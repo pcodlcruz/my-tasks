@@ -1,23 +1,30 @@
 <!--
 Informe de Impacto de Sincronización (Sync Impact Report)
-Cambio de versión: 1.1.0 → 1.1.1 (PATCH: aclaraciones y activación de mecanismos, ningún
-  principio se redefine ni se añade).
+Cambio de versión: 1.1.1 → 1.2.0 (MINOR: redefine el mecanismo de cumplimiento del Principio
+  VII para un mantenedor único; la intención del principio — nada de push directo, ratificación
+  humana antes de integrar — no cambia, pero sí su forma de verificarse).
 Cambios:
-  - Restricciones Técnicas: se completa TODO(SERVICE_ACCOUNT_ID) con el identificador real de
-    la cuenta de servicio del agente (`mytasks-ai-agent@pdlco-mytasks.iam.gserviceaccount.com`),
-    facilitado por el propietario del proyecto.
-  - Mecanismos de Cumplimiento: la fila del Principio V sobre `gcloud`/`gsutil`/`bq` pasa de
-    "pendiente" a "activo"; el harness ya deniega esos comandos vía `.claude/settings.json`.
+  - Principio VII (Revisión Humana Obligatoria): se sustituye la exigencia de "aprobación del
+    propietario" como review formal de GitHub por "fusión (`merge`) explícita del propietario
+    tras revisar el diff". Motivo: en un proyecto de un único mantenedor, las PR se abren bajo
+    la identidad de GitHub del propio propietario (no hay cuenta de agente separada) y GitHub
+    impide aprobar la propia PR — exigir esa aprobación formal habría dejado el repositorio
+    permanentemente bloqueado. Se añade la prohibición explícita de que un agente ejecute
+    `merge`, y que las reglas de rama no tengan actores exentos ("bypass"), ni siquiera el
+    propietario.
+  - Mecanismos de Cumplimiento: la fila de branch protection del Principio VII se divide en dos
+    y pasa de "pendiente" a "activo" en su parte de bloqueo de push directo (rulesets de GitHub
+    sin bypass_actors en `main`, `develop`, `release/*`, `hotfix/*`, verificado con
+    `GET /repos/.../rules/branches/{rama}`); los checks de CI siguen "pendiente" hasta que
+    exista el pipeline.
+  - Definition of Done: el punto del Principio VII se reformula acorde ("PR fusionada
+    explícitamente por el propietario", en vez de "PR aprobada").
 Pendientes / TODOs:
-  - El resto de mecanismos de la tabla (branch protection, permisos del pipeline de CI/CD,
-    checks de tests y commitlint, plantillas de PR/Issue) siguen "pendiente" hasta que exista
-    el repositorio remoto configurado y el harness de CI correspondiente.
+  - El resto de mecanismos de la tabla (permisos del pipeline de CI/CD, checks de tests y
+    commitlint, plantillas de PR/Issue) siguen "pendiente" hasta que exista el pipeline de
+    CI/CD.
 Plantillas que requieren seguimiento: ninguna; las plantillas de plan/spec/tasks leen este
   documento en tiempo de ejecución y no se modifican aquí.
-
-Nota de mantenimiento: el historial de renombrado de principios entre los borradores previos a
-la ratificación 1.0.0 (2026-09-14) queda en el historial de git de este fichero y no se repite
-aquí en cada nueva enmienda, para mantener este informe centrado en el cambio más reciente.
 -->
 
 # Constitución del Gestor Personal de Tareas
@@ -104,12 +111,20 @@ humana y trazabilidad del despliegue.
 
 ### VII. Revisión Humana Obligatoria (NON-NEGOTIABLE)
 Todo cambio de código se integra exclusivamente mediante Pull Request. Están PROHIBIDOS los
-commits directos a `main`, `develop`, `release/*` y `hotfix/*`. Cada PR DEBE contar con la
-aprobación del propietario del proyecto (humano) y con los checks de CI en verde antes de
-fusionarse. Un agente NUNCA aprueba ni fusiona una PR que él mismo haya abierto o modificado.
+commits directos a `main`, `develop`, `release/*` y `hotfix/*`; esta prohibición se hace
+cumplir con reglas de rama (rulesets de GitHub) sin actores exentos ("bypass"), incluido el
+propio propietario. Como las PR se abren bajo la identidad de GitHub del propietario (no existe
+una cuenta de GitHub separada para el agente), no se exige un review formal con aprobación de
+un tercero: GitHub lo impide en cualquier caso al ser un proyecto de un único mantenedor
+("no puedes aprobar tu propia PR"). La ratificación humana se ejerce mediante la fusión
+("merge") explícita del propietario tras revisar el diff: un agente NUNCA ejecuta `merge` (ni
+equivalentes) sobre una PR, la haya abierto él mismo o no. Los checks de CI, cuando existan,
+DEBEN estar en verde antes de fusionar.
 
-**Rationale**: en un proyecto donde los agentes producen la mayor parte del código, la
-aprobación humana es el control real de calidad y de intención.
+**Rationale**: en un proyecto de un único mantenedor, exigir una aprobación formal de GitHub
+distinta del autor es técnicamente irrealizable. El control real de calidad e intención se
+obtiene con dos garantías separables y verificables: ninguna rama protegida acepta push
+directo (ni siquiera del propietario), y solo el propietario ejecuta la fusión.
 
 ### VIII. Desarrollo Dirigido por Agentes y Skills
 Toda tarea que entre en el alcance de un agente o skill definido en `.claude/` DEBE realizarse
@@ -164,7 +179,8 @@ de la PR.
 
 | Regla | Mecanismo | Estado |
 |---|---|---|
-| PR obligatoria, sin commits directos, aprobación humana, CI en verde (VII) | Branch protection en GitHub para `main`, `develop`, `release/*`, `hotfix/*`: PR requerida, 1 aprobación del propietario, required status checks, sin auto-aprobación | pendiente |
+| PR obligatoria, sin commits directos, fusión manual del propietario (VII) | Rulesets de GitHub en `main`, `develop`, `release/*`, `hotfix/*`: PR requerida, sin `bypass_actors`, borrado y push no-fast-forward bloqueados | activo |
+| Checks de CI en verde antes de fusionar (VII) | Required status checks en los rulesets anteriores | pendiente (sin pipeline de CI aún) |
 | Prohibición de `gcloud`/`gsutil`/`bq` directos (V) | Regla `deny` en `.claude/settings.json` para `Bash(gcloud:*)`, `Bash(gsutil:*)`, `Bash(bq:*)` | activo |
 | Sin credenciales personales (V) | El MCP de Google Cloud se configura únicamente con la cuenta de servicio del agente; sin *Application Default Credentials* personales en el entorno del agente | pendiente |
 | Despliegue solo vía pipeline (VI) | Solo la identidad del pipeline de CI/CD tiene permisos de despliegue; la cuenta de servicio del agente no los tiene | pendiente |
@@ -182,7 +198,8 @@ Una tarea, PR o despliegue solo se considera completo cuando se cumplen todos es
       autorización o modelo de datos (III).
 - [ ] Si hay despliegue: staging validado antes de producción, siempre vía pipeline (IV, VI).
 - [ ] Ninguna operación en Google Cloud fuera del MCP oficial ni con credenciales personales (V).
-- [ ] PR aprobada por el propietario; el agente no ha aprobado ni fusionado su propia PR (VII).
+- [ ] PR fusionada explícitamente por el propietario tras revisar el diff; ningún agente ha
+      ejecutado `merge` sobre ella (VII).
 - [ ] Tarea realizada con el agente/skill correspondiente o excepción justificada (VIII).
 - [ ] Código y commits en inglés con Conventional Commits; PR, Issues y docs en español (IX).
 
@@ -208,4 +225,4 @@ activas (V, VI, VII, VIII, IX) se reflejan además en `CLAUDE.md` para que apliq
 los comandos de Spec Kit; toda enmienda a esas reglas DEBE actualizar ambos ficheros en la
 misma PR.
 
-**Versión**: 1.1.1 | **Ratificada**: 2026-09-14 | **Última enmienda**: 2026-09-21
+**Versión**: 1.2.0 | **Ratificada**: 2026-09-14 | **Última enmienda**: 2026-09-21
