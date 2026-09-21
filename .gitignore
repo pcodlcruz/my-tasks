@@ -1,0 +1,29 @@
+# Environment variables and secrets (Principio III de la constitución:
+# está PROHIBIDO almacenar secretos en el repositorio)
+.env
+.env.*
+!.env.example
+
+# Python (backend)
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.venv/
+venv/
+
+# Node (frontend)
+node_modules/
+dist/
+build/
+coverage/
+
+# Firestore emulator
+firestore-debug.log
+firebase-debug.log
+.firebase/
+
+# Editores / SO
+.DS_Store
+.idea/
+.vscode/

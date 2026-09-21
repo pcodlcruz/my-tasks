@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "deny": [
+      "Bash(gcloud:*)",
+      "Bash(gsutil:*)",
+      "Bash(bq:*)"
+    ]
+  }
+}
