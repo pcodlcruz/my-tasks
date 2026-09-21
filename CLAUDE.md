@@ -26,7 +26,8 @@ de conflicto, prevalece la constitución.
 - GitFlow: `feature/*` → `develop` (staging) → `release/*` → `main` (producción);
   `hotfix/*` → `main` con retro-merge a `develop`.
 - **Nunca** hagas commit directo a `main`, `develop`, `release/*` ni `hotfix/*`: siempre PR.
-- **Nunca** apruebes ni fusiones una PR que tú hayas abierto o modificado; aprueba el usuario.
+- **Nunca** ejecutes `merge` (ni equivalentes) sobre una PR, la hayas abierto tú o no: la fusión
+  la ejecuta siempre el propietario, tras revisar el diff.
 - Commits en inglés con [Conventional Commits](https://www.conventionalcommits.org/):
   `type(scope): subject` (`feat`, `fix`, `docs`, `refactor`, `test`, `chore`, `ci`).
 - Los despliegues a staging/producción los hace **solo el pipeline de CI/CD**; nunca manuales.
