@@ -1,42 +1,23 @@
 <!--
 Informe de Impacto de Sincronización (Sync Impact Report)
-Cambio de versión: 1.0.0 → 1.1.0
-Justificación: cambio material en "Restricciones Técnicas" (MINOR): la persistencia pasa de
-  PostgreSQL (supuesto no confirmado en 1.0.0) a Firestore por decisión del propietario, por
-  coste. Se ajustan el stack backend (sin SQLAlchemy/Alembic) y el entorno local (emulador de
-  Firestore, Principio IV). Ningún principio se redefine.
-Historial: 1.0.0 (2026-09-14) fue la ratificación definitiva tras la revisión estructural; las
-  versiones 1.0.0–2.0.0 previas a esa ratificación fueron borradores del mismo día.
-Principios modificados en 1.0.0 (respecto al borrador 2.0.0):
-  - "II. Buenas Prácticas de Ingeniería de Software" → "I. Simplicidad y Complejidad
-    Justificada" (reglas concretas y verificables en lugar de "mejores prácticas").
-  - "I. Calidad Mediante Tests" → "II. Tests por Niveles" (define qué tests debe tener una
-    feature, no solo que deben pasar).
-  - "III. Paridad de Entornos" → "IV. Paridad de Entornos" (mapea ramas GitFlow a entornos).
-  - "IV. Identidad de Agente…" → "V." (sin cambio de fondo; bullets redundantes retirados de
-    la sección de infraestructura).
-  - "V. Despliegue Automatizado…" → "VI." (sin cambio de fondo).
-  - "VI. Desarrollo Dirigido por Agentes y Skills" → "VIII." (recortado).
-  - "VII. Idioma y Convenciones" → "IX." (añade identificadores de código; recortado).
-Principios añadidos:
-  - III. Seguridad de Aplicación.
-  - VII. Revisión Humana Obligatoria (PR obligatoria; los agentes no aprueban ni fusionan
-    sus propias PRs).
-Secciones añadidas:
-  - Convenciones Normativas (glosario DEBE / DEBERÍA / PROHIBIDO).
-  - Restricciones Técnicas (stack fijado: React + TypeScript / FastAPI / Firestore).
-  - Mecanismos de Cumplimiento (tabla regla → mecanismo → estado).
-Secciones eliminadas: ninguna. Redundancia eliminada: cada regla vive en un único sitio;
-  "Definition of Done" y las secciones operativas referencian por número de principio.
-Idioma: todo el documento pasa a español (encabezados e informe incluidos), conforme al
-  Principio IX.
+Cambio de versión: 1.1.0 → 1.1.1 (PATCH: aclaraciones y activación de mecanismos, ningún
+  principio se redefine ni se añade).
+Cambios:
+  - Restricciones Técnicas: se completa TODO(SERVICE_ACCOUNT_ID) con el identificador real de
+    la cuenta de servicio del agente (`mytasks-ai-agent@pdlco-mytasks.iam.gserviceaccount.com`),
+    facilitado por el propietario del proyecto.
+  - Mecanismos de Cumplimiento: la fila del Principio V sobre `gcloud`/`gsutil`/`bq` pasa de
+    "pendiente" a "activo"; el harness ya deniega esos comandos vía `.claude/settings.json`.
 Pendientes / TODOs:
-  - TODO(SERVICE_ACCOUNT_ID): identificador de la cuenta de servicio del agente para Google
-    Cloud, pendiente de que lo facilite el propietario del proyecto.
-  - Los mecanismos de cumplimiento figuran como "pendiente" hasta que existan el repositorio
-    remoto y la configuración del harness (ver tabla).
+  - El resto de mecanismos de la tabla (branch protection, permisos del pipeline de CI/CD,
+    checks de tests y commitlint, plantillas de PR/Issue) siguen "pendiente" hasta que exista
+    el repositorio remoto configurado y el harness de CI correspondiente.
 Plantillas que requieren seguimiento: ninguna; las plantillas de plan/spec/tasks leen este
   documento en tiempo de ejecución y no se modifican aquí.
+
+Nota de mantenimiento: el historial de renombrado de principios entre los borradores previos a
+la ratificación 1.0.0 (2026-09-14) queda en el historial de git de este fichero y no se repite
+aquí en cada nueva enmienda, para mantener este informe centrado en el cambio más reciente.
 -->
 
 # Constitución del Gestor Personal de Tareas
@@ -163,9 +144,8 @@ Stack fijado por esta constitución; cambiarlo requiere enmienda, no una decisi�
   (Principio II) se ejecutan contra el emulador, nunca contra un proyecto real.
 - **Nube**: Google Cloud exclusivamente. El servicio concreto de ejecución (p. ej. Cloud Run)
   y la topología los define el skill `google-cloud-architect` en el plan de arquitectura.
-- **Identidad en la nube**: cuenta de servicio dedicada al agente.
-  TODO(SERVICE_ACCOUNT_ID): identificador pendiente de que lo facilite el propietario; hasta
-  entonces está PROHIBIDA cualquier operación real sobre Google Cloud.
+- **Identidad en la nube**: La cuenta de servicio dedicada al agente es
+  `mytasks-ai-agent@pdlco-mytasks.iam.gserviceaccount.com`. Está PROHIBIDO el uso de cualquier otra.
 
 ## Control de Versiones y Gestión de Proyecto
 
@@ -185,7 +165,7 @@ de la PR.
 | Regla | Mecanismo | Estado |
 |---|---|---|
 | PR obligatoria, sin commits directos, aprobación humana, CI en verde (VII) | Branch protection en GitHub para `main`, `develop`, `release/*`, `hotfix/*`: PR requerida, 1 aprobación del propietario, required status checks, sin auto-aprobación | pendiente |
-| Prohibición de `gcloud`/`gsutil`/`bq` directos (V) | Regla `deny` en `.claude/settings.json` para `Bash(gcloud:*)`, `Bash(gsutil:*)`, `Bash(bq:*)` | pendiente |
+| Prohibición de `gcloud`/`gsutil`/`bq` directos (V) | Regla `deny` en `.claude/settings.json` para `Bash(gcloud:*)`, `Bash(gsutil:*)`, `Bash(bq:*)` | activo |
 | Sin credenciales personales (V) | El MCP de Google Cloud se configura únicamente con la cuenta de servicio del agente; sin *Application Default Credentials* personales en el entorno del agente | pendiente |
 | Despliegue solo vía pipeline (VI) | Solo la identidad del pipeline de CI/CD tiene permisos de despliegue; la cuenta de servicio del agente no los tiene | pendiente |
 | Tests por niveles (II) | Jobs de `pytest`, `Vitest` y `Playwright` como required status checks | pendiente |
@@ -228,4 +208,4 @@ activas (V, VI, VII, VIII, IX) se reflejan además en `CLAUDE.md` para que apliq
 los comandos de Spec Kit; toda enmienda a esas reglas DEBE actualizar ambos ficheros en la
 misma PR.
 
-**Versión**: 1.1.0 | **Ratificada**: 2026-09-14 | **Última enmienda**: 2026-09-14
+**Versión**: 1.1.1 | **Ratificada**: 2026-09-14 | **Última enmienda**: 2026-09-21
