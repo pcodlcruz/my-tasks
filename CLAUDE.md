@@ -25,6 +25,9 @@ de conflicto, prevalece la constitución.
 ### Git y Pull Requests (Principios VI, VII)
 - GitFlow: `feature/*` → `develop` (staging) → `release/*` → `main` (producción);
   `hotfix/*` → `main` con retro-merge a `develop`.
+- Convención de nombre de rama de feature: `feature/NNN-nombre`, igual que el directorio
+  de la spec (`specs/NNN-nombre/`). La crea automáticamente el hook `speckit.git.feature`
+  (ver tabla de skills abajo); no se crea a mano salvo que ese hook falle.
 - **Nunca** hagas commit directo a `main`, `develop`, `release/*` ni `hotfix/*`: siempre PR.
 - **Nunca** ejecutes `merge` (ni equivalentes) sobre una PR, la hayas abierto tú o no: la fusión
   la ejecuta siempre el propietario, tras revisar el diff.
@@ -46,6 +49,7 @@ Si ninguno la cubre, hazlo manualmente y justifícalo en la PR.
 | Revisión de seguridad (obligatoria si tocas auth, autorización o modelo de datos) | `security-auditor` |
 | Planificación, issues, Kanban | `project-manager` |
 | Especificación → plan → tareas → implementación | `speckit-specify`, `speckit-plan`, `speckit-tasks`, `speckit-implement` |
+| Ciclo git de la feature (rama, commit de diseño, PR) — automático vía hooks, ver `.specify/extensions.yml` | `speckit-git-feature`, `speckit-git-commit`, `speckit-git-pr` |
 
 ## Stack (fijado por la constitución; no se decide en cada plan)
 
