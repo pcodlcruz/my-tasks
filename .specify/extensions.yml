@@ -1,0 +1,51 @@
+# Registro de extension hooks de Spec Kit 1.0.4.
+#
+# Automatiza el ciclo git que Spec Kit 1.0.4 no cubre (ver docs/flujo-speckit.md,
+# sección "Spec Kit 1.0.4 no crea ramas git"): crear la rama feature/<NNN-nombre>,
+# comitear los artefactos de diseño tras /speckit-analyze, y abrir (nunca fusionar)
+# la PR a develop tras /speckit-implement.
+#
+# Cada comando/agente que soporta hooks (`/speckit-specify`, `/speckit-analyze`,
+# `/speckit-implement`, ...) lee este fichero por su cuenta antes/después de
+# ejecutarse; no hay un HookExecutor externo. Por eso ningún hook de abajo usa
+# `condition`: las comprobaciones que sí dependen de contexto (p.ej. "sin
+# CRITICAL" tras /speckit-analyze) las hace el skill invocado, no este fichero.
+schema_version: "1.0"
+
+hooks:
+  after_tasks:
+    - extension: "gitflow"
+      command: "speckit.git.feature"
+      description: >-
+        Crea (o verifica) la rama feature/<NNN-nombre> de la feature activa,
+        partiendo de origin/develop, y se lleva los artefactos de specs/ sin
+        trackear.
+      optional: false
+      enabled: true
+
+  before_implement:
+    - extension: "gitflow"
+      command: "speckit.git.feature"
+      description: >-
+        Red de seguridad: repite la comprobación de rama antes de implementar,
+        por si se cambió de rama o se saltó /speckit-tasks.
+      optional: false
+      enabled: true
+
+  after_analyze:
+    - extension: "gitflow"
+      command: "speckit.git.commit"
+      description: >-
+        Commit `docs(spec): ...` de spec.md, plan.md, tasks.md y demás
+        artefactos de diseño, solo si /speckit-analyze no reportó CRITICAL.
+      optional: false
+      enabled: true
+
+  after_implement:
+    - extension: "gitflow"
+      command: "speckit.git.pr"
+      description: >-
+        Verifica tasks.md completo y árbol limpio, hace push de la rama y abre
+        la PR a develop en español con `gh`. Nunca fusiona (Principio VII).
+      optional: false
+      enabled: true
