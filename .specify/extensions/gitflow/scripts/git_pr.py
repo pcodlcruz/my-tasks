@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
-"""Push the feature branch and open (or report) its Pull Request to develop.
+"""Push the feature branch, ready for its Pull Request to develop.
 
 Invoked as the `speckit.git.pr` hook (after_implement in
-.specify/extensions.yml). Per Principio VII de la constitución: this script
-NEVER merges. It only pushes and opens the PR; the owner reviews the diff and
-merges manually.
+.specify/extensions.yml). Per Principio VII de la constitución: nothing in
+this flow ever merges. This script only pushes; the calling skill then uses
+the GitHub MCP (never the `gh` CLI directly, per project convention) to check
+for an existing PR and create one if needed, and the owner reviews the diff
+and merges manually.
 
 This script does not run tests and does not commit code: by Principio VIII,
 code commits happen during /speckit-implement via the role skill
@@ -14,8 +16,9 @@ having verified tests are green *before* invoking this script; this script
 only re-checks that the working tree is clean, since a dirty tree here means
 something was never committed.
 
-Uses the `gh` CLI (not the GitHub MCP, which is currently down per
-docs/flujo-speckit.md) to push and create the PR.
+Emits `owner`/`repo` (parsed from the `origin` remote) alongside the push
+result so the calling skill has what it needs to call the GitHub MCP tools
+without shelling out again.
 """
 
 from __future__ import annotations
@@ -48,17 +51,24 @@ def _tasks_status(feature_path: Path) -> tuple[int, int]:
     return (checked, total)
 
 
+def _owner_repo(repo_root: Path) -> tuple[str, str] | None:
+    """Parse 'owner/repo' out of the origin remote (https or ssh form)."""
+    result = run(["git", "remote", "get-url", "origin"], repo_root)
+    if result.returncode != 0:
+        return None
+    url = result.stdout.strip()
+    match = re.search(r"github\.com[:/](?P<owner>[^/]+)/(?P<repo>[^/]+?)(?:\.git)?$", url)
+    if not match:
+        return None
+    return match.group("owner"), match.group("repo")
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--base", default="develop")
-    parser.add_argument("--title", required=True, help="Título de la PR, en español")
-    parser.add_argument(
-        "--body-file", required=True, help="Ruta a un fichero con el cuerpo de la PR, en español"
-    )
     parser.add_argument(
         "--allow-incomplete-tasks",
         action="store_true",
-        help="Permite abrir la PR aunque queden tareas sin marcar [X] en tasks.md",
+        help="Permite hacer push aunque queden tareas sin marcar [X] en tasks.md",
     )
     args = parser.parse_args()
 
@@ -108,53 +118,15 @@ def main() -> int:
         fail(f"'git push -u origin {branch}' falló: {push.stderr.strip()}")
         return 1
 
-    existing = run(
-        ["gh", "pr", "view", branch, "--json", "url,state"], repo_root
-    )
-    if existing.returncode == 0:
-        emit(
-            {
-                "status": "exists",
-                "branch": branch,
-                "feature_directory": feature_dir_rel,
-                "raw": existing.stdout.strip(),
-            }
-        )
-        return 0
-
-    body_file = Path(args.body_file)
-    if not body_file.is_file():
-        fail(f"No existe el fichero de cuerpo de PR: {body_file}")
-        return 1
-
-    create = run(
-        [
-            "gh",
-            "pr",
-            "create",
-            "--base",
-            args.base,
-            "--head",
-            branch,
-            "--title",
-            args.title,
-            "--body-file",
-            str(body_file),
-        ],
-        repo_root,
-    )
-    if create.returncode != 0:
-        fail(f"'gh pr create' falló: {create.stderr.strip()}")
-        return 1
-
-    emit(
-        {
-            "status": "created",
-            "branch": branch,
-            "feature_directory": feature_dir_rel,
-            "url": create.stdout.strip(),
-        }
-    )
+    owner_repo = _owner_repo(repo_root)
+    payload = {
+        "status": "pushed",
+        "branch": branch,
+        "feature_directory": feature_dir_rel,
+    }
+    if owner_repo is not None:
+        payload["owner"], payload["repo"] = owner_repo
+    emit(payload)
     return 0
 
 

@@ -27,8 +27,7 @@ de conflicto, prevalece la constitución.
   `hotfix/*` → `main` con retro-merge a `develop`.
 - Convención de nombre de rama de feature: `feature/NNN-nombre`, igual que el directorio
   de la spec (`specs/NNN-nombre/`). La crea automáticamente el hook `speckit.git.feature`
-  (ver tabla de skills abajo y `docs/flujo-speckit.md`); no se crea a mano salvo que ese
-  hook falle.
+  (ver tabla de skills abajo); no se crea a mano salvo que ese hook falle.
 - **Nunca** hagas commit directo a `main`, `develop`, `release/*` ni `hotfix/*`: siempre PR.
 - **Nunca** ejecutes `merge` (ni equivalentes) sobre una PR, la hayas abierto tú o no: la fusión
   la ejecuta siempre el propietario, tras revisar el diff.

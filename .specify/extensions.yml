@@ -1,9 +1,9 @@
 # Registro de extension hooks de Spec Kit 1.0.4.
 #
-# Automatiza el ciclo git que Spec Kit 1.0.4 no cubre (ver docs/flujo-speckit.md,
-# sección "Spec Kit 1.0.4 no crea ramas git"): crear la rama feature/<NNN-nombre>,
-# comitear los artefactos de diseño tras /speckit-analyze, y abrir (nunca fusionar)
-# la PR a develop tras /speckit-implement.
+# Automatiza el ciclo git que Spec Kit 1.0.4 no cubre por sí solo (no ejecuta
+# ningún comando git): crear la rama feature/<NNN-nombre>, comitear los
+# artefactos de diseño tras /speckit-analyze, y abrir (nunca fusionar) la PR a
+# develop tras /speckit-implement.
 #
 # Cada comando/agente que soporta hooks (`/speckit-specify`, `/speckit-analyze`,
 # `/speckit-implement`, ...) lee este fichero por su cuenta antes/después de

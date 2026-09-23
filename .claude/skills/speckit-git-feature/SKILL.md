@@ -12,10 +12,10 @@ disable-model-invocation: false
 
 ## Qué hace
 
-Implementa el "Paso 1 — Rama" de `docs/flujo-speckit.md` de forma automática, tal
-como registra `.specify/extensions.yml` (hooks `after_tasks` y
-`before_implement`). Spec Kit 1.0.4 no ejecuta ningún comando git por su
-cuenta; este skill es lo que lo suple.
+Crea automáticamente la rama GitFlow de la feature activa, tal como registra
+`.specify/extensions.yml` (hooks `after_tasks` y `before_implement`). Spec Kit
+1.0.4 no ejecuta ningún comando git por su cuenta; este skill es lo que lo
+suple.
 
 No decide nada por criterio del agente: toda la lógica (qué rama, qué
 ficheros bloquean el cambio, desde qué base) vive en
@@ -44,9 +44,9 @@ comportamiento sea el mismo cada vez.
      eso lo decide el usuario.
 
 3. Si esto se ejecuta como hook `before_implement` y el resultado es
-   `already-on-branch`, no hace falta reportar nada especial: es la
-   comprobación de seguridad silenciosa de la que habla
-   `docs/flujo-speckit.md`.
+   `already-on-branch`, no hace falta reportar nada especial: es solo la
+   comprobación de seguridad silenciosa (por si se cambió de rama o se saltó
+   `/speckit-tasks` antes de implementar).
 
 ## Cuándo se invoca
 

@@ -12,9 +12,10 @@ disable-model-invocation: false
 
 ## Qué hace
 
-Implementa el "Paso 7 — Commit de los artefactos de diseño" de
-`docs/flujo-speckit.md`: separar diseño y código en commits distintos.
-Registrado en `.specify/extensions.yml` como hook `after_analyze`.
+Comitea los artefactos de diseño de la feature activa (spec, plan, tasks) en
+un commit separado del código, para que el diff de diseño y el de
+implementación no se mezclen en la revisión de la PR. Registrado en
+`.specify/extensions.yml` como hook `after_analyze`.
 
 ## Gate de CRITICAL (lo decide el agente, no el script)
 

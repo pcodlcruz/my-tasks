@@ -2,8 +2,8 @@
 """Create or verify the git branch for the active Spec Kit feature.
 
 Invoked as the `speckit.git.feature` hook (after_tasks and before_implement in
-.specify/extensions.yml). See docs/flujo-speckit.md, section "Spec Kit 1.0.4 no
-crea ramas git".
+.specify/extensions.yml). Spec Kit 1.0.4 does not run any git command on its
+own (create_new_feature.py has no git calls); this script fills that gap.
 
 Behaviour:
   - Reads the active feature from .specify/feature.json (e.g. 'specs/003-x').

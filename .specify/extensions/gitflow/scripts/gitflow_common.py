@@ -1,12 +1,11 @@
 #!/usr/bin/env python3
 """Shared helpers for the gitflow extension scripts.
 
-These scripts implement the git-side automation described in
-docs/flujo-speckit.md ("Spec Kit 1.0.4 no crea ramas git"): creating the
-feature branch, committing design artifacts, and opening the PR. They are
-invoked by the speckit-git-feature / speckit-git-commit / speckit-git-pr
-skills as extension hooks (see .specify/extensions.yml), never directly by
-Spec Kit's own bundled scripts.
+Spec Kit 1.0.4 does not run any git command on its own; these scripts fill
+that gap: creating the feature branch, committing design artifacts, and
+pushing ahead of the PR. They are invoked by the speckit-git-feature /
+speckit-git-commit / speckit-git-pr skills as extension hooks (see
+.specify/extensions.yml), never directly by Spec Kit's own bundled scripts.
 """
 
 from __future__ import annotations
@@ -49,7 +48,7 @@ def get_active_feature_dir(repo_root: Path) -> str:
 
 
 def branch_name_for(feature_dir_rel: str) -> str:
-    """Derive 'feature/<basename>' from 'specs/<basename>', per docs/flujo-speckit.md."""
+    """Derive 'feature/<basename>' from 'specs/<basename>' (same basename, GitFlow prefix)."""
     basename = feature_dir_rel.rstrip("/").split("/")[-1]
     return f"feature/{basename}"
 

@@ -2,8 +2,8 @@
 """Commit the design artifacts (spec/plan/tasks) for the active feature.
 
 Invoked as the `speckit.git.commit` hook (after_analyze in
-.specify/extensions.yml). Per docs/flujo-speckit.md ("Paso 7 — Commit de los
-artefactos de diseño"), design and code stay in separate commits.
+.specify/extensions.yml). Design and code stay in separate commits, so the
+design diff doesn't get mixed into the PR's code review.
 
 The CRITICAL-issue gate from /speckit-analyze is NOT re-derived here: the
 calling skill must have already confirmed, from the analysis it just ran in
