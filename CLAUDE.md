@@ -41,22 +41,24 @@ Si ninguno la cubre, hazlo manualmente y justifícalo en la PR.
 
 | Tarea | Skill |
 |---|---|
-| Frontend (React + TypeScript) | `frontend-developer` |
-| Backend (FastAPI) | `backend-developer` |
-| Arquitectura en Google Cloud (solo diseño) | `google-cloud-architect` |
-| Operación real sobre Google Cloud | `google-cloud-operator` |
-| Infraestructura como código | `iac-developer` |
-| Revisión de seguridad (obligatoria si tocas auth, autorización o modelo de datos) | `security-auditor` |
-| Planificación, issues, Kanban | `project-manager` |
+| Frontend (React + TypeScript) | `mytasks-frontend-developer` |
+| Backend (FastAPI) | `mytasks-backend-developer` |
+| Arquitectura en Google Cloud (solo diseño) | `mytasks-google-cloud-architect` |
+| Operación real sobre Google Cloud | `mytasks-google-cloud-operator` |
+| Infraestructura como código | `mytasks-iac-developer` |
+| Revisión de seguridad (obligatoria si tocas auth, autorización o modelo de datos) | `mytasks-security-auditor` |
+| Planificación, issues, Kanban | `mytasks-project-manager` |
 | Especificación → plan → tareas → implementación | `speckit-specify`, `speckit-plan`, `speckit-tasks`, `speckit-implement` |
 | Ciclo git de la feature (rama, commit de diseño, PR) — automático vía hooks, ver `.specify/extensions.yml` | `speckit-git-feature`, `speckit-git-commit`, `speckit-git-pr` |
+
+Los skills de rol viven en `.claude/skills/` de este repo (no a nivel usuario) con el prefijo `mytasks-`: Claude Code da prioridad al skill de usuario (`~/.claude/skills/`) sobre el de proyecto cuando comparten nombre, así que sin el prefijo se invocaría siempre la versión genérica de usuario en vez de la adaptada a este proyecto.
 
 ## Stack (fijado por la constitución; no se decide en cada plan)
 
 - **Frontend**: React 18+, TypeScript estricto, TanStack Query, Zustand, Vitest, Playwright.
 - **Backend**: Python 3.12+, FastAPI, pytest.
 - **Persistencia**: Firestore (modo nativo) con `google-cloud-firestore`; emulador en local.
-  No uses SQLAlchemy/Alembic aunque el skill `backend-developer` los prefiera por defecto.
+  No uses SQLAlchemy/Alembic aunque el skill `mytasks-backend-developer` los prefiera por defecto.
 - **Nube**: Google Cloud exclusivamente. Entornos: local → staging → producción.
 
 ## Definition of Done

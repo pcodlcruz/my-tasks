@@ -1,30 +1,23 @@
 <!--
 Informe de Impacto de Sincronización (Sync Impact Report)
-Cambio de versión: 1.1.1 → 1.2.0 (MINOR: redefine el mecanismo de cumplimiento del Principio
-  VII para un mantenedor único; la intención del principio — nada de push directo, ratificación
-  humana antes de integrar — no cambia, pero sí su forma de verificarse).
+Cambio de versión: 1.2.0 → 1.2.1 (PATCH: corrección de nombre, sin cambio de intención en
+  ningún principio).
 Cambios:
-  - Principio VII (Revisión Humana Obligatoria): se sustituye la exigencia de "aprobación del
-    propietario" como review formal de GitHub por "fusión (`merge`) explícita del propietario
-    tras revisar el diff". Motivo: en un proyecto de un único mantenedor, las PR se abren bajo
-    la identidad de GitHub del propio propietario (no hay cuenta de agente separada) y GitHub
-    impide aprobar la propia PR — exigir esa aprobación formal habría dejado el repositorio
-    permanentemente bloqueado. Se añade la prohibición explícita de que un agente ejecute
-    `merge`, y que las reglas de rama no tengan actores exentos ("bypass"), ni siquiera el
-    propietario.
-  - Mecanismos de Cumplimiento: la fila de branch protection del Principio VII se divide en dos
-    y pasa de "pendiente" a "activo" en su parte de bloqueo de push directo (rulesets de GitHub
-    sin bypass_actors en `main`, `develop`, `release/*`, `hotfix/*`, verificado con
-    `GET /repos/.../rules/branches/{rama}`); los checks de CI siguen "pendiente" hasta que
-    exista el pipeline.
-  - Definition of Done: el punto del Principio VII se reformula acorde ("PR fusionada
-    explícitamente por el propietario", en vez de "PR aprobada").
-Pendientes / TODOs:
-  - El resto de mecanismos de la tabla (permisos del pipeline de CI/CD, checks de tests y
-    commitlint, plantillas de PR/Issue) siguen "pendiente" hasta que exista el pipeline de
-    CI/CD.
-Plantillas que requieren seguimiento: ninguna; las plantillas de plan/spec/tasks leen este
-  documento en tiempo de ejecución y no se modifican aquí.
+  - Todas las menciones a los skills de rol (`security-auditor`, `backend-developer`,
+    `frontend-developer`, `google-cloud-architect`) pasan a su nombre real en este repo,
+    `mytasks-<nombre>`. Motivo: Claude Code da prioridad al skill de usuario
+    (`~/.claude/skills/`) sobre el de proyecto cuando ambos comparten nombre — sin el prefijo,
+    invocar por ejemplo `backend-developer` ejecutaba la versión genérica de usuario (stack
+    Python/SQLAlchemy por defecto) en vez de la de este proyecto (Firestore, ver Restricciones
+    Técnicas). Los 7 skills de rol se copiaron de `~/.claude/skills/` a `.claude/skills/` de
+    este repo y se renombraron con ese prefijo para que la invocación resuelva siempre a la
+    versión adaptada. Ningún principio cambia de significado; solo el identificador con el que
+    se le referencia.
+Pendientes / TODOs: los mismos que en 1.2.0 (ver tabla de Mecanismos de Cumplimiento).
+Plantillas que requieren seguimiento: ninguna.
+Nota de gobernanza: este PATCH lo aplicó un agente como corrección mecánica de nombre; queda
+  pendiente de ratificación por el propietario en la revisión de la PR correspondiente, igual
+  que cualquier otro cambio a este fichero.
 -->
 
 # Constitución del Gestor Personal de Tareas
@@ -72,7 +65,7 @@ genere tareas de test consistentes y que la cobertura no dependa del criterio de
 - Las dependencias DEBEN estar fijadas por versión (lockfiles) y actualizarse de forma
   planificada.
 - Todo cambio que afecte a autenticación, autorización o modelo de datos DEBE pasar una
-  revisión con el skill `security-auditor` antes de fusionarse.
+  revisión con el skill `mytasks-security-auditor` antes de fusionarse.
 
 **Rationale**: el sistema gestiona datos personales; la seguridad de la aplicación merece el
 mismo rigor que ya se exige a la identidad en la nube.
@@ -151,14 +144,14 @@ Stack fijado por esta constitución; cambiarlo requiere enmienda, no una decisi�
 
 - **Frontend**: React 18+, TypeScript en modo estricto, TanStack Query (estado servidor),
   Zustand (estado cliente), Vitest (unitarios) y Playwright (end-to-end). Ver skill
-  `frontend-developer`.
-- **Backend**: Python 3.12+, FastAPI, pytest. Ver skill `backend-developer` (su preferencia
+  `mytasks-frontend-developer`.
+- **Backend**: Python 3.12+, FastAPI, pytest. Ver skill `mytasks-backend-developer` (su preferencia
   por SQLAlchemy/Alembic no aplica: la persistencia es Firestore, ver siguiente punto).
 - **Base de datos**: Firestore (modo nativo) mediante la librería oficial
   `google-cloud-firestore`. En local se usa el emulador de Firestore; los tests de integración
   (Principio II) se ejecutan contra el emulador, nunca contra un proyecto real.
 - **Nube**: Google Cloud exclusivamente. El servicio concreto de ejecución (p. ej. Cloud Run)
-  y la topología los define el skill `google-cloud-architect` en el plan de arquitectura.
+  y la topología los define el skill `mytasks-google-cloud-architect` en el plan de arquitectura.
 - **Identidad en la nube**: La cuenta de servicio dedicada al agente es
   `mytasks-ai-agent@pdlco-mytasks.iam.gserviceaccount.com`. Está PROHIBIDO el uso de cualquier otra.
 
@@ -194,7 +187,7 @@ Una tarea, PR o despliegue solo se considera completo cuando se cumplen todos es
 
 - [ ] Complejidad añadida justificada en el plan o ausente (I).
 - [ ] Tests del nivel correspondiente incluidos en la PR, en verde en local y en CI (II).
-- [ ] Sin secretos en el repositorio; revisión `security-auditor` hecha si tocó auth,
+- [ ] Sin secretos en el repositorio; revisión `mytasks-security-auditor` hecha si tocó auth,
       autorización o modelo de datos (III).
 - [ ] Si hay despliegue: staging validado antes de producción, siempre vía pipeline (IV, VI).
 - [ ] Ninguna operación en Google Cloud fuera del MCP oficial ni con credenciales personales (V).
@@ -225,4 +218,4 @@ activas (V, VI, VII, VIII, IX) se reflejan además en `CLAUDE.md` para que apliq
 los comandos de Spec Kit; toda enmienda a esas reglas DEBE actualizar ambos ficheros en la
 misma PR.
 
-**Versión**: 1.2.0 | **Ratificada**: 2026-09-14 | **Última enmienda**: 2026-09-21
+**Versión**: 1.2.1 | **Ratificada**: 2026-09-14 | **Última enmienda**: 2026-09-24
