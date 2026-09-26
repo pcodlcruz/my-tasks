@@ -29,7 +29,7 @@ y crearla, si hace falta, lo hace este skill llamando a las herramientas MCP
 
 Este skill **no comitea código**: por Principio VIII, el código ya se comitea
 durante `/speckit-implement` con Conventional Commits, a cargo del skill de
-rol correspondiente (`backend-developer`, `frontend-developer`). Si al llegar
+rol correspondiente (`mytasks-backend-developer`, `mytasks-frontend-developer`). Si al llegar
 aquí el árbol de trabajo no está limpio, es una señal de que algo quedó sin
 comitear — el script se para y lo reporta, no intenta adivinar un mensaje de
 commit por ti.
@@ -51,7 +51,7 @@ feature aún no ha llegado a esa fase), no hay tests que ejecutar; continúa.
 ### 2. Revisión de seguridad, si aplicaba
 
 Si la feature tocó auth, autorización o modelo de datos y el skill
-`security-auditor` no se ha usado todavía en esta conversación, indícaselo al
+`mytasks-security-auditor` no se ha usado todavía en esta conversación, indícaselo al
 usuario antes de continuar (no es bloqueante técnico, pero sí de la
 Definition of Done).
 
