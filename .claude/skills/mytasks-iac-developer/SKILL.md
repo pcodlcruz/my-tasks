@@ -32,14 +32,20 @@ Repite la verificación si el usuario cambia de proyecto o de contexto durante l
 
 El servidor MCP oficial de HashiCorp (`terraform-mcp-server`) permite consultar el **Terraform Registry** directamente desde la sesión: documentación de providers, atributos de recursos, módulos disponibles. No ejecuta comandos Terraform — eso sigue siendo via herramienta de shell.
 
-### Instalación (Gemini CLI)
+### Instalación
 
-Añade el servidor en `~/.gemini/settings.json` bajo la clave `mcpServers`:
+```bash
+# Registrar el MCP en Claude Code (una sola vez)
+claude mcp add terraform-mcp -- npx -y @hashicorp/terraform-mcp-server
+```
+
+O manualmente en `~/.claude.json`:
 
 ```json
 {
   "mcpServers": {
     "terraform-mcp": {
+      "type": "stdio",
       "command": "npx",
       "args": ["-y", "@hashicorp/terraform-mcp-server"]
     }
@@ -47,7 +53,7 @@ Añade el servidor en `~/.gemini/settings.json` bajo la clave `mcpServers`:
 }
 ```
 
-Requiere Node.js ≥ 18. Reinicia Gemini CLI tras guardar el archivo. Para verificar que el servidor está activo y sus herramientas disponibles, ejecuta `/mcp` en la sesión.
+Requiere Node.js ≥ 18. Reinicia Claude Code tras añadirlo. Para verificar que está activo: `/mcp` en la sesión.
 
 ### Herramientas disponibles
 
@@ -176,6 +182,7 @@ Clasifica cada acción antes de ejecutarla:
 - **`mytasks-google-cloud-architect`**: produce el diseño y las Fichas de Implementación. El IaC Developer implementa ese diseño en código Terraform/Pulumi.
 - **`mytasks-google-cloud-operator`**: ejecuta operaciones sobre GCP vía el MCP oficial. Si una tarea requiere solo ejecutar sin escribir código IaC, puede derivarse al operador.
 - **`google-cloud-monitor`**: puede detectar incidentes que requieran cambio de infraestructura. El IaC Developer proporciona el parche + ejecuta el apply supervisado.
+- **`mytasks-backend-developer`** / **`mytasks-frontend-developer`**: pueden requerir recursos IaC (Firestore, Cloud Run, buckets, APIs). El IaC Developer produce el código de infraestructura correspondiente.
 
 ---
 

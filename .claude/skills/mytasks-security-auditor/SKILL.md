@@ -40,15 +40,45 @@ Si el sistema combina varias tipologías, aplica todos los marcos e indica la in
 
 ## Análisis por categorías
 
-Analiza en este orden independientemente de la tipología:
+Realiza el análisis en este orden independientemente de la tipología:
 
-1. **Autenticación y autorización** — puntos de entrada, mínimo privilegio, tokens, sesiones
-2. **Exposición de datos sensibles** — cifrado en tránsito y reposo, logs, secretos
-3. **Seguridad de red y perímetro** — superficie pública, firewall, segmentación, WAF
-4. **Dependencias y cadena de suministro** — versiones fijadas, CVEs, imágenes de contenedor
-5. **Configuración y hardening** — endpoints de diagnóstico, CIS Benchmark, IAM
-6. **Logging, auditoría y detección** — logging de auditoría, centralización, alertas
-7. **Gestión de incidentes y recuperación** — plan de respuesta, rotación de secretos, RTO/RPO
+### 1. Autenticación y autorización
+- ¿Existe autenticación en todos los puntos de entrada?
+- ¿Se aplica el principio de mínimo privilegio?
+- ¿Hay controles de autorización en la capa correcta (no solo en la UI)?
+- Tokens, sesiones, expiración, revocación.
+
+### 2. Exposición de datos sensibles
+- ¿Qué datos se clasifican como sensibles?
+- ¿Están cifrados en tránsito (TLS 1.2+) y en reposo?
+- ¿Se registran o exponen datos sensibles en logs, errores o respuestas API?
+- Secretos: ¿están en Secret Manager / variables de entorno / hardcodeados?
+
+### 3. Seguridad de red y perímetro
+- ¿Cuál es la superficie de exposición pública?
+- ¿Las reglas de firewall siguen el principio de denegación por defecto?
+- ¿Existe segmentación de red entre capas (frontend, backend, datos)?
+- WAF, DDoS protection, rate limiting.
+
+### 4. Gestión de dependencias y cadena de suministro
+- ¿Las dependencias tienen versiones fijadas?
+- ¿Hay dependencias con CVEs conocidos?
+- ¿Las imágenes de contenedor tienen origen verificado y están actualizadas?
+
+### 5. Configuración y hardening
+- ¿Están deshabilitados los endpoints de diagnóstico en producción?
+- ¿Los servicios cloud siguen las recomendaciones del CIS Benchmark aplicable?
+- ¿Los roles IAM siguen mínimo privilegio? ¿Hay bindings con `allUsers`?
+
+### 6. Logging, auditoría y detección
+- ¿Existe logging de auditoría en acciones críticas (autenticación, cambios de datos, accesos privilegiados)?
+- ¿Los logs están centralizados y protegidos contra modificación?
+- ¿Hay alertas ante comportamientos anómalos?
+
+### 7. Gestión de incidentes y recuperación
+- ¿Existe un plan de respuesta a incidentes?
+- ¿Los secretos y credenciales son rotables sin downtime?
+- ¿El RTO/RPO cubre escenarios de compromiso?
 
 ## Formato del Informe de Auditoría de Seguridad
 

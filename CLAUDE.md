@@ -18,8 +18,9 @@ de conflicto, prevalece la constitución.
   de servicio del agente.
 - **Nunca** ejecutes `gcloud`, `gsutil` ni `bq` directamente, ni uses SDKs/APIs fuera del MCP.
 - **Nunca** uses credenciales personales del usuario.
-- Mientras no exista la cuenta de servicio (`TODO(SERVICE_ACCOUNT_ID)` en la constitución),
-  **no hay operaciones reales sobre Google Cloud**: si una tarea las requiere, detente y avisa.
+- La cuenta de servicio del agente es `mytasks-ai-agent@pdlco-mytasks.iam.gserviceaccount.com`
+  (ver constitución). Mientras el MCP no esté configurado para operar con ella, **no hay
+  operaciones reales sobre Google Cloud**: si una tarea las requiere, detente y avisa.
 - Cualquier cambio de infraestructura requiere confirmación explícita del usuario.
 
 ### Git y Pull Requests (Principios VI, VII)

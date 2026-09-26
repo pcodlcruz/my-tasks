@@ -46,6 +46,6 @@ hooks:
       command: "speckit.git.pr"
       description: >-
         Verifica tasks.md completo y árbol limpio, hace push de la rama y abre
-        la PR a develop en español con `gh`. Nunca fusiona (Principio VII).
+        la PR a develop en español vía el MCP de GitHub. Nunca fusiona (Principio VII).
       optional: false
       enabled: true
