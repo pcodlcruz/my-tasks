@@ -1,0 +1,277 @@
+openapi: 3.1.0
+info:
+  title: MyTasks API
+  version: 1.0.0
+  description: >-
+    API del Gestor Personal de Tareas (feature 001-eisenhower-task-manager).
+    Todas las rutas bajo /api/v1 exigen un ID token de Firebase Auth en
+    `Authorization: Bearer <token>`. El usuario se identifica siempre por el
+    `uid` del token; una tarea de otro usuario responde 404.
+servers:
+  - url: http://localhost:8000
+    description: Local
+
+security:
+  - firebaseIdToken: []
+
+paths:
+  /healthz:
+    get:
+      summary: Comprobación de vida (sin datos de tareas, sin autenticación)
+      security: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, const: ok }
+
+  /api/v1/tasks:
+    get:
+      summary: Lista tareas de una vista (tablero, historial o papelera)
+      parameters:
+        - name: view
+          in: query
+          required: true
+          schema: { type: string, enum: [board, history, trash] }
+        - name: scope
+          in: query
+          required: false
+          description: Solo para `view=board`. Sin valor = "Todas".
+          schema: { $ref: "#/components/schemas/Scope" }
+        - name: cursor
+          in: query
+          required: false
+          description: Solo para `history` y `trash`. Opaco; viene de `next_cursor`.
+          schema: { type: string }
+        - name: limit
+          in: query
+          required: false
+          description: Solo para `history` y `trash`.
+          schema: { type: integer, minimum: 1, maximum: 100, default: 50 }
+      responses:
+        "200":
+          description: >-
+            `board`: todas las tareas activas fuera de la papelera, fijadas primero y luego por
+            `created_at` asc; `next_cursor` siempre null. `history`: completadas por
+            `completed_at` desc. `trash`: en papelera por `trashed_at` desc.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/TaskPage" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "422": { $ref: "#/components/responses/ValidationError" }
+    post:
+      summary: Crea una tarea activa
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/TaskCreate" }
+      responses:
+        "201":
+          description: Creada
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Task" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "422": { $ref: "#/components/responses/ValidationError" }
+
+  /api/v1/tasks/{taskId}:
+    parameters:
+      - $ref: "#/components/parameters/TaskId"
+    get:
+      summary: Obtiene una tarea (en cualquier estado)
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Task" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404": { $ref: "#/components/responses/NotFound" }
+    patch:
+      summary: Edita una tarea activa (incluye fijar/desfijar)
+      description: Solo tareas activas fuera de la papelera; si no, 409.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/TaskUpdate" }
+      responses:
+        "200":
+          description: Actualizada (con el cuadrante recalculado)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Task" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "409": { $ref: "#/components/responses/InvalidTransition" }
+        "422": { $ref: "#/components/responses/ValidationError" }
+    delete:
+      summary: Borra definitivamente una tarea que está en la papelera
+      description: Si la tarea no está en la papelera, 409 (primero hay que moverla).
+      responses:
+        "204": { description: Borrada para siempre }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "409": { $ref: "#/components/responses/InvalidTransition" }
+
+  /api/v1/tasks/{taskId}/complete:
+    parameters:
+      - $ref: "#/components/parameters/TaskId"
+    post:
+      summary: Marca como completada una tarea activa
+      responses:
+        "200": { $ref: "#/components/responses/TaskOk" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "409": { $ref: "#/components/responses/InvalidTransition" }
+
+  /api/v1/tasks/{taskId}/reopen:
+    parameters:
+      - $ref: "#/components/parameters/TaskId"
+    post:
+      summary: Reabre una tarea completada (vuelve a activa)
+      responses:
+        "200": { $ref: "#/components/responses/TaskOk" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "409": { $ref: "#/components/responses/InvalidTransition" }
+
+  /api/v1/tasks/{taskId}/trash:
+    parameters:
+      - $ref: "#/components/parameters/TaskId"
+    post:
+      summary: Mueve una tarea (activa o completada) a la papelera
+      responses:
+        "200": { $ref: "#/components/responses/TaskOk" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "409": { $ref: "#/components/responses/InvalidTransition" }
+
+  /api/v1/tasks/{taskId}/restore:
+    parameters:
+      - $ref: "#/components/parameters/TaskId"
+    post:
+      summary: Restaura una tarea de la papelera a su estado anterior
+      responses:
+        "200": { $ref: "#/components/responses/TaskOk" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "409": { $ref: "#/components/responses/InvalidTransition" }
+
+components:
+  securitySchemes:
+    firebaseIdToken:
+      type: http
+      scheme: bearer
+      bearerFormat: Firebase ID token (JWT)
+
+  parameters:
+    TaskId:
+      name: taskId
+      in: path
+      required: true
+      schema: { type: string, minLength: 1, maxLength: 128 }
+
+  schemas:
+    Scope:
+      type: string
+      enum: [work, personal]
+    Quadrant:
+      type: string
+      enum: [do_now, schedule, delegate, eliminate]
+    Status:
+      type: string
+      enum: [active, completed]
+
+    TaskCreate:
+      type: object
+      additionalProperties: false
+      required: [title, description, urgent, important, scope]
+      properties:
+        title: { type: string, minLength: 1, maxLength: 200, description: "Se recorta; vacío tras recortar = 422" }
+        description: { type: string, minLength: 1, maxLength: 2000, description: "Se recorta; vacío tras recortar = 422" }
+        urgent: { type: boolean }
+        important: { type: boolean }
+        scope: { $ref: "#/components/schemas/Scope" }
+
+    TaskUpdate:
+      type: object
+      additionalProperties: false
+      minProperties: 1
+      description: Actualización parcial; los campos ausentes no cambian.
+      properties:
+        title: { type: string, minLength: 1, maxLength: 200 }
+        description: { type: string, minLength: 1, maxLength: 2000 }
+        urgent: { type: boolean }
+        important: { type: boolean }
+        scope: { $ref: "#/components/schemas/Scope" }
+        pinned: { type: boolean }
+
+    Task:
+      type: object
+      required: [id, title, description, urgent, important, quadrant, scope, pinned, status, in_trash, created_at, updated_at, completed_at, trashed_at, purge_at]
+      properties:
+        id: { type: string }
+        title: { type: string }
+        description: { type: string }
+        urgent: { type: boolean }
+        important: { type: boolean }
+        quadrant: { $ref: "#/components/schemas/Quadrant" }
+        scope: { $ref: "#/components/schemas/Scope" }
+        pinned: { type: boolean }
+        status: { $ref: "#/components/schemas/Status" }
+        in_trash: { type: boolean }
+        created_at: { type: string, format: date-time }
+        updated_at: { type: string, format: date-time }
+        completed_at: { type: [string, "null"], format: date-time }
+        trashed_at: { type: [string, "null"], format: date-time }
+        purge_at: { type: [string, "null"], format: date-time, description: "Momento en que la tarea desaparecerá de la papelera" }
+
+    TaskPage:
+      type: object
+      required: [items, next_cursor]
+      properties:
+        items:
+          type: array
+          items: { $ref: "#/components/schemas/Task" }
+        next_cursor: { type: [string, "null"] }
+
+    Error:
+      type: object
+      required: [code, message]
+      properties:
+        code: { type: string, examples: [unauthenticated, not_found, invalid_transition, validation_error] }
+        message: { type: string, description: "Mensaje legible en español" }
+        details: { type: array, items: { type: object } }
+
+  responses:
+    TaskOk:
+      description: Transición aplicada; devuelve la tarea actualizada
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Task" }
+    Unauthorized:
+      description: Falta el token o no es válido
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+    NotFound:
+      description: No existe bajo el usuario autenticado (incluye tareas de otros usuarios y tareas ya purgadas)
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+    InvalidTransition:
+      description: La tarea no está en un estado que permita la operación
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+    ValidationError:
+      description: Entrada no válida (campos obligatorios, longitudes, enums)
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
