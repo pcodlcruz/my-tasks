@@ -77,7 +77,10 @@ def main() -> int:
         )
         return 1
 
-    status = run(["git", "status", "--porcelain=v1"], repo_root)
+    # -uall lists every untracked file: without it git collapses a fully
+    # untracked directory (e.g. 'specs/' on the first feature) into one entry
+    # that never matches the feature directory.
+    status = run(["git", "status", "--porcelain=v1", "-uall"], repo_root)
     if status.returncode != 0:
         fail(f"git status falló: {status.stderr.strip()}")
         return 1
