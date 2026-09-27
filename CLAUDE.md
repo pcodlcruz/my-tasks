@@ -26,9 +26,13 @@ de conflicto, prevalece la constitución.
 ### Git y Pull Requests (Principios VI, VII)
 - GitFlow: `feature/*` → `develop` (staging) → `release/*` → `main` (producción);
   `hotfix/*` → `main` con retro-merge a `develop`.
-- Convención de nombre de rama de feature: `feature/NNN-nombre`, igual que el directorio
-  de la spec (`specs/NNN-nombre/`). La crea automáticamente el hook `speckit.git.feature`
-  (ver tabla de skills abajo); no se crea a mano salvo que ese hook falle.
+- Cada feature de Spec Kit se entrega en **una PR de diseño y una PR por fase** de `tasks.md`:
+  - `feature/NNN-nombre` (igual que `specs/NNN-nombre/`): solo los documentos de diseño; su PR
+    se abre tras `/speckit-analyze` y se fusiona antes de implementar.
+  - `feature/NNN-nombre-fase-N`: el código de la fase N (`## Phase N: ...`), desde
+    `origin/develop`; se implementa con `/speckit-implement fase N` y solo esa fase.
+  Las crea automáticamente el hook `speckit.git.feature` (ver tabla de skills abajo); no se
+  crean a mano salvo que ese hook falle.
 - **Nunca** hagas commit directo a `main`, `develop`, `release/*` ni `hotfix/*`: siempre PR.
 - **Nunca** ejecutes `merge` (ni equivalentes) sobre una PR, la hayas abierto tú o no: la fusión
   la ejecuta siempre el propietario, tras revisar el diff.
@@ -50,7 +54,7 @@ Si ninguno la cubre, hazlo manualmente y justifícalo en la PR.
 | Revisión de seguridad (obligatoria si tocas auth, autorización o modelo de datos) | `mytasks-security-auditor` |
 | Planificación, issues, Kanban | `mytasks-project-manager` |
 | Especificación → plan → tareas → implementación | `speckit-specify`, `speckit-plan`, `speckit-tasks`, `speckit-implement` |
-| Ciclo git de la feature (rama, commit de diseño, PR) — automático vía hooks, ver `.specify/extensions.yml` | `speckit-git-feature`, `speckit-git-commit`, `speckit-git-pr` |
+| Ciclo git de la feature (ramas de diseño y de fase, commit de diseño, PRs) — automático vía hooks, ver `.specify/extensions.yml` | `speckit-git-feature`, `speckit-git-commit`, `speckit-git-pr` |
 
 Los skills de rol viven en `.claude/skills/` de este repo (no a nivel usuario) con el prefijo `mytasks-`: Claude Code da prioridad al skill de usuario (`~/.claude/skills/`) sobre el de proyecto cuando comparten nombre, así que sin el prefijo se invocaría siempre la versión genérica de usuario en vez de la adaptada a este proyecto.
 

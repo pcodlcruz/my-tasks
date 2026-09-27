@@ -31,6 +31,7 @@ from gitflow_common import (  # noqa: E402
     fail,
     get_active_feature_dir,
     get_repo_root,
+    phase_of_branch,
     run,
     short_label_for,
 )
@@ -47,7 +48,7 @@ def main() -> int:
     parser.add_argument(
         "--force",
         action="store_true",
-        help="Permite comitear aunque HEAD no esté en la rama feature/<feature> (no recomendado)",
+        help="Permite comitear aunque HEAD no esté en la rama de diseño ni en una de fase de la feature (no recomendado)",
     )
     args = parser.parse_args()
 
@@ -61,9 +62,13 @@ def main() -> int:
 
     branch = branch_name_for(feature_dir_rel)
     here = current_branch(repo_root)
-    if here != branch and not args.force:
+    # The design branch is the normal place (after_analyze), but a phase branch
+    # of the same feature is also valid: re-running /speckit-analyze mid-phase
+    # can update the design documents.
+    on_feature = here == branch or phase_of_branch(here, feature_dir_rel) is not None
+    if not on_feature and not args.force:
         fail(
-            f"No estás en la rama '{branch}' (estás en '{here}'). "
+            f"No estás en la rama '{branch}' ni en una de sus fases (estás en '{here}'). "
             "Ejecuta /speckit-git-feature primero.",
             branch=branch,
             current_branch=here,
@@ -85,7 +90,7 @@ def main() -> int:
         emit(
             {
                 "status": "nothing-to-commit",
-                "branch": branch,
+                "branch": here,
                 "feature_directory": feature_dir_rel,
             }
         )
@@ -108,7 +113,7 @@ def main() -> int:
     emit(
         {
             "status": "committed",
-            "branch": branch,
+            "branch": here,
             "feature_directory": feature_dir_rel,
             "subject": subject,
         }

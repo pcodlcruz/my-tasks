@@ -1,6 +1,12 @@
 #!/usr/bin/env python3
 """Push the feature branch, ready for its Pull Request to develop.
 
+Each feature is delivered as one design PR (branch 'feature/NNN-x', only the
+spec/plan/tasks documents; opened after /speckit-analyze) plus one PR per
+phase of tasks.md (branch 'feature/NNN-x-fase-N'; opened after
+/speckit-implement). On a phase branch only the tasks of that phase must be
+checked [X]; on the design branch the task checklist is not checked at all.
+
 Invoked as the `speckit.git.pr` hook (after_implement in
 .specify/extensions.yml). Per Principio VII de la constitución: nothing in
 this flow ever merges. This script only pushes; the calling skill then uses
@@ -37,18 +43,10 @@ from gitflow_common import (  # noqa: E402
     fail,
     get_active_feature_dir,
     get_repo_root,
+    parse_phases,
+    phase_of_branch,
     run,
 )
-
-
-def _tasks_status(feature_path: Path) -> tuple[int, int]:
-    tasks_file = feature_path / "tasks.md"
-    if not tasks_file.is_file():
-        return (0, 0)
-    text = tasks_file.read_text(encoding="utf-8")
-    total = len(re.findall(r"^\s*-\s*\[[ Xx]\]", text, re.MULTILINE))
-    checked = len(re.findall(r"^\s*-\s*\[[Xx]\]", text, re.MULTILINE))
-    return (checked, total)
 
 
 def _owner_repo(repo_root: Path) -> tuple[str, str] | None:
@@ -68,7 +66,7 @@ def main() -> int:
     parser.add_argument(
         "--allow-incomplete-tasks",
         action="store_true",
-        help="Permite hacer push aunque queden tareas sin marcar [X] en tasks.md",
+        help="Permite hacer push aunque queden tareas de la fase sin marcar [X] en tasks.md",
     )
     args = parser.parse_args()
 
@@ -80,28 +78,44 @@ def main() -> int:
         fail(str(exc))
         return 1
 
-    branch = branch_name_for(feature_dir_rel)
-    here = current_branch(repo_root)
-    if here != branch:
+    design_branch = branch_name_for(feature_dir_rel)
+    branch = current_branch(repo_root)
+    phase_number = phase_of_branch(branch, feature_dir_rel)
+    if branch != design_branch and phase_number is None:
         fail(
-            f"No estás en la rama '{branch}' (estás en '{here}'). "
+            f"No estás en la rama de diseño '{design_branch}' ni en una de sus fases "
+            f"('{design_branch}-fase-N'); estás en '{branch}'. "
             "Ejecuta /speckit-git-feature antes de abrir la PR.",
-            branch=branch,
-            current_branch=here,
+            branch=design_branch,
+            current_branch=branch,
         )
         return 1
 
-    feature_path = repo_root / feature_dir_rel
-    checked, total = _tasks_status(feature_path)
-    if total and checked < total and not args.allow_incomplete_tasks:
-        fail(
-            f"Quedan {total - checked} de {total} tareas sin marcar [X] en "
-            f"{feature_dir_rel}/tasks.md. Completa /speckit-implement o usa "
-            "/speckit-converge antes de abrir la PR.",
-            checked=checked,
-            total=total,
-        )
-        return 1
+    payload: dict[str, object] = {
+        "status": "pushed",
+        "branch": branch,
+        "feature_directory": feature_dir_rel,
+        "kind": "design" if phase_number is None else "phase",
+    }
+
+    if phase_number is not None:
+        tasks_file = repo_root / feature_dir_rel / "tasks.md"
+        phases = parse_phases(tasks_file.read_text(encoding="utf-8")) if tasks_file.is_file() else []
+        phase = next((p for p in phases if p.number == phase_number), None)
+        if phase is None:
+            fail(f"La fase {phase_number} no existe en {feature_dir_rel}/tasks.md.")
+            return 1
+        if not phase.complete and not args.allow_incomplete_tasks:
+            fail(
+                f"Quedan {phase.total - phase.done} de {phase.total} tareas de la fase "
+                f"{phase.number} ('{phase.title}') sin marcar [X] en "
+                f"{feature_dir_rel}/tasks.md. Completa /speckit-implement o usa "
+                "/speckit-converge antes de abrir la PR.",
+                checked=phase.done,
+                total=phase.total,
+            )
+            return 1
+        payload.update({"phase": phase.number, "phase_title": phase.title})
 
     status = run(["git", "status", "--porcelain=v1"], repo_root)
     if status.stdout.strip():
@@ -119,11 +133,6 @@ def main() -> int:
         return 1
 
     owner_repo = _owner_repo(repo_root)
-    payload = {
-        "status": "pushed",
-        "branch": branch,
-        "feature_directory": feature_dir_rel,
-    }
     if owner_repo is not None:
         payload["owner"], payload["repo"] = owner_repo
     emit(payload)
