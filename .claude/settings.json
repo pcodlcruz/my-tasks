@@ -1,5 +1,11 @@
 {
   "permissions": {
+    "allow": [
+      "mcp__google-developer-knowledge__answer_query",
+      "mcp__github__list_pull_requests",
+      "Bash(claude mcp get *)",
+      "Bash(git check-ignore *)"
+    ],
     "deny": [
       "Bash(gcloud:*)",
       "Bash(gsutil:*)",
