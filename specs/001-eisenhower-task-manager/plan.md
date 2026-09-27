@@ -50,7 +50,7 @@ feature
 
 **Scale/Scope**: uso personal, decenas de usuarios; ≤ ~500 tareas activas por usuario
 (el tablero no se pagina); historial y papelera sin límite (paginados por cursor);
-6 pantallas ([ui-screens.md](./contracts/ui-screens.md)) y 9 endpoints de datos más `/healthz`
+5 pantallas ([ui-screens.md](./contracts/ui-screens.md)) y 9 endpoints de datos más `/healthz`
 ([openapi.yaml](./contracts/openapi.yaml))
 
 No quedan puntos marcados como NEEDS CLARIFICATION: todos se resolvieron en
@@ -68,7 +68,7 @@ No quedan puntos marcados como NEEDS CLARIFICATION: todos se resolvieron en
 | **IV. Paridad de entornos** | Esta feature solo toca local: emuladores y project id `demo-mytasks`. Staging y producción llegan con la feature de infraestructura y CI/CD. La configuración va por variables de entorno, así que el mismo código funciona en los tres entornos. | ✅ |
 | **V. Identidad de agente / MCP** | Ninguna operación en Google Cloud. Habilitar Identity Platform, crear la política TTL y los índices en proyectos reales queda para la feature de infraestructura, vía `mytasks-google-cloud-operator` y MCP. Stitch no es Google Cloud: se usa su propio MCP. | ✅ |
 | **VI. Despliegue por pipeline** | Esta feature no despliega nada. | ✅ (N/A) |
-| **VII. Revisión humana** | Rama `feature/001-eisenhower-task-manager` → PR a `develop`, abierta por el hook `speckit.git.pr`; el propietario la fusiona. | ✅ |
+| **VII. Revisión humana** | Rama de diseño `feature/001-eisenhower-task-manager` → PR de diseño a `develop`. Cada fase de [tasks.md](./tasks.md#convenciones) (ver "Entrega por fases") se implementa en su propia rama (`feature/001-eisenhower-task-manager-fase-N`) y PR a `develop`, abiertas por el hook `speckit.git.pr`; el propietario fusiona cada una antes de la siguiente. | ✅ |
 | **VIII. Agentes y skills** | Backend con `mytasks-backend-developer`; frontend con `mytasks-frontend-developer`; revisión con `mytasks-security-auditor`. **Diseño en Stitch: ningún skill lo cubre** → se hace manualmente y se justifica en la PR. La elección de Firebase Auth como servicio de GCP la valida `mytasks-google-cloud-architect` al diseñar la feature de infraestructura. | ✅ (excepción justificada) |
 | **IX. Idioma** | Código y commits en inglés con Conventional Commits; interfaz, documentación y PR en español. | ✅ |
 
@@ -91,7 +91,8 @@ specs/001-eisenhower-task-manager/
 │   └── ui-screens.md    # Fase 1: pantallas a diseñar en Stitch
 ├── checklists/
 │   └── requirements.md
-└── tasks.md             # Fase 2 (/speckit-tasks; no lo crea este comando)
+├── tasks.md             # Fase 2 (/speckit-tasks; no lo crea este comando)
+└── security-review.md   # Fase de Polish: informe de mytasks-security-auditor (T108)
 ```
 
 ### Source Code (repository root)
@@ -169,10 +170,11 @@ una carpeta por pantalla del contrato de UI.
 3. **Backend por historia**: auth (US1) → crear y clasificar (US2) → tablero, edición y fijar
    (US3) → ámbito (US4) → completar, reabrir y papelera (US5), cada una con sus tests.
 4. **Frontend por historia**, siguiendo las pantallas aprobadas y con sus tests e2e.
-5. **Revisión con `mytasks-security-auditor`** y corrección de hallazgos antes de abrir la PR.
+5. **Revisión con `mytasks-security-auditor`** y corrección de hallazgos antes de abrir la última PR.
 
 El paso 1 puede avanzar en paralelo con los pasos 2 y 3; el paso 4 depende de la aprobación del
-paso 1.
+paso 1. Cada paso se entrega en su propia rama y PR a `develop` (una por fase de
+[tasks.md](./tasks.md#convenciones)), no en una única PR para todo el plan.
 
 ## Complexity Tracking
 
