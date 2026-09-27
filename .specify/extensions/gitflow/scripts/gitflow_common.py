@@ -14,6 +14,7 @@ import json
 import re
 import subprocess
 import sys
+from dataclasses import dataclass
 from pathlib import Path
 
 # Reuse the official Spec Kit helpers (get_repo_root, feature.json reading)
@@ -47,10 +48,69 @@ def get_active_feature_dir(repo_root: Path) -> str:
     return value
 
 
-def branch_name_for(feature_dir_rel: str) -> str:
-    """Derive 'feature/<basename>' from 'specs/<basename>' (same basename, GitFlow prefix)."""
+PHASE_SUFFIX = "-fase-"
+
+_PHASE_HEADING = re.compile(r"^##\s+(?:Phase|Fase)\s+(\d+)\s*:\s*(.+?)\s*$")
+_TASK_LINE = re.compile(r"^\s*-\s*\[([ Xx])\]\s+T\d+")
+
+
+@dataclass(frozen=True)
+class Phase:
+    number: int
+    title: str
+    done: int
+    total: int
+
+    @property
+    def complete(self) -> bool:
+        return self.total > 0 and self.done == self.total
+
+
+def branch_name_for(feature_dir_rel: str, phase: int | None = None) -> str:
+    """Derive the GitFlow branch for a feature.
+
+    Without a phase: 'feature/<basename>', the design branch that carries
+    spec/plan/tasks. With a phase: 'feature/<basename>-fase-<N>', one branch
+    (and one PR) per phase of tasks.md.
+    """
     basename = feature_dir_rel.rstrip("/").split("/")[-1]
-    return f"feature/{basename}"
+    branch = f"feature/{basename}"
+    return f"{branch}{PHASE_SUFFIX}{phase}" if phase is not None else branch
+
+
+def phase_of_branch(branch: str, feature_dir_rel: str) -> int | None:
+    """Return N if 'branch' is the phase-N branch of this feature, else None."""
+    prefix = branch_name_for(feature_dir_rel) + PHASE_SUFFIX
+    if branch.startswith(prefix) and branch[len(prefix) :].isdigit():
+        return int(branch[len(prefix) :])
+    return None
+
+
+def parse_phases(tasks_text: str) -> list[Phase]:
+    """Parse the '## Phase N: title' sections of tasks.md and count their tasks."""
+    phases: list[Phase] = []
+    header: tuple[int, str] | None = None
+    done = total = 0
+
+    def close() -> None:
+        if header is not None:
+            phases.append(Phase(header[0], header[1], done, total))
+
+    for line in tasks_text.splitlines():
+        if line.startswith("## "):
+            # Every level-2 heading ends the previous phase; only phase headings
+            # open a new one (Dependencies, Notes... are not phases).
+            close()
+            heading = _PHASE_HEADING.match(line)
+            header = (int(heading.group(1)), heading.group(2)) if heading else None
+            done = total = 0
+            continue
+        task = _TASK_LINE.match(line)
+        if task and header is not None:
+            total += 1
+            done += task.group(1) in "Xx"
+    close()
+    return phases
 
 
 def short_label_for(feature_dir_rel: str) -> str:

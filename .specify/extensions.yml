@@ -1,9 +1,13 @@
 # Registro de extension hooks de Spec Kit 1.0.4.
 #
 # Automatiza el ciclo git que Spec Kit 1.0.4 no cubre por sí solo (no ejecuta
-# ningún comando git): crear la rama feature/<NNN-nombre>, comitear los
-# artefactos de diseño tras /speckit-analyze, y abrir (nunca fusionar) la PR a
-# develop tras /speckit-implement.
+# ningún comando git). Cada feature se entrega en una PR de diseño y una PR
+# por fase de tasks.md:
+#   - rama de diseño feature/<NNN-nombre> tras /speckit-tasks; commit de los
+#     artefactos y PR de diseño tras /speckit-analyze;
+#   - rama feature/<NNN-nombre>-fase-<N> antes de /speckit-implement (sale de
+#     origin/develop con la PR de diseño ya fusionada) y PR de la fase al
+#     terminar. Ninguna PR se fusiona desde aquí (Principio VII).
 #
 # Cada comando/agente que soporta hooks (`/speckit-specify`, `/speckit-analyze`,
 # `/speckit-implement`, ...) lee este fichero por su cuenta antes/después de
@@ -17,9 +21,9 @@ hooks:
     - extension: "gitflow"
       command: "speckit.git.feature"
       description: >-
-        Crea (o verifica) la rama feature/<NNN-nombre> de la feature activa,
-        partiendo de origin/develop, y se lleva los artefactos de specs/ sin
-        trackear.
+        Crea (o verifica) la rama de diseño feature/<NNN-nombre> de la
+        feature activa, partiendo de origin/develop, y se lleva los artefactos
+        de specs/ sin trackear.
       optional: false
       enabled: true
 
@@ -27,8 +31,10 @@ hooks:
     - extension: "gitflow"
       command: "speckit.git.feature"
       description: >-
-        Red de seguridad: repite la comprobación de rama antes de implementar,
-        por si se cambió de rama o se saltó /speckit-tasks.
+        Crea (o verifica) la rama feature/<NNN-nombre>-fase-<N> de la fase
+        que se va a implementar (--phase N, o auto = primera fase con tareas
+        pendientes), desde origin/develop. /speckit-implement ejecuta solo las
+        tareas de esa fase.
       optional: false
       enabled: true
 
@@ -40,12 +46,21 @@ hooks:
         artefactos de diseño, solo si /speckit-analyze no reportó CRITICAL.
       optional: false
       enabled: true
+    - extension: "gitflow"
+      command: "speckit.git.pr"
+      description: >-
+        Push de la rama de diseño y PR de diseño a develop en español vía el
+        MCP de GitHub, solo si /speckit-analyze no reportó CRITICAL. Nunca
+        fusiona; el propietario la fusiona antes de empezar las fases.
+      optional: false
+      enabled: true
 
   after_implement:
     - extension: "gitflow"
       command: "speckit.git.pr"
       description: >-
-        Verifica tasks.md completo y árbol limpio, hace push de la rama y abre
-        la PR a develop en español vía el MCP de GitHub. Nunca fusiona (Principio VII).
+        Tests en verde, tareas de la fase marcadas en tasks.md y árbol limpio;
+        push de la rama de la fase y PR a develop en español vía el MCP de
+        GitHub. Nunca fusiona (Principio VII).
       optional: false
       enabled: true

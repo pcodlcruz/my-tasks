@@ -36,7 +36,7 @@ Antes de ejecutar el script:
 ## Ejecución
 
 ```bash
-python3 .specify/extensions/gitflow/scripts/git_commit.py --json \
+python3 .specify/extensions/gitflow/scripts/git_commit.py \
   --trailer "Co-Authored-By: <línea exacta de atribución activa en esta sesión>"
 ```
 
@@ -50,8 +50,8 @@ Interpreta el JSON de salida:
 - `{"status": "committed", "subject": "docs(spec): ...", ...}` → commit
   creado. Informa brevemente del asunto del commit.
 - `{"status": "error", "message": "..."}` → detente y muestra el mensaje (por
-  ejemplo, no estás en la rama `feature/<...>` — ejecuta
-  `/speckit-git-feature` primero).
+  ejemplo, no estás en la rama de diseño `feature/<NNN-nombre>` ni en una
+  de sus fases — ejecuta `/speckit-git-feature` primero).
 
 El script solo hace `git add` del directorio de la feature activa
 (`specs/NNN-nombre/`); nunca añade otros cambios que pudiera haber en el
