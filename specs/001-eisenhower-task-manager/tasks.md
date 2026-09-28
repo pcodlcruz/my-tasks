@@ -131,19 +131,19 @@ la API responde `401` y la interfaz redirige a `/login` (quickstart pasos 1–4)
 
 > Escribir primero y comprobar que fallan.
 
-- [ ] T038 [P] [US1] Test de integración de autenticación: sin cabecera, con token mal formado y con token caducado/no válido → 401 `unauthenticated` en `GET /api/v1/tasks/{taskId}`; con token válido del emulador → no es 401, en `backend/tests/integration/test_auth.py`
-- [ ] T039 [P] [US1] Test de integración de aislamiento: la cuenta B pide por id una tarea sembrada de A → 404 (idéntico a una tarea inexistente, sin revelar que existe); volver a iniciar sesión con la misma cuenta de Google devuelve el mismo `uid`, en `backend/tests/integration/test_isolation.py`
-- [ ] T040 [P] [US1] Test de componente de `LoginPage` (botón "Iniciar sesión con Google", estado cargando, ventana cerrada sin error, error genérico con "Reintentar", aviso "Tu sesión ha caducado" con `?reason=expired`) en `frontend/tests/unit/features/auth/LoginPage.test.tsx`
-- [ ] T041 [P] [US1] Test de componente de `ProtectedRoute` (sin sesión redirige a `/login` conservando la ruta de origen; con sesión muestra el contenido) en `frontend/tests/unit/app/ProtectedRoute.test.tsx`
-- [ ] T042 [P] [US1] Test e2e: primer acceso con Google → tablero vacío con los 4 cuadrantes; acceso directo a `/historial` sin sesión → `/login` y, tras entrar, vuelve a `/historial`; cerrar sesión → `/login`, en `frontend/tests/e2e/us1-access.spec.ts`
+- [X] T038 [P] [US1] Test de integración de autenticación: sin cabecera, con token mal formado y con token caducado/no válido → 401 `unauthenticated` en `GET /api/v1/tasks/{taskId}`; con token válido del emulador → no es 401, en `backend/tests/integration/test_auth.py`
+- [X] T039 [P] [US1] Test de integración de aislamiento: la cuenta B pide por id una tarea sembrada de A → 404 (idéntico a una tarea inexistente, sin revelar que existe); volver a iniciar sesión con la misma cuenta de Google devuelve el mismo `uid`, en `backend/tests/integration/test_isolation.py`
+- [X] T040 [P] [US1] Test de componente de `LoginPage` (botón "Iniciar sesión con Google", estado cargando, ventana cerrada sin error, error genérico con "Reintentar", aviso "Tu sesión ha caducado" con `?reason=expired`) en `frontend/tests/unit/features/auth/LoginPage.test.tsx`
+- [X] T041 [P] [US1] Test de componente de `ProtectedRoute` (sin sesión redirige a `/login` conservando la ruta de origen; con sesión muestra el contenido) en `frontend/tests/unit/app/ProtectedRoute.test.tsx`
+- [X] T042 [P] [US1] Test e2e: primer acceso con Google → tablero vacío con los 4 cuadrantes; acceso directo a `/historial` sin sesión → `/login` y, tras entrar, vuelve a `/historial`; cerrar sesión → `/login`, en `frontend/tests/e2e/us1-access.spec.ts`
 
 ### Implementación de User Story 1
 
-- [ ] T043 [US1] Implementar el hook `useSession` (estado de `onAuthStateChanged`, `signInWithGoogle()` con `signInWithPopup` + `GoogleAuthProvider` con los *scopes* básicos, `signOut()`) en `frontend/src/features/auth/useSession.ts`
-- [ ] T044 [US1] Implementar la pantalla S1 `LoginPage` siguiendo `docs/design/screens/s1-login/` en `frontend/src/features/auth/LoginPage.tsx` (tras entrar, redirige a la ruta de origen o a `/`)
-- [ ] T045 [US1] Implementar `ProtectedRoute` y aplicarlo a `/`, `/historial` y `/papelera` en `frontend/src/app/ProtectedRoute.tsx` y `frontend/src/app/App.tsx`
-- [ ] T046 [US1] Implementar la cabecera común con navegación (Tablero / Historial / Papelera), nombre/foto o email del usuario de Google y "Cerrar sesión" en `frontend/src/app/AppHeader.tsx`
-- [ ] T047 [US1] Implementar el componente `Quadrant` (título con etiqueta de texto, contador y estado vacío explícito — FR-009) en `frontend/src/features/board/Quadrant.tsx` y la primera versión de `BoardPage` con los 4 cuadrantes vacíos en orden canónico (2×2 en escritorio, apilados con "Hacer ahora" primero en móvil) en `frontend/src/features/board/BoardPage.tsx`, según `docs/design/screens/s3-board/`
+- [X] T043 [US1] Implementar el hook `useSession` (estado de `onAuthStateChanged`, `signInWithGoogle()` con `signInWithPopup` + `GoogleAuthProvider` con los *scopes* básicos, `signOut()`) en `frontend/src/features/auth/useSession.ts`
+- [X] T044 [US1] Implementar la pantalla S1 `LoginPage` siguiendo `docs/design/screens/s1-login/` en `frontend/src/features/auth/LoginPage.tsx` (tras entrar, redirige a la ruta de origen o a `/`)
+- [X] T045 [US1] Implementar `ProtectedRoute` y aplicarlo a `/`, `/historial` y `/papelera` en `frontend/src/app/ProtectedRoute.tsx` y `frontend/src/app/App.tsx`
+- [X] T046 [US1] Implementar la cabecera común con navegación (Tablero / Historial / Papelera), nombre/foto o email del usuario de Google y "Cerrar sesión" en `frontend/src/app/AppHeader.tsx`
+- [X] T047 [US1] Implementar el componente `Quadrant` (título con etiqueta de texto, contador y estado vacío explícito — FR-009) en `frontend/src/features/board/Quadrant.tsx` y la primera versión de `BoardPage` con los 4 cuadrantes vacíos en orden canónico (2×2 en escritorio, apilados con "Hacer ahora" primero en móvil) en `frontend/src/features/board/BoardPage.tsx`, según `docs/design/screens/s3-board/`
 
 **Checkpoint**: US1 funciona y se prueba sola (MVP de acceso).
 
