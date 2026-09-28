@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+
+<html class="h-full bg-background text-text" lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>MyTasks - Matriz de prioridades (Eisenhower)</title>
+<!-- Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Inter Font -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS with configuration -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "surface-alt": "#F8FAFC",
+            "surface-tint": "#2151da",
+            "border": "#CBD5E1",
+            "text": "#0F172A",
+            "on-tertiary-container": "#ffc9b7",
+            "secondary-fixed": "#89f5e7",
+            "surface-container-highest": "#e2e1ed",
+            "primary-container": "#1d4ed8",
+            "schedule": "#1D4ED8",
+            "on-primary-fixed-variant": "#0039b5",
+            "secondary": "#006a61",
+            "on-primary-container": "#cad3ff",
+            "primary-fixed": "#dce1ff",
+            "secondary-container": "#86f2e4",
+            "background": "#faf8ff",
+            "on-surface": "#1a1b23",
+            "on-tertiary-fixed": "#390c00",
+            "inverse-primary": "#b7c4ff",
+            "tertiary": "#7f2500",
+            "inverse-surface": "#2e3039",
+            "primary-fixed-dim": "#b7c4ff",
+            "outline-variant": "#c4c5d7",
+            "surface-container-lowest": "#ffffff",
+            "on-secondary-fixed": "#00201d",
+            "secondary-fixed-dim": "#6bd8cb",
+            "on-primary-fixed": "#001551",
+            "scope-work": "#7C3AED",
+            "on-error-container": "#93000a",
+            "eliminate": "#475569",
+            "text-muted": "#475569",
+            "surface-container": "#ededf9",
+            "error": "#B91C1C",
+            "on-tertiary": "#ffffff",
+            "on-background": "#1a1b23",
+            "on-secondary-container": "#006f66",
+            "tertiary-fixed": "#ffdbcf",
+            "error-container": "#ffdad6",
+            "on-secondary-fixed-variant": "#005049",
+            "on-surface-variant": "#434655",
+            "outline": "#747686",
+            "surface-dim": "#d9d9e5",
+            "tertiary-fixed-dim": "#ffb59c",
+            "tertiary-container": "#a73400",
+            "primary": "#0037b0",
+            "on-error": "#ffffff",
+            "surface-container-low": "#f3f2fe",
+            "scope-personal": "#0D9488",
+            "surface-variant": "#e2e1ed",
+            "inverse-on-surface": "#f0f0fb",
+            "surface": "#FFFFFF",
+            "on-primary": "#ffffff",
+            "surface-bright": "#faf8ff",
+            "on-tertiary-fixed-variant": "#832700",
+            "on-secondary": "#ffffff",
+            "surface-container-high": "#e8e7f3",
+            "delegate": "#B45309",
+            "success": "#15803D",
+            "do-now": "#B91C1C"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.125rem",
+            "lg": "0.25rem",
+            "xl": "0.5rem",
+            "full": "0.75rem"
+          },
+          "spacing": {
+            "space-xl": "32px",
+            "space-2xl": "48px",
+            "space-md": "12px",
+            "margin": "24px",
+            "space-lg": "16px",
+            "gutter": "24px",
+            "space-xs": "4px",
+            "space-sm": "8px"
+          },
+          "fontFamily": {
+            "body": ["Inter"],
+            "heading": ["Inter"],
+            "display": ["Inter"],
+            "caption": ["Inter"],
+            "body-strong": ["Inter"]
+          },
+          "fontSize": {
+            "body": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+            "heading": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+            "display": ["28px", { "lineHeight": "36px", "fontWeight": "700" }],
+            "caption": ["13px", { "lineHeight": "18px", "fontWeight": "400" }],
+            "body-strong": ["16px", { "lineHeight": "24px", "fontWeight": "600" }]
+          }
+        },
+      },
+    }
+  </script>
+</head>
+<body class="min-h-full flex flex-col bg-background font-body text-body text-text antialiased">
+<!-- TOP APP BAR -->
+<header class="w-full bg-surface shadow-sm z-40 sticky top-0 border-b border-border">
+<div class="max-w-7xl mx-auto px-space-lg py-space-sm flex items-center justify-between">
+<!-- Brand & Desktop Navigation Cluster -->
+<div class="flex items-center space-x-space-xl">
+<a aria-label="MyTasks Inicio" class="flex items-center space-x-space-sm text-heading font-heading font-bold text-schedule tracking-tight focus:outline-none focus:ring-2 focus:ring-primary rounded-lg" href="#">
+<span aria-hidden="true" class="material-symbols-outlined text-schedule" data-icon="grid_view">grid_view</span>
+<span class="text-heading font-heading font-bold text-schedule">MyTasks</span>
+</a>
+<!-- Desktop Navigation Items -->
+<nav aria-label="Navegación principal" class="hidden md:flex items-center space-x-space-md">
+<a aria-current="page" class="text-primary font-body-strong px-space-sm py-space-xs border-b-2 border-primary transition-colors duration-150 flex items-center gap-1" href="#">
+<span>Tablero</span>
+</a>
+<a class="text-text-muted hover:text-primary font-body px-space-sm py-space-xs transition-colors duration-150 rounded-lg hover:bg-surface-container" href="#">
+<span>Historial</span>
+</a>
+<a class="text-text-muted hover:text-primary font-body px-space-sm py-space-xs transition-colors duration-150 rounded-lg hover:bg-surface-container" href="#">
+<span>Papelera</span>
+</a>
+</nav>
+</div>
+<!-- User Profile & Session Action -->
+<div class="flex items-center space-x-space-lg">
+<div class="flex items-center space-x-space-sm">
+<div aria-hidden="true" class="w-9 h-9 rounded-full bg-primary-container text-surface flex items-center justify-center font-heading font-semibold text-caption shadow-sm">
+            CM
+          </div>
+<div class="hidden sm:flex flex-col text-left">
+<span class="text-caption font-body-strong leading-tight text-text">Carlos Mendoza</span>
+<span class="text-caption font-caption text-text-muted leading-tight">carlos.mendoza@gmail.com</span>
+</div>
+</div>
+<div aria-hidden="true" class="h-6 w-px bg-border hidden sm:block"></div>
+<button aria-label="Cerrar sesión de Carlos Mendoza" class="flex items-center space-x-1 text-text-muted hover:text-error transition-colors duration-150 font-caption px-space-sm py-space-xs rounded-lg hover:bg-error-container focus:outline-none focus:ring-2 focus:ring-error" type="button">
+<span aria-hidden="true" class="material-symbols-outlined text-[20px]" data-icon="logout">logout</span>
+<span class="hidden md:inline font-caption">Cerrar sesión</span>
+</button>
+</div>
+</div>
+</header>
+<!-- MAIN CANVAS -->
+<main class="flex-1 max-w-7xl w-full mx-auto px-space-md sm:px-space-lg py-space-lg space-y-space-lg">
+<!-- PAGE TITLE & ACTIONS BAR -->
+<section class="flex flex-col md:flex-row md:items-center md:justify-between gap-space-md bg-surface p-space-lg rounded-xl border border-border shadow-sm">
+<div class="space-y-1">
+<h1 class="text-display font-display text-text">Matriz de prioridades</h1>
+<p class="text-caption font-caption text-text-muted">Enfoque estructurado con la matriz de Eisenhower para máxima productividad ejecutiva.</p>
+</div>
+<div class="flex flex-wrap items-center gap-space-md justify-between sm:justify-start">
+<!-- Segmented Scopes -->
+<fieldset aria-label="Filtrar por ámbito" class="flex items-center bg-surface-container-low p-1 rounded-xl border border-border">
+<legend class="sr-only">Filtrar por ámbito</legend>
+<button aria-pressed="true" class="px-space-md py-1.5 rounded-lg text-caption font-body-strong bg-surface text-text shadow-sm border border-border transition-all" type="button">
+            Todas <span class="ml-1 text-caption text-text-muted font-normal">(7)</span>
+</button>
+<button class="flex items-center gap-1.5 px-space-md py-1.5 rounded-lg text-caption font-caption text-text-muted hover:text-text transition-colors" type="button">
+<span aria-hidden="true" class="w-2 h-2 rounded-full bg-scope-work"></span>
+<span>Laboral</span>
+<span class="text-caption font-caption opacity-80">(4)</span>
+</button>
+<button class="flex items-center gap-1.5 px-space-md py-1.5 rounded-lg text-caption font-caption text-text-muted hover:text-text transition-colors" type="button">
+<span aria-hidden="true" class="w-2 h-2 rounded-full bg-scope-personal"></span>
+<span>Personal</span>
+<span class="text-caption font-caption opacity-80">(3)</span>
+</button>
+</fieldset>
+<!-- Primary Call to Action -->
+<button class="inline-flex items-center gap-2 bg-schedule hover:bg-primary-container text-surface px-space-lg py-2.5 rounded-xl font-body-strong text-caption shadow-sm hover:shadow transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-schedule active:scale-95" type="button">
+<span aria-hidden="true" class="material-symbols-outlined text-[18px]" data-icon="add">add</span>
+<span>+ Nueva tarea</span>
+</button>
+</div>
+</section>
+<!-- 2x2 EISENHOWER MATRIX GRID -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-space-lg pb-space-2xl md:pb-space-lg">
+<!-- QUADRANT 1: HACER AHORA (URGENTE & IMPORTANTE) -->
+<section aria-labelledby="heading-q1" class="flex flex-col bg-[#FEF2F2] rounded-xl border border-red-200 shadow-sm overflow-hidden">
+<!-- Quadrant Header -->
+<div class="p-space-lg border-b border-red-200/80 bg-surface/70 backdrop-blur flex items-center justify-between">
+<div class="flex items-start gap-3">
+<div aria-hidden="true" class="mt-1 w-3 h-3 rounded-full bg-do-now flex-shrink-0"></div>
+<div>
+<div class="flex items-center gap-2">
+<h2 class="text-heading font-heading text-text" id="heading-q1">Hacer ahora</h2>
+<span class="bg-red-100 text-do-now text-caption font-body-strong px-2 py-0.5 rounded-full border border-red-200">
+                  3 tareas
+                </span>
+</div>
+<p class="text-caption font-caption text-text-muted mt-0.5">Urgente e Importante · Resolver de inmediato</p>
+</div>
+</div>
+<button aria-label="Añadir tarea rápida en Hacer ahora" class="p-1.5 rounded-lg text-text-muted hover:text-do-now hover:bg-red-50 transition-colors focus:ring-2 focus:ring-do-now" type="button">
+<span aria-hidden="true" class="material-symbols-outlined text-[20px]" data-icon="add">add</span>
+</button>
+</div>
+<!-- Task List -->
+<div class="p-space-md space-y-space-md flex-1">
+<!-- Card 1 -->
+<article class="bg-surface p-space-md rounded-lg shadow-sm border border-border border-l-4 border-l-do-now hover:border-l-do-now transition-all hover:shadow">
+<div class="flex items-start justify-between gap-space-sm">
+<div class="flex items-start gap-space-sm">
+<input aria-label="Marcar como resuelta incidencia crítica en pasarela de pagos" class="mt-1 h-4 w-4 rounded border-border text-do-now focus:ring-do-now" id="task-1" type="checkbox"/>
+<label class="text-body font-body-strong text-text cursor-pointer leading-snug" for="task-1">
+                  Resolver incidencia crítica en pasarela de pagos
+                </label>
+</div>
+<button aria-label="Opciones de tarea" class="text-text-muted hover:text-text p-1 rounded hover:bg-surface-container" type="button">
+<span aria-hidden="true" class="material-symbols-outlined text-[18px]" data-icon="more_vert">more_vert</span>
+</button>
+</div>
+<div class="mt-3 flex items-center justify-between pt-2 border-t border-slate-100">
+<div class="flex items-center gap-2">
+<span class="inline-flex items-center gap-1 bg-purple-50 text-scope-work font-body-strong text-caption px-2 py-0.5 rounded-full border border-purple-200">
+<span aria-hidden="true" class="w-1.5 h-1.5 rounded-full bg-scope-work"></span>
+                  Laboral
+                </span>
+</div>
+<div class="inline-flex items-center gap-1 text-do-now font-caption font-body-strong">
+<span aria-hidden="true" class="material-symbols-outlined text-[16px]" data-icon="schedule">schedule</span>
+<span>Vence hoy 17:00</span>
+</div>
+</div>
+</article>
+<!-- Card 2 -->
+<article class="bg-surface p-space-md rounded-lg shadow-sm border border-border border-l-4 border-l-do-now transition-all hover:shadow">
+<div class="flex items-start justify-between gap-space-sm">
+<div class="flex items-start gap-space-sm">
+<input aria-label="Marcar como resuelto Enviar reporte financiero" class="mt-1 h-4 w-4 rounded border-border text-do-now focus:ring-do-now" id="task-2" type="checkbox"/>
+<label class="text-body font-body-strong text-text cursor-pointer leading-snug" for="task-2">
+                  Enviar reporte financiero mensual a dirección
+                </label>
+</div>
+<button aria-label="Opciones de tarea" class="text-text-muted hover:text-text p-1 rounded hover:bg-surface-container" type="button">
+<span aria-hidden="true" class="material-symbols-outlined text-[18px]" data-icon="more_vert">more_vert</span>
+</button>
+</div>
+<div class="mt-3 flex items-center justify-between pt-2 border-t border-slate-100">
+<span class="inline-flex items-center gap-1 bg-purple-50 text-scope-work font-body-strong text-caption px-2 py-0.5 rounded-full border border-purple-200">
+<span aria-hidden="true" class="w-1.5 h-1.5 rounded-full bg-scope-work"></span>
+                Laboral
+              </span>
+<div class="inline-flex items-center gap-1 text-do-now font-caption">
+<span aria-hidden="true" class="material-symbols-outlined text-[16px]" data-icon="alarm">alarm</span>
+<span>Hoy 19:30</span>
+</div>
+</div>
+</article>
+<!-- Card 3 -->
+<article class="bg-surface p-space-md rounded-lg shadow-sm border border-border border-l-4 border-l-do-now transition-all hover:shadow">
+<div class="flex items-start justify-between gap-space-sm">
+<div class="flex items-start gap-space-sm">
+<input aria-label="Marcar como resuelto comprar receta médica" class="mt-1 h-4 w-4 rounded border-border text-do-now focus:ring-do-now" id="task-3" type="checkbox"/>
+<label class="text-body font-body-strong text-text cursor-pointer leading-snug" for="task-3">
+                  Comprar receta médica en farmacia de turno
+                </label>
+</div>
+<button aria-label="Opciones de tarea" class="text-text-muted hover:text-text p-1 rounded hover:bg-surface-container" type="button">
+<span aria-hidden="true" class="material-symbols-outlined text-[18px]" data-icon="more_vert">more_vert</span>
+</button>
+</div>
+<div class="mt-3 flex items-center justify-between pt-2 border-t border-slate-100">
+<span class="inline-flex items-center gap-1 bg-teal-50 text-scope-personal font-body-strong text-caption px-2 py-0.5 rounded-full border border-teal-200">
+<span aria-hidden="true" class="w-1.5 h-1.5 rounded-full bg-scope-personal"></span>
+                Personal
+              </span>
+<div class="inline-flex items-center gap-1 text-do-now font-caption">
+<span aria-hidden="true" class="material-symbols-outlined text-[16px]" data-icon="event">event</span>
+<span>Antes de 21:00</span>
+</div>
+</div>
+</article>
+</div>
+</section>
+<!-- QUADRANT 2: PLANIFICAR (NO URGENTE, PERO IMPORTANTE) -->
+<section aria-labelledby="heading-q2" class="flex flex-col bg-[#EFF6FF] rounded-xl border border-blue-200 shadow-sm overflow-hidden">
+<!-- Quadrant Header -->
+<div class="p-space-lg border-b border-blue-200/80 bg-surface/70 backdrop-blur flex items-center justify-between">
+<div class="flex items-start gap-3">
+<div aria-hidden="true" class="mt-1 w-3 h-3 rounded-full bg-schedule flex-shrink-0"></div>
+<div>
+<div class="flex items-center gap-2">
+<h2 class="text-heading font-heading text-text" id="heading-q2">Planificar</h2>
+<span class="bg-blue-100 text-schedule text-caption font-body-strong px-2 py-0.5 rounded-full border border-blue-200">
+                  2 tareas
+                </span>
+</div>
+<p class="text-caption font-caption text-text-muted mt-0.5">No urgente, pero Importante · Asignar tiempo en agenda</p>
+</div>
+</div>
+<button aria-label="Añadir tarea rápida en Planificar" class="p-1.5 rounded-lg text-text-muted hover:text-schedule hover:bg-blue-50 transition-colors focus:ring-2 focus:ring-schedule" type="button">
+<span aria-hidden="true" class="material-symbols-outlined text-[20px]" data-icon="add">add</span>
+</button>
+</div>
+<!-- Task List -->
+<div class="p-space-md space-y-space-md flex-1">
+<!-- Card 1 -->
+<article class="bg-surface p-space-md rounded-lg shadow-sm border border-border border-l-4 border-l-schedule hover:border-l-schedule transition-all hover:shadow">
+<div class="flex items-start justify-between gap-space-sm">
+<div class="flex items-start gap-space-sm">
+<input aria-label="Marcar como resuelto Definir arquitectura v2" class="mt-1 h-4 w-4 rounded border-border text-schedule focus:ring-schedule" id="task-4" type="checkbox"/>
+<label class="text-body font-body-strong text-text cursor-pointer leading-snug" for="task-4">
+                  Definir arquitectura v2 para microservicios de inventario
+                </label>
+</div>
+<button aria-label="Opciones de tarea" class="text-text-muted hover:text-text p-1 rounded hover:bg-surface-container" type="button">
+<span aria-hidden="true" class="material-symbols-outlined text-[18px]" data-icon="more_vert">more_vert</span>
+</button>
+</div>
+<div class="mt-3 flex items-center justify-between pt-2 border-t border-slate-100">
+<span class="inline-flex items-center gap-1 bg-purple-50 text-scope-work font-body-strong text-caption px-2 py-0.5 rounded-full border border-purple-200">
+<span aria-hidden="true" class="w-1.5 h-1.5 rounded-full bg-scope-work"></span>
+                Laboral
+              </span>
+<div class="inline-flex items-center gap-1 text-schedule font-caption font-body-strong">
+<span aria-hidden="true" class="material-symbols-outlined text-[16px]" data-icon="calendar_month">calendar_month</span>
+<span>Jueves 16, 10:00</span>
+</div>
+</div>
+</article>
+<!-- Card 2 -->
+<article class="bg-surface p-space-md rounded-lg shadow-sm border border-border border-l-4 border-l-schedule transition-all hover:shadow">
+<div class="flex items-start justify-between gap-space-sm">
+<div class="flex items-start gap-space-sm">
+<input aria-label="Marcar como resuelto Sesión de entrenamiento" class="mt-1 h-4 w-4 rounded border-border text-schedule focus:ring-schedule" id="task-5" type="checkbox"/>
+<label class="text-body font-body-strong text-text cursor-pointer leading-snug" for="task-5">
+                  Sesión de entrenamiento de fuerza y cardio
+                </label>
+</div>
+<button aria-label="Opciones de tarea" class="text-text-muted hover:text-text p-1 rounded hover:bg-surface-container" type="button">
+<span aria-hidden="true" class="material-symbols-outlined text-[18px]" data-icon="more_vert">more_vert</span>
+</button>
+</div>
+<div class="mt-3 flex items-center justify-between pt-2 border-t border-slate-100">
+<span class="inline-flex items-center gap-1 bg-teal-50 text-scope-personal font-body-strong text-caption px-2 py-0.5 rounded-full border border-teal-200">
+<span aria-hidden="true" class="w-1.5 h-1.5 rounded-full bg-scope-personal"></span>
+                Personal
+              </span>
+<div class="inline-flex items-center gap-1 text-schedule font-caption">
+<span aria-hidden="true" class="material-symbols-outlined text-[16px]" data-icon="event_repeat">event_repeat</span>
+<span>Mañana 07:30</span>
+</div>
+</div>
+</article>
+</div>
+</section>
+<!-- QUADRANT 3: DELEGAR (URGENTE, PERO NO IMPORTANTE) -->
+<section aria-labelledby="heading-q3" class="flex flex-col bg-[#FFFBEB] rounded-xl border border-amber-200 shadow-sm overflow-hidden">
+<!-- Quadrant Header -->
+<div class="p-space-lg border-b border-amber-200/80 bg-surface/70 backdrop-blur flex items-center justify-between">
+<div class="flex items-start gap-3">
+<div aria-hidden="true" class="mt-1 w-3 h-3 rounded-full bg-delegate flex-shrink-0"></div>
+<div>
+<div class="flex items-center gap-2">
+<h2 class="text-heading font-heading text-text" id="heading-q3">Delegar</h2>
+<span class="bg-amber-100 text-delegate text-caption font-body-strong px-2 py-0.5 rounded-full border border-amber-200">
+                  2 tareas
+                </span>
+</div>
+<p class="text-caption font-caption text-text-muted mt-0.5">Urgente, pero No importante · Asignar a otra persona</p>
+</div>
+</div>
+<button aria-label="Añadir tarea rápida en Delegar" class="p-1.5 rounded-lg text-text-muted hover:text-delegate hover:bg-amber-50 transition-colors focus:ring-2 focus:ring-delegate" type="button">
+<span aria-hidden="true" class="material-symbols-outlined text-[20px]" data-icon="add">add</span>
+</button>
+</div>
+<!-- Task List -->
+<div class="p-space-md space-y-space-md flex-1">
+<!-- Card 1 -->
+<article class="bg-surface p-space-md rounded-lg shadow-sm border border-border border-l-4 border-l-delegate transition-all hover:shadow">
+<div class="flex items-start justify-between gap-space-sm">
+<div class="flex items-start gap-space-sm">
+<input aria-label="Marcar como resuelto Coordinar logística" class="mt-1 h-4 w-4 rounded border-border text-delegate focus:ring-delegate" id="task-6" type="checkbox"/>
+<label class="text-body font-body-strong text-text cursor-pointer leading-snug" for="task-6">
+                  Coordinar logística y catering para evento de innovación
+                </label>
+</div>
+<button aria-label="Opciones de tarea" class="text-text-muted hover:text-text p-1 rounded hover:bg-surface-container" type="button">
+<span aria-hidden="true" class="material-symbols-outlined text-[18px]" data-icon="more_vert">more_vert</span>
+</button>
+</div>
+<div class="mt-3 flex items-center justify-between pt-2 border-t border-slate-100">
+<span class="inline-flex items-center gap-1 bg-purple-50 text-scope-work font-body-strong text-caption px-2 py-0.5 rounded-full border border-purple-200">
+<span aria-hidden="true" class="w-1.5 h-1.5 rounded-full bg-scope-work"></span>
+                Laboral
+              </span>
+<div class="inline-flex items-center gap-1.5 text-text font-caption font-body-strong bg-amber-50/80 px-2 py-0.5 rounded border border-amber-200/50">
+<span aria-hidden="true" class="material-symbols-outlined text-[16px] text-delegate" data-icon="assignment_ind">assignment_ind</span>
+<span>Delegado a: Lucía Torres</span>
+</div>
+</div>
+</article>
+<!-- Card 2 -->
+<article class="bg-surface p-space-md rounded-lg shadow-sm border border-border border-l-4 border-l-delegate transition-all hover:shadow">
+<div class="flex items-start justify-between gap-space-sm">
+<div class="flex items-start gap-space-sm">
+<input aria-label="Marcar como resuelto Revisar presupuesto de mantenimiento" class="mt-1 h-4 w-4 rounded border-border text-delegate focus:ring-delegate" id="task-7" type="checkbox"/>
+<label class="text-body font-body-strong text-text cursor-pointer leading-snug" for="task-7">
+                  Revisar presupuesto de mantenimiento doméstico
+                </label>
+</div>
+<button aria-label="Opciones de tarea" class="text-text-muted hover:text-text p-1 rounded hover:bg-surface-container" type="button">
+<span aria-hidden="true" class="material-symbols-outlined text-[18px]" data-icon="more_vert">more_vert</span>
+</button>
+</div>
+<div class="mt-3 flex items-center justify-between pt-2 border-t border-slate-100">
+<span class="inline-flex items-center gap-1 bg-teal-50 text-scope-personal font-body-strong text-caption px-2 py-0.5 rounded-full border border-teal-200">
+<span aria-hidden="true" class="w-1.5 h-1.5 rounded-full bg-scope-personal"></span>
+                Personal
+              </span>
+<div class="inline-flex items-center gap-1.5 text-text font-caption font-body-strong bg-amber-50/80 px-2 py-0.5 rounded border border-amber-200/50">
+<span aria-hidden="true" class="material-symbols-outlined text-[16px] text-delegate" data-icon="assignment_ind">assignment_ind</span>
+<span>Delegado a: Roberto M.</span>
+</div>
+</div>
+</article>
+</div>
+</section>
+<!-- QUADRANT 4: ELIMINAR (NI URGENTE, NI IMPORTANTE) -->
+<section aria-labelledby="heading-q4" class="flex flex-col bg-[#F8FAFC] rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+<!-- Quadrant Header -->
+<div class="p-space-lg border-b border-slate-200/80 bg-surface/70 backdrop-blur flex items-center justify-between">
+<div class="flex items-start gap-3">
+<div aria-hidden="true" class="mt-1 w-3 h-3 rounded-full bg-eliminate flex-shrink-0"></div>
+<div>
+<div class="flex items-center gap-2">
+<h2 class="text-heading font-heading text-text" id="heading-q4">Eliminar</h2>
+<span class="bg-slate-200 text-eliminate text-caption font-body-strong px-2 py-0.5 rounded-full border border-slate-300">
+                  0 tareas
+                </span>
+</div>
+<p class="text-caption font-caption text-text-muted mt-0.5">Ni urgente, ni Importante · Descartar distracciones</p>
+</div>
+</div>
+<button aria-label="Añadir tarea en Eliminar" class="p-1.5 rounded-lg text-text-muted hover:text-eliminate hover:bg-slate-100 transition-colors focus:ring-2 focus:ring-eliminate" type="button">
+<span aria-hidden="true" class="material-symbols-outlined text-[20px]" data-icon="add">add</span>
+</button>
+</div>
+<!-- Friendly Empty State -->
+<div class="p-space-xl flex-1 flex flex-col items-center justify-center text-center my-auto">
+<div class="w-14 h-14 rounded-full bg-emerald-50 text-success flex items-center justify-center mb-3 shadow-inner">
+<span aria-hidden="true" class="material-symbols-outlined text-[32px]" data-icon="task_alt">task_alt</span>
+</div>
+<h3 class="text-body font-body-strong text-text">¡Buen trabajo!</h3>
+<p class="text-caption font-caption text-text-muted max-w-xs mt-1 leading-relaxed">
+            No hay tareas aquí. Las distracciones y tareas innecesarias han sido descartadas eficazmente.
+          </p>
+</div>
+</section>
+</div>
+</main>
+<!-- DISCREET FOOTER (DESKTOP) -->
+<footer class="w-full bg-surface border-t border-border mt-auto hidden md:block">
+<div class="max-w-7xl mx-auto px-space-lg py-space-md flex flex-col sm:flex-row items-center justify-between gap-space-sm text-caption text-text-muted">
+<div>
+<span>© 2025 MyTasks · Enfoque estructurado con la matriz de Dwight D. Eisenhower</span>
+</div>
+<nav aria-label="Enlaces legales y ayuda" class="flex items-center space-x-space-md">
+<a class="hover:text-primary transition-colors" href="#">Privacidad</a>
+<span aria-hidden="true">·</span>
+<a class="hover:text-primary transition-colors" href="#">Términos</a>
+<span aria-hidden="true">·</span>
+<a class="hover:text-primary transition-colors" href="#">Ayuda</a>
+</nav>
+</div>
+</footer>
+<!-- MOBILE BOTTOM NAVIGATION BAR -->
+<!-- Executing style_shell_layout, labels, icons and style_active_navigation from JSON -->
+<nav aria-label="Navegación móvil" class="md:hidden fixed bottom-0 left-0 w-full z-50 flex justify-around items-center py-space-sm px-space-md border-t border-border bg-surface shadow-sm">
+<!-- Item 1: Matriz (Active mapping to current matrix dashboard) -->
+<a aria-current="page" class="flex flex-col items-center justify-center text-primary font-body-strong transition-all duration-150 active:scale-95" href="#">
+<span aria-hidden="true" class="material-symbols-outlined text-[24px]" data-icon="grid_view">grid_view</span>
+<span class="text-caption font-caption mt-0.5">Matriz</span>
+</a>
+<!-- Item 2: Hoy -->
+<a class="flex flex-col items-center justify-center text-text-muted font-caption hover:text-primary transition-colors duration-150 active:scale-95" href="#">
+<span aria-hidden="true" class="material-symbols-outlined text-[24px]" data-icon="today">today</span>
+<span class="text-caption font-caption mt-0.5">Hoy</span>
+</a>
+<!-- Item 3: Historial -->
+<a class="flex flex-col items-center justify-center text-text-muted font-caption hover:text-primary transition-colors duration-150 active:scale-95" href="#">
+<span aria-hidden="true" class="material-symbols-outlined text-[24px]" data-icon="history">history</span>
+<span class="text-caption font-caption mt-0.5">Historial</span>
+</a>
+<!-- Item 4: Ajustes -->
+<a class="flex flex-col items-center justify-center text-text-muted font-caption hover:text-primary transition-colors duration-150 active:scale-95" href="#">
+<span aria-hidden="true" class="material-symbols-outlined text-[24px]" data-icon="settings">settings</span>
+<span class="text-caption font-caption mt-0.5">Ajustes</span>
+</a>
+</nav>
+</body></html>

@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+
+<html class="h-full bg-background text-text" lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+<title>Tablero - MyTasks</title>
+<!-- Inter Google Font -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS v3 -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "on-tertiary-fixed": "#390c00",
+            "on-tertiary": "#ffffff",
+            "secondary": "#006a61",
+            "on-primary-container": "#cad3ff",
+            "success": "#15803D",
+            "tertiary-fixed-dim": "#ffb59c",
+            "on-secondary-container": "#006f66",
+            "text-muted": "#475569",
+            "on-primary-fixed": "#001551",
+            "scope-personal": "#0D9488",
+            "border": "#CBD5E1",
+            "on-error": "#ffffff",
+            "on-error-container": "#93000a",
+            "error": "#B91C1C",
+            "secondary-fixed": "#89f5e7",
+            "outline": "#747686",
+            "inverse-surface": "#2e3039",
+            "inverse-on-surface": "#f0f0fb",
+            "tertiary-fixed": "#ffdbcf",
+            "schedule": "#1D4ED8",
+            "text": "#0F172A",
+            "tertiary-container": "#a73400",
+            "surface-container-lowest": "#ffffff",
+            "secondary-container": "#86f2e4",
+            "surface-container-high": "#e8e7f3",
+            "eliminate": "#475569",
+            "surface-container-highest": "#e2e1ed",
+            "on-background": "#1a1b23",
+            "on-primary-fixed-variant": "#0039b5",
+            "surface-container": "#ededf9",
+            "on-secondary-fixed-variant": "#005049",
+            "on-tertiary-container": "#ffc9b7",
+            "outline-variant": "#c4c5d7",
+            "error-container": "#ffdad6",
+            "surface": "#FFFFFF",
+            "delegate": "#B45309",
+            "on-surface": "#1a1b23",
+            "primary-fixed-dim": "#b7c4ff",
+            "primary": "#0037b0",
+            "primary-fixed": "#dce1ff",
+            "on-surface-variant": "#434655",
+            "surface-alt": "#F8FAFC",
+            "on-tertiary-fixed-variant": "#832700",
+            "on-secondary": "#ffffff",
+            "background": "#faf8ff",
+            "tertiary": "#7f2500",
+            "surface-tint": "#2151da",
+            "inverse-primary": "#b7c4ff",
+            "surface-container-low": "#f3f2fe",
+            "primary-container": "#1d4ed8",
+            "do-now": "#B91C1C",
+            "secondary-fixed-dim": "#6bd8cb",
+            "surface-bright": "#faf8ff",
+            "on-primary": "#ffffff",
+            "scope-work": "#7C3AED",
+            "surface-variant": "#e2e1ed",
+            "surface-dim": "#d9d9e5",
+            "on-secondary-fixed": "#00201d"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.125rem",
+            "lg": "0.25rem",
+            "xl": "0.5rem",
+            "full": "0.75rem"
+          },
+          "spacing": {
+            "margin": "24px",
+            "space-xl": "32px",
+            "space-md": "12px",
+            "space-sm": "8px",
+            "space-2xl": "48px",
+            "space-lg": "16px",
+            "gutter": "24px",
+            "space-xs": "4px"
+          },
+          "fontFamily": {
+            "body-strong": ["Inter"],
+            "body": ["Inter"],
+            "caption": ["Inter"],
+            "heading": ["Inter"],
+            "display": ["Inter"]
+          },
+          "fontSize": {
+            "body-strong": ["16px", { "lineHeight": "24px", "fontWeight": "600" }],
+            "body": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+            "caption": ["13px", { "lineHeight": "18px", "fontWeight": "400" }],
+            "heading": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+            "display": ["28px", { "lineHeight": "36px", "fontWeight": "700" }]
+          }
+        }
+      }
+    }
+  </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="min-h-full font-body text-body text-text bg-background antialiased flex flex-col items-center">
+<!-- Mobile Screen Container (390px simulation) -->
+<div class="w-full max-w-[390px] min-h-screen bg-background flex flex-col relative pb-24 shadow-xl">
+<!-- Top Status / Brand Header (TopNavBar execution per spec) -->
+<header class="w-full bg-surface px-space-lg py-space-sm border-b border-border shadow-sm sticky top-0 z-40">
+<div class="flex items-center justify-between">
+<!-- Logo / Isotipo -->
+<div class="flex items-center gap-space-xs">
+<span class="w-7 h-7 rounded-xl bg-primary-container flex items-center justify-center text-on-primary">
+<span class="material-symbols-outlined text-[18px]">grid_view</span>
+</span>
+<span class="text-heading font-heading font-bold text-primary tracking-tight">MyTasks</span>
+</div>
+<!-- Trailing actions: Notifications & User Avatar -->
+<div class="flex items-center gap-space-sm">
+<button aria-label="Notificaciones" class="w-8 h-8 rounded-full flex items-center justify-center text-text-muted hover:bg-surface-container transition-colors duration-150 relative" type="button">
+<span class="material-symbols-outlined text-[20px]">notifications</span>
+<span class="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-error ring-2 ring-surface"></span>
+</button>
+<div aria-label="Perfil: Carlos Mendoza" class="w-8 h-8 rounded-full bg-primary-fixed flex items-center justify-center border border-border">
+<span class="text-caption font-heading font-bold text-on-primary-fixed">CM</span>
+</div>
+</div>
+</div>
+</header>
+<!-- Main Content Area -->
+<main class="px-space-lg pt-space-md flex-1 flex flex-col gap-space-md">
+<!-- View Title & CTA Header -->
+<section class="flex flex-col gap-space-sm">
+<div class="flex items-center justify-between gap-space-sm">
+<div>
+<h1 class="text-heading font-heading font-bold text-text tracking-tight">Tablero</h1>
+<p class="text-caption font-caption text-text-muted">Matriz de Eisenhower para priorización ágil</p>
+</div>
+<!-- Primary CTA Button -->
+<button class="inline-flex items-center gap-space-xs bg-primary-container text-on-primary px-space-md py-space-xs rounded-xl font-body-strong text-caption shadow-sm hover:opacity-95 active:scale-95 transition-all duration-150 whitespace-nowrap" type="button">
+<span class="material-symbols-outlined text-[18px]">add</span>
+<span>Nueva tarea</span>
+</button>
+</div>
+<!-- Filter Segmented Bar -->
+<div aria-label="Filtrar por ámbito" class="flex items-center gap-space-xs overflow-x-auto py-1 no-scrollbar" role="tablist">
+<button aria-selected="true" class="px-space-md py-1 rounded-full text-caption font-body-strong bg-primary text-on-primary shadow-xs transition-colors" role="tab" type="button">
+            Todas (7)
+          </button>
+<button aria-selected="false" class="px-space-md py-1 rounded-full text-caption font-body-strong bg-[#F3E8FF] text-scope-work border border-[#DDD6FE] hover:bg-[#E9D5FF] transition-colors flex items-center gap-1" role="tab" type="button">
+<span class="w-2 h-2 rounded-full bg-scope-work"></span>
+            Laboral (4)
+          </button>
+<button aria-selected="false" class="px-space-md py-1 rounded-full text-caption font-body-strong bg-[#CCFBF1] text-scope-personal border border-[#99F6E4] hover:bg-[#99F6E4] transition-colors flex items-center gap-1" role="tab" type="button">
+<span class="w-2 h-2 rounded-full bg-scope-personal"></span>
+            Personal (3)
+          </button>
+</div>
+</section>
+<!-- Eisenhower Matrix: 4 Quadrants Vertical Flow -->
+<div class="flex flex-col gap-space-md">
+<!-- Cuadrante 1: Hacer ahora (Urgente e Importante) -->
+<section aria-labelledby="q1-title" class="rounded-xl border border-border bg-[#FEF2F2] p-space-sm flex flex-col gap-space-sm shadow-sm">
+<!-- Header Cuadrante -->
+<div class="flex items-center justify-between pb-1 border-b border-[#FCA5A5]/40">
+<div class="flex items-center gap-space-xs">
+<span class="w-2.5 h-2.5 rounded-full bg-do-now"></span>
+<h2 class="text-body-strong font-heading text-[#991B1B] font-bold" id="q1-title">Hacer ahora</h2>
+<span class="text-caption text-text-muted font-caption">(Urgente e Importante)</span>
+</div>
+<span class="px-space-xs py-0.5 rounded-lg bg-[#FEE2E2] text-do-now text-caption font-body-strong">3 tareas</span>
+</div>
+<!-- Cards Stack -->
+<div class="flex flex-col gap-space-xs">
+<!-- Card 1 -->
+<article class="bg-surface rounded-lg p-space-sm border-l-4 border-l-do-now border-y border-r border-border shadow-xs flex items-start gap-space-sm">
+<input class="mt-1 w-4 h-4 rounded text-do-now focus:ring-do-now border-border cursor-pointer" id="task-1" type="checkbox"/>
+<div class="flex-1 min-w-0">
+<label class="text-body font-body text-text font-medium leading-snug cursor-pointer block" for="task-1">
+                  Presentar balance contable trimestral
+                </label>
+<div class="flex items-center gap-space-xs mt-1.5 flex-wrap">
+<span class="px-1.5 py-0.5 rounded text-[11px] font-semibold bg-[#F3E8FF] text-scope-work">Laboral</span>
+<span class="flex items-center gap-0.5 text-caption text-text-muted">
+<span class="material-symbols-outlined text-[14px]">schedule</span>
+                    Hoy, 14:00
+                  </span>
+</div>
+</div>
+<button aria-label="Opciones de tarea" class="text-text-muted hover:text-text p-0.5" type="button">
+<span class="material-symbols-outlined text-[18px]">more_vert</span>
+</button>
+</article>
+<!-- Card 2 -->
+<article class="bg-surface rounded-lg p-space-sm border-l-4 border-l-do-now border-y border-r border-border shadow-xs flex items-start gap-space-sm">
+<input class="mt-1 w-4 h-4 rounded text-do-now focus:ring-do-now border-border cursor-pointer" id="task-2" type="checkbox"/>
+<div class="flex-1 min-w-0">
+<label class="text-body font-body text-text font-medium leading-snug cursor-pointer block" for="task-2">
+                  Comprar medicamento con receta médica
+                </label>
+<div class="flex items-center gap-space-xs mt-1.5 flex-wrap">
+<span class="px-1.5 py-0.5 rounded text-[11px] font-semibold bg-[#CCFBF1] text-scope-personal">Personal</span>
+<span class="flex items-center gap-0.5 text-caption text-text-muted">
+<span class="material-symbols-outlined text-[14px]">schedule</span>
+                    Hoy, 17:30
+                  </span>
+</div>
+</div>
+<button aria-label="Opciones de tarea" class="text-text-muted hover:text-text p-0.5" type="button">
+<span class="material-symbols-outlined text-[18px]">more_vert</span>
+</button>
+</article>
+<!-- Card 3 -->
+<article class="bg-surface rounded-lg p-space-sm border-l-4 border-l-do-now border-y border-r border-border shadow-xs flex items-start gap-space-sm">
+<input class="mt-1 w-4 h-4 rounded text-do-now focus:ring-do-now border-border cursor-pointer" id="task-3" type="checkbox"/>
+<div class="flex-1 min-w-0">
+<label class="text-body font-body text-text font-medium leading-snug cursor-pointer block" for="task-3">
+                  Revisar caída de servidor en producción
+                </label>
+<div class="flex items-center gap-space-xs mt-1.5 flex-wrap">
+<span class="px-1.5 py-0.5 rounded text-[11px] font-semibold bg-[#F3E8FF] text-scope-work">Laboral</span>
+<span class="px-1.5 py-0.5 rounded text-[11px] font-semibold bg-error text-on-error flex items-center gap-0.5">
+<span class="material-symbols-outlined text-[12px]">priority_high</span>
+                    Crítico inmediato
+                  </span>
+</div>
+</div>
+<button aria-label="Opciones de tarea" class="text-text-muted hover:text-text p-0.5" type="button">
+<span class="material-symbols-outlined text-[18px]">more_vert</span>
+</button>
+</article>
+</div>
+</section>
+<!-- Cuadrante 2: Planificar (No urgente, pero Importante) -->
+<section aria-labelledby="q2-title" class="rounded-xl border border-border bg-[#EFF6FF] p-space-sm flex flex-col gap-space-sm shadow-sm">
+<!-- Header Cuadrante -->
+<div class="flex items-center justify-between pb-1 border-b border-[#93C5FD]/40">
+<div class="flex items-center gap-space-xs">
+<span class="w-2.5 h-2.5 rounded-full bg-schedule"></span>
+<h2 class="text-body-strong font-heading text-[#1E40AF] font-bold" id="q2-title">Planificar</h2>
+<span class="text-caption text-text-muted font-caption">(No urgente, Importante)</span>
+</div>
+<span class="px-space-xs py-0.5 rounded-lg bg-[#DBEAFE] text-schedule text-caption font-body-strong">2 tareas</span>
+</div>
+<!-- Cards Stack -->
+<div class="flex flex-col gap-space-xs">
+<!-- Card 1 -->
+<article class="bg-surface rounded-lg p-space-sm border-l-4 border-l-schedule border-y border-r border-border shadow-xs flex items-start gap-space-sm">
+<input class="mt-1 w-4 h-4 rounded text-schedule focus:ring-schedule border-border cursor-pointer" id="task-4" type="checkbox"/>
+<div class="flex-1 min-w-0">
+<label class="text-body font-body text-text font-medium leading-snug cursor-pointer block" for="task-4">
+                  Diseñar arquitectura del nuevo microservicio
+                </label>
+<div class="flex items-center gap-space-xs mt-1.5 flex-wrap">
+<span class="px-1.5 py-0.5 rounded text-[11px] font-semibold bg-[#F3E8FF] text-scope-work">Laboral</span>
+<span class="flex items-center gap-0.5 text-caption text-text-muted">
+<span class="material-symbols-outlined text-[14px]">calendar_today</span>
+                    Jueves 16, 10:00
+                  </span>
+</div>
+</div>
+<button aria-label="Opciones de tarea" class="text-text-muted hover:text-text p-0.5" type="button">
+<span class="material-symbols-outlined text-[18px]">more_vert</span>
+</button>
+</article>
+<!-- Card 2 -->
+<article class="bg-surface rounded-lg p-space-sm border-l-4 border-l-schedule border-y border-r border-border shadow-xs flex items-start gap-space-sm">
+<input class="mt-1 w-4 h-4 rounded text-schedule focus:ring-schedule border-border cursor-pointer" id="task-5" type="checkbox"/>
+<div class="flex-1 min-w-0">
+<label class="text-body font-body text-text font-medium leading-snug cursor-pointer block" for="task-5">
+                  Planificar sesión de fisioterapia y entrenamiento
+                </label>
+<div class="flex items-center gap-space-xs mt-1.5 flex-wrap">
+<span class="px-1.5 py-0.5 rounded text-[11px] font-semibold bg-[#CCFBF1] text-scope-personal">Personal</span>
+<span class="flex items-center gap-0.5 text-caption text-text-muted">
+<span class="material-symbols-outlined text-[14px]">calendar_today</span>
+                    Viernes, 07:00
+                  </span>
+</div>
+</div>
+<button aria-label="Opciones de tarea" class="text-text-muted hover:text-text p-0.5" type="button">
+<span class="material-symbols-outlined text-[18px]">more_vert</span>
+</button>
+</article>
+</div>
+</section>
+<!-- Cuadrante 3: Delegar (Urgente, no Importante) -->
+<section aria-labelledby="q3-title" class="rounded-xl border border-border bg-[#FFFBEB] p-space-sm flex flex-col gap-space-sm shadow-sm">
+<!-- Header Cuadrante -->
+<div class="flex items-center justify-between pb-1 border-b border-[#FCD34D]/40">
+<div class="flex items-center gap-space-xs">
+<span class="w-2.5 h-2.5 rounded-full bg-delegate"></span>
+<h2 class="text-body-strong font-heading text-[#92400E] font-bold" id="q3-title">Delegar</h2>
+<span class="text-caption text-text-muted font-caption">(Urgente, no Importante)</span>
+</div>
+<span class="px-space-xs py-0.5 rounded-lg bg-[#FEF3C7] text-delegate text-caption font-body-strong">2 tareas</span>
+</div>
+<!-- Cards Stack -->
+<div class="flex flex-col gap-space-xs">
+<!-- Card 1 -->
+<article class="bg-surface rounded-lg p-space-sm border-l-4 border-l-delegate border-y border-r border-border shadow-xs flex items-start gap-space-sm">
+<input class="mt-1 w-4 h-4 rounded text-delegate focus:ring-delegate border-border cursor-pointer" id="task-6" type="checkbox"/>
+<div class="flex-1 min-w-0">
+<label class="text-body font-body text-text font-medium leading-snug cursor-pointer block" for="task-6">
+                  Actualizar catálogo de proveedores Q2
+                </label>
+<div class="flex items-center gap-space-xs mt-1.5 flex-wrap">
+<span class="px-1.5 py-0.5 rounded text-[11px] font-semibold bg-[#F3E8FF] text-scope-work">Laboral</span>
+<span class="flex items-center gap-1 text-caption text-text-muted">
+<span class="material-symbols-outlined text-[14px]">person</span>
+                    Asignado a: Carlos M.
+                  </span>
+</div>
+</div>
+<button aria-label="Opciones de tarea" class="text-text-muted hover:text-text p-0.5" type="button">
+<span class="material-symbols-outlined text-[18px]">more_vert</span>
+</button>
+</article>
+<!-- Card 2 -->
+<article class="bg-surface rounded-lg p-space-sm border-l-4 border-l-delegate border-y border-r border-border shadow-xs flex items-start gap-space-sm">
+<input class="mt-1 w-4 h-4 rounded text-delegate focus:ring-delegate border-border cursor-pointer" id="task-7" type="checkbox"/>
+<div class="flex-1 min-w-0">
+<label class="text-body font-body text-text font-medium leading-snug cursor-pointer block" for="task-7">
+                  Confirmar reservaciones para almuerzo de equipo
+                </label>
+<div class="flex items-center gap-space-xs mt-1.5 flex-wrap">
+<span class="px-1.5 py-0.5 rounded text-[11px] font-semibold bg-[#F3E8FF] text-scope-work">Laboral</span>
+<span class="flex items-center gap-1 text-caption text-text-muted">
+<span class="material-symbols-outlined text-[14px]">person</span>
+                    Asignado a: Sofía R.
+                  </span>
+</div>
+</div>
+<button aria-label="Opciones de tarea" class="text-text-muted hover:text-text p-0.5" type="button">
+<span class="material-symbols-outlined text-[18px]">more_vert</span>
+</button>
+</article>
+</div>
+</section>
+<!-- Cuadrante 4: Eliminar (Ni urgente, ni Importante) -->
+<section aria-labelledby="q4-title" class="rounded-xl border border-border bg-surface-alt p-space-sm flex flex-col gap-space-sm shadow-sm">
+<!-- Header Cuadrante -->
+<div class="flex items-center justify-between pb-1 border-b border-border">
+<div class="flex items-center gap-space-xs">
+<span class="w-2.5 h-2.5 rounded-full bg-eliminate"></span>
+<h2 class="text-body-strong font-heading text-text-muted font-bold" id="q4-title">Eliminar</h2>
+<span class="text-caption text-text-muted font-caption">(Ni urgente, ni Importante)</span>
+</div>
+<span class="px-space-xs py-0.5 rounded-lg bg-surface-container text-text-muted text-caption font-body-strong">1 tarea</span>
+</div>
+<!-- Cards Stack -->
+<div class="flex flex-col gap-space-xs">
+<!-- Card 1 -->
+<article class="bg-surface rounded-lg p-space-sm border-l-4 border-l-eliminate border-y border-r border-border shadow-xs flex items-start gap-space-sm">
+<input class="mt-1 w-4 h-4 rounded text-eliminate focus:ring-eliminate border-border cursor-pointer" id="task-8" type="checkbox"/>
+<div class="flex-1 min-w-0">
+<label class="text-body font-body text-text font-medium leading-snug cursor-pointer block" for="task-8">
+                  Reorganizar feeds RSS obsoletos y newsletters
+                </label>
+<div class="flex items-center gap-space-xs mt-1.5 flex-wrap">
+<span class="px-1.5 py-0.5 rounded text-[11px] font-semibold bg-[#CCFBF1] text-scope-personal">Personal</span>
+<button class="text-caption text-error hover:underline flex items-center gap-0.5" type="button">
+<span class="material-symbols-outlined text-[14px]">delete</span>
+                    Descartar
+                  </button>
+</div>
+</div>
+<button aria-label="Opciones de tarea" class="text-text-muted hover:text-text p-0.5" type="button">
+<span class="material-symbols-outlined text-[18px]">more_vert</span>
+</button>
+</article>
+<!-- Focus notice -->
+<div class="rounded-lg bg-surface border border-border border-dashed p-space-xs flex items-center justify-between">
+<div class="flex items-center gap-1.5 text-text-muted">
+<span class="material-symbols-outlined text-success text-[16px]">check_circle</span>
+<span class="text-caption">Foco despejado: baja distracción</span>
+</div>
+<span class="text-[11px] font-medium text-text-muted px-1.5 py-0.5 bg-surface-container rounded">92% óptimo</span>
+</div>
+</div>
+</section>
+</div>
+</main>
+<!-- Bottom Navigation Bar (Execution strictly mapped from JSON) -->
+<nav aria-label="Navegación principal" class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center py-space-sm px-space-md border-t border-border bg-surface shadow-sm max-w-[390px] mx-auto right-0">
+<!-- Item 1: Matriz (Active) -->
+<a aria-current="page" class="flex flex-col items-center justify-center text-primary font-body-strong transition-all duration-150 active:scale-95" href="#">
+<span class="material-symbols-outlined text-[24px]" style="font-variation-settings: 'FILL' 1;">grid_view</span>
+<span class="text-caption font-caption mt-0.5">Matriz</span>
+</a>
+<!-- Item 2: Hoy -->
+<a class="flex flex-col items-center justify-center text-text-muted font-caption hover:text-primary transition-colors duration-150 active:scale-95" href="#">
+<span class="material-symbols-outlined text-[24px]">today</span>
+<span class="text-caption font-caption mt-0.5">Hoy</span>
+</a>
+<!-- Item 3: Historial -->
+<a class="flex flex-col items-center justify-center text-text-muted font-caption hover:text-primary transition-colors duration-150 active:scale-95" href="#">
+<span class="material-symbols-outlined text-[24px]">history</span>
+<span class="text-caption font-caption mt-0.5">Historial</span>
+</a>
+<!-- Item 4: Ajustes -->
+<a class="flex flex-col items-center justify-center text-text-muted font-caption hover:text-primary transition-colors duration-150 active:scale-95" href="#">
+<span class="material-symbols-outlined text-[24px]">settings</span>
+<span class="text-caption font-caption mt-0.5">Ajustes</span>
+</a>
+</nav>
+</div>
+<!-- Micro-interactions Script -->
+<script>
+    // Minimal interactivity for checkbox state toggling and feedback
+    document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+      checkbox.addEventListener('change', (e) => {
+        const label = e.target.closest('article').querySelector('label');
+        if (e.target.checked) {
+          label.classList.add('line-through', 'text-text-muted', 'opacity-70');
+        } else {
+          label.classList.remove('line-through', 'text-text-muted', 'opacity-70');
+        }
+      });
+    });
+  </script>
+</body></html>
