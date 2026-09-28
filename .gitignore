@@ -19,9 +19,12 @@ build/
 coverage/
 
 # Firestore emulator
-firestore-debug.log
-firebase-debug.log
+*-debug.log
 .firebase/
+
+# Playwright
+playwright-report/
+test-results/
 
 # Editores / SO
 .DS_Store
