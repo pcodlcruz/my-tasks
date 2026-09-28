@@ -8,7 +8,7 @@ from google.cloud import firestore
 from google.cloud.firestore_v1.base_query import FieldFilter
 
 from mytasks_api.config import get_settings
-from mytasks_api.domain.task import Scope, Status, Task
+from mytasks_api.domain.task import Scope, Status, Task, TaskNotFoundError, ensure_editable
 from mytasks_api.schemas.task import TaskCreate
 
 
@@ -35,6 +35,30 @@ def _document_to_task(task_id: str, data: dict[str, Any]) -> Task:
         trashed_at=_to_utc(data.get("trashed_at")),
         purge_at=_to_utc(data.get("purge_at")),
     )
+
+
+@firestore.async_transactional
+async def _apply_update(
+    transaction: firestore.AsyncTransaction,
+    doc_ref: firestore.AsyncDocumentReference,
+    fields: dict[str, Any],
+) -> Task:
+    snapshot = await doc_ref.get(transaction=transaction)
+    data = snapshot.to_dict() if snapshot.exists else None
+    if data is None:
+        raise TaskNotFoundError(doc_ref.id)
+    task = _document_to_task(snapshot.id, data)
+    if task.purge_at is not None and task.purge_at <= datetime.now(UTC):
+        raise TaskNotFoundError(doc_ref.id)
+    ensure_editable(task)
+
+    update_payload: dict[str, Any] = dict(fields)
+    if isinstance(update_payload.get("scope"), Scope):
+        update_payload["scope"] = update_payload["scope"].value
+    update_payload["updated_at"] = datetime.now(UTC)
+
+    transaction.update(doc_ref, update_payload)
+    return _document_to_task(snapshot.id, {**data, **update_payload})
 
 
 class TaskRepository:
@@ -79,6 +103,11 @@ class TaskRepository:
         doc_ref = self._tasks_collection(uid).document()
         await doc_ref.set(document)
         return _document_to_task(doc_ref.id, document)
+
+    async def update(self, uid: str, task_id: str, fields: dict[str, Any]) -> Task:
+        doc_ref = self._tasks_collection(uid).document(task_id)
+        transaction = self._client.transaction()
+        return await _apply_update(transaction, doc_ref, fields)
 
     async def list_board(self, uid: str, scope: Scope | None = None) -> list[Task]:
         query = (

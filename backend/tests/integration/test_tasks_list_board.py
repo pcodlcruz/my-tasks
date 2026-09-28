@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from datetime import UTC, datetime, timedelta
 from typing import TYPE_CHECKING
 
 import httpx
@@ -44,3 +45,33 @@ async def test_list_board_requires_view_query_param(
     )
 
     assert response.status_code == 422
+
+
+async def test_list_board_orders_pinned_first_then_created_at_ascending(
+    client: httpx.AsyncClient, google_user: GoogleUserFactory, seed_task: SeedTaskFactory
+) -> None:
+    user = await google_user("owner@example.com")
+    now = datetime.now(UTC)
+    await seed_task(user.uid, title="Antigua sin fijar", created_at=now - timedelta(minutes=10))
+    await seed_task(user.uid, title="Reciente sin fijar", created_at=now)
+    await seed_task(
+        user.uid, title="Fijada más reciente", pinned=True, created_at=now - timedelta(minutes=1)
+    )
+    await seed_task(
+        user.uid, title="Fijada más antigua", pinned=True, created_at=now - timedelta(minutes=20)
+    )
+
+    response = await client.get(
+        "/api/v1/tasks",
+        params={"view": "board"},
+        headers={"Authorization": f"Bearer {user.id_token}"},
+    )
+
+    assert response.status_code == 200
+    titles = [task["title"] for task in response.json()["items"]]
+    assert titles == [
+        "Fijada más antigua",
+        "Fijada más reciente",
+        "Antigua sin fijar",
+        "Reciente sin fijar",
+    ]

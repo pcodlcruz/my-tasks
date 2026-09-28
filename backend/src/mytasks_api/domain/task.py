@@ -60,3 +60,12 @@ class Task:
     @property
     def quadrant(self) -> Quadrant:
         return quadrant_for(urgent=self.urgent, important=self.important)
+
+
+def sort_board(tasks: list[Task]) -> list[Task]:
+    return sorted(tasks, key=lambda task: (not task.pinned, task.created_at))
+
+
+def ensure_editable(task: Task) -> None:
+    if task.status != Status.ACTIVE or task.in_trash:
+        raise InvalidTransitionError(task.id)

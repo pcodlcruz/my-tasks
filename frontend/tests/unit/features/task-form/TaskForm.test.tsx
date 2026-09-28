@@ -3,9 +3,11 @@ import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 const mutateAsync = vi.fn()
+const updateMutateAsync = vi.fn()
 
 vi.mock('../../../../src/api/tasks', () => ({
   useCreateTask: () => ({ mutateAsync, isPending: false }),
+  useUpdateTask: () => ({ mutateAsync: updateMutateAsync, isPending: false }),
 }))
 
 async function renderTaskForm(onClose: () => void = vi.fn()): Promise<void> {
