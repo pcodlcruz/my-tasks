@@ -13,7 +13,7 @@ async function createTask(
   if (options.important) {
     await page.getByRole('checkbox', { name: 'Marcar como importante' }).check()
   }
-  await page.getByRole('radio', { name: options.scope }).check()
+  await page.getByRole('dialog').getByRole('radio', { name: options.scope }).check()
   await page.getByRole('button', { name: 'Guardar' }).click()
   await expect(page.getByRole('dialog')).toHaveCount(0)
 }

@@ -227,15 +227,15 @@ al crear y editable después, con reflejo inmediato en el filtro.
 
 ### Tests de User Story 4 ⚠️
 
-- [ ] T077 [P] [US4] Test de integración de `GET /api/v1/tasks?view=board&scope=work|personal` (devuelve solo ese ámbito; sin `scope` devuelve todas; 422 por un `scope` no válido) en `backend/tests/integration/test_tasks_list_board_scope.py`
-- [ ] T078 [P] [US4] Test de componente de `ScopeFilter` y del store (tres opciones exclusivas, un clic, estado conservado al navegar) en `frontend/tests/unit/features/board/ScopeFilter.test.tsx`
-- [ ] T079 [P] [US4] Test e2e: filtrar por "Laboral" y volver a "Todas"; cambiar el ámbito de una tarea la saca del filtro activo sin recargar; crear sin ámbito no deja guardar, en `frontend/tests/e2e/us4-scope.spec.ts`
+- [X] T077 [P] [US4] Test de integración de `GET /api/v1/tasks?view=board&scope=work|personal` (devuelve solo ese ámbito; sin `scope` devuelve todas; 422 por un `scope` no válido) en `backend/tests/integration/test_tasks_list_board_scope.py`
+- [X] T078 [P] [US4] Test de componente de `ScopeFilter` y del store (tres opciones exclusivas, un clic, estado conservado al navegar) en `frontend/tests/unit/features/board/ScopeFilter.test.tsx`
+- [X] T079 [P] [US4] Test e2e: filtrar por "Laboral" y volver a "Todas"; cambiar el ámbito de una tarea la saca del filtro activo sin recargar; crear sin ámbito no deja guardar, en `frontend/tests/e2e/us4-scope.spec.ts`
 
 ### Implementación de User Story 4
 
-- [ ] T080 [US4] Aplicar el filtro `scope ==` en la consulta de `list_board` en `backend/src/mytasks_api/repositories/task_repository.py` y aceptar el parámetro `scope` para `view=board` en `backend/src/mytasks_api/routers/tasks.py`
-- [ ] T081 [P] [US4] Implementar el store de Zustand con el filtro de ámbito (`all | work | personal`) en `frontend/src/stores/uiStore.ts`
-- [ ] T082 [US4] Implementar `ScopeFilter` (grupo de opciones accesible) en `frontend/src/features/board/ScopeFilter.tsx`, integrarlo en `BoardPage` y pasar el ámbito a `useBoardTasks` (clave de consulta por ámbito) en `frontend/src/features/board/BoardPage.tsx` y `frontend/src/api/tasks.ts`
+- [X] T080 [US4] Aplicar el filtro `scope ==` en la consulta de `list_board` en `backend/src/mytasks_api/repositories/task_repository.py` y aceptar el parámetro `scope` para `view=board` en `backend/src/mytasks_api/routers/tasks.py`
+- [X] T081 [P] [US4] Implementar el store de Zustand con el filtro de ámbito (`all | work | personal`) en `frontend/src/stores/uiStore.ts`
+- [X] T082 [US4] Implementar `ScopeFilter` (grupo de opciones accesible) en `frontend/src/features/board/ScopeFilter.tsx`, integrarlo en `BoardPage` y pasar el ámbito a `useBoardTasks` (clave de consulta por ámbito) en `frontend/src/features/board/BoardPage.tsx` y `frontend/src/api/tasks.ts`
 
 **Checkpoint**: US1–US4 funcionan.
 

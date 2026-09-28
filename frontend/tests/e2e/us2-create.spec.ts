@@ -25,7 +25,7 @@ test.describe('US2 · Capturar una tarea y verla clasificada', () => {
       if (combo.important) {
         await page.getByRole('checkbox', { name: 'Marcar como importante' }).check()
       }
-      await page.getByRole('radio', { name: 'Laboral' }).check()
+      await page.getByRole('dialog').getByRole('radio', { name: 'Laboral' }).check()
       await page.getByRole('button', { name: 'Guardar' }).click()
 
       await expect(page.getByRole('dialog')).toHaveCount(0)
@@ -45,7 +45,7 @@ test.describe('US2 · Capturar una tarea y verla clasificada', () => {
     await page.getByRole('button', { name: '+ Nueva tarea' }).click()
     await page.getByLabel('Título').fill('Tarea de prueba')
     await page.getByLabel('Descripción').fill('   ')
-    await page.getByRole('radio', { name: 'Personal' }).check()
+    await page.getByRole('dialog').getByRole('radio', { name: 'Personal' }).check()
     await page.getByRole('button', { name: 'Guardar' }).click()
 
     await expect(page.getByText('La descripción no puede estar vacía.')).toBeVisible()
