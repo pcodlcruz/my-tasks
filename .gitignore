@@ -32,4 +32,10 @@ test-results/
 .vscode/
 
 # exluded at moment, but can be added later if needed
-docs/
+docs/*
+# excepción: el design system y las pantallas de Stitch de esta feature se
+# versionan (specs/001-eisenhower-task-manager/plan.md § Project Structure).
+# Git no puede reincluir un hijo de un directorio ya excluido, por eso la
+# regla de arriba excluye el contenido de docs/ (docs/*) en vez del propio
+# directorio (docs/).
+!docs/design/
