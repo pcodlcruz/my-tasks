@@ -1,6 +1,7 @@
 from datetime import datetime
+from typing import Self
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 from mytasks_api.domain.task import Quadrant, Scope, Status, Task
 
@@ -18,6 +19,32 @@ class TaskCreate(BaseModel):
     @classmethod
     def _strip_whitespace(cls, value: object) -> object:
         return value.strip() if isinstance(value, str) else value
+
+
+class TaskUpdate(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    title: str | None = Field(default=None, min_length=1, max_length=200)
+    description: str | None = Field(default=None, min_length=1, max_length=2000)
+    urgent: bool | None = None
+    important: bool | None = None
+    scope: Scope | None = None
+    pinned: bool | None = None
+
+    @field_validator("title", "description", mode="before")
+    @classmethod
+    def _strip_whitespace(cls, value: object) -> object:
+        return value.strip() if isinstance(value, str) else value
+
+    @model_validator(mode="after")
+    def _require_at_least_one_field(self) -> Self:
+        if not self.model_fields_set:
+            message = "Debes indicar al menos un campo a actualizar."
+            raise ValueError(message)
+        return self
+
+    def updated_fields(self) -> dict[str, object]:
+        return self.model_dump(exclude_unset=True)
 
 
 class TaskOut(BaseModel):

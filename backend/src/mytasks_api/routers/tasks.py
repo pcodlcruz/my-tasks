@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, Path, Query, status
 
 from mytasks_api.auth import CurrentUser, get_current_user
 from mytasks_api.domain.task import Scope
-from mytasks_api.schemas.task import TaskCreate, TaskOut, TaskPage
+from mytasks_api.schemas.task import TaskCreate, TaskOut, TaskPage, TaskUpdate
 from mytasks_api.services.task_service import TaskService, get_task_service
 
 router = APIRouter(prefix="/api/v1/tasks", tags=["tasks"])
@@ -40,4 +40,15 @@ async def get_task(
     service: TaskService = Depends(get_task_service),
 ) -> TaskOut:
     task = await service.get_task(current_user.uid, task_id)
+    return TaskOut.from_task(task)
+
+
+@router.patch("/{task_id}", response_model=TaskOut)
+async def update_task(
+    payload: TaskUpdate,
+    task_id: str = TaskId,
+    current_user: CurrentUser = Depends(get_current_user),
+    service: TaskService = Depends(get_task_service),
+) -> TaskOut:
+    task = await service.update_task(current_user.uid, task_id, payload)
     return TaskOut.from_task(task)

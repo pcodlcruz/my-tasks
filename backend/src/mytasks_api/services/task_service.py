@@ -1,8 +1,8 @@
 from fastapi import Depends
 
-from mytasks_api.domain.task import Scope, Task, TaskNotFoundError
+from mytasks_api.domain.task import Scope, Task, TaskNotFoundError, sort_board
 from mytasks_api.repositories.task_repository import TaskRepository, get_task_repository
-from mytasks_api.schemas.task import TaskCreate
+from mytasks_api.schemas.task import TaskCreate, TaskUpdate
 
 
 class TaskService:
@@ -18,9 +18,12 @@ class TaskService:
     async def create_task(self, uid: str, data: TaskCreate) -> Task:
         return await self._repository.create(uid, data)
 
+    async def update_task(self, uid: str, task_id: str, data: TaskUpdate) -> Task:
+        return await self._repository.update(uid, task_id, data.updated_fields())
+
     async def list_board(self, uid: str, scope: Scope | None = None) -> list[Task]:
         tasks = await self._repository.list_board(uid, scope)
-        return sorted(tasks, key=lambda task: task.created_at)
+        return sort_board(tasks)
 
 
 def get_task_service(

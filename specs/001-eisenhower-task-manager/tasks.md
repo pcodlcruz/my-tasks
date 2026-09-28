@@ -193,24 +193,24 @@ pone primera y desfijarla la devuelve a su sitio (quickstart pasos 7–8).
 
 ### Tests de User Story 3 ⚠️
 
-- [ ] T062 [P] [US3] Tests unitarios de dominio: orden del tablero (fijadas primero y luego `created_at` ascendente — FR-008a) y regla "solo se edita/fija una tarea activa fuera de la papelera", en `backend/tests/unit/domain/test_board_order_and_edit.py`
-- [ ] T063 [P] [US3] Tests unitarios de `TaskUpdate` (actualización parcial, `minProperties: 1`, mismas reglas de longitud y recorte, `extra="forbid"`) en `backend/tests/unit/schemas/test_task_update.py`
-- [ ] T064 [P] [US3] Test de integración de `PATCH /api/v1/tasks/{taskId}` (edita campos y recalcula `quadrant`; `pinned` se conserva al cambiar de cuadrante; fijar/desfijar; 409 si está completada o en la papelera; 404 si es de otro usuario; 422 por cuerpo vacío o no válido) en `backend/tests/integration/test_tasks_update.py`
-- [ ] T065 [P] [US3] Ampliar el test de integración del tablero con el orden fijadas primero + `created_at` ascendente en `backend/tests/integration/test_tasks_list_board.py`
-- [ ] T066 [P] [US3] Test de componente de `BoardPage` (4 cuadrantes siempre visibles, estado vacío por cuadrante, bienvenida sin tareas, esqueleto de carga, error con "Reintentar") en `frontend/tests/unit/features/board/BoardPage.test.tsx`
-- [ ] T067 [P] [US3] Test e2e: editar una tarea de "Planificar" marcándola urgente la mueve a "Hacer ahora"; fijar y desfijar la tarea más reciente de un cuadrante, en `frontend/tests/e2e/us3-board.spec.ts`
+- [X] T062 [P] [US3] Tests unitarios de dominio: orden del tablero (fijadas primero y luego `created_at` ascendente — FR-008a) y regla "solo se edita/fija una tarea activa fuera de la papelera", en `backend/tests/unit/domain/test_board_order_and_edit.py`
+- [X] T063 [P] [US3] Tests unitarios de `TaskUpdate` (actualización parcial, `minProperties: 1`, mismas reglas de longitud y recorte, `extra="forbid"`) en `backend/tests/unit/schemas/test_task_update.py`
+- [X] T064 [P] [US3] Test de integración de `PATCH /api/v1/tasks/{taskId}` (edita campos y recalcula `quadrant`; `pinned` se conserva al cambiar de cuadrante; fijar/desfijar; 409 si está completada o en la papelera; 404 si es de otro usuario; 422 por cuerpo vacío o no válido) en `backend/tests/integration/test_tasks_update.py`
+- [X] T065 [P] [US3] Ampliar el test de integración del tablero con el orden fijadas primero + `created_at` ascendente en `backend/tests/integration/test_tasks_list_board.py`
+- [X] T066 [P] [US3] Test de componente de `BoardPage` (4 cuadrantes siempre visibles, estado vacío por cuadrante, bienvenida sin tareas, esqueleto de carga, error con "Reintentar") en `frontend/tests/unit/features/board/BoardPage.test.tsx`
+- [X] T067 [P] [US3] Test e2e: editar una tarea de "Planificar" marcándola urgente la mueve a "Hacer ahora"; fijar y desfijar la tarea más reciente de un cuadrante, en `frontend/tests/e2e/us3-board.spec.ts`
 
 ### Implementación de User Story 3
 
-- [ ] T068 [US3] Añadir al dominio `sort_board(tasks)` y `ensure_editable(task)` (lanza `InvalidTransitionError`) en `backend/src/mytasks_api/domain/task.py`
-- [ ] T069 [US3] Añadir el esquema `TaskUpdate` en `backend/src/mytasks_api/schemas/task.py`
-- [ ] T070 [US3] Añadir `update(uid, task_id, fields)` en una transacción que relee el estado ([research.md § R6](./research.md#r6-concurrencia)) en `backend/src/mytasks_api/repositories/task_repository.py`
-- [ ] T071 [US3] Añadir `update_task` (con `ensure_editable` y `updated_at`) y aplicar `sort_board` en `list_board` en `backend/src/mytasks_api/services/task_service.py`
-- [ ] T072 [US3] Añadir `PATCH /api/v1/tasks/{taskId}` en `backend/src/mytasks_api/routers/tasks.py`
-- [ ] T073 [P] [US3] Implementar los hooks `useUpdateTask` y `useTogglePin` con actualización optimista del tablero en `frontend/src/api/tasks.ts`
-- [ ] T074 [US3] Añadir el modo editar a `TaskForm` (precarga los valores y usa `useUpdateTask`) en `frontend/src/features/task-form/TaskForm.tsx`
-- [ ] T075 [US3] Añadir a `TaskCard` el indicador de fijada y las acciones "Fijar/Desfijar" y "Editar" en `frontend/src/features/board/TaskCard.tsx`
-- [ ] T076 [US3] Completar `BoardPage` con bienvenida sin tareas, esqueleto de carga y error con "Reintentar" en `frontend/src/features/board/BoardPage.tsx`
+- [X] T068 [US3] Añadir al dominio `sort_board(tasks)` y `ensure_editable(task)` (lanza `InvalidTransitionError`) en `backend/src/mytasks_api/domain/task.py`
+- [X] T069 [US3] Añadir el esquema `TaskUpdate` en `backend/src/mytasks_api/schemas/task.py`
+- [X] T070 [US3] Añadir `update(uid, task_id, fields)` en una transacción que relee el estado ([research.md § R6](./research.md#r6-concurrencia)) en `backend/src/mytasks_api/repositories/task_repository.py`
+- [X] T071 [US3] Añadir `update_task` (con `ensure_editable` y `updated_at`) y aplicar `sort_board` en `list_board` en `backend/src/mytasks_api/services/task_service.py`
+- [X] T072 [US3] Añadir `PATCH /api/v1/tasks/{taskId}` en `backend/src/mytasks_api/routers/tasks.py`
+- [X] T073 [P] [US3] Implementar los hooks `useUpdateTask` y `useTogglePin` con actualización optimista del tablero en `frontend/src/api/tasks.ts`
+- [X] T074 [US3] Añadir el modo editar a `TaskForm` (precarga los valores y usa `useUpdateTask`) en `frontend/src/features/task-form/TaskForm.tsx`
+- [X] T075 [US3] Añadir a `TaskCard` el indicador de fijada y las acciones "Fijar/Desfijar" y "Editar" en `frontend/src/features/board/TaskCard.tsx`
+- [X] T076 [US3] Completar `BoardPage` con bienvenida sin tareas, esqueleto de carga y error con "Reintentar" en `frontend/src/features/board/BoardPage.tsx`
 
 **Checkpoint**: US1–US3 funcionan; el tablero da visibilidad completa.
 

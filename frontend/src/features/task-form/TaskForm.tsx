@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
-import { QUADRANT_LABELS, type Quadrant, type Scope, quadrantFor } from '../../api/types'
-import { useCreateTask } from '../../api/tasks'
+import { QUADRANT_LABELS, type Quadrant, type Scope, type Task, quadrantFor } from '../../api/types'
+import { useCreateTask, useUpdateTask } from '../../api/tasks'
 import {
   DESCRIPTION_MAX_LENGTH,
   TITLE_MAX_LENGTH,
@@ -10,6 +10,7 @@ import {
 
 interface TaskFormProps {
   onClose: () => void
+  task?: Task
 }
 
 const SCOPE_OPTIONS: { value: Scope; label: string; hint: string }[] = [
@@ -26,15 +27,18 @@ const QUADRANT_PREVIEW_SURFACE: Record<Quadrant, string> = {
   eliminate: 'bg-quadrant-eliminate-surface',
 }
 
-export function TaskForm({ onClose }: TaskFormProps): JSX.Element {
+export function TaskForm({ onClose, task }: TaskFormProps): JSX.Element {
   const dialogRef = useRef<HTMLDivElement>(null)
-  const { mutateAsync, isPending } = useCreateTask()
+  const createTask = useCreateTask()
+  const updateTask = useUpdateTask()
+  const isEditing = task !== undefined
+  const isPending = isEditing ? updateTask.isPending : createTask.isPending
 
-  const [title, setTitle] = useState('')
-  const [description, setDescription] = useState('')
-  const [urgent, setUrgent] = useState(false)
-  const [important, setImportant] = useState(false)
-  const [scope, setScope] = useState<Scope | null>(null)
+  const [title, setTitle] = useState(task?.title ?? '')
+  const [description, setDescription] = useState(task?.description ?? '')
+  const [urgent, setUrgent] = useState(task?.urgent ?? false)
+  const [important, setImportant] = useState(task?.important ?? false)
+  const [scope, setScope] = useState<Scope | null>(task?.scope ?? null)
   const [errors, setErrors] = useState<TaskFormErrors>({})
 
   useEffect(() => {
@@ -77,13 +81,18 @@ export function TaskForm({ onClose }: TaskFormProps): JSX.Element {
     if (Object.keys(validationErrors).length > 0 || scope === null) {
       return
     }
-    await mutateAsync({
+    const values = {
       title: title.trim(),
       description: description.trim(),
       urgent,
       important,
       scope,
-    })
+    }
+    if (isEditing) {
+      await updateTask.mutateAsync({ taskId: task.id, data: values })
+    } else {
+      await createTask.mutateAsync(values)
+    }
     onClose()
   }
 
@@ -104,7 +113,7 @@ export function TaskForm({ onClose }: TaskFormProps): JSX.Element {
       >
         <div className="flex items-center justify-between border-b border-border px-6 py-5">
           <h2 id="task-form-title" className="text-xl font-semibold text-text">
-            Nueva tarea
+            {isEditing ? 'Editar tarea' : 'Nueva tarea'}
           </h2>
           <button
             type="button"
