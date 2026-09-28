@@ -5,9 +5,11 @@ from typing import Any
 
 from fastapi import Depends
 from google.cloud import firestore
+from google.cloud.firestore_v1.base_query import FieldFilter
 
 from mytasks_api.config import get_settings
 from mytasks_api.domain.task import Scope, Status, Task
+from mytasks_api.schemas.task import TaskCreate
 
 
 def _to_utc(value: datetime | None) -> datetime | None:
@@ -56,6 +58,42 @@ class TaskRepository:
         if task.purge_at is not None and task.purge_at <= datetime.now(UTC):
             return None
         return task
+
+    async def create(self, uid: str, data: TaskCreate) -> Task:
+        now = datetime.now(UTC)
+        document: dict[str, Any] = {
+            "title": data.title,
+            "description": data.description,
+            "urgent": data.urgent,
+            "important": data.important,
+            "scope": data.scope.value,
+            "pinned": False,
+            "status": Status.ACTIVE.value,
+            "in_trash": False,
+            "created_at": now,
+            "updated_at": now,
+            "completed_at": None,
+            "trashed_at": None,
+            "purge_at": None,
+        }
+        doc_ref = self._tasks_collection(uid).document()
+        await doc_ref.set(document)
+        return _document_to_task(doc_ref.id, document)
+
+    async def list_board(self, uid: str, scope: Scope | None = None) -> list[Task]:
+        query = (
+            self._tasks_collection(uid)
+            .where(filter=FieldFilter("status", "==", Status.ACTIVE.value))
+            .where(filter=FieldFilter("in_trash", "==", False))
+        )
+        if scope is not None:
+            query = query.where(filter=FieldFilter("scope", "==", scope.value))
+        tasks: list[Task] = []
+        async for snapshot in query.stream():
+            data = snapshot.to_dict()
+            if data is not None:
+                tasks.append(_document_to_task(snapshot.id, data))
+        return tasks
 
 
 @lru_cache
