@@ -31,5 +31,8 @@ test-results/
 .idea/
 .vscode/
 
+# Worktrees aislados de agentes (Claude Code)
+.claude/worktrees/
+
 # exluded at moment, but can be added later if needed
 docs/
