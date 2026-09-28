@@ -7,7 +7,12 @@ interface AuthFixtures {
 export const test = base.extend<AuthFixtures>({
   loginAsGoogleUser: async ({ page }, use) => {
     await use(async (email: string) => {
-      await page.goto('/login')
+      // No navega a /login si ya estamos ahí (p. ej. tras una redirección de
+      // ProtectedRoute): un page.goto perdería el estado de ruta de origen
+      // (location.state.from) que esa redirección conserva.
+      if (!page.url().includes('/login')) {
+        await page.goto('/login')
+      }
       await page.waitForFunction(() => typeof window.__mytasksTestLogin === 'function')
       await page.evaluate(async (userEmail) => {
         await window.__mytasksTestLogin?.(userEmail)
