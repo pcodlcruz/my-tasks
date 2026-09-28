@@ -1,8 +1,23 @@
 from datetime import datetime
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from mytasks_api.domain.task import Quadrant, Scope, Status, Task
+
+
+class TaskCreate(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    title: str = Field(min_length=1, max_length=200)
+    description: str = Field(min_length=1, max_length=2000)
+    urgent: bool
+    important: bool
+    scope: Scope
+
+    @field_validator("title", "description", mode="before")
+    @classmethod
+    def _strip_whitespace(cls, value: object) -> object:
+        return value.strip() if isinstance(value, str) else value
 
 
 class TaskOut(BaseModel):

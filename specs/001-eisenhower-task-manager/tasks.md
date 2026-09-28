@@ -160,23 +160,23 @@ espacios o título de 201 caracteres se rechaza (quickstart pasos 5–6).
 
 ### Tests de User Story 2 ⚠️
 
-- [ ] T048 [P] [US2] Tests unitarios de validación de `TaskCreate` (recorte de espacios, vacío tras recortar, 200/2000 caracteres, `extra="forbid"`, `scope` obligatorio sin valor por defecto) en `backend/tests/unit/schemas/test_task_create.py`
-- [ ] T049 [P] [US2] Tests unitarios de `TaskService.create_task` y `list_board` con un repositorio falso (valores por defecto `pinned=false`, `status=active`, `in_trash=false`, `created_at` del servidor) en `backend/tests/unit/services/test_task_service_create.py`
-- [ ] T050 [P] [US2] Test de integración de `POST /api/v1/tasks` (201 con `quadrant` correcto para las 4 combinaciones; 422 por título/descripción vacíos o solo espacios, longitudes superadas, campos extra y `scope` ausente; 401 sin token) en `backend/tests/integration/test_tasks_create.py`
-- [ ] T051 [P] [US2] Test de integración de `GET /api/v1/tasks?view=board` (solo tareas activas fuera de la papelera del usuario autenticado, `next_cursor` null; 422 si falta `view`) en `backend/tests/integration/test_tasks_list_board.py`
-- [ ] T052 [P] [US2] Test de componente de `TaskForm` en modo crear (contadores, interruptores, ámbito sin preselección, vista previa "Irá a: …", errores en línea, no envía si no es válido) en `frontend/tests/unit/features/task-form/TaskForm.test.tsx`
-- [ ] T053 [P] [US2] Test e2e: crear una tarea por cada combinación y verla en su cuadrante sin recargar; intentar guardar con descripción "   " muestra el error, en `frontend/tests/e2e/us2-create.spec.ts`
+- [X] T048 [P] [US2] Tests unitarios de validación de `TaskCreate` (recorte de espacios, vacío tras recortar, 200/2000 caracteres, `extra="forbid"`, `scope` obligatorio sin valor por defecto) en `backend/tests/unit/schemas/test_task_create.py`
+- [X] T049 [P] [US2] Tests unitarios de `TaskService.create_task` y `list_board` con un repositorio falso (valores por defecto `pinned=false`, `status=active`, `in_trash=false`, `created_at` del servidor) en `backend/tests/unit/services/test_task_service_create.py`
+- [X] T050 [P] [US2] Test de integración de `POST /api/v1/tasks` (201 con `quadrant` correcto para las 4 combinaciones; 422 por título/descripción vacíos o solo espacios, longitudes superadas, campos extra y `scope` ausente; 401 sin token) en `backend/tests/integration/test_tasks_create.py`
+- [X] T051 [P] [US2] Test de integración de `GET /api/v1/tasks?view=board` (solo tareas activas fuera de la papelera del usuario autenticado, `next_cursor` null; 422 si falta `view`) en `backend/tests/integration/test_tasks_list_board.py`
+- [X] T052 [P] [US2] Test de componente de `TaskForm` en modo crear (contadores, interruptores, ámbito sin preselección, vista previa "Irá a: …", errores en línea, no envía si no es válido) en `frontend/tests/unit/features/task-form/TaskForm.test.tsx`
+- [X] T053 [P] [US2] Test e2e: crear una tarea por cada combinación y verla en su cuadrante sin recargar; intentar guardar con descripción "   " muestra el error, en `frontend/tests/e2e/us2-create.spec.ts`
 
 ### Implementación de User Story 2
 
-- [ ] T054 [US2] Añadir el esquema `TaskCreate` (recorte de espacios, longitudes, `extra="forbid"`) en `backend/src/mytasks_api/schemas/task.py`
-- [ ] T055 [US2] Añadir `create(uid, data)` y `list_board(uid, scope=None)` (`status == active` y `in_trash == false`) en `backend/src/mytasks_api/repositories/task_repository.py`
-- [ ] T056 [US2] Añadir `create_task` y `list_board` (orden por `created_at` ascendente) en `backend/src/mytasks_api/services/task_service.py`
-- [ ] T057 [US2] Añadir `POST /api/v1/tasks` (201) y `GET /api/v1/tasks?view=board` en `backend/src/mytasks_api/routers/tasks.py`
-- [ ] T058 [P] [US2] Implementar los hooks `useBoardTasks` y `useCreateTask` (invalida el tablero al crear) en `frontend/src/api/tasks.ts`
-- [ ] T059 [P] [US2] Implementar la validación del formulario compartida con el contrato (recorte, obligatorios, límites, ámbito obligatorio) en `frontend/src/features/task-form/taskFormSchema.ts`
-- [ ] T060 [US2] Implementar el modal S4 `TaskForm` en modo crear, accesible (foco atrapado, `Esc` cierra, errores asociados a sus campos), siguiendo `docs/design/screens/s4-task-form/` en `frontend/src/features/task-form/TaskForm.tsx`
-- [ ] T061 [US2] Implementar `TaskCard` (título, insignia de ámbito) en `frontend/src/features/board/TaskCard.tsx` y conectar `BoardPage` a `useBoardTasks` con el botón "Nueva tarea", repartiendo las tareas por `quadrant`, en `frontend/src/features/board/BoardPage.tsx`
+- [X] T054 [US2] Añadir el esquema `TaskCreate` (recorte de espacios, longitudes, `extra="forbid"`) en `backend/src/mytasks_api/schemas/task.py`
+- [X] T055 [US2] Añadir `create(uid, data)` y `list_board(uid, scope=None)` (`status == active` y `in_trash == false`) en `backend/src/mytasks_api/repositories/task_repository.py`
+- [X] T056 [US2] Añadir `create_task` y `list_board` (orden por `created_at` ascendente) en `backend/src/mytasks_api/services/task_service.py`
+- [X] T057 [US2] Añadir `POST /api/v1/tasks` (201) y `GET /api/v1/tasks?view=board` en `backend/src/mytasks_api/routers/tasks.py`
+- [X] T058 [P] [US2] Implementar los hooks `useBoardTasks` y `useCreateTask` (invalida el tablero al crear) en `frontend/src/api/tasks.ts`
+- [X] T059 [P] [US2] Implementar la validación del formulario compartida con el contrato (recorte, obligatorios, límites, ámbito obligatorio) en `frontend/src/features/task-form/taskFormSchema.ts`
+- [X] T060 [US2] Implementar el modal S4 `TaskForm` en modo crear, accesible (foco atrapado, `Esc` cierra, errores asociados a sus campos), siguiendo `docs/design/screens/s4-task-form/` en `frontend/src/features/task-form/TaskForm.tsx`
+- [X] T061 [US2] Implementar `TaskCard` (título, insignia de ámbito) en `frontend/src/features/board/TaskCard.tsx` y conectar `BoardPage` a `useBoardTasks` con el botón "Nueva tarea", repartiendo las tareas por `quadrant`, en `frontend/src/features/board/BoardPage.tsx`
 
 **Checkpoint**: US1 y US2 funcionan; se pueden crear tareas y verlas clasificadas.
 

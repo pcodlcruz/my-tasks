@@ -16,6 +16,13 @@ export const QUADRANT_LABELS: Record<Quadrant, string> = {
   eliminate: 'Eliminar',
 }
 
+export function quadrantFor(urgent: boolean, important: boolean): Quadrant {
+  if (urgent && important) return 'do_now'
+  if (!urgent && important) return 'schedule'
+  if (urgent && !important) return 'delegate'
+  return 'eliminate'
+}
+
 export interface Task {
   id: string
   title: string
