@@ -14,6 +14,12 @@ export default tseslint.config(
       ecmaVersion: 2023,
       globals: globals.browser,
     },
+  },
+  {
+    // react-hooks/react-refresh solo tienen sentido en el código de la app React;
+    // en tests/e2e (fixtures de Playwright) y en configs de Node dan falsos positivos
+    // (p. ej. el parámetro `use` de una fixture de Playwright no es un hook de React).
+    files: ['src/**/*.{ts,tsx}'],
     plugins: {
       'react-hooks': reactHooks,
       'react-refresh': reactRefresh,

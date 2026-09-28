@@ -36,15 +36,25 @@ src = ["src", "tests"]
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B", "SIM", "ASYNC"]
 
+[tool.ruff.lint.flake8-bugbear]
+extend-immutable-calls = ["fastapi.Depends", "fastapi.Path", "fastapi.Query"]
+
 [tool.mypy]
 python_version = "3.12"
 strict = true
 packages = ["mytasks_api"]
 mypy_path = "src"
+explicit_package_bases = true
+
+[[tool.mypy.overrides]]
+module = "firebase_admin.*"
+ignore_missing_imports = true
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "session"
+asyncio_default_test_loop_scope = "session"
 markers = [
     "unit: tests unitarios de dominio y servicios, sin I/O",
     "integration: tests de integración contra los emuladores de Firebase",
