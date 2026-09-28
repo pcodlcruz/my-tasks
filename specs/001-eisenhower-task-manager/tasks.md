@@ -69,18 +69,18 @@ implementar y probar como un incremento independiente.
 antes de implementar el frontend ([research.md § R7](./research.md#r7-diseño-de-interfaz-con-stitch-petición-del-usuario)).
 Avanza en paralelo con la Fase 3 y con las tareas de backend de las historias.
 
-- [ ] T011 Redactar el design system en `docs/design/DESIGN.md`: paleta con un color por cuadrante que cumpla contraste WCAG 2.1 AA (y siempre con etiqueta de texto, nunca solo color), tipografía, espaciado, radios, estados (foco, hover, deshabilitado, error) y el botón "Iniciar sesión con Google" según las guías de marca de Google
-- [ ] T012 Crear el proyecto Stitch "MyTasks" y su design system a partir de `docs/design/DESIGN.md` con el MCP de Stitch (`create_project`, `create_design_system_from_design_md`), y anotar el id del proyecto en `docs/design/screens/README.md`
-- [ ] T013 [P] Generar en Stitch la pantalla S1 Iniciar sesión (escritorio y móvil) con sus estados: inicial, cargando, error con "Reintentar" y aviso "Tu sesión ha caducado" — destino `docs/design/screens/s1-login/`
-- [ ] T014 [P] Generar en Stitch la pantalla S3 Tablero (escritorio 2×2 y móvil apilado con "Hacer ahora" primero) con cabecera y navegación, filtro de ámbito, tarjetas con fijada/insignia de ámbito, estados vacío por cuadrante, bienvenida, cargando (esqueleto) y error — destino `docs/design/screens/s3-board/`
-- [ ] T015 [P] Generar en Stitch la pantalla S4 Formulario de tarea (modal de crear y editar) con contadores, interruptores, ámbito sin preselección, vista previa del cuadrante y errores en línea — destino `docs/design/screens/s4-task-form/`
-- [ ] T016 [P] Generar en Stitch la pantalla S5 Historial con acciones "Reabrir" y "Mover a la papelera", "Cargar más" y estado vacío — destino `docs/design/screens/s5-history/`
-- [ ] T017 [P] Generar en Stitch la pantalla S6 Papelera con "se eliminará en N días", "Restaurar", "Eliminar definitivamente" con diálogo de confirmación, aviso fijo de 30 días y estado vacío — destino `docs/design/screens/s6-trash/`
-- [ ] T018 **Punto de control humano**: pedir al propietario que revise las 5 pantallas en Stitch, aplicar los cambios que pida y registrar la aprobación (pantalla, id de Stitch y fecha) en `docs/design/screens/README.md`. **No se empieza ninguna tarea de frontend de las historias sin esta aprobación.**
-- [ ] T019 Exportar el HTML y la captura PNG (escritorio y móvil) de cada pantalla aprobada a `docs/design/screens/<s1-login|s3-board|s4-task-form|s5-history|s6-trash>/`
-- [ ] T020 Trasladar los tokens del design system aprobado (colores de cuadrante, tipografía, espaciado) a `frontend/tailwind.config.ts`
+- [X] T011 Redactar el design system en `docs/design/DESIGN.md`: paleta con un color por cuadrante que cumpla contraste WCAG 2.1 AA (y siempre con etiqueta de texto, nunca solo color), tipografía, espaciado, radios, estados (foco, hover, deshabilitado, error) y el botón "Iniciar sesión con Google" según las guías de marca de Google
+- [X] T012 Crear el proyecto Stitch "MyTasks" y su design system a partir de `docs/design/DESIGN.md` con el MCP de Stitch (`create_project`, `create_design_system_from_design_md`), y anotar el id del proyecto en `docs/design/screens/README.md`
+- [X] T013 [P] Generar en Stitch la pantalla S1 Iniciar sesión (escritorio y móvil) con sus estados: inicial, cargando, error con "Reintentar" y aviso "Tu sesión ha caducado" — destino `docs/design/screens/s1-login/`
+- [X] T014 [P] Generar en Stitch la pantalla S3 Tablero (escritorio 2×2 y móvil apilado con "Hacer ahora" primero) con cabecera y navegación, filtro de ámbito, tarjetas con fijada/insignia de ámbito, estados vacío por cuadrante, bienvenida, cargando (esqueleto) y error — destino `docs/design/screens/s3-board/`
+- [X] T015 [P] Generar en Stitch la pantalla S4 Formulario de tarea (modal de crear y editar) con contadores, interruptores, ámbito sin preselección, vista previa del cuadrante y errores en línea — destino `docs/design/screens/s4-task-form/`
+- [ ] T016 [P] Generar en Stitch la pantalla S5 Historial con acciones "Reabrir" y "Mover a la papelera", "Cargar más" y estado vacío — destino `docs/design/screens/s5-history/` — **diferida**: 14 intentos de `generate_screen_from_text` (9 escritorio, 5 móvil) dieron timeout del MCP de Stitch; el propietario decidió no bloquear el resto de la fase por esto (ver `docs/design/screens/README.md`). Se retoma como tarea aparte.
+- [X] T017 [P] Generar en Stitch la pantalla S6 Papelera con "se eliminará en N días", "Restaurar", "Eliminar definitivamente" con diálogo de confirmación, aviso fijo de 30 días y estado vacío — destino `docs/design/screens/s6-trash/`
+- [X] T018 **Punto de control humano**: pedir al propietario que revise las 5 pantallas en Stitch, aplicar los cambios que pida y registrar la aprobación (pantalla, id de Stitch y fecha) en `docs/design/screens/README.md`. **No se empieza ninguna tarea de frontend de las historias sin esta aprobación.** — hecho sobre S1, S3, S4 y S6 (4 de 5; S5 excluida a propósito, ver T016)
+- [X] T019 Exportar el HTML y la captura PNG (escritorio y móvil) de cada pantalla aprobada a `docs/design/screens/<s1-login|s3-board|s4-task-form|s5-history|s6-trash>/` — s5-history pendiente de T016
+- [X] T020 Trasladar los tokens del design system aprobado (colores de cuadrante, tipografía, espaciado) a `frontend/tailwind.config.ts`
 
-**Checkpoint**: pantallas aprobadas y exportadas; el frontend de las historias puede empezar.
+**Checkpoint**: 4 de 5 pantallas aprobadas y exportadas (S1, S3, S4, S6); el frontend de esas historias puede empezar. S5 Historial (US5) queda pendiente como tarea aparte antes de implementar esa historia en frontend.
 
 ---
 
