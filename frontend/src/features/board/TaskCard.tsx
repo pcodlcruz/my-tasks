@@ -17,8 +17,8 @@ export function TaskCard({ task, onEdit }: TaskCardProps): JSX.Element {
 
   return (
     <article className="rounded-lg border border-border bg-surface p-4 shadow-sm">
-      <div className="flex items-start justify-between gap-2">
-        <p className="flex items-center gap-1.5 text-body font-semibold text-text">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+        <p className="flex min-w-0 items-center gap-1.5 break-words text-body font-semibold text-text">
           {task.pinned && (
             <span aria-label="Fijada" title="Fijada">
               📌
@@ -26,7 +26,7 @@ export function TaskCard({ task, onEdit }: TaskCardProps): JSX.Element {
           )}
           {task.title}
         </p>
-        <div className="flex shrink-0 flex-wrap items-center justify-end gap-1">
+        <div className="flex shrink-0 flex-wrap items-center gap-1 sm:justify-end">
           <button
             type="button"
             onClick={() => void togglePin(task)}

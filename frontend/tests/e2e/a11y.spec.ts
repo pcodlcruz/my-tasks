@@ -156,6 +156,40 @@ test.describe('Accesibilidad WCAG 2.1 AA', () => {
     await expectNoViolations(page, 'S6 · Diálogo de confirmación')
   })
 
+  test('ninguna pantalla desborda en horizontal en móvil (reflow, WCAG 1.4.10)', async ({
+    page,
+    loginAsGoogleUser,
+  }) => {
+    await page.setViewportSize({ width: 390, height: 844 })
+    await loginAsGoogleUser(`a11y-reflow-${crypto.randomUUID()}@example.com`)
+    await createTask(page, {
+      title:
+        'Una tarea con un título bastante largo para comprobar cómo se ajusta en pantallas estrechas',
+      urgent: true,
+      important: true,
+      scope: 'Laboral',
+    })
+
+    async function expectNoHorizontalOverflow(screen: string): Promise<void> {
+      const overflow = await page.evaluate(
+        () => document.documentElement.scrollWidth - window.innerWidth,
+      )
+      expect(overflow, `Desbordamiento horizontal en ${screen}`).toBeLessThanOrEqual(0)
+    }
+
+    await expectNoHorizontalOverflow('Tablero')
+    await page.getByRole('button', { name: 'Completar' }).click()
+    await goTo(page, 'Historial')
+    await expect(page.getByRole('heading', { name: 'Historial', level: 1 })).toBeVisible()
+    await expect(page.locator('article')).toHaveCount(1)
+    await expectNoHorizontalOverflow('Historial')
+    await page.getByRole('button', { name: 'Mover a la papelera' }).click()
+    await goTo(page, 'Papelera')
+    await expect(page.getByRole('heading', { name: 'Papelera', level: 1 })).toBeVisible()
+    await expect(page.locator('article')).toHaveCount(1)
+    await expectNoHorizontalOverflow('Papelera')
+  })
+
   test('los cuadrantes se distinguen por texto y no solo por color', async ({
     page,
     loginAsGoogleUser,
