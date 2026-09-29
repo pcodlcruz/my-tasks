@@ -285,12 +285,12 @@ definitivamente la elimina de todas las vistas; una tarea con `purge_at` vencido
 
 **Purpose**: calidad transversal, revisión de seguridad obligatoria y validación final.
 
-- [ ] T103 [P] Pasar `ruff check`, `ruff format --check` y `mypy --strict` sin errores en `backend/`
-- [ ] T104 [P] Pasar `npm run lint`, `tsc --noEmit` y Prettier sin errores en `frontend/`
-- [ ] T105 [P] Revisión de accesibilidad WCAG 2.1 AA (navegación por teclado, foco visible, contraste, etiquetas, cuadrantes no distinguidos solo por color) con `@axe-core/playwright` en `frontend/tests/e2e/a11y.spec.ts`
-- [ ] T106 [P] Comprobar el objetivo de rendimiento (p95 < 300 ms por endpoint con ~500 tareas activas sembradas en el emulador) con un test marcado `perf` en `backend/tests/integration/test_performance.py`
-- [ ] T107 [P] Escribir el `README.md` de la raíz en español: qué es la aplicación, requisitos y arranque en local (enlazando [quickstart.md](./quickstart.md)) y cómo ejecutar los tests
-- [ ] T108 Revisión de seguridad con `mytasks-security-auditor` (obligatoria: toca autenticación, autorización y modelo de datos — Principio III): verificación del ID token, aislamiento por `uid`, `firestore.rules`, validación de entradas, CORS, ausencia de secretos y *scopes* de Google; guardar el informe en `specs/001-eisenhower-task-manager/security-review.md`
+- [X] T103 [P] Pasar `ruff check`, `ruff format --check` y `mypy --strict` sin errores en `backend/`
+- [X] T104 [P] Pasar `npm run lint`, `tsc --noEmit` y Prettier sin errores en `frontend/`
+- [X] T105 [P] Revisión de accesibilidad WCAG 2.1 AA (navegación por teclado, foco visible, contraste, etiquetas, cuadrantes no distinguidos solo por color) con `@axe-core/playwright` en `frontend/tests/e2e/a11y.spec.ts`
+- [X] T106 [P] Comprobar el objetivo de rendimiento (p95 < 300 ms por endpoint con ~500 tareas activas sembradas en el emulador) con un test marcado `perf` en `backend/tests/integration/test_performance.py`
+- [X] T107 [P] Escribir el `README.md` de la raíz en español: qué es la aplicación, requisitos y arranque en local (enlazando [quickstart.md](./quickstart.md)) y cómo ejecutar los tests
+- [X] T108 Revisión de seguridad con `mytasks-security-auditor` (obligatoria: toca autenticación, autorización y modelo de datos — Principio III): verificación del ID token, aislamiento por `uid`, `firestore.rules`, validación de entradas, CORS, ausencia de secretos y *scopes* de Google; guardar el informe en `specs/001-eisenhower-task-manager/security-review.md`
 - [ ] T109 Corregir los hallazgos de la revisión de seguridad y volver a pasar todos los tests
 - [ ] T110 Ejecutar la validación manual completa de [quickstart.md](./quickstart.md) (pasos 1–16 y comprobación visual frente a `docs/design/screens/`) y anotar el resultado en `specs/001-eisenhower-task-manager/quickstart.md`
 
