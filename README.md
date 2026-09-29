@@ -45,6 +45,12 @@ exactos están en [`quickstart.md`](specs/001-eisenhower-task-manager/quickstart
 Con todo en marcha, `http://localhost:5173` muestra la pantalla de inicio de sesión y
 `http://localhost:8000/healthz` responde `{"status":"ok"}`.
 
+El backend solo admite los emuladores con `APP_ENV=local` (ya incluido en `backend/.env.example`).
+Sin esa variable arranca como `production` y se niega a iniciar si ve variables de emulador o un
+project id `demo-…`; es una salvaguarda para que nunca se acepten tokens sin firmar en un entorno
+real ([informe de seguridad](specs/001-eisenhower-task-manager/security-review.md)). Con
+`APP_ENV=local` también están disponibles `/docs` y `/openapi.json`.
+
 ## Tests
 
 Los emuladores tienen que estar en marcha para los tests de integración.

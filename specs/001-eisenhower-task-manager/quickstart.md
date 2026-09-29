@@ -35,6 +35,10 @@ cd frontend && cp .env.example .env && npm ci && npm run dev
 Resultado esperado: `GET http://localhost:8000/healthz` → `{"status":"ok"}`, y
 `http://localhost:5173` muestra la pantalla de login.
 
+> `backend/.env.example` incluye `APP_ENV=local`. Sin esa variable el backend arranca como
+> `production` y se niega a iniciar con las variables de los emuladores (ver
+> [security-review.md](./security-review.md), HIGH-001).
+
 ## Tests automáticos (Principio II)
 
 ```bash
@@ -80,3 +84,44 @@ Referencias: [contrato de la API](./contracts/openapi.yaml),
 Antes de la validación visual, comprobar que cada pantalla de
 [ui-screens.md](./contracts/ui-screens.md) tiene su diseño aprobado en `docs/design/screens/` y
 que la implementación coincide con él (cuadrantes, estados vacíos, formulario, versión móvil).
+
+## Resultado de la validación (T110) — 2026-09-29
+
+Validado por el agente sobre la rama de la Fase 9, con emuladores, backend y frontend arrancados
+como indica este documento (backend con `cp .env.example .env`).
+
+| Comprobación | Resultado |
+|---|---|
+| Arranque: `/healthz` → `{"status":"ok"}` y frontend en :5173 | ✅ |
+| Pasos 1–16, por HTTP real contra el backend arrancado con `.env` | ✅ 31 de 31 comprobaciones (cuentas aisladas, `404` idéntico a una tarea inexistente, `401` sin token, mismo `uid` al volver a entrar, los 4 cuadrantes, validaciones `422`, editar, fijar y desfijar, filtro de ámbito, completar, reabrir, papelera, restaurar cada una a su vista, borrado con `409` previo y `204`, estado idéntico al reentrar) |
+| Pasos 1–16 por la interfaz | ✅ Cubiertos por los 25 e2e de Playwright (US1–US5 y accesibilidad) |
+| Paso 15 (purga a los 30 días) | ✅ Cubierto por los tests de integración (`test_tasks_list_trash.py`, `test_tasks_restore.py`, `test_tasks_delete.py`): con `purge_at` en el pasado no se lista y toda operación da `404` |
+| Tests automáticos | ✅ Backend 190, frontend 50 unitarios, 25 e2e; `ruff`, `mypy --strict`, `eslint`, `tsc -b` y `prettier` limpios |
+| Rendimiento (`pytest -m perf`) | ✅ p95 de todos los endpoints por debajo de 300 ms; el peor, el tablero con ~500 tareas, ≈ 190 ms |
+
+**Un fallo real que salió de esta validación**: el arranque documentado no funcionaba con la
+autenticación. `FIREBASE_AUTH_EMULATOR_HOST` definido solo en `.env` no llegaba a `firebase_admin`
+(verificado: con el código anterior, un token válido del emulador daba `401`). Corregido en la
+Fase 9 (ver [security-review.md](./security-review.md), HIGH-001).
+
+### Comprobación visual frente a `docs/design/screens/`
+
+Hecha por el agente comparando capturas de la aplicación en marcha (escritorio 1280 px y móvil
+390 px) con los exportes aprobados de S1, S3, S4, S5 y S6:
+
+- **Coinciden**: rejilla 2×2 con el orden canónico y un color por cuadrante con etiqueta de texto;
+  estado vacío por cuadrante; insignias de ámbito; filtro Todas / Laboral / Personal; formulario
+  modal con contadores, interruptores, ámbito sin preselección y vista previa «Irá a: …»; filas
+  del historial con cuadrante, ámbito, fecha y las acciones «Reabrir» y «Mover a la papelera»;
+  papelera con el aviso de 30 días, «se eliminará en N días», «Restaurar» y «Eliminar
+  definitivamente»; inicio de sesión con el botón de Google.
+- **Corregido a raíz de la comparación**: en móvil la página desbordaba en horizontal (cabecera y
+  tarjetas). Ahora se ajusta, con un test de *reflow* (`a11y.spec.ts`) que lo impide.
+- **Diferencias deliberadas** (elementos de los diseños de Stitch que la spec no pide, no
+  implementados): avatar con iniciales, fechas límite y «delegado a» en las tarjetas, botón «+» por
+  cuadrante, migas de pan, buscador, ordenación, «Exportar CSV», «Vaciar papelera», pie de página y,
+  en móvil, la barra inferior «Matriz / Hoy / Historial / Ajustes».
+
+**No comprobado**: el flujo real de la ventana emergente de Google (los tests y esta validación usan
+el inicio de sesión simulado del emulador), y la validación visual **no es un visto bueno del
+propietario**: queda pendiente que la revise en la PR.
