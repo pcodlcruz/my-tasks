@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react'
+import { useRestoreFocus } from './useRestoreFocus'
 
 interface ConfirmDialogProps {
   title: string
@@ -15,6 +16,7 @@ export function ConfirmDialog({
   onConfirm,
   onCancel,
 }: ConfirmDialogProps): JSX.Element {
+  useRestoreFocus()
   const dialogRef = useRef<HTMLDivElement>(null)
   const cancelRef = useRef<HTMLButtonElement>(null)
 

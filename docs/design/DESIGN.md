@@ -46,7 +46,7 @@ cabecera de cuadrante siempre muestra la etiqueta de texto ("Hacer ahora",
 | `--color-disabled-bg` | `#E2E8F0` (pizarra 200) | Fondo de controles deshabilitados |
 | `--color-disabled-text` | `#94A3B8` (pizarra 400) | Texto de controles deshabilitados (no interactivo, exento de AA) |
 | `--color-scope-work` | `#7C3AED` (violeta 600) | Insignia de ámbito "Laboral", 5.4:1 |
-| `--color-scope-personal` | `#0D9488` (verde azulado 600) | Insignia de ámbito "Personal", 4.6:1 |
+| `--color-scope-personal` | `#0F766E` (verde azulado 700) | Insignia de ámbito "Personal", 5.2:1 sobre el fondo de la insignia (`#F0FDFA`). Antes `#0D9488` (verde azulado 600): daba 3.59:1 sobre ese fondo y no cumplía AA (detectado con axe en T105) |
 
 ## Tipografía
 

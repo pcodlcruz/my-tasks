@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { QUADRANT_LABELS, type Quadrant, type Scope, type Task, quadrantFor } from '../../api/types'
 import { useCreateTask, useUpdateTask } from '../../api/tasks'
+import { useRestoreFocus } from '../../app/useRestoreFocus'
 import {
   DESCRIPTION_MAX_LENGTH,
   TITLE_MAX_LENGTH,
@@ -28,6 +29,7 @@ const QUADRANT_PREVIEW_SURFACE: Record<Quadrant, string> = {
 }
 
 export function TaskForm({ onClose, task }: TaskFormProps): JSX.Element {
+  useRestoreFocus()
   const dialogRef = useRef<HTMLDivElement>(null)
   const createTask = useCreateTask()
   const updateTask = useUpdateTask()

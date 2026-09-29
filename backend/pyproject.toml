@@ -55,7 +55,9 @@ testpaths = ["tests"]
 asyncio_mode = "auto"
 asyncio_default_fixture_loop_scope = "session"
 asyncio_default_test_loop_scope = "session"
+addopts = "-m 'not perf'"
 markers = [
     "unit: tests unitarios de dominio y servicios, sin I/O",
     "integration: tests de integración contra los emuladores de Firebase",
+    "perf: comprobación del objetivo de rendimiento (p95 < 300 ms); `pytest -m perf`, no corre por defecto",
 ]

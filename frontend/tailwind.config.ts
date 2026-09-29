@@ -16,7 +16,7 @@ export default {
         },
         scope: {
           work: '#7C3AED',
-          personal: '#0D9488',
+          personal: '#0F766E',
         },
         text: {
           DEFAULT: '#0F172A',
