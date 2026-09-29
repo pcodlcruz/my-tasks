@@ -1,12 +1,17 @@
 openapi: 3.1.0
 info:
   title: MyTasks API
-  version: 1.0.0
+  version: 1.1.0
   description: >-
     API del Gestor Personal de Tareas (feature 001-eisenhower-task-manager).
     Todas las rutas bajo /api/v1 exigen un ID token de Firebase Auth en
     `Authorization: Bearer <token>`. El usuario se identifica siempre por el
-    `uid` del token; una tarea de otro usuario responde 404.
+    `uid` del token; una tarea de otro usuario responde 404. Cada usuario puede
+    tener como máximo 500 tareas activas (FR-016). Todas las respuestas incluyen
+    `X-Request-ID` (generado por el servidor, para correlacionar con los logs) y
+    cabeceras de seguridad (`X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`,
+    `Referrer-Policy: no-referrer`, `Cache-Control: no-store`).
+    Este documento (y `/docs`, `/openapi.json`) solo se publica con `APP_ENV=local`.
 servers:
   - url: http://localhost:8000
     description: Local
@@ -45,7 +50,7 @@ paths:
         - name: cursor
           in: query
           required: false
-          description: Solo para `history` y `trash`. Opaco; viene de `next_cursor`.
+          description: Solo para `history` y `trash`. Opaco; viene de `next_cursor`. Un cursor mal formado responde 422.
           schema: { type: string }
         - name: limit
           in: query
@@ -63,8 +68,10 @@ paths:
               schema: { $ref: "#/components/schemas/TaskPage" }
         "401": { $ref: "#/components/responses/Unauthorized" }
         "422": { $ref: "#/components/responses/ValidationError" }
+        "503": { $ref: "#/components/responses/AuthUnavailable" }
     post:
       summary: Crea una tarea activa
+      description: Si el usuario ya tiene 500 tareas activas, 409 `task_limit_reached` (FR-016).
       requestBody:
         required: true
         content:
@@ -77,7 +84,9 @@ paths:
             application/json:
               schema: { $ref: "#/components/schemas/Task" }
         "401": { $ref: "#/components/responses/Unauthorized" }
+        "409": { $ref: "#/components/responses/TaskLimitReached" }
         "422": { $ref: "#/components/responses/ValidationError" }
+        "503": { $ref: "#/components/responses/AuthUnavailable" }
 
   /api/v1/tasks/{taskId}:
     parameters:
@@ -92,6 +101,7 @@ paths:
               schema: { $ref: "#/components/schemas/Task" }
         "401": { $ref: "#/components/responses/Unauthorized" }
         "404": { $ref: "#/components/responses/NotFound" }
+        "503": { $ref: "#/components/responses/AuthUnavailable" }
     patch:
       summary: Edita una tarea activa (incluye fijar/desfijar)
       description: Solo tareas activas fuera de la papelera; si no, 409.
@@ -110,6 +120,7 @@ paths:
         "404": { $ref: "#/components/responses/NotFound" }
         "409": { $ref: "#/components/responses/InvalidTransition" }
         "422": { $ref: "#/components/responses/ValidationError" }
+        "503": { $ref: "#/components/responses/AuthUnavailable" }
     delete:
       summary: Borra definitivamente una tarea que está en la papelera
       description: Si la tarea no está en la papelera, 409 (primero hay que moverla).
@@ -118,6 +129,7 @@ paths:
         "401": { $ref: "#/components/responses/Unauthorized" }
         "404": { $ref: "#/components/responses/NotFound" }
         "409": { $ref: "#/components/responses/InvalidTransition" }
+        "503": { $ref: "#/components/responses/AuthUnavailable" }
 
   /api/v1/tasks/{taskId}/complete:
     parameters:
@@ -129,17 +141,20 @@ paths:
         "401": { $ref: "#/components/responses/Unauthorized" }
         "404": { $ref: "#/components/responses/NotFound" }
         "409": { $ref: "#/components/responses/InvalidTransition" }
+        "503": { $ref: "#/components/responses/AuthUnavailable" }
 
   /api/v1/tasks/{taskId}/reopen:
     parameters:
       - $ref: "#/components/parameters/TaskId"
     post:
       summary: Reabre una tarea completada (vuelve a activa)
+      description: Si el usuario ya tiene 500 tareas activas, 409 `task_limit_reached` (FR-016).
       responses:
         "200": { $ref: "#/components/responses/TaskOk" }
         "401": { $ref: "#/components/responses/Unauthorized" }
         "404": { $ref: "#/components/responses/NotFound" }
-        "409": { $ref: "#/components/responses/InvalidTransition" }
+        "409": { $ref: "#/components/responses/InvalidTransitionOrLimit" }
+        "503": { $ref: "#/components/responses/AuthUnavailable" }
 
   /api/v1/tasks/{taskId}/trash:
     parameters:
@@ -151,17 +166,22 @@ paths:
         "401": { $ref: "#/components/responses/Unauthorized" }
         "404": { $ref: "#/components/responses/NotFound" }
         "409": { $ref: "#/components/responses/InvalidTransition" }
+        "503": { $ref: "#/components/responses/AuthUnavailable" }
 
   /api/v1/tasks/{taskId}/restore:
     parameters:
       - $ref: "#/components/parameters/TaskId"
     post:
       summary: Restaura una tarea de la papelera a su estado anterior
+      description: >-
+        Si la tarea estaba activa y el usuario ya tiene 500 tareas activas, 409
+        `task_limit_reached` (FR-016). Restaurar una completada nunca lo dispara.
       responses:
         "200": { $ref: "#/components/responses/TaskOk" }
         "401": { $ref: "#/components/responses/Unauthorized" }
         "404": { $ref: "#/components/responses/NotFound" }
-        "409": { $ref: "#/components/responses/InvalidTransition" }
+        "409": { $ref: "#/components/responses/InvalidTransitionOrLimit" }
+        "503": { $ref: "#/components/responses/AuthUnavailable" }
 
 components:
   securitySchemes:
@@ -175,6 +195,11 @@ components:
       name: taskId
       in: path
       required: true
+      description: >-
+        Identificador generado por Firestore. Solo se admiten `A-Z`, `a-z`, `0-9`, `_` y `-`;
+        cualquier otro valor, y los identificadores reservados de Firestore (con la forma
+        `__algo__`), responden 404 como una tarea inexistente (nunca 500). La autenticación se
+        comprueba antes: sin token, 401.
       schema: { type: string, minLength: 1, maxLength: 128 }
 
   schemas:
@@ -245,7 +270,9 @@ components:
       type: object
       required: [code, message]
       properties:
-        code: { type: string, examples: [unauthenticated, not_found, invalid_transition, validation_error] }
+        code:
+          type: string
+          examples: [unauthenticated, auth_unavailable, not_found, invalid_transition, task_limit_reached, validation_error]
         message: { type: string, description: "Mensaje legible en español" }
         details: { type: array, items: { type: object } }
 
@@ -256,22 +283,46 @@ components:
         application/json:
           schema: { $ref: "#/components/schemas/Task" }
     Unauthorized:
-      description: Falta el token o no es válido
+      description: Falta el token o no es válido (código `unauthenticated`)
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+    AuthUnavailable:
+      description: >-
+        No se pudo verificar la sesión por un fallo del verificador de tokens (red,
+        certificados de Google), no por culpa del cliente (código `auth_unavailable`).
+        Se puede reintentar.
       content:
         application/json:
           schema: { $ref: "#/components/schemas/Error" }
     NotFound:
-      description: No existe bajo el usuario autenticado (incluye tareas de otros usuarios y tareas ya purgadas)
+      description: >-
+        No existe bajo el usuario autenticado (incluye tareas de otros usuarios, tareas ya
+        purgadas e identificadores con forma no válida)
       content:
         application/json:
           schema: { $ref: "#/components/schemas/Error" }
     InvalidTransition:
-      description: La tarea no está en un estado que permita la operación
+      description: La tarea no está en un estado que permita la operación (código `invalid_transition`)
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+    TaskLimitReached:
+      description: >-
+        El usuario ya tiene 500 tareas activas (código `task_limit_reached`, FR-016). El mensaje,
+        en español, indica el límite; completar o eliminar una tarea activa libera espacio.
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+    InvalidTransitionOrLimit:
+      description: >-
+        La tarea no está en un estado que permita la operación (`invalid_transition`) o el
+        usuario ya tiene 500 tareas activas (`task_limit_reached`, FR-016).
       content:
         application/json:
           schema: { $ref: "#/components/schemas/Error" }
     ValidationError:
-      description: Entrada no válida (campos obligatorios, longitudes, enums)
+      description: Entrada no válida (campos obligatorios, longitudes, enums, cursor)
       content:
         application/json:
           schema: { $ref: "#/components/schemas/Error" }

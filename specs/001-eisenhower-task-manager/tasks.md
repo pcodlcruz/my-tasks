@@ -293,6 +293,7 @@ definitivamente la elimina de todas las vistas; una tarea con `purge_at` vencido
 - [X] T108 Revisión de seguridad con `mytasks-security-auditor` (obligatoria: toca autenticación, autorización y modelo de datos — Principio III): verificación del ID token, aislamiento por `uid`, `firestore.rules`, validación de entradas, CORS, ausencia de secretos y *scopes* de Google; guardar el informe en `specs/001-eisenhower-task-manager/security-review.md`
 - [X] T109 Corregir los hallazgos de la revisión de seguridad y volver a pasar todos los tests
 - [X] T110 Ejecutar la validación manual completa de [quickstart.md](./quickstart.md) (pasos 1–16 y comprobación visual frente a `docs/design/screens/`) y anotar el resultado en `specs/001-eisenhower-task-manager/quickstart.md`
+- [X] T111 Aplicar el tope de 500 tareas activas por usuario (FR-016, decidido tras el hallazgo MED-002 de T108): constante `MAX_ACTIVE_TASKS` en `backend/src/mytasks_api/domain/task.py`, recuento en `backend/src/mytasks_api/repositories/task_repository.py`, comprobación al crear, reabrir y restaurar una tarea activa en `backend/src/mytasks_api/services/task_service.py` (`409 task_limit_reached`), mensaje del servidor en el frontend (`frontend/src/api/tasks.ts`) y tests en `backend/tests/integration/test_task_limit.py` — se hizo dentro de T109 y se registra aquí para que FR-016 tenga una tarea asociada
 
 ---
 
