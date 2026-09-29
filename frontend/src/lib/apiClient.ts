@@ -16,6 +16,15 @@ export class ApiClientError extends Error {
   }
 }
 
+// La tarea cambió (o desapareció) desde otra pestaña o ventana: transición
+// no válida (409) o tarea inexistente/purgada (404).
+export function isStaleTaskError(error: unknown): boolean {
+  return (
+    error instanceof ApiClientError &&
+    (error.code === 'invalid_transition' || error.code === 'not_found')
+  )
+}
+
 async function toApiError(response: Response): Promise<ApiClientError> {
   try {
     const body = (await response.json()) as ApiError

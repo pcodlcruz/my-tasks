@@ -261,8 +261,8 @@ definitivamente la elimina de todas las vistas; una tarea con `purge_at` vencido
 - [X] T088 [P] [US5] Test de integración de `DELETE /api/v1/tasks/{taskId}` (204 si está en la papelera y el documento desaparece; 409 si no está en la papelera; 404 de otro usuario) en `backend/tests/integration/test_tasks_delete.py`
 - [X] T089 [P] [US5] Test de integración de `GET /api/v1/tasks?view=history` (completadas fuera de la papelera por `completed_at` desc, paginación con `cursor`/`limit` y `next_cursor`, 422 por `limit` fuera de 1–100) en `backend/tests/integration/test_tasks_list_history.py`
 - [X] T090 [P] [US5] Test de integración de `GET /api/v1/tasks?view=trash` (solo en la papelera con `purge_at > ahora`, orden `trashed_at` desc, paginación; una tarea con `purge_at` en el pasado no se lista y cualquier operación sobre ella da 404 — FR-014b, SC-008) en `backend/tests/integration/test_tasks_list_trash.py`
-- [ ] T091 [P] [US5] Tests de componente de `HistoryPage` y `TrashPage` (campos mostrados, sin acción de editar en historial, botones "Reabrir" y "Mover a la papelera" en cada fila del historial, botón "Restaurar" en cada fila de la papelera, "Cargar más", estados vacíos, "se eliminará en N días", confirmación de borrado definitivo) en `frontend/tests/unit/features/history/HistoryPage.test.tsx` y `frontend/tests/unit/features/trash/TrashPage.test.tsx`
-- [ ] T092 [P] [US5] Test e2e: completar → historial; reabrir → tablero; mover a la papelera una activa y una completada y restaurarlas; "Deshacer" del aviso; borrar definitivamente con confirmación; cerrar sesión y volver a entrar conserva el estado (FR-015), en `frontend/tests/e2e/us5-lifecycle.spec.ts`
+- [X] T091 [P] [US5] Tests de componente de `HistoryPage` y `TrashPage` (campos mostrados, sin acción de editar en historial, botones "Reabrir" y "Mover a la papelera" en cada fila del historial, botón "Restaurar" en cada fila de la papelera, "Cargar más", estados vacíos, "se eliminará en N días", confirmación de borrado definitivo) en `frontend/tests/unit/features/history/HistoryPage.test.tsx` y `frontend/tests/unit/features/trash/TrashPage.test.tsx`
+- [X] T092 [P] [US5] Test e2e: completar → historial; reabrir → tablero; mover a la papelera una activa y una completada y restaurarlas; "Deshacer" del aviso; borrar definitivamente con confirmación; cerrar sesión y volver a entrar conserva el estado (FR-015), en `frontend/tests/e2e/us5-lifecycle.spec.ts`
 
 ### Implementación de User Story 5
 
@@ -270,12 +270,12 @@ definitivamente la elimina de todas las vistas; una tarea con `purge_at` vencido
 - [X] T094 [US5] Añadir al repositorio `apply_transition(uid, task_id, fn)` en transacción que relee el estado, `delete(uid, task_id)` transaccional, y `list_history`/`list_trash` paginados por cursor opaco (orden `completed_at` desc y `purge_at` desc; la papelera filtra `purge_at > ahora`) en `backend/src/mytasks_api/repositories/task_repository.py`
 - [X] T095 [US5] Añadir al servicio `complete_task`, `reopen_task`, `trash_task`, `restore_task`, `delete_task`, `list_history` y `list_trash` en `backend/src/mytasks_api/services/task_service.py`
 - [X] T096 [US5] Añadir `POST /complete`, `/reopen`, `/trash`, `/restore`, `DELETE /api/v1/tasks/{taskId}` y las vistas `history`/`trash` (con `cursor` y `limit`) a `GET /api/v1/tasks` en `backend/src/mytasks_api/routers/tasks.py`
-- [ ] T097 [P] [US5] Implementar los hooks `useCompleteTask`, `useReopenTask`, `useTrashTask`, `useRestoreTask`, `useDeleteTask`, `useHistory` y `useTrash` (paginación con `useInfiniteQuery`; invalidan tablero, historial y papelera) en `frontend/src/api/tasks.ts`
-- [ ] T098 [P] [US5] Implementar el sistema de avisos (*toast*) accesible (`aria-live`) con acción opcional ("Deshacer") en `frontend/src/app/Toaster.tsx`
-- [ ] T099 [US5] Añadir a `TaskCard` las acciones "Completar" y "Mover a la papelera" (aviso con "Deshacer" que llama a restaurar) en `frontend/src/features/board/TaskCard.tsx`
-- [ ] T100 [US5] Implementar la pantalla S5 `HistoryPage` según `docs/design/screens/s5-history/` en `frontend/src/features/history/HistoryPage.tsx`
-- [ ] T101 [US5] Implementar la pantalla S6 `TrashPage` con diálogo de confirmación accesible según `docs/design/screens/s6-trash/` en `frontend/src/features/trash/TrashPage.tsx`
-- [ ] T102 [US5] Gestionar el `409` en todas las mutaciones mostrando "La tarea cambió en otra ventana" y refrescando los datos en `frontend/src/lib/apiClient.ts` y `frontend/src/api/tasks.ts`
+- [X] T097 [P] [US5] Implementar los hooks `useCompleteTask`, `useReopenTask`, `useTrashTask`, `useRestoreTask`, `useDeleteTask`, `useHistory` y `useTrash` (paginación con `useInfiniteQuery`; invalidan tablero, historial y papelera) en `frontend/src/api/tasks.ts`
+- [X] T098 [P] [US5] Implementar el sistema de avisos (*toast*) accesible (`aria-live`) con acción opcional ("Deshacer") en `frontend/src/app/Toaster.tsx`
+- [X] T099 [US5] Añadir a `TaskCard` las acciones "Completar" y "Mover a la papelera" (aviso con "Deshacer" que llama a restaurar) en `frontend/src/features/board/TaskCard.tsx`
+- [X] T100 [US5] Implementar la pantalla S5 `HistoryPage` según `docs/design/screens/s5-history/` en `frontend/src/features/history/HistoryPage.tsx`
+- [X] T101 [US5] Implementar la pantalla S6 `TrashPage` con diálogo de confirmación accesible según `docs/design/screens/s6-trash/` en `frontend/src/features/trash/TrashPage.tsx`
+- [X] T102 [US5] Gestionar el `409` en todas las mutaciones mostrando "La tarea cambió en otra ventana" y refrescando los datos en `frontend/src/lib/apiClient.ts` y `frontend/src/api/tasks.ts`
 
 **Checkpoint**: las 5 historias funcionan y se prueban de forma independiente.
 

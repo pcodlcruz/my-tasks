@@ -1,19 +1,19 @@
-import { useTogglePin } from '../../api/tasks'
+import { useCompleteTask, useTogglePin, useTrashTask } from '../../api/tasks'
 import type { Task } from '../../api/types'
-import { SCOPE_LABELS } from '../../api/types'
+import { ScopeBadge } from '../shared/TaskBadges'
 
 interface TaskCardProps {
   task: Task
   onEdit: (task: Task) => void
 }
 
-const SCOPE_BADGE_STYLE: Record<Task['scope'], string> = {
-  work: 'bg-purple-50 text-scope-work border-purple-200',
-  personal: 'bg-teal-50 text-scope-personal border-teal-200',
-}
+const TEXT_BUTTON =
+  'rounded p-1 text-caption text-text-muted hover:bg-surface-alt hover:text-text disabled:cursor-not-allowed disabled:opacity-60'
 
 export function TaskCard({ task, onEdit }: TaskCardProps): JSX.Element {
-  const { togglePin, isPending } = useTogglePin()
+  const { togglePin, isPending: isPinPending } = useTogglePin()
+  const complete = useCompleteTask()
+  const trash = useTrashTask()
 
   return (
     <article className="rounded-lg border border-border bg-surface p-4 shadow-sm">
@@ -26,30 +26,38 @@ export function TaskCard({ task, onEdit }: TaskCardProps): JSX.Element {
           )}
           {task.title}
         </p>
-        <div className="flex shrink-0 items-center gap-1">
+        <div className="flex shrink-0 flex-wrap items-center justify-end gap-1">
           <button
             type="button"
             onClick={() => void togglePin(task)}
-            disabled={isPending}
-            className="rounded p-1 text-caption text-text-muted hover:bg-surface-alt hover:text-text disabled:cursor-not-allowed disabled:opacity-60"
+            disabled={isPinPending}
+            className={TEXT_BUTTON}
           >
             {task.pinned ? 'Desfijar' : 'Fijar'}
           </button>
+          <button type="button" onClick={() => onEdit(task)} className={TEXT_BUTTON}>
+            Editar
+          </button>
           <button
             type="button"
-            onClick={() => onEdit(task)}
-            className="rounded p-1 text-caption text-text-muted hover:bg-surface-alt hover:text-text"
+            onClick={() => trash.mutate(task.id)}
+            disabled={trash.isPending}
+            className={TEXT_BUTTON}
           >
-            Editar
+            Mover a la papelera
           </button>
         </div>
       </div>
       <div className="mt-3 flex items-center justify-between border-t border-border/60 pt-2">
-        <span
-          className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-caption font-semibold ${SCOPE_BADGE_STYLE[task.scope]}`}
+        <ScopeBadge scope={task.scope} />
+        <button
+          type="button"
+          onClick={() => complete.mutate(task.id)}
+          disabled={complete.isPending}
+          className="rounded-lg border border-success/40 px-3 py-1 text-caption font-semibold text-success hover:bg-success/10 disabled:cursor-not-allowed disabled:opacity-60"
         >
-          {SCOPE_LABELS[task.scope]}
-        </span>
+          Completar
+        </button>
       </div>
     </article>
   )
