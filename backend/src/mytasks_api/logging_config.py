@@ -8,8 +8,8 @@ PACKAGE_LOGGER_NAME = "mytasks_api"
 
 request_id_var: ContextVar[str | None] = ContextVar("request_id", default=None)
 
-# Lista cerrada de campos que pueden salir en un log: nunca el token ni el contenido
-# de las tareas (Principio III). Lo que no esté aquí se descarta.
+# Closed list of fields allowed in a log entry: never the token nor task content
+# (Principle III). Anything not listed here is dropped.
 _LOGGED_FIELDS = ("action", "uid", "task_id", "reason")
 
 
@@ -39,7 +39,7 @@ _configured_handler: logging.Handler | None = None
 
 
 def configure_logging() -> None:
-    """Deja el logger del paquete escribiendo JSON estructurado en stdout (idempotente)."""
+    """Make the package logger write structured JSON to stdout (idempotent)."""
     global _configured_handler
     package_logger = logging.getLogger(PACKAGE_LOGGER_NAME)
     package_logger.setLevel(logging.INFO)

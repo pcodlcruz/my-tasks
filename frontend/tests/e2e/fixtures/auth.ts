@@ -7,9 +7,9 @@ interface AuthFixtures {
 export const test = base.extend<AuthFixtures>({
   loginAsGoogleUser: async ({ page }, use) => {
     await use(async (email: string) => {
-      // No navega a /login si ya estamos ahí (p. ej. tras una redirección de
-      // ProtectedRoute): un page.goto perdería el estado de ruta de origen
-      // (location.state.from) que esa redirección conserva.
+      // Does not navigate to /login if we are already there (e.g. after a
+      // ProtectedRoute redirect): a page.goto would lose the origin route state
+      // (location.state.from) that the redirect preserves.
       if (!page.url().includes('/login')) {
         await page.goto('/login')
       }

@@ -31,15 +31,15 @@ class TaskService:
         self._repository = repository
 
     def _log_missing(self, uid: str, task_id: str, action: str) -> None:
-        # Una tarea ajena y una inexistente dan el mismo 404 al cliente; el registro
-        # permite detectar a quien va probando identificadores.
+        # A foreign task and a missing one give the client the same 404; the log makes
+        # it possible to spot someone probing identifiers.
         log_event(
             logger, logging.WARNING, "task_not_found", uid=uid, task_id=task_id, action=action
         )
 
     async def _ensure_room_for_active_task(self, uid: str) -> None:
-        # Tope "blando": el recuento y la escritura no son atómicos, así que dos altas
-        # simultáneas podrían pasarse por muy poco. Basta para acotar el abuso.
+        # "Soft" cap: the count and the write are not atomic, so two simultaneous
+        # creations could overshoot by a small margin. Enough to bound abuse.
         if await self._repository.count_active(uid) >= MAX_ACTIVE_TASKS:
             raise ActiveTaskLimitError(uid)
 

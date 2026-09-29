@@ -28,8 +28,8 @@ def _init_firebase_app(settings: Settings) -> firebase_admin.App:
 
 
 def _unauthenticated(reason: str) -> HTTPException:
-    # Solo se registra la causa, nunca el token ni el texto de la excepción: el
-    # mensaje de algunas excepciones del SDK incluye el token recibido.
+    # Only the cause is logged, never the token nor the exception text: the message
+    # of some SDK exceptions includes the received token.
     log_event(logger, logging.WARNING, "auth_failed", reason=reason)
     return HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
@@ -57,17 +57,17 @@ async def get_current_user(
 
     _init_firebase_app(settings)
     try:
-        # No se comprueba la revocación (`check_revoked`): un token robado o de una cuenta
-        # deshabilitada vale hasta que caduca (~1 h). Riesgo aceptado por el propietario
-        # (security-review.md, LOW-004): la comprobación cuesta una llamada por petición.
+        # Revocation is not checked (`check_revoked`): a stolen token, or one from a
+        # disabled account, stays valid until it expires (~1 h). Risk accepted by the
+        # owner (security-review.md, LOW-004): checking costs one call per request.
         decoded = auth.verify_id_token(credentials.credentials)
     except auth.ExpiredIdTokenError as exc:
         raise _unauthenticated("expired_token") from exc
     except (auth.InvalidIdTokenError, ValueError) as exc:
         raise _unauthenticated("invalid_token") from exc
     except Exception as exc:
-        # Fallo del propio verificador (red, certificados de Google, SDK): no es culpa
-        # del cliente, así que no se le responde 401.
+        # Failure of the verifier itself (network, Google certificates, SDK): it is not
+        # the client's fault, so it is not answered with a 401.
         raise _verifier_unavailable(exc) from exc
 
     return CurrentUser(uid=decoded["uid"], email=decoded.get("email"))

@@ -10,8 +10,8 @@ from mytasks_api.services.task_service import TaskService, get_task_service
 
 router = APIRouter(prefix="/api/v1/tasks", tags=["tasks"])
 
-# Firestore genera identificadores alfanuméricos y rechaza los reservados (`__algo__`).
-# Cualquier otra forma no puede corresponder a una tarea: se trata como inexistente.
+# Firestore generates alphanumeric ids and rejects reserved ones (`__something__`).
+# Any other shape cannot correspond to a task, so it is treated as missing.
 _TASK_ID_PATTERN = re.compile(r"(?!__.*__$)[A-Za-z0-9_-]{1,128}")
 
 
@@ -19,7 +19,7 @@ async def valid_task_id(
     task_id: str = Path(min_length=1, max_length=128),
     _: CurrentUser = Depends(get_current_user),
 ) -> str:
-    # Depende de la autenticación para que un 401 nunca quede tapado por un 404.
+    # Depends on authentication so a 401 is never masked by a 404.
     if _TASK_ID_PATTERN.fullmatch(task_id) is None:
         raise TaskNotFoundError(task_id)
     return task_id

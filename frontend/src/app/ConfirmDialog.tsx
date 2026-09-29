@@ -42,7 +42,7 @@ export function ConfirmDialog({
     }
 
     document.addEventListener('keydown', handleKeyDown)
-    // Foco inicial en la acción segura: la destructiva no se activa por accidente.
+    // Initial focus on the safe action so the destructive one is never triggered by accident.
     cancelRef.current?.focus()
     return () => document.removeEventListener('keydown', handleKeyDown)
   }, [onCancel])

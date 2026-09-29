@@ -20,7 +20,7 @@ from mytasks_api.logging_config import configure_logging, request_id_var
 from mytasks_api.routers.tasks import router as tasks_router
 from mytasks_api.schemas.task import ErrorOut
 
-# La API solo usa estos métodos y estas cabeceras (contrato en openapi.yaml).
+# The API only uses these methods and headers (contract in openapi.yaml).
 ALLOWED_METHODS = ["GET", "POST", "PATCH", "DELETE"]
 ALLOWED_HEADERS = ["Authorization", "Content-Type"]
 
@@ -41,7 +41,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     configure_logging()
     settings.export_emulator_hosts()
 
-    # La documentación interactiva y el esquema solo se publican en local.
+    # The interactive docs and the schema are only published in local mode.
     docs_options: dict[str, Any] = (
         {} if settings.is_local else {"docs_url": None, "redoc_url": None, "openapi_url": None}
     )
@@ -54,14 +54,14 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         allow_headers=ALLOWED_HEADERS,
     )
 
-    # Se añade después del CORS para envolverlo: las cabeceras de seguridad y el
-    # identificador de petición salen también en las respuestas de preflight.
+    # Added after CORS so it wraps it: the security headers and the request id also
+    # appear on preflight responses.
     @app.middleware("http")
     async def request_context(
         request: Request, call_next: Callable[[Request], Awaitable[Response]]
     ) -> Response:
-        # El identificador lo genera el servidor; el que envíe el cliente se ignora
-        # para que no pueda inyectar texto en los logs.
+        # The server generates the id; any id sent by the client is ignored so it
+        # cannot inject text into the logs.
         request_id = uuid.uuid4().hex
         token = request_id_var.set(request_id)
         try:

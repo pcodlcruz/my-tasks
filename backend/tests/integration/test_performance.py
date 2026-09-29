@@ -15,8 +15,8 @@ pytestmark = [pytest.mark.integration, pytest.mark.perf]
 
 P95_LIMIT_MS = 300.0
 SAMPLES = 20
-# El tope es de 500 tareas activas y el test crea/reabre/restaura hasta 20 más
-# (en cada momento no hay más de ACTIVE_TASKS + SAMPLES activas): 480 + 20 = 500.
+# The cap is 500 active tasks and the test creates/reopens/restores up to 20 more
+# (at no point are there more than ACTIVE_TASKS + SAMPLES active): 480 + 20 = 500.
 ACTIVE_TASKS = 480
 COMPLETED_TASKS = 120
 TRASHED_TASKS = 60
@@ -60,8 +60,8 @@ async def test_every_endpoint_meets_the_p95_latency_goal_with_500_active_tasks(
     def send(method: str, path: str, **kwargs: object) -> Callable[[], Awaitable[httpx.Response]]:
         return lambda: client.request(method, path, headers=headers, **kwargs)  # type: ignore[arg-type]
 
-    # Calentamiento: la primera lectura grande tras arrancar el emulador es
-    # notablemente más lenta (arranque en frío) y no representa el régimen estable.
+    # Warm-up: the first large read after the emulator starts is noticeably slower
+    # (cold start) and does not represent steady state.
     await client.get("/api/v1/tasks", params={"view": "board"}, headers=headers)
 
     await _measure("GET /healthz", [send("GET", "/healthz")] * SAMPLES, 200, results)

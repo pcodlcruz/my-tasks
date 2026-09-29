@@ -38,8 +38,8 @@ function ToastItem({ toast }: { toast: Toast }): JSX.Element {
   )
 }
 
-// La región `aria-live` existe siempre (vacía) para que los lectores de
-// pantalla anuncien los avisos cuando se añaden.
+// The `aria-live` region is always rendered (empty) so screen readers
+// announce toasts as they are added.
 export function Toaster(): JSX.Element {
   const toasts = useToastStore((state) => state.toasts)
 

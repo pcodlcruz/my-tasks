@@ -19,8 +19,8 @@ const SCOPE_OPTIONS: { value: Scope; label: string; hint: string }[] = [
   { value: 'personal', label: 'Personal', hint: 'Hogar, salud y vida' },
 ]
 
-// Nombres de clase completos y literales a propósito (ver Quadrant.tsx): el
-// escáner de Tailwind no genera utilidades construidas con plantillas.
+// Full literal class names on purpose (see Quadrant.tsx): Tailwind's scanner
+// does not generate utilities built from templates.
 const QUADRANT_PREVIEW_SURFACE: Record<Quadrant, string> = {
   do_now: 'bg-quadrant-do-now-surface',
   schedule: 'bg-quadrant-schedule-surface',
@@ -97,8 +97,8 @@ export function TaskForm({ onClose, task }: TaskFormProps): JSX.Element {
         await createTask.mutateAsync(values)
       }
     } catch {
-      // El hook ya avisa del fallo con un aviso; el formulario sigue abierto para no
-      // perder lo escrito.
+      // The hook already reports the failure with a toast; the form stays open so
+      // nothing that was typed is lost.
       return
     }
     onClose()

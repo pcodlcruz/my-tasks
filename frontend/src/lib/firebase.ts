@@ -25,8 +25,8 @@ if (import.meta.env.VITE_USE_EMULATORS === 'true') {
     disableWarnings: true,
   })
 
-  // Solo en modo emulador: permite a los tests e2e (Playwright) iniciar sesión con
-  // una cuenta de Google ficticia sin pasar por el popup real de Google.
+  // Emulator mode only: lets the e2e tests (Playwright) sign in with a fake
+  // Google account without going through the real Google popup.
   window.__mytasksTestLogin = async (email: string) => {
     const fakeIdToken = JSON.stringify({
       sub: crypto.randomUUID(),

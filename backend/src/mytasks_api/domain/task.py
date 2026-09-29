@@ -4,8 +4,8 @@ from enum import StrEnum
 
 TRASH_RETENTION = timedelta(days=30)
 
-# Tope de tareas activas por usuario: el tablero no se pagina y se dimensionó para
-# ~500 (plan.md); sin tope, un usuario podría degradar la API y disparar el coste.
+# Per-user cap on active tasks: the board is not paginated and was sized for ~500
+# (plan.md); without a cap, a user could degrade the API and drive up cost.
 MAX_ACTIVE_TASKS = 500
 
 

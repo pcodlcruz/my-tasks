@@ -1,8 +1,7 @@
 rules_version = '2';
 
-// Todo el acceso a datos pasa por la API (verificación del ID token y
-// aislamiento por uid en el backend); ningún cliente lee ni escribe
-// Firestore directamente.
+// All data access goes through the API (ID token verification and per-uid
+// isolation in the backend); no client reads or writes Firestore directly.
 service cloud.firestore {
   match /databases/{database}/documents {
     match /{document=**} {

@@ -13,9 +13,9 @@ function filterScopeOption(
   page: import('@playwright/test').Page,
   label: string,
 ): ReturnType<import('@playwright/test').Page['getByText']> {
-  // El radio de esta pantalla está visualmente oculto (sr-only) a propósito
-  // (la selección se muestra con el estilo del texto visible, no con un radio
-  // nativo); un usuario real hace clic en el texto, así que el test también.
+  // The radio on this screen is visually hidden (sr-only) on purpose (the
+  // selection is shown through the visible text's styling, not a native radio);
+  // a real user clicks the text, so the test does too.
   return page
     .getByRole('radiogroup', { name: 'Filtrar por ámbito' })
     .getByText(label, { exact: true })
