@@ -5,7 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from mytasks_api.config import get_settings
-from mytasks_api.domain.task import InvalidTransitionError, TaskNotFoundError
+from mytasks_api.domain.task import InvalidCursorError, InvalidTransitionError, TaskNotFoundError
 from mytasks_api.routers.tasks import router as tasks_router
 from mytasks_api.schemas.task import ErrorOut
 
@@ -54,6 +54,14 @@ async def validation_exception_handler(_: Request, exc: RequestValidationError) 
 async def task_not_found_handler(_: Request, __: TaskNotFoundError) -> JSONResponse:
     error = ErrorOut(code="not_found", message="La tarea no existe.")
     return JSONResponse(status_code=status.HTTP_404_NOT_FOUND, content=jsonable_encoder(error))
+
+
+@app.exception_handler(InvalidCursorError)
+async def invalid_cursor_handler(_: Request, __: InvalidCursorError) -> JSONResponse:
+    error = ErrorOut(code="validation_error", message="El cursor no es válido.")
+    return JSONResponse(
+        status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, content=jsonable_encoder(error)
+    )
 
 
 @app.exception_handler(InvalidTransitionError)

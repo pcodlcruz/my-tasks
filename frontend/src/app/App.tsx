@@ -2,14 +2,13 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { BrowserRouter, Outlet, Route, Routes } from 'react-router-dom'
 import { LoginPage } from '../features/auth/LoginPage'
 import { BoardPage } from '../features/board/BoardPage'
+import { HistoryPage } from '../features/history/HistoryPage'
+import { TrashPage } from '../features/trash/TrashPage'
 import { AppHeader } from './AppHeader'
 import { ProtectedRoute } from './ProtectedRoute'
+import { Toaster } from './Toaster'
 
 const queryClient = new QueryClient()
-
-function PlaceholderPage({ title }: { title: string }): JSX.Element {
-  return <main className="mx-auto max-w-7xl px-4 py-6">{title}</main>
-}
 
 function ProtectedLayout(): JSX.Element {
   return (
@@ -28,10 +27,11 @@ export function App(): JSX.Element {
           <Route path="/login" element={<LoginPage />} />
           <Route element={<ProtectedLayout />}>
             <Route path="/" element={<BoardPage />} />
-            <Route path="/historial" element={<PlaceholderPage title="Historial" />} />
-            <Route path="/papelera" element={<PlaceholderPage title="Papelera" />} />
+            <Route path="/historial" element={<HistoryPage />} />
+            <Route path="/papelera" element={<TrashPage />} />
           </Route>
         </Routes>
+        <Toaster />
       </BrowserRouter>
     </QueryClientProvider>
   )
