@@ -1,8 +1,10 @@
 import { useState } from 'react'
 import { useBoardTasks } from '../../api/tasks'
 import type { Quadrant as QuadrantKey, Task } from '../../api/types'
+import { useUiStore } from '../../stores/uiStore'
 import { TaskForm } from '../task-form/TaskForm'
 import { Quadrant } from './Quadrant'
+import { ScopeFilter } from './ScopeFilter'
 import { TaskCard } from './TaskCard'
 
 const CANONICAL_QUADRANTS: QuadrantKey[] = ['do_now', 'schedule', 'delegate', 'eliminate']
@@ -21,7 +23,10 @@ function groupByQuadrant(tasks: Task[]): Record<QuadrantKey, Task[]> {
 }
 
 export function BoardPage(): JSX.Element {
-  const { data, isLoading, isError, refetch } = useBoardTasks()
+  const scopeFilter = useUiStore((state) => state.scopeFilter)
+  const { data, isLoading, isError, refetch } = useBoardTasks(
+    scopeFilter === 'all' ? undefined : scopeFilter,
+  )
   const [isCreating, setIsCreating] = useState(false)
   const [editingTask, setEditingTask] = useState<Task | null>(null)
   const tasks = data?.items ?? []
@@ -30,8 +35,9 @@ export function BoardPage(): JSX.Element {
 
   return (
     <main className="mx-auto w-full max-w-7xl px-4 py-6">
-      <div className="mb-6 flex items-center justify-between">
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-display font-display text-text">Matriz de prioridades</h1>
+        <ScopeFilter />
         <button
           type="button"
           onClick={() => setIsCreating(true)}
@@ -71,7 +77,7 @@ export function BoardPage(): JSX.Element {
 
       {!isLoading && !isError && (
         <>
-          {hasNoTasks && (
+          {hasNoTasks && scopeFilter === 'all' && (
             <div className="mb-6 rounded-xl border border-border bg-surface-alt p-6 text-center">
               <p className="text-body font-semibold text-text">¡Bienvenido a MyTasks!</p>
               <p className="mt-1 text-caption text-text-muted">
