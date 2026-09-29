@@ -27,6 +27,7 @@ export default defineConfig({
       reuseExistingServer: !process.env.CI,
       timeout: 30_000,
       env: {
+        APP_ENV: 'local',
         GOOGLE_CLOUD_PROJECT: 'demo-mytasks',
         FIRESTORE_EMULATOR_HOST: 'localhost:8080',
         FIREBASE_AUTH_EMULATOR_HOST: 'localhost:9099',

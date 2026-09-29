@@ -3,21 +3,21 @@ from __future__ import annotations
 import math
 import time
 from collections.abc import Awaitable, Callable
-from datetime import UTC, datetime, timedelta
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 import httpx
 import pytest
-from google.cloud import firestore
 
 if TYPE_CHECKING:
-    from tests.conftest import GoogleUserFactory
+    from tests.conftest import GoogleUserFactory, SeedManyFactory
 
 pytestmark = [pytest.mark.integration, pytest.mark.perf]
 
 P95_LIMIT_MS = 300.0
 SAMPLES = 20
-ACTIVE_TASKS = 500
+# El tope es de 500 tareas activas y el test crea/reabre/restaura hasta 20 más
+# (en cada momento no hay más de ACTIVE_TASKS + SAMPLES activas): 480 + 20 = 500.
+ACTIVE_TASKS = 480
 COMPLETED_TASKS = 120
 TRASHED_TASKS = 60
 
@@ -25,40 +25,6 @@ TRASHED_TASKS = 60
 def _p95(samples_ms: list[float]) -> float:
     ordered = sorted(samples_ms)
     return ordered[math.ceil(0.95 * len(ordered)) - 1]
-
-
-async def _seed(client: firestore.AsyncClient, uid: str, count: int, **fields: object) -> list[str]:
-    now = datetime.now(UTC)
-    collection = client.collection("users").document(uid).collection("tasks")
-    batch = client.batch()
-    ids: list[str] = []
-    for index in range(count):
-        doc_ref = collection.document()
-        document: dict[str, Any] = {
-            "title": f"Tarea {index}",
-            "description": "Descripción de prueba",
-            "urgent": index % 2 == 0,
-            "important": index % 3 == 0,
-            "scope": "work" if index % 2 == 0 else "personal",
-            "pinned": index % 25 == 0,
-            "status": "active",
-            "in_trash": False,
-            "created_at": now - timedelta(minutes=index),
-            "updated_at": now,
-            "completed_at": None,
-            "trashed_at": None,
-            "purge_at": None,
-        }
-        document.update(fields)
-        if fields.get("status") == "completed":
-            document["completed_at"] = now - timedelta(minutes=index)
-        if fields.get("in_trash") is True:
-            document["trashed_at"] = now - timedelta(minutes=index)
-            document["purge_at"] = now + timedelta(days=30) - timedelta(minutes=index)
-        batch.set(doc_ref, document)
-        ids.append(doc_ref.id)
-    await batch.commit()
-    return ids
 
 
 async def _measure(
@@ -79,13 +45,13 @@ async def _measure(
 async def test_every_endpoint_meets_the_p95_latency_goal_with_500_active_tasks(
     client: httpx.AsyncClient,
     google_user: GoogleUserFactory,
-    firestore_client: firestore.AsyncClient,
+    seed_many_tasks: SeedManyFactory,
 ) -> None:
     user = await google_user("perf@example.com")
     headers = {"Authorization": f"Bearer {user.id_token}"}
-    active = await _seed(firestore_client, user.uid, ACTIVE_TASKS)
-    completed = await _seed(firestore_client, user.uid, COMPLETED_TASKS, status="completed")
-    trashed = await _seed(firestore_client, user.uid, TRASHED_TASKS, in_trash=True)
+    active = await seed_many_tasks(user.uid, ACTIVE_TASKS)
+    completed = await seed_many_tasks(user.uid, COMPLETED_TASKS, status="completed")
+    trashed = await seed_many_tasks(user.uid, TRASHED_TASKS, in_trash=True)
     results: dict[str, float] = {}
 
     def get(path: str, **params: object) -> Callable[[], Awaitable[httpx.Response]]:

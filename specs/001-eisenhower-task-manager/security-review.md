@@ -239,3 +239,26 @@ Esta feature no despliega nada, así que estas categorías no se pueden auditar 
 | LOW-003 | Baja | Desarrollador backend | `mytasks-backend-developer` |
 | LOW-004 | Baja | Desarrollador backend | `mytasks-backend-developer` (decisión de riesgo) |
 | LOW-005 | Baja | Arquitecto | `mytasks-google-cloud-architect` |
+
+---
+
+## Resolución (T109)
+
+Corregido en esta misma fase con el skill `mytasks-backend-developer`, tests primero (se comprobó que los tests nuevos fallan sin el código: 33 fallos). Estado tras la corrección: backend 190 tests en verde, frontend 50 unitarios y 24 e2e en verde.
+
+| ID | Estado | Qué se hizo |
+|---|---|---|
+| HIGH-001 | ✅ Corregido | Nueva variable `APP_ENV` (`local`, `staging`, `production`) con valor por defecto `production`. `Settings` se niega a validarse (y el backend a arrancar) si hay variables de emulador fuera de `APP_ENV=local`, si falta `GOOGLE_CLOUD_PROJECT` fuera de local, o si el project id empieza por `demo-` fuera de local; en local exige el prefijo `demo-`. Los hosts de emulador que vengan del `.env` ahora se publican en el entorno para los SDK (antes `FIREBASE_AUTH_EMULATOR_HOST` del `.env` no llegaba a `firebase_admin`). Tests: `tests/unit/test_config.py`. |
+| MED-001 | ✅ Corregido | Logging JSON estructurado con campos en lista cerrada (`action`, `uid`, `task_id`, `reason`, más `request_id`); nunca token ni contenido de tareas. Se registran los fallos de autenticación (solo la causa, sin el texto de la excepción, que en algunos casos incluye el token), las transiciones de estado y el borrado definitivo, y el acceso a tareas inexistentes o ajenas. Un fallo del verificador de tokens ya no se disfraza de 401: responde `503 auth_unavailable` y registra un error. Cada respuesta lleva `X-Request-ID` generado por el servidor. Tests: `test_audit_logging.py`, `test_logging_config.py`, `test_app_factory.py`. |
+| MED-002 | ◐ Parcial (decisión del propietario) | Tope de 500 tareas activas por usuario, con `409 task_limit_reached` y mensaje en español. Se aplica al crear, al reabrir y al restaurar una tarea activa; completadas y en papelera no cuentan. Es un tope «blando» (el recuento y la escritura no son atómicos), suficiente para acotar el abuso. El frontend muestra el mensaje del servidor y no cierra el formulario. **Pendiente para la feature de infraestructura**: limitación de tasa y cuotas en el perímetro (`mytasks-google-cloud-architect`). Tests: `test_task_limit.py` y unitarios de servicio. |
+| LOW-001 | ✅ Corregido | El identificador de tarea se valida en el borde (solo `[A-Za-z0-9_-]`, sin la forma reservada `__algo__`); uno no válido responde el `404 not_found` habitual, en las 7 rutas con `taskId`. La comprobación depende de la autenticación, así que un 401 nunca queda tapado. Tests: `test_task_id_validation.py`. |
+| LOW-002 | ✅ Corregido | `/docs`, `/redoc` y `/openapi.json` solo existen con `APP_ENV=local`. Tests: `test_app_factory.py`. |
+| LOW-003 | ✅ Corregido | CORS limitado a `GET`, `POST`, `PATCH`, `DELETE` y a las cabeceras `Authorization` y `Content-Type`. Todas las respuestas llevan `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, `Referrer-Policy: no-referrer` y `Cache-Control: no-store`. Tests: `test_app_factory.py`. |
+| LOW-004 | ✅ Riesgo aceptado (decisión del propietario) | Se mantiene `verify_id_token` sin comprobar la revocación. Queda documentado en el código (`auth.py`). Riesgo residual: un token robado o de una cuenta deshabilitada vale hasta ~1 h. |
+| LOW-005 | ⏭ Pendiente (otra feature) | Sin alojamiento definido no hay dónde aplicar CSP ni cabeceras de la SPA. Queda como requisito para la feature de infraestructura y CI/CD (`mytasks-google-cloud-architect`). |
+
+**Efecto en local**: el backend necesita `APP_ENV=local` (ya incluido en `backend/.env.example` y en la configuración de Playwright). Sin esa variable arranca como `production` y falla con un mensaje claro.
+
+**Otros cambios de esta fase que salieron de la revisión**: el color del texto de la insignia «Personal» pasó a `#0F766E` (contraste 5,2:1; el anterior daba 3,59:1, detectado con axe), y el foco vuelve al botón que abrió un modal al cerrarlo.
+
+**Nivel de riesgo tras la corrección**: **Bajo**, a falta de la revisión de perímetro, IAM y cabeceras de la SPA cuando exista infraestructura (categorías «sin información suficiente»).

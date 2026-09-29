@@ -1,15 +1,31 @@
+import re
 from typing import Literal
 
 from fastapi import APIRouter, Depends, Path, Query, Response, status
 
 from mytasks_api.auth import CurrentUser, get_current_user
-from mytasks_api.domain.task import Scope
+from mytasks_api.domain.task import Scope, TaskNotFoundError
 from mytasks_api.schemas.task import TaskCreate, TaskOut, TaskPage, TaskUpdate
 from mytasks_api.services.task_service import TaskService, get_task_service
 
 router = APIRouter(prefix="/api/v1/tasks", tags=["tasks"])
 
-TaskId = Path(min_length=1, max_length=128)
+# Firestore genera identificadores alfanuméricos y rechaza los reservados (`__algo__`).
+# Cualquier otra forma no puede corresponder a una tarea: se trata como inexistente.
+_TASK_ID_PATTERN = re.compile(r"(?!__.*__$)[A-Za-z0-9_-]{1,128}")
+
+
+async def valid_task_id(
+    task_id: str = Path(min_length=1, max_length=128),
+    _: CurrentUser = Depends(get_current_user),
+) -> str:
+    # Depende de la autenticación para que un 401 nunca quede tapado por un 404.
+    if _TASK_ID_PATTERN.fullmatch(task_id) is None:
+        raise TaskNotFoundError(task_id)
+    return task_id
+
+
+TaskId = Depends(valid_task_id)
 
 
 @router.get("", response_model=TaskPage)
