@@ -12,8 +12,8 @@ DEMO_PROJECT_PREFIX = "demo-"
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
-    # Entorno de ejecución. Por defecto "production" (falla cerrado): el modo local,
-    # el único que admite emuladores, hay que pedirlo de forma explícita.
+    # Runtime environment. Defaults to "production" (fails closed): local mode, the
+    # only one that admits emulators, must be requested explicitly.
     app_env: Literal["local", "staging", "production"] = "production"
     google_cloud_project: str | None = None
     firestore_emulator_host: str | None = None
@@ -41,8 +41,8 @@ class Settings(BaseSettings):
             self.google_cloud_project = project
             return self
 
-        # Con los emuladores de Auth activos el SDK acepta tokens sin firmar: en un
-        # entorno real eso permitiría suplantar a cualquier usuario.
+        # With the Auth emulators active the SDK accepts unsigned tokens: in a real
+        # environment that would let anyone impersonate any user.
         if self.firestore_emulator_host or self.firebase_auth_emulator_host:
             message = (
                 "Las variables de los emuladores de Firebase (FIRESTORE_EMULATOR_HOST, "
@@ -62,10 +62,10 @@ class Settings(BaseSettings):
         return self
 
     def export_emulator_hosts(self) -> None:
-        """Publica los hosts de los emuladores en las variables que leen los SDK de Google.
+        """Publish the emulator hosts in the variables the Google SDKs read.
 
-        `firebase_admin` y `google-cloud-firestore` solo leen `os.environ`: un valor
-        que venga del fichero `.env` no llega a ellos si no se exporta aquí.
+        `firebase_admin` and `google-cloud-firestore` only read `os.environ`: a value
+        that comes from the `.env` file never reaches them unless it is exported here.
         """
         if self.firestore_emulator_host:
             os.environ["FIRESTORE_EMULATOR_HOST"] = self.firestore_emulator_host

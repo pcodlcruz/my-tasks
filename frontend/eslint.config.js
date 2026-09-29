@@ -16,9 +16,9 @@ export default tseslint.config(
     },
   },
   {
-    // react-hooks/react-refresh solo tienen sentido en el código de la app React;
-    // en tests/e2e (fixtures de Playwright) y en configs de Node dan falsos positivos
-    // (p. ej. el parámetro `use` de una fixture de Playwright no es un hook de React).
+    // react-hooks/react-refresh only make sense in the React app code; in tests/e2e
+    // (Playwright fixtures) and Node configs they produce false positives
+    // (e.g. the `use` parameter of a Playwright fixture is not a React hook).
     files: ['src/**/*.{ts,tsx}'],
     plugins: {
       'react-hooks': reactHooks,

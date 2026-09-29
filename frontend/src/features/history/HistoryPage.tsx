@@ -10,8 +10,8 @@ interface DayGroup {
   tasks: Task[]
 }
 
-// El servidor ya entrega las tareas por `completed_at` descendente: basta con
-// agrupar las consecutivas del mismo día.
+// The server already returns tasks by `completed_at` descending, so it is enough
+// to group consecutive tasks that share the same day.
 function groupByCompletionDay(tasks: Task[]): DayGroup[] {
   const groups: DayGroup[] = []
   for (const task of tasks) {

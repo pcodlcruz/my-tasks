@@ -16,8 +16,8 @@ export class ApiClientError extends Error {
   }
 }
 
-// La tarea cambió (o desapareció) desde otra pestaña o ventana: transición
-// no válida (409) o tarea inexistente/purgada (404).
+// The task changed (or disappeared) from another tab or window: invalid
+// transition (409) or missing/purged task (404).
 export function isStaleTaskError(error: unknown): boolean {
   return (
     error instanceof ApiClientError &&
@@ -25,7 +25,7 @@ export function isStaleTaskError(error: unknown): boolean {
   )
 }
 
-// Errores cuyo mensaje, ya redactado en español por el servidor, se muestra tal cual.
+// Errors whose message, already written in Spanish by the server, is shown as is.
 const USER_FACING_ERROR_CODES = ['task_limit_reached', 'auth_unavailable']
 
 export function isUserFacingError(error: unknown): error is ApiClientError {

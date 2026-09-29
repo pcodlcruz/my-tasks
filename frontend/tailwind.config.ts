@@ -1,8 +1,8 @@
 import type { Config } from 'tailwindcss'
 
-// Tokens del design system aprobado en Stitch — docs/design/DESIGN.md (T011,
-// aprobado en T018). Las claves siguen los nombres semánticos de ese
-// documento, no la escala numérica por defecto de Tailwind.
+// Tokens of the design system approved in Stitch — docs/design/DESIGN.md (T011,
+// approved in T018). Keys follow that document's semantic names, not Tailwind's
+// default numeric scale.
 export default {
   content: ['./index.html', './src/**/*.{ts,tsx}'],
   theme: {

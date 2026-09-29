@@ -35,7 +35,7 @@ describe('<ScopeFilter>', () => {
     await renderScopeFilter()
     await userEvent.click(screen.getByRole('radio', { name: /Personal/ }))
 
-    // Simula salir de la página (desmontar) y volver a entrar (montar de nuevo).
+    // Simulates leaving the page (unmount) and coming back (mount again).
     await renderScopeFilter()
 
     expect(useUiStore.getState().scopeFilter).toBe('personal')

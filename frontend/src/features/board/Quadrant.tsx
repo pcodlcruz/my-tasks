@@ -8,11 +8,10 @@ interface QuadrantProps {
   children?: ReactNode
 }
 
-// Nombres de clase completos y literales a propósito: el escáner de Tailwind
-// detecta utilidades por coincidencia de texto en el código fuente, no
-// evaluando JS en tiempo de ejecución — una plantilla como
-// `bg-quadrant-${token}-surface` nunca aparece así en el fuente y esa clase
-// no se genera en el CSS de producción.
+// Full literal class names on purpose: Tailwind's scanner detects utilities by
+// matching text in the source code, not by evaluating JS at runtime — a template
+// like `bg-quadrant-${token}-surface` never appears that way in the source, so
+// that class would not be generated in the production CSS.
 const QUADRANT_STYLES: Record<
   QuadrantKey,
   { surfaceBg: string; accentBg: string; accentText: string; border: string }

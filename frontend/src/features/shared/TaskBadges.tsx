@@ -1,8 +1,8 @@
 import type { Quadrant, Scope } from '../../api/types'
 import { QUADRANT_LABELS, SCOPE_LABELS } from '../../api/types'
 
-// Nombres de clase completos y literales a propósito (ver Quadrant.tsx): el
-// escáner de Tailwind no genera utilidades construidas con plantillas.
+// Full literal class names on purpose (see Quadrant.tsx): Tailwind's scanner
+// does not generate utilities built from templates.
 const SCOPE_BADGE_STYLE: Record<Scope, string> = {
   work: 'bg-purple-50 text-scope-work border-purple-200',
   personal: 'bg-teal-50 text-scope-personal border-teal-200',
@@ -22,7 +22,7 @@ export function ScopeBadge({ scope }: { scope: Scope }): JSX.Element {
   return <span className={`${BADGE_BASE} ${SCOPE_BADGE_STYLE[scope]}`}>{SCOPE_LABELS[scope]}</span>
 }
 
-// El cuadrante siempre lleva etiqueta de texto: el color solo refuerza (WCAG 1.4.1).
+// The quadrant always carries a text label: color only reinforces it (WCAG 1.4.1).
 export function QuadrantBadge({ quadrant }: { quadrant: Quadrant }): JSX.Element {
   return (
     <span className={`${BADGE_BASE} ${QUADRANT_BADGE_STYLE[quadrant]}`}>

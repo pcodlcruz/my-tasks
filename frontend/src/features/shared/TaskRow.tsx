@@ -8,7 +8,7 @@ interface TaskRowProps {
   actions: ReactNode
 }
 
-// Nombres de clase completos y literales a propósito (ver Quadrant.tsx).
+// Full literal class names on purpose (see Quadrant.tsx).
 const QUADRANT_ROW_ACCENT: Record<Quadrant, string> = {
   do_now: 'border-l-quadrant-do-now-accent',
   schedule: 'border-l-quadrant-schedule-accent',

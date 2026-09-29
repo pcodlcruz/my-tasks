@@ -25,9 +25,9 @@ function errorMessage(error: unknown): string {
   return GENERIC_ERROR_MESSAGE
 }
 
-// Cualquier mutación que falle refresca todas las vistas (tablero, historial y
-// papelera) y avisa: si la tarea cambió en otra ventana, con ese mensaje; si es un
-// límite o una caída del verificador de sesión, con el mensaje del servidor.
+// Any failed mutation refreshes every view (board, history and trash) and shows a
+// toast: the "changed in another window" message if the task went stale, or the
+// server's own message for a limit or a session-verifier outage.
 function handleMutationError(queryClient: QueryClient, error: unknown): void {
   useToastStore.getState().show(errorMessage(error))
   void queryClient.invalidateQueries({ queryKey: TASKS_QUERY_KEY })

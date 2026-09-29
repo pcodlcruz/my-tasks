@@ -16,7 +16,7 @@ function capitalize(text: string): string {
   return text.charAt(0).toUpperCase() + text.slice(1)
 }
 
-// Días naturales entre `date` y `now` (0 = hoy, 1 = ayer, ...).
+// Calendar days between `date` and `now` (0 = today, 1 = yesterday, ...).
 function calendarDaysAgo(date: Date, now: Date): number {
   return Math.round((startOfDay(now) - startOfDay(date)) / DAY_MS)
 }
