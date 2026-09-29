@@ -5,7 +5,7 @@ import {
   useQuery,
   useQueryClient,
 } from '@tanstack/react-query'
-import { apiFetch, isStaleTaskError } from '../lib/apiClient'
+import { apiFetch, isStaleTaskError, isUserFacingError } from '../lib/apiClient'
 import { useToastStore } from '../stores/toastStore'
 import type { Scope, Task, TaskCreate, TaskPage, TaskUpdate } from './types'
 import { quadrantFor } from './types'
@@ -19,11 +19,17 @@ const PAGE_SIZE = 20
 const STALE_TASK_MESSAGE = 'La tarea cambió en otra ventana'
 const GENERIC_ERROR_MESSAGE = 'No se pudo completar la acción. Inténtalo de nuevo.'
 
+function errorMessage(error: unknown): string {
+  if (isStaleTaskError(error)) return STALE_TASK_MESSAGE
+  if (isUserFacingError(error)) return error.message
+  return GENERIC_ERROR_MESSAGE
+}
+
 // Cualquier mutación que falle refresca todas las vistas (tablero, historial y
-// papelera) y avisa: si la tarea cambió en otra ventana, con ese mensaje.
+// papelera) y avisa: si la tarea cambió en otra ventana, con ese mensaje; si es un
+// límite o una caída del verificador de sesión, con el mensaje del servidor.
 function handleMutationError(queryClient: QueryClient, error: unknown): void {
-  const { show } = useToastStore.getState()
-  show(isStaleTaskError(error) ? STALE_TASK_MESSAGE : GENERIC_ERROR_MESSAGE)
+  useToastStore.getState().show(errorMessage(error))
   void queryClient.invalidateQueries({ queryKey: TASKS_QUERY_KEY })
 }
 
@@ -55,6 +61,7 @@ export function useCreateTask() {
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: BOARD_QUERY_KEY })
     },
+    onError: (error) => handleMutationError(queryClient, error),
   })
 }
 

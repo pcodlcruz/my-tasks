@@ -90,10 +90,16 @@ export function TaskForm({ onClose, task }: TaskFormProps): JSX.Element {
       important,
       scope,
     }
-    if (isEditing) {
-      await updateTask.mutateAsync({ taskId: task.id, data: values })
-    } else {
-      await createTask.mutateAsync(values)
+    try {
+      if (isEditing) {
+        await updateTask.mutateAsync({ taskId: task.id, data: values })
+      } else {
+        await createTask.mutateAsync(values)
+      }
+    } catch {
+      // El hook ya avisa del fallo con un aviso; el formulario sigue abierto para no
+      // perder lo escrito.
+      return
     }
     onClose()
   }
