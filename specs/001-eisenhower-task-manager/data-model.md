@@ -75,6 +75,12 @@ restaurar la tarea vuelva a su estado anterior (FR-014a).
 | restaurar | en la papelera y `purge_at > ahora` | `in_trash=false`, `trashed_at=null`, `purge_at=null` | `409` |
 | borrar definitivamente | en la papelera | Borra el documento | `409` |
 
+**Límite de tareas activas (FR-016)**: un usuario no puede tener más de 500 tareas con
+`status == active` e `in_trash == false`. Crear, reabrir y restaurar una tarea que estaba activa
+comprueban el recuento y responden `409 task_limit_reached` si ya se alcanzó; restaurar una
+completada no lo comprueba. Es un tope «blando»: el recuento y la escritura no son atómicos, así
+que dos altas simultáneas podrían pasarse por muy poco.
+
 Toda transición se hace en una transacción de Firestore que relee el estado ([R6](./research.md#r6-concurrencia)).
 Una tarea con `purge_at <= ahora` se trata como inexistente (`404`) en cualquier lectura u
 operación ([R3](./research.md#r3-papelera-con-purgado-a-los-30-días-fr-014b)).

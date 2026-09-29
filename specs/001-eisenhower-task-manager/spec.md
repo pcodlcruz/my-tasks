@@ -1,10 +1,10 @@
 # Feature Specification: Gestión de tareas con matriz de Eisenhower
 
-**Feature Branch**: `[001-eisenhower-task-manager]`
+**Feature Branch**: `feature/001-eisenhower-task-manager` (cada fase se entregó en `feature/001-eisenhower-task-manager-fase-N`)
 
 **Created**: 2026-09-27
 
-**Status**: Draft
+**Status**: Implementada (fases 1–9 fusionadas en `develop`, 2026-09-29); el despliegue y la retención automática de la papelera quedan para la feature de infraestructura y CI/CD
 
 **Input**: User description: "Vamos a crear el scaffolding del proyecto. Será una aplicación de gestión de tareas. El propósito de la aplicación será tener visibilidad constante del estado de las tareas que realizo en mi día a día tanto en el entorno laboral como en la vida personal. Primeramente quiero que se base en la matriz de Eisenhower como metodología."
 
@@ -18,21 +18,27 @@
 - Q: ¿Qué longitud máxima deben tener el título y la descripción de una tarea? → A: Título hasta 200 caracteres; descripción hasta 2000 caracteres.
 - Q: ¿Qué debe pasar cuando el usuario elimina una tarea? → A: Pasa a una papelera recuperable que se vacía automáticamente a los 30 días.
 
+### Session 2026-09-29
+
+- Q: ¿Se limita el número de tareas activas por usuario? → A: Sí, a 500 (revisión de seguridad, hallazgo MED-002, y objetivo de rendimiento del tablero, que no se pagina). Al alcanzarlo no se pueden crear, reabrir ni restaurar tareas activas; las completadas y las de la papelera no cuentan.
+- Q: ¿Hay formulario de registro propio? → A: No. El acceso es solo con cuenta de Google (research R1): la primera vez se crea la cuenta automáticamente y la misma cuenta de Google es siempre el mismo usuario.
+
 ## User Scenarios & Testing *(mandatory)*
 
-### User Story 1 - Registrarme y acceder solo a mis tareas (Priority: P1)
+### User Story 1 - Acceder con Google y ver solo mis tareas (Priority: P1)
 
-Como usuario nuevo, quiero crear mi propia cuenta y acceder únicamente a mis tareas, para que mi información quede aislada de la de cualquier otro usuario que use la aplicación.
+Como usuario, quiero iniciar sesión con mi cuenta de Google (la primera vez se crea mi cuenta automáticamente, sin formulario de registro) y acceder únicamente a mis tareas, para que mi información quede aislada de la de cualquier otro usuario que use la aplicación.
 
 **Why this priority**: Es el requisito de acceso previo a cualquier otra funcionalidad: sin cuenta ni aislamiento de datos por usuario no hay tareas que crear ni tablero que ver.
 
-**Independent Test**: Se puede probar de forma aislada registrando dos cuentas distintas y comprobando que cada una solo ve sus propias tareas (inicialmente ninguna), sin acceso a las de la otra.
+**Independent Test**: Se puede probar de forma aislada iniciando sesión con dos cuentas de Google distintas y comprobando que cada una solo ve sus propias tareas (inicialmente ninguna), sin acceso a las de la otra.
 
 **Acceptance Scenarios**:
 
-1. **Given** que no tengo cuenta, **When** me registro con mis datos, **Then** obtengo acceso a mi propio espacio de tareas, vacío.
+1. **Given** que no he usado la aplicación antes, **When** inicio sesión con mi cuenta de Google, **Then** se crea mi cuenta y obtengo acceso a mi propio espacio de tareas, vacío.
 2. **Given** dos usuarios ya registrados, **When** el usuario A intenta acceder a las tareas del usuario B, **Then** el sistema se lo impide.
 3. **Given** que no he iniciado sesión, **When** intento ver o modificar cualquier tarea, **Then** el sistema me lo impide hasta que me autentique.
+4. **Given** que ya he usado la aplicación, **When** vuelvo a iniciar sesión con la misma cuenta de Google, **Then** accedo al mismo espacio con mis tareas y no se crea una segunda cuenta.
 
 ---
 
@@ -114,13 +120,14 @@ Como usuario, quiero marcar una tarea como completada y poder consultarla despu�
 - ¿Qué ocurre si el título supera los 200 caracteres o la descripción los 2000, al crear o al editar? El sistema rechaza el guardado e indica el límite superado; no trunca el texto en silencio. Un título o una descripción formados solo por espacios en blanco cuentan como vacíos.
 - ¿Cómo se comporta el tablero cuando el usuario no tiene ninguna tarea activa en ningún cuadrante? Se muestran los cuatro cuadrantes vacíos con una indicación de bienvenida o de "sin tareas", nunca una pantalla en blanco sin contexto.
 - ¿Qué ocurre si el usuario intenta acceder al tablero, al historial o a la papelera sin haber iniciado sesión? El sistema se lo impide hasta que se autentique.
-- ¿Qué ocurre si dos personas intentan registrarse con el mismo identificador de cuenta (p. ej. el mismo email)? El sistema debe impedir el duplicado e informar del conflicto sin revelar más datos de la cuenta existente que los estrictamente necesarios.
+- ¿Qué ocurre si alguien inicia sesión de nuevo con la misma cuenta de Google? Es siempre el mismo usuario: no se crea una cuenta nueva. Al no haber formulario de registro propio, no existen altas duplicadas que resolver.
+- ¿Qué ocurre si el usuario ya tiene 500 tareas activas e intenta crear otra, reabrir una completada o restaurar una tarea activa de la papelera? El sistema lo rechaza con un mensaje que indica el límite, sin crear ni cambiar nada y sin perder lo que el usuario había escrito. Completar o eliminar una tarea activa libera espacio; las tareas completadas y las de la papelera no cuentan.
 
 ## Requirements *(mandatory)*
 
 ### Functional Requirements
 
-- **FR-001**: El sistema DEBE permitir que una persona nueva se registre y obtenga su propia cuenta, sin intervención de un administrador.
+- **FR-001**: El sistema DEBE permitir que una persona nueva obtenga su propia cuenta iniciando sesión por primera vez con su cuenta de Google, sin formulario de registro ni intervención de un administrador.
 - **FR-002**: El sistema DEBE exigir que el usuario esté autenticado antes de ver o modificar cualquier tarea, su historial o su papelera.
 - **FR-003**: El sistema DEBE garantizar que cada usuario solo pueda ver y modificar sus propias tareas, nunca las de otro usuario.
 - **FR-004**: El sistema DEBE permitir crear una tarea con un título obligatorio (máximo 200 caracteres), una descripción obligatoria (máximo 2000 caracteres), un nivel de urgencia (urgente / no urgente) y un nivel de importancia (importante / no importante).
@@ -138,8 +145,9 @@ Como usuario, quiero marcar una tarea como completada y poder consultarla despu�
 - **FR-013a**: El sistema DEBE permitir reabrir una tarea completada: vuelve al estado activa, se elimina su fecha de finalización, deja de aparecer en el historial y se muestra en el tablero en el cuadrante que corresponda a su urgencia e importancia.
 - **FR-014**: El sistema DEBE permitir eliminar una tarea, tanto si está activa como si está en el historial de completadas; al eliminarla, la tarea pasa a una papelera propia del usuario y deja de mostrarse en el tablero y en el historial.
 - **FR-014a**: El sistema DEBE ofrecer una vista de papelera, separada del tablero y del historial, desde la que el usuario puede restaurar una tarea (vuelve a su estado anterior: activa o completada) o eliminarla definitivamente. Las tareas en la papelera no son editables.
-- **FR-014b**: El sistema DEBE eliminar de forma permanente e irrecuperable toda tarea que lleve 30 días en la papelera.
+- **FR-014b**: El sistema DEBE eliminar de forma permanente e irrecuperable toda tarea que lleve 30 días en la papelera. Pasados los 30 días la tarea desaparece de inmediato de todas las vistas y operaciones (no se lista ni se puede restaurar); el borrado físico lo garantiza la política de retención automática que se configura en la feature de infraestructura, y hasta entonces la tarea sigue almacenada.
 - **FR-015**: El sistema DEBE conservar el estado de las tareas y del historial del usuario entre sesiones, de modo que al volver a abrir la aplicación encuentre exactamente lo mismo que dejó.
+- **FR-016**: El sistema DEBE limitar a 500 el número de tareas activas por usuario. Al alcanzar el límite, crear una tarea, reabrir una completada o restaurar una tarea que estaba activa DEBE rechazarse con un mensaje que indique el límite. Las tareas completadas y las de la papelera no cuentan.
 
 ### Key Entities
 
@@ -157,10 +165,10 @@ Como usuario, quiero marcar una tarea como completada y poder consultarla despu�
 - **SC-005**: El 100% de las tareas creadas quedan visibles en el cuadrante que corresponde exactamente a su urgencia e importancia, sin intervención manual de reclasificación.
 - **SC-006**: Un usuario puede pasar de ver todas sus tareas a ver únicamente las de un ámbito (laboral o personal) en un único paso de interacción.
 - **SC-007**: Un usuario puede consultar, en cualquier momento posterior, el historial completo de sus tareas completadas.
-- **SC-008**: El 100% de las tareas eliminadas pueden restaurarse desde la papelera durante los 30 días siguientes a su eliminación, y ninguna tarea permanece almacenada más de 30 días en la papelera.
+- **SC-008**: El 100% de las tareas eliminadas pueden restaurarse desde la papelera durante los 30 días siguientes a su eliminación, y ninguna tarea permanece almacenada más de 30 días en la papelera. *Nota*: la segunda parte (borrado físico) depende de la política de retención automática de la feature de infraestructura; hasta que exista, pasados los 30 días la tarea desaparece de todas las vistas y operaciones pero sigue almacenada.
 
 ## Assumptions
 
 - **Alcance de "scaffolding"**: esta especificación cubre el ciclo completo de vida de una tarea (crear, ver clasificada, fijar, filtrar por ámbito, editar, completar, reabrir, consultar en el historial, eliminar a la papelera y restaurar) más el registro/aislamiento por usuario, como primera funcionalidad del proyecto. No incluye recordatorios, notificaciones, subtareas, comentarios, recuperación de contraseña ni colaboración/compartición de tareas entre usuarios en esta primera versión.
-- **Mecanismo de autenticación**: el requisito funcional es que cada usuario tenga una cuenta propia y una sesión autenticada que aísle sus datos (Principio III de la constitución); el mecanismo concreto (contraseña, proveedor externo, etc.) es una decisión técnica que corresponde a `/speckit-plan`, no a esta especificación.
+- **Mecanismo de autenticación**: el requisito funcional es que cada usuario tenga una cuenta propia y una sesión autenticada que aísle sus datos (Principio III de la constitución). El mecanismo lo decidió `/speckit-plan` (research R1): solo inicio de sesión con Google, sin contraseñas propias ni recuperación de contraseña.
 - **Urgencia e importancia manuales**: se establecen manualmente por el usuario en cada tarea; no hay fechas límite ni cálculo automático en esta primera versión (podría añadirse en una feature futura).

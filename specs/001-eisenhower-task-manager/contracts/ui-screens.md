@@ -68,5 +68,9 @@ autenticarse, vuelve a la ruta original (FR-002).
 - Aviso breve (*toast*) tras completar, reabrir, mover a la papelera o restaurar. Al mover a la
   papelera, el aviso ofrece "Deshacer", que llama a *restaurar*.
 - Sesión caducada: se redirige a `/login` con el mensaje "Tu sesión ha caducado".
-- Un `409` (conflicto entre pestañas) muestra "La tarea cambió en otra ventana" y refresca los
-  datos.
+- Un `409` (conflicto entre pestañas) o un `404` en una operación sobre una tarea muestra "La tarea
+  cambió en otra ventana" y refresca los datos.
+- Al alcanzar el límite de 500 tareas activas (FR-016) se muestra un aviso con el mensaje del
+  servidor, que indica el límite; el formulario de creación sigue abierto con lo escrito.
+- Si el servidor no puede verificar la sesión (`503`) se muestra su mensaje; cualquier otro fallo
+  de una acción muestra "No se pudo completar la acción. Inténtalo de nuevo."
