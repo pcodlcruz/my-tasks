@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from datetime import datetime, timedelta
 from enum import StrEnum
 
@@ -27,6 +27,10 @@ class TaskNotFoundError(Exception):
 
 
 class InvalidTransitionError(Exception):
+    pass
+
+
+class InvalidCursorError(Exception):
     pass
 
 
@@ -68,4 +72,39 @@ def sort_board(tasks: list[Task]) -> list[Task]:
 
 def ensure_editable(task: Task) -> None:
     if task.status != Status.ACTIVE or task.in_trash:
+        raise InvalidTransitionError(task.id)
+
+
+def complete(task: Task, now: datetime) -> Task:
+    if task.status != Status.ACTIVE or task.in_trash:
+        raise InvalidTransitionError(task.id)
+    return replace(task, status=Status.COMPLETED, completed_at=now, updated_at=now)
+
+
+def reopen(task: Task, now: datetime) -> Task:
+    if task.status != Status.COMPLETED or task.in_trash:
+        raise InvalidTransitionError(task.id)
+    return replace(task, status=Status.ACTIVE, completed_at=None, updated_at=now)
+
+
+def move_to_trash(task: Task, now: datetime) -> Task:
+    if task.in_trash:
+        raise InvalidTransitionError(task.id)
+    return replace(
+        task,
+        in_trash=True,
+        trashed_at=now,
+        purge_at=now + TRASH_RETENTION,
+        updated_at=now,
+    )
+
+
+def restore(task: Task, now: datetime) -> Task:
+    if not task.in_trash:
+        raise InvalidTransitionError(task.id)
+    return replace(task, in_trash=False, trashed_at=None, purge_at=None, updated_at=now)
+
+
+def ensure_purgeable(task: Task) -> None:
+    if not task.in_trash:
         raise InvalidTransitionError(task.id)
