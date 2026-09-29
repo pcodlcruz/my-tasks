@@ -134,4 +134,59 @@ describe('task lifecycle hooks', () => {
       'La tarea cambió en otra ventana',
     ])
   })
+
+  it('shows the server message when the active task limit is reached', async () => {
+    const queryClient = new QueryClient()
+    const { useCreateTask } = await import('../../../src/api/tasks')
+    const message = 'Has alcanzado el límite de 500 tareas activas.'
+    vi.mocked(fetch).mockResolvedValueOnce(
+      jsonResponse({ code: 'task_limit_reached', message }, 409),
+    )
+
+    const { result } = renderHook(() => useCreateTask(), { wrapper: createWrapper(queryClient) })
+    await act(async () => {
+      await result.current
+        .mutateAsync({
+          title: 'Una más',
+          description: 'Detalle',
+          urgent: true,
+          important: true,
+          scope: 'work',
+        })
+        .catch(() => undefined)
+    })
+
+    expect(useToastStore.getState().toasts.map((toast) => toast.message)).toEqual([message])
+  })
+
+  it('shows the server message when the session verifier is unavailable', async () => {
+    const queryClient = new QueryClient()
+    const { useCompleteTask } = await import('../../../src/api/tasks')
+    const message = 'No se pudo verificar la sesión. Inténtalo de nuevo en unos segundos.'
+    vi.mocked(fetch).mockResolvedValueOnce(jsonResponse({ code: 'auth_unavailable', message }, 503))
+
+    const { result } = renderHook(() => useCompleteTask(), { wrapper: createWrapper(queryClient) })
+    await act(async () => {
+      await result.current.mutateAsync('t1').catch(() => undefined)
+    })
+
+    expect(useToastStore.getState().toasts.map((toast) => toast.message)).toEqual([message])
+  })
+
+  it('shows a generic message for any other failure', async () => {
+    const queryClient = new QueryClient()
+    const { useCompleteTask } = await import('../../../src/api/tasks')
+    vi.mocked(fetch).mockResolvedValueOnce(
+      jsonResponse({ code: 'error', message: 'Internal Server Error' }, 500),
+    )
+
+    const { result } = renderHook(() => useCompleteTask(), { wrapper: createWrapper(queryClient) })
+    await act(async () => {
+      await result.current.mutateAsync('t1').catch(() => undefined)
+    })
+
+    expect(useToastStore.getState().toasts.map((toast) => toast.message)).toEqual([
+      'No se pudo completar la acción. Inténtalo de nuevo.',
+    ])
+  })
 })

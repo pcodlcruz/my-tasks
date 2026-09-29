@@ -192,6 +192,16 @@ class TaskRepository:
                 tasks.append(_document_to_task(snapshot.id, data))
         return tasks
 
+    async def count_active(self, uid: str) -> int:
+        query = (
+            self._tasks_collection(uid)
+            .where(filter=FieldFilter("status", "==", Status.ACTIVE.value))
+            .where(filter=FieldFilter("in_trash", "==", False))
+        )
+        # Los tipos del SDK marcan `get` como método sin enlazar: es solo un fallo de mypy.
+        result = await query.count().get()  # type: ignore[call-arg]
+        return int(result[0][0].value)
+
     async def apply_transition(self, uid: str, task_id: str, transition: Transition) -> Task:
         doc_ref = self._tasks_collection(uid).document(task_id)
         transaction = self._client.transaction()

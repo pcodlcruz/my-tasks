@@ -4,6 +4,10 @@ from enum import StrEnum
 
 TRASH_RETENTION = timedelta(days=30)
 
+# Tope de tareas activas por usuario: el tablero no se pagina y se dimensionó para
+# ~500 (plan.md); sin tope, un usuario podría degradar la API y disparar el coste.
+MAX_ACTIVE_TASKS = 500
+
 
 class Scope(StrEnum):
     WORK = "work"
@@ -31,6 +35,10 @@ class InvalidTransitionError(Exception):
 
 
 class InvalidCursorError(Exception):
+    pass
+
+
+class ActiveTaskLimitError(Exception):
     pass
 
 

@@ -23,7 +23,7 @@ export function TaskRow({ task, struckThrough = false, meta, actions }: TaskRowP
     >
       <div className="min-w-0 flex-1">
         <p
-          className={`text-body-strong ${struckThrough ? 'text-text-muted line-through' : 'text-text'}`}
+          className={`break-words text-body-strong ${struckThrough ? 'text-text-muted line-through' : 'text-text'}`}
         >
           {task.title}
         </p>

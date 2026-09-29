@@ -87,4 +87,19 @@ describe('<TaskForm> (modo crear)', () => {
     })
     expect(onClose).toHaveBeenCalledOnce()
   })
+
+  it('mantiene el formulario abierto con lo escrito si el servidor rechaza el guardado', async () => {
+    mutateAsync.mockRejectedValue(new Error('límite alcanzado'))
+    const onClose = vi.fn()
+    await renderTaskForm(onClose)
+
+    await userEvent.type(screen.getByLabelText(/Título/), 'Comprar leche')
+    await userEvent.type(screen.getByLabelText(/Descripción/), 'En el supermercado')
+    await userEvent.click(screen.getByRole('radio', { name: /Personal/ }))
+    await userEvent.click(screen.getByRole('button', { name: 'Guardar' }))
+
+    expect(mutateAsync).toHaveBeenCalledOnce()
+    expect(onClose).not.toHaveBeenCalled()
+    expect(screen.getByLabelText(/Título/)).toHaveValue('Comprar leche')
+  })
 })

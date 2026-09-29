@@ -3,7 +3,7 @@ from datetime import UTC, datetime
 
 import pytest
 
-from mytasks_api.domain.task import Scope, Status, Task
+from mytasks_api.domain.task import MAX_ACTIVE_TASKS, ActiveTaskLimitError, Scope, Status, Task
 from mytasks_api.schemas.task import TaskCreate
 from mytasks_api.services.task_service import TaskService
 
@@ -48,6 +48,9 @@ class FakeTaskRepository:
             tasks = [task for task in tasks if task.scope == scope]
         return tasks
 
+    async def count_active(self, uid: str) -> int:
+        return len(await self.list_board(uid))
+
 
 def _create_data(**overrides: object) -> TaskCreate:
     payload: dict[str, object] = {
@@ -70,6 +73,30 @@ async def test_create_task_applies_server_defaults() -> None:
     assert task.status == Status.ACTIVE
     assert task.in_trash is False
     assert task.created_at is not None
+
+
+async def test_create_task_raises_when_the_active_task_limit_is_reached() -> None:
+    repository = FakeTaskRepository()
+    service = TaskService(repository)  # type: ignore[arg-type]
+    for _ in range(MAX_ACTIVE_TASKS):
+        await repository.create("user-1", _create_data())
+
+    with pytest.raises(ActiveTaskLimitError):
+        await service.create_task("user-1", _create_data())
+
+    assert await repository.count_active("user-1") == MAX_ACTIVE_TASKS
+
+
+async def test_create_task_ignores_tasks_out_of_the_active_view_for_the_limit() -> None:
+    repository = FakeTaskRepository()
+    service = TaskService(repository)  # type: ignore[arg-type]
+    for _ in range(MAX_ACTIVE_TASKS):
+        task = await repository.create("user-1", _create_data())
+        task.status = Status.COMPLETED
+
+    await service.create_task("user-1", _create_data())
+
+    assert await repository.count_active("user-1") == 1
 
 
 async def test_list_board_returns_only_active_tasks_out_of_trash() -> None:

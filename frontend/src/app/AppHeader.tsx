@@ -12,10 +12,10 @@ export function AppHeader(): JSX.Element {
 
   return (
     <header className="sticky top-0 z-40 w-full border-b border-border bg-surface shadow-sm">
-      <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-2">
-        <div className="flex items-center gap-8">
+      <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-x-4 gap-y-1 px-4 py-2">
+        <div className="flex items-center gap-4 sm:gap-8">
           <span className="font-heading text-heading font-bold text-schedule">MyTasks</span>
-          <nav aria-label="Navegación principal" className="flex items-center gap-4">
+          <nav aria-label="Navegación principal" className="flex items-center gap-1 sm:gap-4">
             {NAV_ITEMS.map((item) => (
               <NavLink
                 key={item.to}
@@ -32,9 +32,11 @@ export function AppHeader(): JSX.Element {
             ))}
           </nav>
         </div>
-        <div className="flex items-center gap-4">
+        <div className="flex min-w-0 items-center gap-2 sm:gap-4">
           {user && (
-            <span className="text-caption text-text-muted">{user.displayName ?? user.email}</span>
+            <span className="max-w-[16rem] truncate text-caption text-text-muted">
+              {user.displayName ?? user.email}
+            </span>
           )}
           <button
             type="button"

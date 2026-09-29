@@ -25,6 +25,13 @@ export function isStaleTaskError(error: unknown): boolean {
   )
 }
 
+// Errores cuyo mensaje, ya redactado en español por el servidor, se muestra tal cual.
+const USER_FACING_ERROR_CODES = ['task_limit_reached', 'auth_unavailable']
+
+export function isUserFacingError(error: unknown): error is ApiClientError {
+  return error instanceof ApiClientError && USER_FACING_ERROR_CODES.includes(error.code)
+}
+
 async function toApiError(response: Response): Promise<ApiClientError> {
   try {
     const body = (await response.json()) as ApiError
