@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+
+<html class="h-full bg-background text-text" lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Historial - MyTasks</title>
+<!-- Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Google Fonts: Inter -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Tailwind Configuration -->
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "tertiary-fixed": "#ffdbcf",
+            "outline": "#747686",
+            "on-error": "#ffffff",
+            "tertiary-container": "#a73400",
+            "background": "#faf8ff",
+            "on-primary-container": "#cad3ff",
+            "border": "#CBD5E1",
+            "surface-container-low": "#f3f2fe",
+            "surface-container-high": "#e8e7f3",
+            "primary-fixed-dim": "#b7c4ff",
+            "inverse-primary": "#b7c4ff",
+            "inverse-on-surface": "#f0f0fb",
+            "primary": "#0037b0",
+            "error": "#B91C1C",
+            "scope-personal": "#0D9488",
+            "on-primary-fixed": "#001551",
+            "error-container": "#ffdad6",
+            "text": "#0F172A",
+            "tertiary": "#7f2500",
+            "primary-fixed": "#dce1ff",
+            "on-tertiary": "#ffffff",
+            "eliminate": "#475569",
+            "on-primary": "#ffffff",
+            "on-tertiary-container": "#ffc9b7",
+            "on-tertiary-fixed-variant": "#832700",
+            "surface-tint": "#2151da",
+            "schedule": "#1D4ED8",
+            "secondary-fixed-dim": "#6bd8cb",
+            "surface-dim": "#d9d9e5",
+            "text-muted": "#475569",
+            "surface-alt": "#F8FAFC",
+            "surface-container": "#ededf9",
+            "secondary-container": "#86f2e4",
+            "on-surface-variant": "#434655",
+            "success": "#15803D",
+            "do-now": "#B91C1C",
+            "on-tertiary-fixed": "#390c00",
+            "on-secondary": "#ffffff",
+            "on-secondary-fixed-variant": "#005049",
+            "surface-variant": "#e2e1ed",
+            "surface-bright": "#faf8ff",
+            "secondary-fixed": "#89f5e7",
+            "on-secondary-fixed": "#00201d",
+            "delegate": "#B45309",
+            "surface": "#FFFFFF",
+            "on-error-container": "#93000a",
+            "inverse-surface": "#2e3039",
+            "secondary": "#006a61",
+            "tertiary-fixed-dim": "#ffb59c",
+            "surface-container-highest": "#e2e1ed",
+            "surface-container-lowest": "#ffffff",
+            "on-surface": "#1a1b23",
+            "scope-work": "#7C3AED",
+            "outline-variant": "#c4c5d7",
+            "on-primary-fixed-variant": "#0039b5",
+            "on-background": "#1a1b23",
+            "on-secondary-container": "#006f66",
+            "primary-container": "#1d4ed8"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.125rem",
+            "lg": "0.25rem",
+            "xl": "0.5rem",
+            "full": "0.75rem"
+          },
+          "spacing": {
+            "space-md": "12px",
+            "space-xs": "4px",
+            "space-sm": "8px",
+            "gutter": "24px",
+            "space-xl": "32px",
+            "space-lg": "16px",
+            "space-2xl": "48px",
+            "margin": "24px"
+          },
+          "fontFamily": {
+            "display": ["Inter", "sans-serif"],
+            "heading": ["Inter", "sans-serif"],
+            "caption": ["Inter", "sans-serif"],
+            "body-strong": ["Inter", "sans-serif"],
+            "body": ["Inter", "sans-serif"]
+          },
+          "fontSize": {
+            "display": ["28px", { "lineHeight": "36px", "fontWeight": "700" }],
+            "heading": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+            "caption": ["13px", { "lineHeight": "18px", "fontWeight": "400" }],
+            "body-strong": ["16px", { "lineHeight": "24px", "fontWeight": "600" }],
+            "body": ["16px", { "lineHeight": "24px", "fontWeight": "400" }]
+          }
+        },
+      },
+    }
+  </script>
+</head>
+<body class="min-h-full flex flex-col font-body text-body bg-background text-text antialiased">
+<!-- TopNavBar (Shared Component aligned with Desktop Spec) -->
+<header class="w-full flex items-center justify-between px-space-lg py-space-sm bg-surface shadow-sm z-30 sticky top-0" role="banner">
+<!-- Brand / Logo -->
+<div class="flex items-center gap-space-lg">
+<a aria-label="MyTasks Inicio" class="flex items-center gap-2 group focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded" href="#">
+<span class="w-9 h-9 rounded-lg bg-schedule/10 flex items-center justify-center text-schedule transition-transform duration-150 group-hover:scale-105">
+<span class="material-symbols-outlined" data-icon="grid_view" style="font-size: 24px;">grid_view</span>
+</span>
+<span class="font-heading text-heading font-bold text-schedule tracking-tight">MyTasks</span>
+</a>
+<!-- Desktop Navigation Tabs -->
+<nav aria-label="Navegación principal" class="hidden md:flex items-center gap-1 ml-4">
+<a class="px-3 py-2 rounded font-body text-body text-text-muted hover:text-primary hover:bg-surface-container transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-primary" href="#">
+          Tablero
+        </a>
+<a aria-current="page" class="relative px-3 py-2 rounded font-body-strong text-body-strong text-schedule font-semibold focus:outline-none focus:ring-2 focus:ring-primary" href="#">
+          Historial
+          <span class="absolute bottom-0 left-3 right-3 h-[2px] bg-schedule rounded-full"></span>
+</a>
+<a class="px-3 py-2 rounded font-body text-body text-text-muted hover:text-primary hover:bg-surface-container transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-primary" href="#">
+          Papelera
+        </a>
+</nav>
+</div>
+<!-- User Profile & Actions -->
+<div class="flex items-center gap-space-md">
+<div class="flex items-center gap-space-sm pl-2 pr-3 py-1 bg-surface-container-low rounded-full border border-border">
+<span aria-hidden="true" class="w-8 h-8 rounded-full bg-schedule text-white flex items-center justify-center font-body-strong text-caption font-bold tracking-wider">
+          CM
+        </span>
+<div class="hidden lg:flex flex-col text-left">
+<span class="font-body-strong text-caption font-semibold leading-tight text-text">Carlos Mendoza</span>
+<span class="font-caption text-caption text-text-muted leading-tight">carlos.mendoza@gmail.com</span>
+</div>
+</div>
+<button aria-label="Cerrar sesión de Carlos Mendoza" class="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded border border-border bg-surface text-text hover:bg-surface-container font-caption text-caption font-medium transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-primary" type="button">
+<span class="material-symbols-outlined" data-icon="logout" style="font-size: 16px;">logout</span>
+<span>Cerrar sesión</span>
+</button>
+</div>
+</header>
+<!-- Main Content Layout -->
+<main class="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-space-xl" id="main-content">
+<!-- Breadcrumb & Header Section -->
+<header class="mb-space-xl">
+<!-- Breadcrumb -->
+<nav aria-label="Miga de pan" class="mb-2">
+<ol class="flex items-center gap-1.5 font-caption text-caption text-text-muted">
+<li>
+<a class="hover:text-primary transition-colors focus:outline-none focus:ring-1 focus:ring-primary rounded" href="#">Inicio</a>
+</li>
+<li aria-hidden="true">
+<span class="material-symbols-outlined" data-icon="chevron_right" style="font-size: 14px;">chevron_right</span>
+</li>
+<li aria-current="page" class="font-semibold text-text">Historial de tareas</li>
+</ol>
+</nav>
+<!-- Main Headline + Badge Cluster -->
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mt-1">
+<div class="space-y-1">
+<div class="flex items-center gap-3">
+<span class="p-2 rounded-lg bg-schedule/10 text-schedule flex items-center justify-center">
+<span class="material-symbols-outlined" data-icon="history" style="font-size: 28px;">history</span>
+</span>
+<h1 class="font-display text-display text-text font-bold tracking-tight">Historial</h1>
+<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-schedule/10 text-schedule border border-schedule/20 font-body-strong text-caption font-semibold">
+<span class="w-2 h-2 rounded-full bg-schedule"></span>
+              24 tareas completadas
+            </span>
+</div>
+<p class="font-body text-body text-text-muted">
+            Registro de tareas finalizadas organizadas cronológicamente por cuadrante de origen.
+          </p>
+</div>
+<div class="flex items-center gap-2 self-start md:self-auto">
+<button class="inline-flex items-center gap-2 px-3.5 py-2 rounded bg-surface border border-border text-text hover:bg-surface-container font-caption text-caption font-medium transition-colors shadow-sm focus:outline-none focus:ring-2 focus:ring-primary" type="button">
+<span class="material-symbols-outlined" data-icon="download" style="font-size: 18px;">download</span>
+<span>Exportar CSV</span>
+</button>
+</div>
+</div>
+</header>
+<!-- Toolbar & Filter Area -->
+<section aria-label="Filtros y búsqueda" class="bg-surface rounded-xl border border-border p-space-md mb-space-lg shadow-sm">
+<div class="flex flex-col lg:flex-row gap-4 justify-between items-stretch lg:items-center">
+<!-- Search Input -->
+<div class="relative flex-1 max-w-lg">
+<label class="sr-only" for="history-search">Buscar en el historial de tareas</label>
+<div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-text-muted">
+<span class="material-symbols-outlined" data-icon="search" style="font-size: 20px;">search</span>
+</div>
+<input class="block w-full pl-10 pr-4 py-2 border border-border rounded text-body font-body text-text placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all bg-background" id="history-search" name="search" placeholder="Buscar en el historial de tareas..." type="search"/>
+</div>
+<!-- Scope Badges Filter Group & Sort Dropdown -->
+<div class="flex flex-wrap items-center gap-3">
+<!-- Scope Segmented Controls -->
+<div aria-label="Filtrar por ámbito" class="inline-flex p-1 bg-surface-container rounded border border-border" role="group">
+<button aria-pressed="true" class="px-3 py-1.5 rounded font-caption text-caption font-semibold bg-surface text-schedule shadow-sm focus:outline-none focus:ring-2 focus:ring-schedule" type="button">
+              Todas (24)
+            </button>
+<button aria-pressed="false" class="px-3 py-1.5 rounded font-caption text-caption text-text-muted hover:text-text transition-colors focus:outline-none focus:ring-2 focus:ring-primary" type="button">
+              Laboral (16)
+            </button>
+<button aria-pressed="false" class="px-3 py-1.5 rounded font-caption text-caption text-text-muted hover:text-text transition-colors focus:outline-none focus:ring-2 focus:ring-primary" type="button">
+              Personal (8)
+            </button>
+</div>
+<!-- Sort Select -->
+<div class="flex items-center gap-2">
+<label class="sr-only" for="sort-history">Ordenar por</label>
+<div class="relative">
+<select class="appearance-none bg-surface border border-border text-text font-caption text-caption font-medium py-2 pl-3 pr-8 rounded focus:outline-none focus:ring-2 focus:ring-primary cursor-pointer hover:bg-surface-container transition-colors" id="sort-history">
+<option selected="">Más recientes primero</option>
+<option>Más antiguas primero</option>
+<option>Por cuadrante de origen</option>
+<option>Por ámbito (Laboral/Personal)</option>
+</select>
+<div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-text-muted">
+<span class="material-symbols-outlined" data-icon="expand_more" style="font-size: 18px;">expand_more</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Chronological Tasks Feed -->
+<div aria-label="Tareas completadas" class="space-y-space-lg" role="feed">
+<!-- Group 1: Hoy, 28 de marzo -->
+<section aria-labelledby="heading-today" class="space-y-3">
+<div class="flex items-center gap-2 border-b border-border pb-2">
+<span class="material-symbols-outlined text-schedule" data-icon="calendar_today" style="font-size: 18px;">calendar_today</span>
+<h2 class="font-heading text-body-strong font-semibold text-text" id="heading-today">Hoy, 28 de marzo</h2>
+<span class="text-caption font-caption text-text-muted">(2 tareas finalizadas)</span>
+</div>
+<div class="space-y-2.5">
+<!-- Item 1: Hacer ahora / Laboral -->
+<article class="group bg-surface rounded-lg border border-border border-l-4 border-l-do-now p-4 shadow-sm hover:shadow transition-shadow flex flex-col md:flex-row md:items-center justify-between gap-4">
+<div class="flex items-start gap-3.5 flex-1 min-w-0">
+<!-- Checkmark Icon -->
+<span aria-label="Tarea completada" class="flex-shrink-0 mt-0.5 w-6 h-6 rounded-full bg-success/10 text-success flex items-center justify-center border border-success/30">
+<span class="material-symbols-outlined" data-icon="check" style="font-size: 16px; font-weight: 700;">check</span>
+</span>
+<!-- Content -->
+<div class="space-y-1.5 flex-1 min-w-0">
+<p class="font-body text-body font-medium text-text line-through text-opacity-85">
+                  Enviar reporte financiero mensual al comité directivo
+                </p>
+<div class="flex flex-wrap items-center gap-2">
+<!-- Quadrant Badge: Hacer ahora -->
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded font-caption text-caption font-semibold bg-do-now/10 text-do-now border border-do-now/20">
+<span aria-hidden="true" class="w-1.5 h-1.5 rounded-full bg-do-now"></span>
+                    Hacer ahora
+                  </span>
+<!-- Scope Badge: Laboral -->
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded font-caption text-caption font-medium bg-scope-work/10 text-scope-work border border-scope-work/20">
+<span class="material-symbols-outlined" data-icon="business_center" style="font-size: 13px;">business_center</span>
+                    Laboral
+                  </span>
+<!-- Time Stamp -->
+<span class="font-caption text-caption text-text-muted flex items-center gap-1">
+<span class="material-symbols-outlined" data-icon="schedule" style="font-size: 14px;">schedule</span>
+                    Completada hoy, 14:30
+                  </span>
+</div>
+</div>
+</div>
+<!-- Actions -->
+<div class="flex items-center gap-2 self-end md:self-center shrink-0">
+<button aria-label="Reabrir tarea: Enviar reporte financiero mensual al comité directivo" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded border border-border bg-surface text-text hover:bg-surface-container font-caption text-caption font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-primary shadow-sm" type="button">
+<span class="material-symbols-outlined text-schedule" data-icon="restart_alt" style="font-size: 16px;">restart_alt</span>
+<span>Reabrir</span>
+</button>
+<button aria-label="Mover a la papelera tarea: Enviar reporte financiero mensual al comité directivo" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded border border-border bg-surface text-text hover:bg-error/10 hover:text-error hover:border-error/30 font-caption text-caption font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-error shadow-sm" type="button">
+<span class="material-symbols-outlined text-text-muted group-hover:text-error" data-icon="delete" style="font-size: 16px;">delete</span>
+<span>Mover a la papelera</span>
+</button>
+</div>
+</article>
+<!-- Item 2: Planificar / Laboral -->
+<article class="group bg-surface rounded-lg border border-border border-l-4 border-l-schedule p-4 shadow-sm hover:shadow transition-shadow flex flex-col md:flex-row md:items-center justify-between gap-4">
+<div class="flex items-start gap-3.5 flex-1 min-w-0">
+<span aria-label="Tarea completada" class="flex-shrink-0 mt-0.5 w-6 h-6 rounded-full bg-success/10 text-success flex items-center justify-center border border-success/30">
+<span class="material-symbols-outlined" data-icon="check" style="font-size: 16px; font-weight: 700;">check</span>
+</span>
+<div class="space-y-1.5 flex-1 min-w-0">
+<p class="font-body text-body font-medium text-text line-through text-opacity-85">
+                  Estructurar arquitectura para la nueva versión de la API de pagos
+                </p>
+<div class="flex flex-wrap items-center gap-2">
+<!-- Quadrant Badge: Planificar -->
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded font-caption text-caption font-semibold bg-schedule/10 text-schedule border border-schedule/20">
+<span aria-hidden="true" class="w-1.5 h-1.5 rounded-full bg-schedule"></span>
+                    Planificar
+                  </span>
+<!-- Scope Badge: Laboral -->
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded font-caption text-caption font-medium bg-scope-work/10 text-scope-work border border-scope-work/20">
+<span class="material-symbols-outlined" data-icon="business_center" style="font-size: 13px;">business_center</span>
+                    Laboral
+                  </span>
+<!-- Time Stamp -->
+<span class="font-caption text-caption text-text-muted flex items-center gap-1">
+<span class="material-symbols-outlined" data-icon="schedule" style="font-size: 14px;">schedule</span>
+                    Completada hoy, 11:15
+                  </span>
+</div>
+</div>
+</div>
+<!-- Actions -->
+<div class="flex items-center gap-2 self-end md:self-center shrink-0">
+<button aria-label="Reabrir tarea: Estructurar arquitectura para la nueva versión de la API de pagos" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded border border-border bg-surface text-text hover:bg-surface-container font-caption text-caption font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-primary shadow-sm" type="button">
+<span class="material-symbols-outlined text-schedule" data-icon="restart_alt" style="font-size: 16px;">restart_alt</span>
+<span>Reabrir</span>
+</button>
+<button aria-label="Mover a la papelera tarea: Estructurar arquitectura para la nueva versión de la API de pagos" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded border border-border bg-surface text-text hover:bg-error/10 hover:text-error hover:border-error/30 font-caption text-caption font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-error shadow-sm" type="button">
+<span class="material-symbols-outlined text-text-muted group-hover:text-error" data-icon="delete" style="font-size: 16px;">delete</span>
+<span>Mover a la papelera</span>
+</button>
+</div>
+</article>
+</div>
+</section>
+<!-- Group 2: Ayer, 27 de marzo -->
+<section aria-labelledby="heading-yesterday" class="space-y-3 pt-2">
+<div class="flex items-center gap-2 border-b border-border pb-2">
+<span class="material-symbols-outlined text-schedule" data-icon="calendar_today" style="font-size: 18px;">calendar_today</span>
+<h2 class="font-heading text-body-strong font-semibold text-text" id="heading-yesterday">Ayer, 27 de marzo</h2>
+<span class="text-caption font-caption text-text-muted">(2 tareas finalizadas)</span>
+</div>
+<div class="space-y-2.5">
+<!-- Item 3: Delegar / Laboral -->
+<article class="group bg-surface rounded-lg border border-border border-l-4 border-l-delegate p-4 shadow-sm hover:shadow transition-shadow flex flex-col md:flex-row md:items-center justify-between gap-4">
+<div class="flex items-start gap-3.5 flex-1 min-w-0">
+<span aria-label="Tarea completada" class="flex-shrink-0 mt-0.5 w-6 h-6 rounded-full bg-success/10 text-success flex items-center justify-center border border-success/30">
+<span class="material-symbols-outlined" data-icon="check" style="font-size: 16px; font-weight: 700;">check</span>
+</span>
+<div class="space-y-1.5 flex-1 min-w-0">
+<p class="font-body text-body font-medium text-text line-through text-opacity-85">
+                  Coordinar soporte técnico para la migración de correos
+                </p>
+<div class="flex flex-wrap items-center gap-2">
+<!-- Quadrant Badge: Delegar -->
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded font-caption text-caption font-semibold bg-delegate/10 text-delegate border border-delegate/20">
+<span aria-hidden="true" class="w-1.5 h-1.5 rounded-full bg-delegate"></span>
+                    Delegar
+                  </span>
+<!-- Scope Badge: Laboral -->
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded font-caption text-caption font-medium bg-scope-work/10 text-scope-work border border-scope-work/20">
+<span class="material-symbols-outlined" data-icon="business_center" style="font-size: 13px;">business_center</span>
+                    Laboral
+                  </span>
+<!-- Time Stamp -->
+<span class="font-caption text-caption text-text-muted flex items-center gap-1">
+<span class="material-symbols-outlined" data-icon="schedule" style="font-size: 14px;">schedule</span>
+                    Completada ayer, 18:15
+                  </span>
+</div>
+</div>
+</div>
+<!-- Actions -->
+<div class="flex items-center gap-2 self-end md:self-center shrink-0">
+<button aria-label="Reabrir tarea: Coordinar soporte técnico para la migración de correos" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded border border-border bg-surface text-text hover:bg-surface-container font-caption text-caption font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-primary shadow-sm" type="button">
+<span class="material-symbols-outlined text-schedule" data-icon="restart_alt" style="font-size: 16px;">restart_alt</span>
+<span>Reabrir</span>
+</button>
+<button aria-label="Mover a la papelera tarea: Coordinar soporte técnico para la migración de correos" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded border border-border bg-surface text-text hover:bg-error/10 hover:text-error hover:border-error/30 font-caption text-caption font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-error shadow-sm" type="button">
+<span class="material-symbols-outlined text-text-muted group-hover:text-error" data-icon="delete" style="font-size: 16px;">delete</span>
+<span>Mover a la papelera</span>
+</button>
+</div>
+</article>
+<!-- Item 4: Planificar / Personal -->
+<article class="group bg-surface rounded-lg border border-border border-l-4 border-l-schedule p-4 shadow-sm hover:shadow transition-shadow flex flex-col md:flex-row md:items-center justify-between gap-4">
+<div class="flex items-start gap-3.5 flex-1 min-w-0">
+<span aria-label="Tarea completada" class="flex-shrink-0 mt-0.5 w-6 h-6 rounded-full bg-success/10 text-success flex items-center justify-center border border-success/30">
+<span class="material-symbols-outlined" data-icon="check" style="font-size: 16px; font-weight: 700;">check</span>
+</span>
+<div class="space-y-1.5 flex-1 min-w-0">
+<p class="font-body text-body font-medium text-text line-through text-opacity-85">
+                  Comprar pasajes y hotel para las vacaciones familiares de verano
+                </p>
+<div class="flex flex-wrap items-center gap-2">
+<!-- Quadrant Badge: Planificar -->
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded font-caption text-caption font-semibold bg-schedule/10 text-schedule border border-schedule/20">
+<span aria-hidden="true" class="w-1.5 h-1.5 rounded-full bg-schedule"></span>
+                    Planificar
+                  </span>
+<!-- Scope Badge: Personal -->
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded font-caption text-caption font-medium bg-scope-personal/10 text-scope-personal border border-scope-personal/20">
+<span class="material-symbols-outlined" data-icon="person" style="font-size: 13px;">person</span>
+                    Personal
+                  </span>
+<!-- Time Stamp -->
+<span class="font-caption text-caption text-text-muted flex items-center gap-1">
+<span class="material-symbols-outlined" data-icon="schedule" style="font-size: 14px;">schedule</span>
+                    Completada ayer, 16:40
+                  </span>
+</div>
+</div>
+</div>
+<!-- Actions -->
+<div class="flex items-center gap-2 self-end md:self-center shrink-0">
+<button aria-label="Reabrir tarea: Comprar pasajes y hotel para las vacaciones familiares de verano" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded border border-border bg-surface text-text hover:bg-surface-container font-caption text-caption font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-primary shadow-sm" type="button">
+<span class="material-symbols-outlined text-schedule" data-icon="restart_alt" style="font-size: 16px;">restart_alt</span>
+<span>Reabrir</span>
+</button>
+<button aria-label="Mover a la papelera tarea: Comprar pasajes y hotel para las vacaciones familiares de verano" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded border border-border bg-surface text-text hover:bg-error/10 hover:text-error hover:border-error/30 font-caption text-caption font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-error shadow-sm" type="button">
+<span class="material-symbols-outlined text-text-muted group-hover:text-error" data-icon="delete" style="font-size: 16px;">delete</span>
+<span>Mover a la papelera</span>
+</button>
+</div>
+</article>
+</div>
+</section>
+<!-- Group 3: Lunes, 24 de marzo -->
+<section aria-labelledby="heading-monday" class="space-y-3 pt-2">
+<div class="flex items-center gap-2 border-b border-border pb-2">
+<span class="material-symbols-outlined text-schedule" data-icon="calendar_today" style="font-size: 18px;">calendar_today</span>
+<h2 class="font-heading text-body-strong font-semibold text-text" id="heading-monday">Lunes, 24 de marzo</h2>
+<span class="text-caption font-caption text-text-muted">(1 tarea finalizada)</span>
+</div>
+<div class="space-y-2.5">
+<!-- Item 5: Eliminar / Personal -->
+<article class="group bg-surface rounded-lg border border-border border-l-4 border-l-eliminate p-4 shadow-sm hover:shadow transition-shadow flex flex-col md:flex-row md:items-center justify-between gap-4">
+<div class="flex items-start gap-3.5 flex-1 min-w-0">
+<span aria-label="Tarea completada" class="flex-shrink-0 mt-0.5 w-6 h-6 rounded-full bg-success/10 text-success flex items-center justify-center border border-success/30">
+<span class="material-symbols-outlined" data-icon="check" style="font-size: 16px; font-weight: 700;">check</span>
+</span>
+<div class="space-y-1.5 flex-1 min-w-0">
+<p class="font-body text-body font-medium text-text line-through text-opacity-85">
+                  Revisar folletos antiguos de suscripciones innecesarias
+                </p>
+<div class="flex flex-wrap items-center gap-2">
+<!-- Quadrant Badge: Eliminar -->
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded font-caption text-caption font-semibold bg-eliminate/10 text-eliminate border border-eliminate/20">
+<span aria-hidden="true" class="w-1.5 h-1.5 rounded-full bg-eliminate"></span>
+                    Eliminar
+                  </span>
+<!-- Scope Badge: Personal -->
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded font-caption text-caption font-medium bg-scope-personal/10 text-scope-personal border border-scope-personal/20">
+<span class="material-symbols-outlined" data-icon="person" style="font-size: 13px;">person</span>
+                    Personal
+                  </span>
+<!-- Time Stamp -->
+<span class="font-caption text-caption text-text-muted flex items-center gap-1">
+<span class="material-symbols-outlined" data-icon="schedule" style="font-size: 14px;">schedule</span>
+                    Completada lunes, 10:05
+                  </span>
+</div>
+</div>
+</div>
+<!-- Actions -->
+<div class="flex items-center gap-2 self-end md:self-center shrink-0">
+<button aria-label="Reabrir tarea: Revisar folletos antiguos de suscripciones innecesarias" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded border border-border bg-surface text-text hover:bg-surface-container font-caption text-caption font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-primary shadow-sm" type="button">
+<span class="material-symbols-outlined text-schedule" data-icon="restart_alt" style="font-size: 16px;">restart_alt</span>
+<span>Reabrir</span>
+</button>
+<button aria-label="Mover a la papelera tarea: Revisar folletos antiguos de suscripciones innecesarias" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded border border-border bg-surface text-text hover:bg-error/10 hover:text-error hover:border-error/30 font-caption text-caption font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-error shadow-sm" type="button">
+<span class="material-symbols-outlined text-text-muted group-hover:text-error" data-icon="delete" style="font-size: 16px;">delete</span>
+<span>Mover a la papelera</span>
+</button>
+</div>
+</article>
+</div>
+</section>
+</div>
+<!-- Load More Section -->
+<div class="mt-space-xl flex flex-col items-center justify-center gap-2">
+<button class="inline-flex items-center gap-2 px-5 py-2.5 rounded bg-surface border border-border text-text font-body-strong text-caption font-semibold shadow-sm hover:bg-surface-container hover:border-text-muted/40 transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-primary active:scale-95" type="button">
+<span>Cargar más tareas</span>
+<span class="material-symbols-outlined text-schedule" data-icon="expand_more" style="font-size: 20px;">expand_more</span>
+</button>
+<p class="font-caption text-caption text-text-muted">Mostrando 5 de 24 tareas completadas</p>
+</div>
+</main>
+<!-- Institutional Footer -->
+<footer class="mt-auto bg-surface border-t border-border py-6 px-4" role="contentinfo">
+<div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 font-caption text-caption text-text-muted text-center sm:text-left">
+<p>© 2025 MyTasks. Enfoque estructurado con la matriz de Dwight D. Eisenhower.</p>
+<div class="flex items-center gap-4">
+<a class="hover:text-primary transition-colors focus:outline-none focus:ring-1 focus:ring-primary rounded" href="#">Privacidad</a>
+<span aria-hidden="true">·</span>
+<a class="hover:text-primary transition-colors focus:outline-none focus:ring-1 focus:ring-primary rounded" href="#">Términos</a>
+<span aria-hidden="true">·</span>
+<a class="hover:text-primary transition-colors focus:outline-none focus:ring-1 focus:ring-primary rounded" href="#">Ayuda</a>
+</div>
+</div>
+</footer>
+</body></html>
