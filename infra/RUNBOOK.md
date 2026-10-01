@@ -78,3 +78,31 @@ Cuando haya sospecha de que la clave se ha expuesto, o falle una comprobación d
 
 Mientras la cuenta esté revocada no hay operaciones reales sobre Google Cloud: el agente se
 detiene y avisa.
+
+## 4. Permisos temporales de arranque de `mytasks-ai-agent`
+
+Concedidos por el propietario con sus credenciales el **2026-10-01** (tarea T004) para crear el
+arranque de la Fase 3: estado de Terraform, federación, identidades del pipeline y registro de
+imágenes. No incluyen roles de despliegue de Cloud Run (Principio VI) ni `owner`/`editor`.
+Se **retiran en la tarea T060**; solo `roles/viewer` y `roles/logging.viewer` son permanentes.
+
+| Rol | `pdlco-mytasks` (producción y plataforma) | `pdlco-mytasks-stg` (staging) | Motivo | Se retira |
+|---|---|---|---|---|
+| `roles/serviceusage.serviceUsageAdmin` | sí | sí | Habilitar APIs (T042) | T060 |
+| `roles/iam.serviceAccountAdmin` | sí | sí | Crear cuentas `terraform-*`, `terraform-plan-*` y `deployer-*` y enlazarlas a la federación (T046, T047, T049) | T060 |
+| `roles/resourcemanager.projectIamAdmin` | sí | sí | Roles acotados de esas cuentas y registros de auditoría (T015, T046) | T060 |
+| `roles/storage.admin` | sí | no | Bucket de estado de Terraform (T043) | T060 |
+| `roles/iam.workloadIdentityPoolAdmin` | sí | no | Pool y proveedor de federación de GitHub (T044) | T060 |
+| `roles/artifactregistry.admin` | sí | no | Repositorio de imágenes (T048) | T060 |
+| `roles/viewer` | sí | sí | Lectura de recursos | permanente |
+| `roles/logging.viewer` | sí | sí | Lectura de registros de auditoría | permanente |
+
+Verificado en solo lectura el 2026-10-01 con la política IAM de cada proyecto: producción tiene los
+ocho roles y staging los cinco que le corresponden.
+
+`roles/resourcemanager.projectIamAdmin` permite a la cuenta concederse más permisos: es el riesgo
+conocido del arranque y la razón de que sea temporal y de que cada cambio requiera la confirmación
+explícita del propietario.
+
+Al terminar el arranque, T060 retira los seis roles temporales y se anota aquí la fecha.
+`TODO(T060): fecha de retirada`.
