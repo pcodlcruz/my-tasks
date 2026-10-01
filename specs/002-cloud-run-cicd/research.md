@@ -291,6 +291,39 @@ Detalle y verificaciones en [contracts/agent-identity.md](./contracts/agent-iden
 - **Riesgo**: R-1 (políticas de organización que impidan crear claves) y R-6 (comportamiento del
   MCP no verificado).
 
+### Verificado (T007, 2026-10-01)
+
+Fuentes: README y `src/index.ts` de `googleapis/gcloud-mcp`, y la documentación de Claude Code
+sobre sandbox, permisos, ajustes y hooks.
+
+- **`gcloud-mcp` no bloquea el cambio de identidad por sí mismo (cierra R-6).** Su lista de
+  comandos denegados por defecto solo contiene comandos interactivos o de SSH (`compute ssh`,
+  `compute start-iap-tunnel`, `compute connect-to-serial-port`, `compute tpus tpu-vm ssh`,
+  `compute tpus queued-resources ssh`, `cloud-shell ssh`, `workstations ssh`, `app instances ssh`,
+  `interactive`, `meta`). **No** incluye `auth`, `config set`, `--account` ni
+  `--impersonate-service-account`. Admite un fichero JSON de denylist/allowlist con `--config`
+  (formato no documentado en el README). Sus permisos son los de la cuenta activa de `gcloud`.
+  Conclusión: el hook de identidad (T009) es necesario como segunda capa; la capa 1 (sin
+  credenciales personales en el almacén aislado) sigue siendo la garantía principal.
+- **Sandbox de Bash** (`.claude/settings.json`): `sandbox.enabled`,
+  `sandbox.filesystem.denyRead` / `allowRead` (gana la ruta más específica),
+  `sandbox.credentials.files` y `sandbox.credentials.envVars` con `"mode": "deny"` (las variables
+  se eliminan del entorno de cada comando), `sandbox.allowUnsandboxedCommands: false` (anula el
+  parámetro `dangerouslyDisableSandbox`) y `sandbox.failIfUnavailable: true`. Las entradas
+  `deny` se fusionan entre ámbitos y ninguno puede retirarlas. Por defecto el sandbox **permite**
+  leer todo el equipo salvo directorios denegados, y avisa y sigue sin sandbox si no arranca.
+- **Herramientas de fichero**: el sandbox solo cubre Bash. Para `Read`, `Grep` y `Glob` hacen falta
+  reglas `permissions.deny` con `Read(...)`: `~/ruta` (relativa al directorio personal) y
+  `//ruta` (absoluta); `Edit(...)` cubre las herramientas de edición. Claude Code aplica `Read`
+  "en la medida de lo posible" a Grep/Glob y a las menciones `@fichero`, y los `deny` también
+  actúan sobre el destino de un enlace simbólico.
+- **Hook `PreToolUse`**: se registra en `settings.json` con `matcher` `mcp__gcloud__.*` (o la
+  herramienta concreta `mcp__gcloud__run_gcloud_command`); recibe por la entrada estándar un JSON
+  con `tool_name` y `tool_input`; el código de salida 2 (con el motivo por la salida de errores) o
+  un JSON con `permissionDecision: "deny"` bloquean la llamada. Dispone de `$CLAUDE_PROJECT_DIR`.
+- **Variables del MCP**: el servidor MCP es un proceso propio, no sandboxed; recibe el entorno
+  definido en `.mcp.json` (`env`), no el de Bash.
+
 ## R13. Empaquetado de imágenes: Buildpacks por defecto, Dockerfile por excepción
 
 - **Decision** (ratificada por el propietario el 2026-09-30): las imágenes se construyen con
