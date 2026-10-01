@@ -14,18 +14,21 @@ de conflicto, prevalece la constitución.
 - Documentación del proyecto, título y cuerpo de PRs e Issues: **español**.
 
 ### Google Cloud (Principio V)
-- Toda operación sobre Google Cloud pasa por el **MCP oficial de Google Cloud** con la cuenta
-  de servicio del agente.
+- Toda operación **del agente** sobre Google Cloud pasa por el **MCP oficial de Google Cloud**
+  con la cuenta de servicio del agente.
 - **Nunca** ejecutes `gcloud`, `gsutil` ni `bq` directamente, ni uses SDKs/APIs fuera del MCP.
 - **Nunca** uses credenciales personales del usuario.
 - La cuenta de servicio del agente es `mytasks-ai-agent@pdlco-mytasks.iam.gserviceaccount.com`
-  (ver constitución). Mientras el MCP no esté configurado para operar con ella, **no hay
+  (ver constitución); **nunca** uses otra. Las cuentas `terraform-*`, `terraform-plan-*` y
+  `deployer-*` son exclusivas del pipeline CI/CD (federadas, sin claves) y el agente no las usa.
+  Mientras el MCP no esté configurado para operar con ella, **no hay
   operaciones reales sobre Google Cloud**: si una tarea las requiere, detente y avisa.
 - Cualquier cambio de infraestructura requiere confirmación explícita del usuario.
 
 ### Git y Pull Requests (Principios VI, VII)
 - GitFlow: `feature/*` → `develop` (staging) → `release/*` → `main` (producción);
-  `hotfix/*` → `main` con retro-merge a `develop`.
+  `hotfix/*` → `main` con retro-merge a `develop`. Staging se despliega desde `develop`,
+  `release/*` y `hotfix/*`; producción, desde `main`.
 - Cada feature de Spec Kit se entrega en **una PR de diseño y una PR por fase** de `tasks.md`:
   - `feature/NNN-nombre` (igual que `specs/NNN-nombre/`): solo los documentos de diseño; su PR
     se abre tras `/speckit-analyze` y se fusiona antes de implementar.
@@ -38,7 +41,8 @@ de conflicto, prevalece la constitución.
   la ejecuta siempre el propietario, tras revisar el diff.
 - Commits en inglés con [Conventional Commits](https://www.conventionalcommits.org/):
   `type(scope): subject` (`feat`, `fix`, `docs`, `refactor`, `test`, `chore`, `ci`).
-- Los despliegues a staging/producción los hace **solo el pipeline de CI/CD**; nunca manuales.
+- Los despliegues a staging/producción los hace **solo el pipeline de CI/CD** con sus propias
+  identidades; nunca manuales.
 
 ### Agentes y skills (Principio VIII)
 Usa el agente o skill de `.claude/skills/` que cubra la tarea antes de actuar por tu cuenta.

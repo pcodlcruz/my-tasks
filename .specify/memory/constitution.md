@@ -1,5 +1,28 @@
 <!--
 Informe de Impacto de Sincronización (Sync Impact Report)
+Cambio de versión: 1.2.1 → 1.3.0 (MINOR: ampliación material de los Principios IV y V y de la
+  restricción de identidad en la nube).
+Motivo: la feature 002-cloud-run-cicd (hallazgos D1/D2 de `/speckit-analyze`) hace que el
+  pipeline CI/CD despliegue y aplique Terraform con identidades de servicio propias, lo que la
+  redacción 1.2.1 prohibía literalmente ("toda interacción con Google Cloud" por el MCP; "cualquier
+  otra" cuenta de servicio PROHIBIDA).
+Cambios:
+  - Principio IV: staging se despliega desde `develop`, `release/*` y `hotfix/*` (antes solo
+    `develop`); producción sigue desde `main`.
+  - Principio V: la obligación de usar el MCP y las prohibiciones (`gcloud`/`gsutil`/`bq`/SDK
+    directos, credenciales personales) aplican al agente; el pipeline CI/CD actúa con identidades
+    de servicio propias, federadas y sin claves de larga duración, que el agente no puede usar.
+  - Restricciones Técnicas, "Identidad en la nube": distingue la cuenta del agente de las cuentas
+    exclusivas del pipeline (`terraform-*`, `terraform-plan-*`, `deployer-*`).
+  - Sin cambios en la tabla de Mecanismos de Cumplimiento: siguen *pendiente*; pasarán a *activo*
+    en una enmienda PATCH posterior cuando se implementen (tarea T091 de la feature 002).
+  - `CLAUDE.md` actualizado en la misma PR (reglas siempre activas V, VI y GitFlow).
+Pendientes / TODOs: los mismos que en 1.2.0 (ver tabla de Mecanismos de Cumplimiento).
+Plantillas que requieren seguimiento: ninguna.
+Nota de gobernanza: esta enmienda la redacta un agente; solo el propietario la ratifica al
+  fusionar la PR.
+
+Historial anterior (1.2.1):
 Cambio de versión: 1.2.0 → 1.2.1 (PATCH: corrección de nombre, sin cambio de intención en
   ningún principio).
 Cambios:
@@ -74,7 +97,8 @@ mismo rigor que ya se exige a la identidad en la nube.
 Existen tres entornos con la misma topología y configuración (el dimensionado puede diferir):
 - **Local**: desarrollo y ejecución de tests (con el emulador de Firestore); único entorno
   donde se prueba manualmente.
-- **Staging** (Google Cloud): validación previa a producción; se despliega desde `develop`.
+- **Staging** (Google Cloud): validación previa a producción; se despliega desde `develop`,
+  `release/*` y `hotfix/*`.
 - **Producción** (Google Cloud): producto real; se despliega desde `main` (releases y hotfixes).
 
 Un cambio DEBE superar staging antes de promoverse a producción. Está PROHIBIDO usar staging o
@@ -84,11 +108,13 @@ producción como entorno de desarrollo o de pruebas manuales ad-hoc.
 despliega dónde y protege a los usuarios reales durante la iteración.
 
 ### V. Identidad de Agente y Acceso Exclusivo por MCP Oficial (NON-NEGOTIABLE)
-Toda interacción con Google Cloud DEBE realizarse a través del MCP oficial de Google Cloud con
-la cuenta de servicio dedicada al agente. Está PROHIBIDO ejecutar directamente `gcloud`,
-`gsutil`, `bq` o sus equivalentes de API/SDK fuera del MCP, y está PROHIBIDO usar credenciales
-personales del usuario para cualquier operación, de lectura o escritura, en cualquier entorno.
-Los cambios de infraestructura DEBEN confirmarse explícitamente por el propietario antes de
+Toda interacción **del agente** con Google Cloud DEBE realizarse a través del MCP oficial de
+Google Cloud con la cuenta de servicio dedicada al agente. Está PROHIBIDO que el agente ejecute
+directamente `gcloud`, `gsutil`, `bq` o sus equivalentes de API/SDK fuera del MCP, y está
+PROHIBIDO usar credenciales personales del usuario para cualquier operación, de lectura o
+escritura, en cualquier entorno. El pipeline CI/CD (Principio VI) actúa con identidades de
+servicio propias, federadas y sin claves de larga duración, que el agente no puede usar. Los
+cambios de infraestructura DEBEN confirmarse explícitamente por el propietario antes de
 aplicarse.
 
 **Rationale**: una única vía de acceso con identidad de servicio auditable elimina operaciones
@@ -153,7 +179,9 @@ Stack fijado por esta constitución; cambiarlo requiere enmienda, no una decisi�
 - **Nube**: Google Cloud exclusivamente. El servicio concreto de ejecución (p. ej. Cloud Run)
   y la topología los define el skill `mytasks-google-cloud-architect` en el plan de arquitectura.
 - **Identidad en la nube**: La cuenta de servicio dedicada al agente es
-  `mytasks-ai-agent@pdlco-mytasks.iam.gserviceaccount.com`. Está PROHIBIDO el uso de cualquier otra.
+  `mytasks-ai-agent@pdlco-mytasks.iam.gserviceaccount.com`. Está PROHIBIDO que el agente use
+  cualquier otra. Las cuentas `terraform-*`, `terraform-plan-*` y `deployer-*` son exclusivas del
+  pipeline CI/CD (Principios V y VI) y el agente no puede usarlas.
 
 ## Control de Versiones y Gestión de Proyecto
 
@@ -218,4 +246,4 @@ activas (V, VI, VII, VIII, IX) se reflejan además en `CLAUDE.md` para que apliq
 los comandos de Spec Kit; toda enmienda a esas reglas DEBE actualizar ambos ficheros en la
 misma PR.
 
-**Versión**: 1.2.1 | **Ratificada**: 2026-09-14 | **Última enmienda**: 2026-09-24
+**Versión**: 1.3.0 | **Ratificada**: 2026-09-14 | **Última enmienda**: 2026-10-01
