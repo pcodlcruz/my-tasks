@@ -7,7 +7,7 @@
         "CLOUDSDK_CONFIG": "${HOME}/.config/mytasks-agent/gcloud",
         "CLOUDSDK_CORE_PROJECT": "pdlco-mytasks",
         "CLOUDSDK_AUTH_IMPERSONATE_SERVICE_ACCOUNT": "",
-        "CLOUDSDK_CORE_ACCOUNT": "",
+        "CLOUDSDK_CORE_ACCOUNT": "mytasks-ai-agent@pdlco-mytasks.iam.gserviceaccount.com",
         "CLOUDSDK_AUTH_ACCESS_TOKEN_FILE": "",
         "CLOUDSDK_AUTH_CREDENTIAL_FILE_OVERRIDE": "",
         "GOOGLE_APPLICATION_CREDENTIALS": ""
