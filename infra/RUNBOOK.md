@@ -106,3 +106,20 @@ explícita del propietario.
 
 Al terminar el arranque, T060 retira los seis roles temporales y se anota aquí la fecha.
 `TODO(T060): fecha de retirada`.
+
+## 5. Registros de auditoría de acceso a datos (T015)
+
+Activados el **2026-10-02** por el propietario desde la consola web (IAM y administración →
+Registros de auditoría) en `pdlco-mytasks`, porque el clasificador de permisos del agente bloqueó
+`projects set-iam-policy` por el MCP. Es, por tanto, una excepción a "todo por el MCP", anotada
+también en la PR. Verificado en solo lectura por el MCP (`projects get-iam-policy`); los bindings
+no cambiaron.
+
+| Servicio | Nombre en la consola | Lectura de datos | Escritura de datos |
+|---|---|---|---|
+| `datastore.googleapis.com` | Firestore/Datastore API | sí | sí |
+| `iam.googleapis.com` | Identity and Access Management (IAM) API | sí | sí |
+
+La actividad de administración está siempre activa. T055 declara este mismo `auditConfigs` en
+`infra/platform/` y T064 el del entorno de staging. Pendiente de confirmar con tráfico real
+(T017) que las operaciones de Firestore aparecen como `DATA_READ` / `DATA_WRITE`.
