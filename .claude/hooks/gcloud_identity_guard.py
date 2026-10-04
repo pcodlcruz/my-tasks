@@ -30,6 +30,8 @@ FORBIDDEN_FLAGS = (
     "--access-token-file",
     "--credential-file-override",
     "--configuration",
+    # Loads `--flag: value` pairs from a file the agent could write, hiding any flag above.
+    "--flags-file",
 )
 # gcloud may accept unambiguous abbreviations; block them too (shorter ones would be ambiguous).
 MIN_ABBREVIATION_LENGTH = 5
@@ -141,7 +143,7 @@ def _log_rejection(tool_name: str, reason: str) -> None:
         log_file.write(json.dumps(entry) + "\n")
 
 
-def main() -> int:
+def _run() -> tuple[str, bool, str | None]:
     tool_name = "unknown"
     try:
         payload = json.loads(sys.stdin.read())
@@ -152,6 +154,15 @@ def main() -> int:
             tool_name = payload["tool_name"]
 
     allowed, reason = evaluate(payload)
+    return tool_name, allowed, reason
+
+
+def main() -> int:
+    try:
+        tool_name, allowed, reason = _run()
+    except Exception:  # noqa: BLE001 - any unexpected failure must block, never let the call pass
+        # Claude Code only blocks on exit code 2; an uncaught exception would exit 1 and allow it.
+        tool_name, allowed, reason = "unknown", False, "guard-error"
     if allowed:
         return 0
 

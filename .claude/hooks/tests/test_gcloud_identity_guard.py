@@ -1,6 +1,7 @@
 """Tests for the gcloud identity guard (PreToolUse hook for the Google Cloud MCP)."""
 
 import importlib.util
+import io
 import json
 import subprocess
 import sys
@@ -9,6 +10,7 @@ from pathlib import Path
 import pytest
 
 HOOK_PATH = Path(__file__).resolve().parents[1] / "gcloud_identity_guard.py"
+SETTINGS_PATH = Path(__file__).resolve().parents[2] / "settings.json"
 GCLOUD_TOOL = "mcp__gcloud__run_gcloud_command"
 
 
@@ -43,6 +45,9 @@ BLOCKED_ARGS = [
     pytest.param(["projects", "list", "--credential-file-override=/tmp/key"], id="credential-file"),
     pytest.param(["projects", "list", "--configuration=personal"], id="named-configuration"),
     pytest.param(["projects", "list", "--acc=personal@gmail.com"], id="abbreviated-account"),
+    pytest.param(["projects", "list", "--flags-file=/tmp/flags.yaml"], id="flags-file-equals"),
+    pytest.param(["projects", "list", "--flags-file", "/tmp/flags.yaml"], id="flags-file-separate"),
+    pytest.param(["projects", "list", "--flags=/tmp/flags.yaml"], id="abbreviated-flags-file"),
     pytest.param(["auth", "list"], id="auth-list"),
     pytest.param(["auth", "login"], id="auth-login"),
     pytest.param(["auth", "print-access-token"], id="auth-print-token"),
@@ -81,6 +86,7 @@ ALLOWED_ARGS = [
         id="audit-log-query-mentions-account-in-value",
     ),
     pytest.param(["projects", "get-iam-policy", "pdlco-mytasks"], id="get-iam-policy"),
+    pytest.param(["iam", "service-accounts", "list", "--flatten=email"], id="flatten-is-not-flags-file"),
 ]
 
 
@@ -155,6 +161,38 @@ def test_cli_allows_with_exit_code_0_and_writes_no_log(tmp_path):
 def test_cli_blocks_invalid_json(tmp_path):
     result = _run_hook("not json", tmp_path / "guard.log")
     assert result.returncode == 2
+
+
+def test_main_blocks_with_exit_code_2_when_the_guard_crashes(monkeypatch, tmp_path, capsys):
+    guard = _load_guard()
+    monkeypatch.setenv("MYTASKS_GUARD_LOG", str(tmp_path / "guard.log"))
+    monkeypatch.setattr(sys, "stdin", io.StringIO(json.dumps(_payload(["projects", "list"]))))
+
+    def crash(_payload):
+        raise RuntimeError("unexpected failure")
+
+    monkeypatch.setattr(guard, "evaluate", crash)
+
+    assert guard.main() == 2
+    assert capsys.readouterr().err.strip()
+    entry = json.loads((tmp_path / "guard.log").read_text().splitlines()[-1])
+    assert entry["reason"] == "guard-error"
+
+
+def test_settings_register_the_guard_so_that_it_fails_closed():
+    settings = json.loads(SETTINGS_PATH.read_text())
+    entries = [
+        entry
+        for entry in settings["hooks"]["PreToolUse"]
+        if entry["matcher"] == "mcp__gcloud__.*"
+    ]
+    assert len(entries) == 1
+    (hook,) = entries[0]["hooks"]
+    command = hook["command"]
+    assert "gcloud_identity_guard.py" in command
+    # Claude Code only blocks on exit code 2: any other failure (python3 missing, interpreter
+    # error) would let the call through unless the command maps it to 2.
+    assert command.rstrip().endswith("|| exit 2")
 
 
 def test_cli_still_blocks_when_the_log_cannot_be_written(tmp_path):
