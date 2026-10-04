@@ -9,7 +9,13 @@ Contrato de diseño: [`specs/002-cloud-run-cicd/contracts/agent-identity.md`](..
 ## 1. Identidad aislada del agente: comprobaciones repetibles
 
 **Cuándo ejecutarlas**: tras montar la identidad aislada (Fase 1), tras cambiar `.mcp.json`,
-`.claude/settings.json` o el hook, tras rotar la clave y como mínimo una vez por trimestre.
+`.claude/settings.json` o el hook, tras rotar la clave, tras cambiar la versión del paquete del
+MCP y como mínimo una vez por trimestre.
+
+**Versión del MCP**: `.mcp.json` fija `@google-cloud/gcloud-mcp` en una versión exacta (hoy
+`0.5.3`), nunca `latest` ni un rango: ese proceso corre fuera del sandbox con acceso al almacén
+aislado de la clave. Para actualizarla, cambia la versión en `.mcp.json` en una PR, reinicia la
+sesión y repite las comprobaciones 1 a 7 antes de fusionar.
 
 **Garantía que se comprueba**: el agente solo puede operar sobre Google Cloud como
 `mytasks-ai-agent@pdlco-mytasks.iam.gserviceaccount.com`, por el MCP, y no puede usar
