@@ -122,4 +122,37 @@ no cambiaron.
 
 La actividad de administración está siempre activa. T055 declara este mismo `auditConfigs` en
 `infra/platform/` y T064 el del entorno de staging. Pendiente de confirmar con tráfico real
-(T017) que las operaciones de Firestore aparecen como `DATA_READ` / `DATA_WRITE`.
+que las operaciones de Firestore aparecen como `DATA_READ` / `DATA_WRITE` (T017 no lo pudo
+comprobar: el agente aún no ha leído ni escrito datos de Firestore).
+
+## 6. Resultados de las comprobaciones de identidad (T017, T018)
+
+Ejecutadas el **2026-10-04** en la rama `feature/002-cloud-run-cicd-fase-1`. T018 se hizo en una
+sesión de Claude Code nueva, tras reiniciar.
+
+| # | Resultado |
+|---|---|
+| 1 | Superada el 2026-10-02 (propietario): el almacén aislado solo tiene `mytasks-ai-agent`. Tras el reinicio, `config list` por el MCP muestra `core.account = mytasks-ai-agent@pdlco-mytasks.iam.gserviceaccount.com` y `project = pdlco-mytasks` |
+| 2 | Superada: el hook rechazó `--account` (`forbidden-flag:--account`) |
+| 3 | Superada: el hook rechazó `--impersonate-service-account` |
+| 4 | Superada: lectura de `~/.config/gcloud/application_default_credentials.json` denegada por Bash y por `Read` |
+| 5 | Superada: lectura de `~/.config/mytasks-agent/` denegada por Bash y por `Read` |
+| 6 | Superada: `gcloud --version` denegado por la regla `deny` |
+| 7 | Superada (propietario): `claude mcp list` muestra un único servidor `gcloud`; `claude mcp get gcloud` indica ámbito *Project config (shared via .mcp.json)*, `CLOUDSDK_CONFIG` aislado y variables de suplantación y credenciales vacías |
+| 8 | Superada con una salvedad, ver abajo |
+| 9 | Superada: 2 a 7 repetidas tras reiniciar la sesión, mismos resultados |
+
+**Comprobación 8: registro de auditoría** (`logging read`, últimos 3 días, por el MCP):
+
+| Fecha (UTC) | Identidad | Operación |
+|---|---|---|
+| 2026-10-01 19:38 | cuenta personal del propietario | `SetIamPolicy` (`cloudresourcemanager.googleapis.com`) |
+| 2026-10-02 09:31 | cuenta personal del propietario | `SetIamPolicy` |
+| 2026-10-02 09:47 | cuenta personal del propietario | `SetIamPolicy` |
+
+Las tres son acciones del propietario en la consola (permisos temporales de arranque y T015). Ninguna
+la inició el agente con una identidad personal. No hay entradas a nombre de `mytasks-ai-agent`
+porque todas sus operaciones fueron lecturas (`config list`, `projects describe`, `logging read`),
+que la actividad de administración no registra por defecto. El registro confirma, por tanto, que el
+agente no usó la identidad del propietario, pero no muestra operaciones suyas; que opera como la
+cuenta del agente lo demuestran las comprobaciones 1 y 7.

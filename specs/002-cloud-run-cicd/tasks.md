@@ -91,8 +91,8 @@ registro de auditoría muestra solo a `mytasks-ai-agent`.
 - [X] T014 [US3] (propietario) Retirar el servidor MCP `gcloud` de ámbito usuario que suplanta a la cuenta del agente, de modo que no coexistan dos servidores de Google Cloud
 - [X] T015 [US3] Activar por el MCP (con confirmación explícita) los registros de auditoría de acceso a datos de Firestore e IAM en `pdlco-mytasks`; anotar el cambio para adoptarlo en Terraform en T055 (depende de T013 y T014)
 - [X] T016 [US3] Crear `infra/RUNBOOK.md` (en español) con tres secciones iniciales: lista de las 9 comprobaciones de identidad como procedimiento ejecutable, rotación de la clave cada 90 días (con un recordatorio periódico en el calendario del propietario) y revocación inmediata
-- [ ] T017 [US3] Ejecutar las 9 comprobaciones de T016 y la consulta del registro de auditoría (solo lectura, por el MCP); pegar los resultados en la PR (depende de T009–T016)
-- [ ] T018 [US3] Reiniciar la sesión de Claude Code y repetir las comprobaciones 2 a 7 (comprobación 9)
+- [X] T017 [US3] Ejecutar las 9 comprobaciones de T016 y la consulta del registro de auditoría (solo lectura, por el MCP); pegar los resultados en la PR (depende de T009–T016)
+- [X] T018 [US3] Reiniciar la sesión de Claude Code y repetir las comprobaciones 2 a 7 (comprobación 9)
 - [ ] T019 [US3] Revisión de `mytasks-security-auditor` de la identidad aislada: informe sin hallazgos bloqueantes en la PR
 
 **Checkpoint**: MCP operativo solo con la identidad del agente; comprobaciones en verde; sin
