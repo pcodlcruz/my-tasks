@@ -22,7 +22,11 @@
       "Read(~/.config/gcloud/**)",
       "Read(~/.config/mytasks-agent/**)",
       "Edit(~/.config/gcloud/**)",
-      "Edit(~/.config/mytasks-agent/**)"
+      "Edit(~/.config/mytasks-agent/**)",
+      "Edit(.claude/settings.json)",
+      "Edit(.claude/settings.local.json)",
+      "Edit(.claude/hooks/**)",
+      "Edit(.mcp.json)"
     ]
   },
   "sandbox": {

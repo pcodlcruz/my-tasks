@@ -45,8 +45,9 @@ esas rutas.
 | 6 | Ejecutar `gcloud`, `gsutil` o `bq` directamente | Desde el agente, por Bash: `gcloud --version` | Denegado por la regla `deny` existente |
 | 7 | Servidores MCP de Google Cloud de ámbito usuario | `claude mcp list` y `claude mcp get gcloud` | Un único servidor `gcloud`, de ámbito **Project** (`.mcp.json`); ninguno de ámbito User |
 | 8 | Registro de auditoría de Google Cloud tras las pruebas | Por el MCP, solo lectura: `logging read` filtrando por `protoPayload.authenticationInfo.principalEmail` en `pdlco-mytasks` y el periodo de las pruebas | Todas las operaciones del agente a nombre de `mytasks-ai-agent`; ninguna iniciada por el agente a nombre de una identidad personal. Las acciones tuyas en la consola se distinguen por horario y se anotan |
-| 9 | Repetir 2 a 7 y 10 tras reiniciar la sesión de Claude Code | Cerrar y abrir la sesión | Mismos resultados que antes del reinicio |
+| 9 | Repetir 2 a 7, 10 y 11 tras reiniciar la sesión de Claude Code | Cerrar y abrir la sesión | Mismos resultados que antes del reinicio |
 | 10 | Cargar indicadores desde un fichero por el MCP | Pedir al MCP un comando de solo lectura con `--flags-file=<fichero>` | Rechazado por el hook (`forbidden-flag:--flags-file`). El comando del hook en `.claude/settings.json` termina en `|| exit 2`, de modo que un fallo del propio hook (por ejemplo, `python3` ausente) también bloquea |
+| 11 | Editar los ficheros que sostienen la contención | Desde el agente, con la herramienta de edición, intentar un cambio en `.mcp.json`, `.claude/settings.json`, `.claude/settings.local.json` y `.claude/hooks/` | Denegado en los cuatro casos. Los cambios legítimos en esos ficheros los hace el propietario (o se retira la regla `deny` de forma temporal y explícita) y obligan a repetir esta lista |
 
 Notas:
 - `gcloud auth ...` está bloqueado por el hook cuando se pide por el MCP; por eso la comprobación 1

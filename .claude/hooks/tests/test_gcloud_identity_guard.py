@@ -195,6 +195,20 @@ def test_settings_register_the_guard_so_that_it_fails_closed():
     assert command.rstrip().endswith("|| exit 2")
 
 
+@pytest.mark.parametrize(
+    "rule",
+    [
+        "Edit(.claude/settings.json)",
+        "Edit(.claude/settings.local.json)",
+        "Edit(.claude/hooks/**)",
+        "Edit(.mcp.json)",
+    ],
+)
+def test_settings_deny_editing_the_files_that_hold_the_containment(rule):
+    deny = json.loads(SETTINGS_PATH.read_text())["permissions"]["deny"]
+    assert rule in deny
+
+
 def test_cli_still_blocks_when_the_log_cannot_be_written(tmp_path):
     unwritable = tmp_path / "missing-dir-is-created-but-this-is-a-file" / "x"
     (tmp_path / "missing-dir-is-created-but-this-is-a-file").write_text("not a directory")
