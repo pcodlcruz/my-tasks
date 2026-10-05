@@ -18,7 +18,59 @@
     "deny": [
       "Bash(gcloud:*)",
       "Bash(gsutil:*)",
-      "Bash(bq:*)"
+      "Bash(bq:*)",
+      "Read(~/.config/gcloud/**)",
+      "Read(~/.config/mytasks-agent/**)",
+      "Edit(~/.config/gcloud/**)",
+      "Edit(~/.config/mytasks-agent/**)",
+      "Edit(.claude/settings.json)",
+      "Edit(.claude/settings.local.json)",
+      "Edit(.claude/hooks/**)",
+      "Edit(.mcp.json)"
+    ]
+  },
+  "sandbox": {
+    "enabled": true,
+    "failIfUnavailable": true,
+    "allowUnsandboxedCommands": false,
+    "filesystem": {
+      "denyRead": [
+        "~/.config/gcloud",
+        "~/.config/mytasks-agent",
+        "~/.config/mytasks-agent/gcloud"
+      ]
+    },
+    "credentials": {
+      "files": [
+        { "path": "~/.config/gcloud", "mode": "deny" },
+        { "path": "~/.config/gcloud/application_default_credentials.json", "mode": "deny" },
+        { "path": "~/.config/mytasks-agent", "mode": "deny" },
+        { "path": "~/.config/mytasks-agent/gcloud", "mode": "deny" }
+      ],
+      "envVars": [
+        { "name": "GOOGLE_APPLICATION_CREDENTIALS", "mode": "deny" },
+        { "name": "CLOUDSDK_AUTH_ACCESS_TOKEN", "mode": "deny" },
+        { "name": "CLOUDSDK_AUTH_ACCESS_TOKEN_FILE", "mode": "deny" },
+        { "name": "CLOUDSDK_AUTH_CREDENTIAL_FILE_OVERRIDE", "mode": "deny" },
+        { "name": "CLOUDSDK_AUTH_IMPERSONATE_SERVICE_ACCOUNT", "mode": "deny" },
+        { "name": "CLOUDSDK_CORE_ACCOUNT", "mode": "deny" },
+        { "name": "CLOUDSDK_CONFIG", "mode": "deny" },
+        { "name": "CLOUDSDK_ACTIVE_CONFIG_NAME", "mode": "deny" }
+      ]
+    }
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "mcp__gcloud__.*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"$CLAUDE_PROJECT_DIR/.claude/hooks/gcloud_identity_guard.py\" || exit 2",
+            "timeout": 10
+          }
+        ]
+      }
     ]
   }
 }
