@@ -10,7 +10,8 @@
     "lint": "eslint .",
     "format": "prettier --check .",
     "test": "vitest run",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "test:entrypoint": "sh nginx/tests/test-runtime-config.sh"
   },
   "dependencies": {
     "@tanstack/react-query": "^5.62.0",

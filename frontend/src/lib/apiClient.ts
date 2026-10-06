@@ -1,8 +1,7 @@
 import { getIdToken } from 'firebase/auth'
 import type { ApiError } from '../api/types'
 import { auth } from './firebase'
-
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL as string
+import { runtimeConfig } from './runtimeConfig'
 
 export class ApiClientError extends Error {
   readonly code: string
@@ -57,7 +56,7 @@ export async function apiFetch<T>(path: string, init: RequestInit = {}): Promise
     headers.set('Content-Type', 'application/json')
   }
 
-  const response = await fetch(`${API_BASE_URL}${path}`, { ...init, headers })
+  const response = await fetch(`${runtimeConfig.apiBaseUrl}${path}`, { ...init, headers })
 
   if (response.status === 401) {
     await handleUnauthorized()
