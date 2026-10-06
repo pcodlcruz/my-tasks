@@ -6,7 +6,6 @@ import httpx
 import pytest
 
 from mytasks_api.factory import get_firestore_client_factory
-from mytasks_api.main import app
 
 pytestmark = pytest.mark.integration
 
@@ -38,6 +37,10 @@ def _slow_client() -> _UnreachableFirestore:
 
 
 def _override_client(factory: Callable[[], Any]) -> Iterator[None]:
+    # Imported here, not at module level: importing the app builds it from the environment,
+    # and at collection time the conftest has not yet set APP_ENV=local for the emulators.
+    from mytasks_api.main import app
+
     app.dependency_overrides[get_firestore_client_factory] = lambda: factory
     yield
     app.dependency_overrides.pop(get_firestore_client_factory, None)
