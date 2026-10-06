@@ -142,7 +142,7 @@ desplegar y falla si se rompe un test o el contrato de la API.
 - [X] T038 [US1] Añadir a `ci.yml` el job `e2e` (Playwright contra frontend, API y emuladores)
 - [X] T039 [US1] Añadir a `ci.yml` los jobs `images-build` (API con `pack build` sin publicar, web con su Dockerfile) y `secrets-scan` (análisis de secretos del cambio; proponer la herramienta y fijar su acción por SHA, justificado en la PR)
 - [X] T040 [US1] Añadir a `ci.yml` el job `api-contract-compat`: genera con `backend/scripts/export_openapi.py` el contrato de la PR y el de su rama destino ejecutando el script de la PR contra el árbol de la rama destino (si esta aún no tiene contrato exportable, el check pasa y lo registra), y falla ante un cambio incompatible (campo o endpoint retirado, tipo más restrictivo) con una herramienta de comparación fijada por SHA o versión (depende de T026)
-- [ ] T041 [US1] Validar `ci.yml` en una rama de prueba: todos los checks verdes sin desplegar nada; romper a propósito un test hace fallar su check y retirar un campo del contrato hace fallar `api-contract-compat` (escenario 2 del quickstart)
+- [X] T041 [US1] Validar `ci.yml` en una rama de prueba: todos los checks verdes sin desplegar nada; romper a propósito un test hace fallar su check y retirar un campo del contrato hace fallar `api-contract-compat` (escenario 2 del quickstart)
 
 **Checkpoint**: imágenes construibles y checks de CI operativos; los nombres de los checks son los
 de [contracts/pipeline.md](./contracts/pipeline.md) (salvo `terraform-validate`, en la Fase 3).
