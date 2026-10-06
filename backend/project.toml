@@ -1,0 +1,44 @@
+# Build descriptor for `pack build` (Google Cloud Buildpacks). No Dockerfile on purpose
+# (research R13). Used by the CI check `images-build` and by the deploy pipeline.
+#
+# The builder lives here, inside backend/, so that bumping it changes the tree hash of
+# backend/ and the pipeline rebuilds the image with the patched builder.
+# Pinned by digest, never `latest` (Principio III). To bump it:
+#   docker pull gcr.io/buildpacks/builder:google-24   # copy the new digest below
+[_]
+schema-version = "0.2"
+id = "mytasks-api"
+name = "mytasks-api"
+
+[io.buildpacks]
+# gcr.io/buildpacks/builder:google-24 (Ubuntu 24.04)
+builder = "gcr.io/buildpacks/builder@sha256:1c5d6ecf8b0d4e6520853a35b740d8fcf2c6953829aa12085b9acb330e59a030"
+
+# Local state that must never reach the image: .env holds local settings and .venv/caches
+# are rebuilt by the buildpack (in CI the checkout is clean, locally they exist).
+exclude = [
+  ".env",
+  ".env.*",
+  ".venv",
+  ".claude",
+  ".git",
+  "__pycache__",
+  "*.pyc",
+  ".mypy_cache",
+  ".pytest_cache",
+  ".ruff_cache",
+  "*-debug.log",
+  "tests",
+  "scripts",
+]
+
+# Production dependencies only: the buildpack runs `uv sync`, which would otherwise also
+# install the `dev` group (pytest, mypy, ruff) into the image.
+[[io.buildpacks.build.env]]
+name = "UV_NO_DEV"
+value = "1"
+
+[[io.buildpacks.build.env]]
+name = "GOOGLE_ENTRYPOINT"
+# Cloud Run injects PORT (8080); the default keeps `docker run` working without it.
+value = "uvicorn mytasks_api.main:app --host 0.0.0.0 --port ${PORT:-8080}"
