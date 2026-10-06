@@ -81,6 +81,14 @@ Rechazar `--flags-file` y sus abreviaturas válidas. Hacer que cualquier error n
 
 ### [MED-003] Los permisos temporales de arranque permiten al agente obtener credenciales del pipeline y ampliar los suyos
 
+> **Corrección (2026-10-06).** La descripción de abajo dice que `roles/iam.serviceAccountAdmin` incluye la
+> creación de claves de cualquier cuenta. **No es exacto**: `iam.serviceAccountKeys.create` pertenece a
+> `roles/iam.serviceAccountKeyAdmin` y a `roles/editor`. El vector real es `iam.serviceAccounts.setIamPolicy`
+> (incluido en `serviceAccountAdmin`), que permite concederse la suplantación de la cuenta, junto con
+> `projectIamAdmin`, que permite concederse cualquier rol. La gravedad y el riesgo no cambian; la remediación sí.
+> Se resuelve con el diseño de [`contracts/agent-bootstrap-permissions.md`](./contracts/agent-bootstrap-permissions.md)
+> (tareas T041a a T041d de la Fase 3), que sustituye la remediación (1) a (5) de abajo.
+
 | Campo | Valor |
 |---|---|
 | **Severidad** | Media |
