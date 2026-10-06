@@ -64,7 +64,6 @@ class TaskOut(BaseModel):
     updated_at: datetime
     completed_at: datetime | None
     trashed_at: datetime | None
-    purge_at: datetime | None
 
     @classmethod
     def from_task(cls, task: Task) -> "TaskOut":
@@ -83,7 +82,6 @@ class TaskOut(BaseModel):
             updated_at=task.updated_at,
             completed_at=task.completed_at,
             trashed_at=task.trashed_at,
-            purge_at=task.purge_at,
         )
 
 
