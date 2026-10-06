@@ -79,9 +79,18 @@ jobs:
       # Unit and integration tests of the API run against the Firestore and Auth emulators
       # (never a real project, Principio II); the tests of the identity-guard hook run too.
       - name: pytest (unit + integration) and hook tests
-        run: >-
-          firebase emulators:exec --only auth,firestore --project demo-mytasks
-          'cd backend && uv run pytest tests ../.claude/hooks/tests'
+        run: |
+          set -o pipefail
+          firebase emulators:exec --only auth,firestore --project demo-mytasks \
+            'cd backend && uv run pytest tests ../.claude/hooks/tests -ra --tb=short' \
+            2>&1 | tee "$RUNNER_TEMP/backend-tests.log"
+      # Surfaces the end of the log as an annotation of the check, so the cause is visible
+      # from the pull request without opening the raw logs.
+      - name: Annotate the failure
+        if: failure()
+        run: |
+          message=$(tail -n 40 "$RUNNER_TEMP/backend-tests.log" | sed ':a;N;$!ba;s/\n/%0A/g')
+          echo "::error title=backend-tests::${message}"
 
   frontend-lint-types:
     name: frontend-lint-types
@@ -183,12 +192,18 @@ jobs:
       # Nothing is published: this only detects a broken packaging before the merge.
       - name: Build the API image
         run: pack build mytasks-api:ci --path backend --trust-builder
+      # The published port accepts connections before Uvicorn is ready (empty replies are
+      # not retried by curl --retry), so wait explicitly and show the container log on failure.
       - name: Smoke test the API image
         run: |
           docker run -d --name api -p 8080:8080 \
             -e APP_ENV=staging -e GOOGLE_CLOUD_PROJECT=ci-project -e APP_VERSION=ci mytasks-api:ci
-          curl --fail --silent --retry 15 --retry-delay 2 --retry-connrefused \
-            http://localhost:8080/healthz | grep -q '"version":"ci"'
+          for attempt in $(seq 1 30); do
+            if body=$(curl --silent --fail --max-time 5 http://localhost:8080/healthz); then break; fi
+            sleep 2
+          done
+          echo "healthz: ${body:-<no response>}"
+          if ! echo "${body:-}" | grep -q '"version":"ci"'; then docker logs api; exit 1; fi
           docker rm -f api
       # Web: Dockerfile (Nginx unprivileged + runtime config), research R13.
       - name: Build the web image
@@ -199,8 +214,11 @@ jobs:
             -e API_BASE_URL=https://api.example.com -e FIREBASE_API_KEY=ci-key \
             -e FIREBASE_AUTH_DOMAIN=ci.firebaseapp.com -e FIREBASE_PROJECT_ID=ci-project \
             -e APP_VERSION=ci mytasks-web:ci
-          curl --fail --silent --retry 15 --retry-delay 2 --retry-connrefused \
-            http://localhost:8081/config.js | grep -q "APP_VERSION: 'ci'"
+          for attempt in $(seq 1 30); do
+            if config=$(curl --silent --fail --max-time 5 http://localhost:8081/config.js); then break; fi
+            sleep 2
+          done
+          if ! echo "${config:-}" | grep -q "APP_VERSION: 'ci'"; then docker logs web; exit 1; fi
           test "$(curl --silent --output /dev/null --write-out '%{http_code}' http://localhost:8081/history)" = 200
           docker rm -f web
 
