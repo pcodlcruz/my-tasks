@@ -1,12 +1,15 @@
+import asyncio
+import logging
 import uuid
 from collections.abc import Awaitable, Callable
 from typing import Any
 
-from fastapi import FastAPI, Request, Response, status
+from fastapi import Depends, FastAPI, Request, Response, status
 from fastapi.encoders import jsonable_encoder
 from fastapi.exceptions import HTTPException, RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from google.cloud import firestore
 
 from mytasks_api.config import Settings, get_settings
 from mytasks_api.domain.task import (
@@ -16,9 +19,16 @@ from mytasks_api.domain.task import (
     InvalidTransitionError,
     TaskNotFoundError,
 )
-from mytasks_api.logging_config import configure_logging, request_id_var
+from mytasks_api.logging_config import configure_logging, log_event, request_id_var
+from mytasks_api.repositories.task_repository import get_firestore_client
 from mytasks_api.routers.tasks import router as tasks_router
-from mytasks_api.schemas.task import ErrorOut
+from mytasks_api.schemas.task import ErrorOut, ReadinessOut
+
+logger = logging.getLogger(__name__)
+
+READINESS_COLLECTION = "_readyz"
+READINESS_DOCUMENT = "probe"
+READINESS_TIMEOUT_SECONDS = 3.0
 
 # The API only uses these methods and headers (contract in openapi.yaml).
 ALLOWED_METHODS = ["GET", "POST", "PATCH", "DELETE"]
@@ -30,6 +40,12 @@ SECURITY_HEADERS = {
     "Referrer-Policy": "no-referrer",
     "Cache-Control": "no-store",
 }
+
+
+def get_firestore_client_factory() -> Callable[[], firestore.AsyncClient]:
+    # A dependency that returns the factory instead of the client, so /readyz can build the
+    # client inside its own error handling (a failing dependency would escape it as a 500).
+    return get_firestore_client
 
 
 def _error_response(status_code: int, error: ErrorOut) -> JSONResponse:
@@ -75,9 +91,33 @@ def create_app(settings: Settings | None = None) -> FastAPI:
 
     app.include_router(tasks_router)
 
+    # Anonymous and data-free on purpose: they are probed by the deploy pipeline and by
+    # Cloud Run, which cannot present a token.
     @app.get("/healthz")
     async def healthz() -> dict[str, str]:
-        return {"status": "ok"}
+        return {"status": "ok", "version": settings.app_version}
+
+    @app.get("/readyz", responses={status.HTTP_503_SERVICE_UNAVAILABLE: {"model": ReadinessOut}})
+    async def readyz(
+        client_factory: Callable[[], firestore.AsyncClient] = Depends(get_firestore_client_factory),
+    ) -> JSONResponse:
+        try:
+            async with asyncio.timeout(READINESS_TIMEOUT_SECONDS):
+                # Building the client discovers credentials, which can fail or block for
+                # seconds when the runtime identity is broken: it belongs inside the
+                # try and off the event loop, so a broken service answers 503, not 500.
+                client = await asyncio.to_thread(client_factory)
+                # Minimal read: it proves the runtime identity can reach Firestore
+                # without touching user data (the document does not need to exist).
+                await client.collection(READINESS_COLLECTION).document(READINESS_DOCUMENT).get()
+        except Exception as exc:
+            # The cause goes to the log, never to the anonymous response.
+            log_event(logger, logging.ERROR, "readiness_failed", reason=type(exc).__name__)
+            return JSONResponse(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                content={"status": "unavailable"},
+            )
+        return JSONResponse(status_code=status.HTTP_200_OK, content={"status": "ready"})
 
     @app.exception_handler(HTTPException)
     async def http_exception_handler(_: Request, exc: HTTPException) -> JSONResponse:

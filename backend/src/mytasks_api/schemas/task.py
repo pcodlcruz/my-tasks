@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Self
+from typing import Literal, Self
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
@@ -90,6 +90,10 @@ class TaskOut(BaseModel):
 class TaskPage(BaseModel):
     items: list[TaskOut]
     next_cursor: str | None
+
+
+class ReadinessOut(BaseModel):
+    status: Literal["ready", "unavailable"]
 
 
 class ErrorOut(BaseModel):

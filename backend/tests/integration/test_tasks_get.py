@@ -16,7 +16,7 @@ async def test_healthz_returns_ok_without_token(client: httpx.AsyncClient) -> No
     response = await client.get("/healthz")
 
     assert response.status_code == 200
-    assert response.json() == {"status": "ok"}
+    assert response.json()["status"] == "ok"
 
 
 async def test_get_task_returns_own_task_with_quadrant(

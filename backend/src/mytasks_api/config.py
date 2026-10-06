@@ -19,6 +19,8 @@ class Settings(BaseSettings):
     firestore_emulator_host: str | None = None
     firebase_auth_emulator_host: str | None = None
     cors_origins: str = "http://localhost:5173"
+    # Version served by /healthz. The pipeline sets it on deploy (tree hash of backend/).
+    app_version: str = "dev"
 
     @property
     def cors_origin_list(self) -> list[str]:
