@@ -98,7 +98,7 @@ def test_local_rejects_a_real_project_id() -> None:
 def test_app_version_defaults_to_dev_for_local_runs() -> None:
     settings = _settings(app_env="local")
 
-    assert settings.app_version == "dev"
+    assert settings.app_version == "deliberately-broken"
 
 
 def test_app_version_is_read_from_the_environment(monkeypatch: pytest.MonkeyPatch) -> None:
