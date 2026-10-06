@@ -5,6 +5,7 @@ import {
   getAuth,
   signInWithCredential,
 } from 'firebase/auth'
+import { runtimeConfig } from './runtimeConfig'
 
 declare global {
   interface Window {
@@ -13,15 +14,15 @@ declare global {
 }
 
 const firebaseApp = initializeApp({
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  apiKey: runtimeConfig.firebaseApiKey,
+  authDomain: runtimeConfig.firebaseAuthDomain,
+  projectId: runtimeConfig.firebaseProjectId,
 })
 
 export const auth = getAuth(firebaseApp)
 
-if (import.meta.env.VITE_USE_EMULATORS === 'true') {
-  connectAuthEmulator(auth, `http://${import.meta.env.VITE_FIREBASE_AUTH_DOMAIN}:9099`, {
+if (runtimeConfig.useEmulators) {
+  connectAuthEmulator(auth, `http://${runtimeConfig.firebaseAuthDomain}:9099`, {
     disableWarnings: true,
   })
 

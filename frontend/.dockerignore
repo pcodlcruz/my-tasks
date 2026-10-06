@@ -1,0 +1,23 @@
+# Keep the build context free of local state and of anything environment-specific: the
+# image must be identical in every environment (no .env, no baked VITE_* values).
+.env
+.env.*
+!.env.example
+
+node_modules
+dist
+coverage
+playwright-report
+test-results
+.vscode
+.idea
+.DS_Store
+*.log
+*.local
+
+# Not needed to build the image.
+Dockerfile
+.dockerignore
+tests
+nginx/tests
+README.md

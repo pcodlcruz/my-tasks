@@ -5,7 +5,12 @@ from mytasks_api.config import Settings
 
 pytestmark = pytest.mark.unit
 
-EMULATOR_VARIABLES = ("FIRESTORE_EMULATOR_HOST", "FIREBASE_AUTH_EMULATOR_HOST", "APP_ENV")
+EMULATOR_VARIABLES = (
+    "FIRESTORE_EMULATOR_HOST",
+    "FIREBASE_AUTH_EMULATOR_HOST",
+    "APP_ENV",
+    "APP_VERSION",
+)
 
 
 @pytest.fixture(autouse=True)
@@ -88,6 +93,20 @@ def test_local_accepts_emulators() -> None:
 def test_local_rejects_a_real_project_id() -> None:
     with pytest.raises(ValidationError, match="demo-"):
         _settings(app_env="local", google_cloud_project="mytasks-prod")
+
+
+def test_app_version_defaults_to_dev_for_local_runs() -> None:
+    settings = _settings(app_env="local")
+
+    assert settings.app_version == "dev"
+
+
+def test_app_version_is_read_from_the_environment(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("APP_VERSION", "3f9c2ab")
+
+    settings = _settings(app_env="production", google_cloud_project="mytasks-prod")
+
+    assert settings.app_version == "3f9c2ab"
 
 
 def test_export_emulator_hosts_sets_the_variables_the_sdks_read(

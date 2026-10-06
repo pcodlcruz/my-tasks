@@ -365,6 +365,44 @@ sobre sandbox, permisos, ajustes y hooks.
   Paketo con Nginx para la web (segundo builder y segunda política de soporte); Cloud Build o
   `--source` (ver arriba).
 
+### Verificado (T028, 2026-10-06)
+
+Construcción local con `pack` 0.40.6 y el builder `gcr.io/buildpacks/builder:google-24` fijado
+por digest (`sha256:1c5d6ecf…`) en `backend/project.toml`. El resultado de cada punto de la
+lista *A verificar*:
+
+- **(a) Solo dependencias de producción: corregido.** Por defecto el buildpack ejecuta
+  `uv sync` **con** el grupo `dev` e instalaba `pytest`, `mypy` y `ruff` (64 paquetes). Con
+  `UV_NO_DEV=1` en el entorno de construcción de `project.toml` instala 52, sin ninguno de
+  ellos. El buildpack usa `uv.lock` (`Using existing uv.lock`) y fija su propia versión de
+  `uv` (0.12.10).
+- **(b) Versión de Python: fijada con `backend/.python-version`.** Sin ella, el builder elige
+  la última disponible (se obtuvo **3.14.6**). Con `.python-version` = `3.13` instala 3.13.14 y
+  lo anuncia en el log (`Using Python version from /workspace/.python-version`). Se fija la
+  serie menor: el parche lo decide el builder en el momento de construir, lo que aporta
+  parches de seguridad del runtime pero no es reproducible entre días. Es aceptable porque la
+  imagen se construye una vez y se promueve el mismo digest (R5).
+- **(c) Sin privilegios: sí.** La imagen corre como `uid=33 (www-data)`.
+- **(d) Sin `.env` ni cachés locales: sí**, gracias a la lista `exclude` de `project.toml`.
+  En `/workspace` solo quedan `src/`, `pyproject.toml`, `uv.lock`, `project.toml` y
+  `.python-version`; no hay `.env*`, `tests/`, `scripts/` ni `.venv` en ninguna ruta.
+- **(e) Repetibilidad: no es idéntica bit a bit.** Dos construcciones seguidas (la segunda con
+  `--clear-cache`) dan digests distintos: de 11 capas difieren 2 (runtime de Python y
+  dependencias); la capa de la aplicación y las bases coinciden. No afecta al diseño: el check
+  `images-build` solo detecta empaquetados rotos y no compara digests, y el despliegue
+  promueve el digest ya construido.
+- **(f) Dónde se fija el builder: `[io.buildpacks] builder` en `backend/project.toml`**, que
+  `pack` lee sin necesidad de `--builder`. Google publica el digest de la etiqueta
+  `google-24`; subirlo cambia el hash de árbol de `backend/`, como exige R5.
+- **Arranque.** La imagen arranca con `GOOGLE_ENTRYPOINT` (Uvicorn en `${PORT:-8080}`);
+  `/healthz` devuelve `{"status":"ok","version":"<APP_VERSION>"}`, un endpoint de datos sin
+  token devuelve `401` y `/readyz` sin acceso a Firestore devuelve `503` en 3 s.
+
+Dos hallazgos de entorno que afectan al CI y a quien construya en local: los clientes `pack`
+anteriores a 0.40 usan la versión 1.38 del API de Docker, que los motores actuales (Docker 29)
+rechazan, por lo que `ci.yml` fija `pack` 0.40.9; y el aviso `Grep failed … sed: can't read`
+del buildpack de runtime es inocuo.
+
 ## R14. Repositorio único para aplicación e infraestructura
 
 - **Decision** (ratificada por el propietario el 2026-09-30): `backend/`, `frontend/` e `infra/`

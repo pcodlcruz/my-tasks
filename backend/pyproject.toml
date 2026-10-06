@@ -2,7 +2,7 @@
 name = "mytasks-api"
 version = "0.1.0"
 description = "API del Gestor Personal de Tareas (matriz de Eisenhower)"
-requires-python = ">=3.12"
+requires-python = ">=3.13"
 dependencies = [
     "fastapi>=0.115",
     "pydantic>=2.9",
@@ -30,8 +30,8 @@ packages = ["src/mytasks_api"]
 
 [tool.ruff]
 line-length = 100
-target-version = "py312"
-src = ["src", "tests"]
+target-version = "py313"
+src = ["src", "tests", "."]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B", "SIM", "ASYNC"]
@@ -40,9 +40,9 @@ select = ["E", "F", "I", "UP", "B", "SIM", "ASYNC"]
 extend-immutable-calls = ["fastapi.Depends", "fastapi.Path", "fastapi.Query"]
 
 [tool.mypy]
-python_version = "3.12"
+python_version = "3.13"
 strict = true
-packages = ["mytasks_api"]
+files = ["src/mytasks_api", "scripts"]
 mypy_path = "src"
 explicit_package_bases = true
 
@@ -52,6 +52,8 @@ ignore_missing_imports = true
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+# `scripts/` (export_openapi.py) is imported by its unit test.
+pythonpath = ["."]
 asyncio_mode = "auto"
 asyncio_default_fixture_loop_scope = "session"
 asyncio_default_test_loop_scope = "session"

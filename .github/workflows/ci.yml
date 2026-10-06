@@ -1,0 +1,298 @@
+# Continuous integration: validates a change, never deploys (contracts/pipeline.md).
+#
+# - Runs on every PR to develop, main, release/* and hotfix/*, and is reusable
+#   (`workflow_call`) so deploy.yml can gate a deployment on it (FR-004).
+# - No `paths` filter at workflow level: the job names below are *required status checks*
+#   and a filtered-out workflow would leave them pending and block the merge.
+# - Read-only token, no Google Cloud credentials: a PR can never reach a deploy identity.
+# - Third-party actions are pinned to a full commit SHA (the tag is in the comment).
+
+name: ci
+
+on:
+  pull_request:
+    branches: [develop, main, "release/*", "hotfix/*"]
+  workflow_call:
+
+permissions:
+  contents: read
+
+env:
+  NODE_VERSION: "22"
+  JAVA_VERSION: "21"
+  UV_VERSION: "0.10.12"
+  FIREBASE_TOOLS_VERSION: "15.23.0"
+  # >= 0.40: older pack clients speak Docker API 1.38, which current Docker engines reject.
+  PACK_VERSION: "0.40.9"
+
+jobs:
+  backend-lint-types:
+    name: backend-lint-types
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+        with:
+          version: ${{ env.UV_VERSION }}
+          enable-cache: true
+          cache-dependency-glob: backend/uv.lock
+      - name: Install dependencies
+        run: uv sync --locked
+      - name: ruff (lint)
+        run: uv run ruff check .
+      - name: ruff (format)
+        run: uv run ruff format --check .
+      - name: mypy (strict)
+        run: uv run mypy
+
+  backend-tests:
+    name: backend-tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+        with:
+          version: ${{ env.UV_VERSION }}
+          enable-cache: true
+          cache-dependency-glob: backend/uv.lock
+      - uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
+        with:
+          distribution: temurin
+          java-version: ${{ env.JAVA_VERSION }}
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      - name: Install the Firebase emulators
+        run: npm install --global firebase-tools@${{ env.FIREBASE_TOOLS_VERSION }}
+      - name: Install dependencies
+        working-directory: backend
+        run: uv sync --locked
+      # Unit and integration tests of the API run against the Firestore and Auth emulators
+      # (never a real project, Principio II); the tests of the identity-guard hook run too.
+      - name: pytest (unit + integration) and hook tests
+        run: |
+          set -o pipefail
+          firebase emulators:exec --only auth,firestore --project demo-mytasks \
+            'cd backend && uv run pytest tests ../.claude/hooks/tests -ra --tb=short' \
+            2>&1 | tee "$RUNNER_TEMP/backend-tests.log"
+      # Surfaces the end of the log as an annotation of the check, so the cause is visible
+      # from the pull request without opening the raw logs.
+      - name: Annotate the failure
+        if: failure()
+        run: |
+          message=$(tail -n 40 "$RUNNER_TEMP/backend-tests.log" | sed ':a;N;$!ba;s/\n/%0A/g')
+          echo "::error title=backend-tests::${message}"
+
+  frontend-lint-types:
+    name: frontend-lint-types
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: npm ci
+      - name: ESLint
+        run: npm run lint
+      - name: Prettier
+        run: npm run format
+      - name: tsc
+        run: npx --no-install tsc -b
+
+  frontend-tests:
+    name: frontend-tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: npm ci
+      - name: Vitest
+        run: npm test
+      # The startup script of the web image validates the runtime config (Principio II).
+      - name: Runtime config script of the web image
+        run: npm run test:entrypoint
+
+  e2e:
+    name: e2e
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+        with:
+          version: ${{ env.UV_VERSION }}
+          enable-cache: true
+          cache-dependency-glob: backend/uv.lock
+      - uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
+        with:
+          distribution: temurin
+          java-version: ${{ env.JAVA_VERSION }}
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - name: Install the Firebase emulators
+        run: npm install --global firebase-tools@${{ env.FIREBASE_TOOLS_VERSION }}
+      - name: Install backend dependencies
+        working-directory: backend
+        run: uv sync --locked
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: npm ci
+      - name: Install the Playwright browser
+        working-directory: frontend
+        run: npx --no-install playwright install --with-deps chromium
+      # playwright.config.ts starts the emulators, the API and the Vite dev server itself.
+      - name: Playwright
+        working-directory: frontend
+        run: npm run test:e2e
+
+  images-build:
+    name: images-build
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: buildpacks/github-actions/setup-pack@af8c06ccd592e27001cbf78083dcc9b47aa6652a # v6.1.1
+        with:
+          pack-version: ${{ env.PACK_VERSION }}
+      # API: Buildpacks, no Dockerfile. The builder is pinned in backend/project.toml.
+      # Nothing is published: this only detects a broken packaging before the merge.
+      - name: Build the API image
+        run: pack build mytasks-api:ci --path backend --trust-builder
+      # The published port accepts connections before Uvicorn is ready (empty replies are
+      # not retried by curl --retry), so wait explicitly and show the container log on failure.
+      - name: Smoke test the API image
+        run: |
+          docker run -d --name api -p 8080:8080 \
+            -e APP_ENV=staging -e GOOGLE_CLOUD_PROJECT=ci-project -e APP_VERSION=ci mytasks-api:ci
+          for attempt in $(seq 1 30); do
+            if body=$(curl --silent --fail --max-time 5 http://localhost:8080/healthz); then break; fi
+            sleep 2
+          done
+          echo "healthz: ${body:-<no response>}"
+          if ! echo "${body:-}" | grep -q '"version":"ci"'; then docker logs api; exit 1; fi
+          docker rm -f api
+      # Web: Dockerfile (Nginx unprivileged + runtime config), research R13.
+      - name: Build the web image
+        run: docker build --tag mytasks-web:ci frontend
+      - name: Smoke test the web image
+        run: |
+          docker run -d --name web -p 8081:8080 \
+            -e API_BASE_URL=https://api.example.com -e FIREBASE_API_KEY=ci-key \
+            -e FIREBASE_AUTH_DOMAIN=ci.firebaseapp.com -e FIREBASE_PROJECT_ID=ci-project \
+            -e APP_VERSION=ci mytasks-web:ci
+          for attempt in $(seq 1 30); do
+            if config=$(curl --silent --fail --max-time 5 http://localhost:8081/config.js); then break; fi
+            sleep 2
+          done
+          if ! echo "${config:-}" | grep -q "APP_VERSION: 'ci'"; then docker logs web; exit 1; fi
+          test "$(curl --silent --output /dev/null --write-out '%{http_code}' http://localhost:8081/history)" = 200
+          docker rm -f web
+
+  secrets-scan:
+    name: secrets-scan
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      # Scans the commits of the change. Comments on the PR are disabled so the token
+      # stays read-only (a failing check is the signal).
+      - uses: gitleaks/gitleaks-action@e0c47f4f8be36e29cdc102c57e68cb5cbf0e8d1e # v3.0.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITLEAKS_ENABLE_COMMENTS: "false"
+
+  api-contract-compat:
+    name: api-contract-compat
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          path: pr
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+        with:
+          version: ${{ env.UV_VERSION }}
+          enable-cache: true
+          cache-dependency-glob: pr/backend/uv.lock
+      - name: Export the contract of the change
+        working-directory: pr/backend
+        run: |
+          uv sync --locked
+          mkdir -p "$GITHUB_WORKSPACE/contracts"
+          uv run python scripts/export_openapi.py "$GITHUB_WORKSPACE/contracts/pr.json"
+      # Outside a PR (deploy.yml reusing this workflow after a push) there is no target
+      # branch to compare with: the check passes and says so.
+      - name: Check out the target branch
+        id: base-checkout
+        if: github.event_name == 'pull_request'
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.base_ref }}
+          path: base
+          persist-credentials: false
+      # The script of the PR runs against the tree of the target branch, so the comparison
+      # works even if the target branch predates the exporter. If the target cannot export
+      # a contract yet, the check passes and records it.
+      - name: Export the contract of the target branch
+        id: base-export
+        if: steps.base-checkout.outcome == 'success'
+        working-directory: base/backend
+        continue-on-error: true
+        run: |
+          mkdir -p scripts
+          cp "$GITHUB_WORKSPACE/pr/backend/scripts/export_openapi.py" scripts/export_openapi.py
+          uv sync --locked
+          uv run python scripts/export_openapi.py "$GITHUB_WORKSPACE/contracts/base.json"
+      - name: Nothing to compare
+        if: steps.base-export.outcome != 'success'
+        run: |
+          {
+            echo "### api-contract-compat"
+            echo "No contract to compare with (not a pull request, or the target branch cannot export one yet). Check passed without a comparison."
+          } >> "$GITHUB_STEP_SUMMARY"
+      # Fails on a breaking change (field or endpoint removed, stricter type): FR-008.
+      - name: Compare the contracts
+        if: steps.base-export.outcome == 'success'
+        uses: oasdiff/oasdiff-action/breaking@b9325c9e0a27ab65b0da3b766522cedec6be81dc # v0.1.18
+        with:
+          base: contracts/base.json
+          revision: contracts/pr.json
+          fail-on: WARN
