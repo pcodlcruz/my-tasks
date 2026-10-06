@@ -5,13 +5,17 @@
 # backend/ and the pipeline rebuilds the image with the patched builder.
 # Pinned by digest, never `latest` (Principio III). To bump it:
 #   docker pull gcr.io/buildpacks/builder:google-24   # copy the new digest below
+# The Python version is pinned separately, in backend/.python-version.
 [_]
 schema-version = "0.2"
 id = "mytasks-api"
 name = "mytasks-api"
 
 [io.buildpacks]
-# gcr.io/buildpacks/builder:google-24 (Ubuntu 24.04)
+# Google's generic builder, the one Cloud Run uses for source deployments. There is no
+# Python-only builder: it detects the language and the Python buildpack lives inside it.
+# "google-24" is the tag of its current stack (Ubuntu 24.04 base image); the older tags are
+# google-22 (Ubuntu 22) and v1 (Ubuntu 18). The digest below is gcr.io/buildpacks/builder:google-24.
 builder = "gcr.io/buildpacks/builder@sha256:1c5d6ecf8b0d4e6520853a35b740d8fcf2c6953829aa12085b9acb330e59a030"
 
 # Local state that must never reach the image: .env holds local settings and .venv/caches
