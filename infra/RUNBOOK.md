@@ -264,3 +264,54 @@ Creada por el propietario en consola en ambos proyectos y verificada en solo lec
 ### MED-002 resuelto y MED-003 reclasificado (2026-10-09)
 
 El propietario retiró `roles/editor` de las cuentas de Compute por defecto de ambos proyectos (verificado en solo lectura: sin concesiones). Los enlaces heredados del bucket de estado no se tocan: no restringen nada, porque los roles básicos de proyecto ya incluyen permisos de Cloud Storage (informe `security-review-t046.md`, MED-003). Pendiente del informe: MED-001 (roles personalizados de Firestore e Identity Platform).
+
+### T046 completada: roles de proyecto de `terraform-*` (2026-10-09)
+
+Concedidos por el propietario en la consola según la lista de `security-review-t046.md` y verificados en solo lectura por el MCP. Sin `owner`, `editor` ni roles adicionales. Los roles personalizados de Firestore e Identity Platform (MED-001) se añaden en la Fase 4, cuando un `terraform plan` real fije sus permisos mínimos.
+
+| Rol | `terraform-production` | `terraform-staging` |
+|---|---|---|
+| `roles/serviceusage.serviceUsageAdmin` | sí | sí |
+| `roles/run.admin` | sí | sí |
+| `roles/iam.serviceAccountAdmin` | sí | sí |
+| `roles/resourcemanager.projectIamAdmin` con condición `modifiedGrantsByRole.hasOnly(['roles/datastore.user'])` | sí | sí |
+| `roles/iam.workloadIdentityPoolAdmin` | sí | no |
+| `roles/artifactregistry.admin` | sí | no |
+
+### T047: cuentas `terraform-plan-*` (2026-10-09)
+
+Creadas por el MCP, con confirmación del propietario. Sin claves y **sin ningún rol de proyecto** (opción C elegida por el propietario): quedan inertes hasta que la Fase 4 fije el rol de lectura mínimo. Verificado en solo lectura.
+
+| Cuenta | Proyecto | Puede usarla (`roles/iam.workloadIdentityUser`) | Lectura del estado (`roles/storage.objectViewer`, condición por prefijo) |
+|---|---|---|---|
+| `terraform-plan-production@pdlco-mytasks.iam.gserviceaccount.com` | `pdlco-mytasks` | `principal://iam.googleapis.com/projects/2195266360/locations/global/workloadIdentityPools/github/subject/repo:pcodlcruz@210847116/my-tasks@1370451186:pull_request` | `production/` y `platform/` |
+| `terraform-plan-staging@pdlco-mytasks-stg.iam.gserviceaccount.com` | `pdlco-mytasks-stg` | el mismo sujeto `…:pull_request` | `staging/` |
+
+El `plan` de estas cuentas debe ejecutarse con `-lock=false`: el bloqueo del estado exige crear un objeto y no tienen escritura. Pendiente de la Fase 4: elegir el rol de lectura del proyecto (rol personalizado de metadatos o `roles/viewer` si se comprueba que no expone documentos de Firestore).
+
+### T048: repositorio de Artifact Registry (2026-10-09)
+
+Creado por el MCP, con confirmación del propietario, en `pdlco-mytasks`. Verificado con `repositories describe`. Se adopta en `infra/platform/` en T052 con `prevent_destroy` (T054).
+
+| Parámetro | Valor |
+|---|---|
+| Repositorio | `projects/pdlco-mytasks/locations/europe-southwest1/repositories/mytasks` |
+| Formato / modo | Docker, `STANDARD_REPOSITORY` |
+| Etiquetas | inmutables (`immutableTags: true`) |
+| Cifrado | clave gestionada por Google |
+| Lectura (`roles/artifactregistry.reader`, a nivel de repositorio) | `service-838389521553@serverless-robot-prod.iam.gserviceaccount.com`, agente de servicio de Cloud Run del proyecto de staging (número 838389521553) |
+
+La escritura para `deployer-staging` y la lectura para `deployer-production` se conceden en T049.
+
+### T049: cuentas `deployer-*` (2026-10-09)
+
+Creadas por el MCP, con confirmación del propietario. Sin claves y **sin ningún rol de proyecto** (verificado en solo lectura en ambos proyectos). Los permisos sobre los servicios de Cloud Run y las cuentas de ejecución se conceden en la Fase 4 (T064/T065), cuando esos recursos existen. Se adoptan en `infra/platform/` en T053.
+
+| Cuenta | Proyecto | Puede usarla (`roles/iam.workloadIdentityUser`) | Sobre el repositorio `mytasks` |
+|---|---|---|---|
+| `deployer-staging@pdlco-mytasks-stg.iam.gserviceaccount.com` | `pdlco-mytasks-stg` | `principal://iam.googleapis.com/projects/2195266360/locations/global/workloadIdentityPools/github/subject/repo:pcodlcruz@210847116/my-tasks@1370451186:environment:staging` | `roles/artifactregistry.writer` |
+| `deployer-production@pdlco-mytasks.iam.gserviceaccount.com` | `pdlco-mytasks` | el mismo sujeto con `…:environment:production` | `roles/artifactregistry.reader` |
+
+Política final del repositorio `mytasks`: lectura para `deployer-production` y para el agente de Cloud Run de staging; escritura solo para `deployer-staging`.
+
+Riesgo aceptado: `deployer-staging`, una cuenta de staging, escribe en un repositorio del proyecto de producción. Limitado al repositorio concreto y al *environment* `staging`, restringido a `develop`, `release/*` y `hotfix/*`.
