@@ -25,7 +25,9 @@ jobs:
         run: |
           token=$(curl -sS -H "Authorization: bearer ${ACTIONS_ID_TOKEN_REQUEST_TOKEN}" "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=t045-claims" | jq -r .value)
           echo "::add-mask::${token}"
-          TOKEN="${token}" python3 -c 'import os, json, base64; p = os.environ["TOKEN"].split(".")[1]; p += "=" * (-len(p) % 4); c = json.loads(base64.urlsafe_b64decode(p)); keys = ["sub", "repository", "repository_id", "repository_owner_id", "environment", "event_name", "ref", "job_workflow_ref"]; print(json.dumps({k: c.get(k) for k in keys}, indent=2))'
+          out=$(TOKEN="${token}" python3 -c 'import os, json, base64; p = os.environ["TOKEN"].split(".")[1]; p += "=" * (-len(p) % 4); c = json.loads(base64.urlsafe_b64decode(p)); keys = ["sub", "repository", "repository_id", "repository_owner_id", "environment", "event_name", "ref", "job_workflow_ref"]; print(json.dumps({k: c.get(k) for k in keys}))')
+          echo "${out}"
+          echo "::notice title=T045 claims::${out}"
 
   claims-pull-request:
     if: github.event_name == 'pull_request'
@@ -38,4 +40,6 @@ jobs:
         run: |
           token=$(curl -sS -H "Authorization: bearer ${ACTIONS_ID_TOKEN_REQUEST_TOKEN}" "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=t045-claims" | jq -r .value)
           echo "::add-mask::${token}"
-          TOKEN="${token}" python3 -c 'import os, json, base64; p = os.environ["TOKEN"].split(".")[1]; p += "=" * (-len(p) % 4); c = json.loads(base64.urlsafe_b64decode(p)); keys = ["sub", "repository", "repository_id", "repository_owner_id", "environment", "event_name", "ref", "job_workflow_ref"]; print(json.dumps({k: c.get(k) for k in keys}, indent=2))'
+          out=$(TOKEN="${token}" python3 -c 'import os, json, base64; p = os.environ["TOKEN"].split(".")[1]; p += "=" * (-len(p) % 4); c = json.loads(base64.urlsafe_b64decode(p)); keys = ["sub", "repository", "repository_id", "repository_owner_id", "environment", "event_name", "ref", "job_workflow_ref"]; print(json.dumps({k: c.get(k) for k in keys}))')
+          echo "${out}"
+          echo "::notice title=T045 claims::${out}"
