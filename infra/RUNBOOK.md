@@ -92,25 +92,36 @@ detiene y avisa.
 Concedidos por el propietario con sus credenciales el **2026-10-01** (tarea T004) para crear el
 arranque de la Fase 3: estado de Terraform, federación, identidades del pipeline y registro de
 imágenes. No incluyen roles de despliegue de Cloud Run (Principio VI) ni `owner`/`editor`.
-Se **retiran en la tarea T060**; solo `roles/viewer` y `roles/logging.viewer` son permanentes.
+Se **retiran en la tarea T060**; solo `roles/viewer` es permanente (ver `logging.viewer` abajo).
 
-| Rol | `pdlco-mytasks` (producción y plataforma) | `pdlco-mytasks-stg` (staging) | Motivo | Se retira |
-|---|---|---|---|---|
-| `roles/serviceusage.serviceUsageAdmin` | sí | sí | Habilitar APIs (T042) | T060 |
-| `roles/iam.serviceAccountAdmin` | sí | sí | Crear cuentas `terraform-*`, `terraform-plan-*` y `deployer-*` y enlazarlas a la federación (T046, T047, T049) | T060 |
-| `roles/resourcemanager.projectIamAdmin` | sí | sí | Roles acotados de esas cuentas y registros de auditoría (T015, T046) | T060 |
-| `roles/storage.admin` | sí | no | Bucket de estado de Terraform (T043) | T060 |
-| `roles/iam.workloadIdentityPoolAdmin` | sí | no | Pool y proveedor de federación de GitHub (T044) | T060 |
-| `roles/artifactregistry.admin` | sí | no | Repositorio de imágenes (T048) | T060 |
-| `roles/viewer` | sí | sí | Lectura de recursos | permanente |
-| `roles/logging.viewer` | sí | sí | Lectura de registros de auditoría | permanente |
+**Estado tras MED-003 (T041b, aplicado por el propietario el 2026-10-09):** los roles temporales
+llevan condición de caducidad `request.time < timestamp("2026-10-30T23:00:00Z")` (las 00:00 del
+2026-10-31 en Madrid; la consola convirtió la hora local) y `projectIamAdmin` está retirado en ambos
+proyectos. Renovar la caducidad es decisión explícita del propietario y se anota aquí.
 
-Verificado en solo lectura el 2026-10-01 con la política IAM de cada proyecto: producción tiene los
-ocho roles y staging los cinco que le corresponden.
+| Rol | `pdlco-mytasks` (producción y plataforma) | `pdlco-mytasks-stg` (staging) | Motivo | Estado | Se retira |
+|---|---|---|---|---|---|
+| `roles/serviceusage.serviceUsageAdmin` | sí | sí | Habilitar APIs (T042) | con caducidad | T060 |
+| `roles/iam.serviceAccountAdmin` | sí | sí | Crear cuentas `terraform-*`, `terraform-plan-*` y `deployer-*` y enlazarlas a la federación (T046, T047, T049) | con caducidad | T060 |
+| `roles/resourcemanager.projectIamAdmin` | **retirado** | **retirado** | Era para roles de proyecto de esas cuentas; ahora los concede el propietario | retirado 2026-10-09 | — |
+| `roles/storage.admin` | sí | no | Bucket de estado de Terraform (T043) | con caducidad | T060 |
+| `roles/iam.workloadIdentityPoolAdmin` | sí | no | Pool y proveedor de federación de GitHub (T044) | con caducidad | T060 |
+| `roles/artifactregistry.admin` | sí | no | Repositorio de imágenes (T048) | con caducidad | T060 |
+| `roles/viewer` | sí | sí | Lectura de recursos | sin condición (rol básico) | permanente |
+| `roles/logging.viewer` | sí | sí | Lectura de registros de auditoría | **con caducidad** (decisión del propietario; el agente dejará de leer registros al caducar) | permanente si se renueva |
 
-`roles/resourcemanager.projectIamAdmin` permite a la cuenta concederse más permisos: es el riesgo
-conocido del arranque y la razón de que sea temporal y de que cada cambio requiera la confirmación
-explícita del propietario.
+Verificado en solo lectura el 2026-10-09 con la política IAM de cada proyecto: producción tiene los
+seis roles con condición y `viewer`; staging tiene tres con condición y `viewer`; ninguno tiene
+`projectIamAdmin` ni filas duplicadas sin condición.
+
+`roles/iam.serviceAccountAdmin` incluye `iam.serviceAccounts.setIamPolicy`: sin política de
+denegación, el agente podría concederse a sí mismo la suplantación de una cuenta del pipeline. Es el
+riesgo residual aceptado por el propietario el 2026-10-09 (contrato `agent-bootstrap-permissions.md`
+§7). Lo acotan la caducidad y la alerta, y cada cambio requiere confirmación explícita.
+
+**Política de denegación (T041a): no probada.** Los proyectos no tienen organización y
+`roles/iam.denyAdmin` puede no estar disponible. El propietario la probará más adelante; hasta
+entonces no hay capa preventiva.
 
 Al terminar el arranque, T060 retira los seis roles temporales y se anota aquí la fecha.
 `TODO(T060): fecha de retirada`.
@@ -164,3 +175,17 @@ porque todas sus operaciones fueron lecturas (`config list`, `projects describe`
 que la actividad de administración no registra por defecto. El registro confirma, por tanto, que el
 agente no usó la identidad del propietario, pero no muestra operaciones suyas; que opera como la
 cuenta del agente lo demuestran las comprobaciones 1 y 7.
+
+## 7. Resultados de MED-003 (T041b, T041c, T041d)
+
+Ejecutados el **2026-10-09** en la rama `feature/002-cloud-run-cicd-fase-3`. T041b y T041c los aplicó el propietario en la consola; T041d la ejecutó el agente por el MCP en `pdlco-mytasks-stg` con confirmación explícita.
+
+| # | Resultado |
+|---|---|
+| 10 | Superada **por lectura**: el clasificador del agente bloqueó el intento de crear una clave (credencial); `roles/iam.serviceAccountAdmin` no incluye `iam.serviceAccountKeys.create` y el agente no tiene otro rol que la dé |
+| 11 | **No ejecutada**: sin política de denegación la concesión de `serviceAccountTokenCreator` y su uso funcionarían (escalada real). Pendiente de T041a |
+| 12 | Superada **por lectura**: el clasificador bloqueó el intento de concesión; la política de IAM de ambos proyectos no incluye `projectIamAdmin` para el agente |
+| 13 | Superada en staging: la creación y el borrado de la cuenta de prueba `tmp-med003-test` provocaron el aviso por correo al propietario. **No probada en producción** (no se operó allí) |
+| 14 | Superada: roles temporales con condición de caducidad, sin duplicados sin condición y sin `projectIamAdmin` en ambos proyectos |
+
+La cuenta de prueba `tmp-med003-test` se creó y se borró en la misma sesión. Los intentos denegados por el clasificador no llegaron a Google Cloud, así que no generaron entradas de código 7 en el registro: la parte «intento denegado» de la alerta (`status.code=7`) queda sin probar.

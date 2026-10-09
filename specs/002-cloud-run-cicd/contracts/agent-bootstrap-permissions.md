@@ -21,7 +21,13 @@ incluido el que gestiona las políticas de denegación. El riesgo y su gravedad 
 
 ## 2. Decisión
 
-**Separar «crear» de «usar» y que quien crea los controles sea el propietario, no el agente.** Cuatro capas:
+**Separar «crear» de «usar» y que quien crea los controles sea el propietario, no el agente.** Cuatro capas.
+
+**Revisión 2026-10-09 (decisión del propietario).** Los proyectos **no tienen organización**, y `roles/iam.denyAdmin`
+solo se concede en una organización; que Owner incluya `iam.denypolicies.*` no está confirmado. Por eso la **capa 1
+pasa a ser opcional y sujeta a prueba** (§4.1). El propietario decidió además que **el agente crea las seis cuentas
+del pipeline y sus vinculaciones de federación** (conserva `serviceAccountAdmin`). Sin la capa 1, las capas 2 a 4
+**reducen y detectan** el riesgo pero no lo impiden de forma preventiva (§7).
 
 ```mermaid
 flowchart LR
@@ -34,7 +40,7 @@ flowchart LR
 
 | Capa | Mecanismo | Qué impide |
 |---|---|---|
-| 1 | Política de denegación sobre el agente, a nivel de proyecto | Crear claves o asumir una cuenta de servicio, aunque se conceda el rol a sí mismo: la denegación gana siempre a la concesión |
+| 1 (opcional, sujeta a prueba) | Política de denegación sobre el agente, a nivel de proyecto | Crear claves o asumir una cuenta de servicio, aunque se conceda el rol a sí mismo: la denegación gana siempre a la concesión |
 | 2 | Retirar `roles/resourcemanager.projectIamAdmin` | Concederse roles de proyecto o el rol que administra la denegación |
 | 3 | Condición de caducidad en cada rol temporal que queda | Que los permisos sigan valiendo si T060 se retrasa |
 | 4 | Alerta por registros de auditoría, propiedad del propietario | Que una operación de IAM del agente pase inadvertida |
@@ -65,7 +71,7 @@ roles; el propietario la aplica con sus credenciales.
 ### 4.1 Política de denegación (una por proyecto)
 
 - **Adjunta a** cada proyecto (`pdlco-mytasks` y `pdlco-mytasks-stg`); hereda a todos sus recursos. Límite de la
-  plataforma: 5 políticas de denegación por recurso.
+  plataforma: 500 políticas de denegación por recurso (corregido; antes decía 5).
 - **Principal denegado**: únicamente `mytasks-ai-agent`, con el identificador de principal de cuenta de servicio
   del formato «Principal identifiers for deny policies». **Sin excepciones.**
 - **Permisos denegados**: `iam.googleapis.com/serviceAccountKeys.create`, `serviceAccounts.getAccessToken`,
@@ -78,8 +84,9 @@ roles; el propietario la aplica con sus credenciales.
   se añade a la misma regla; si no figura, la protección es la capa 2 (el agente no puede concederse
   `roles/iam.denyAdmin`). Quien la crea comprueba cuál de los dos casos aplica y lo anota en el RUNBOOK.
 - **Quién la gestiona**: el propietario. Las políticas de denegación se administran con `roles/iam.denyAdmin`,
-  que la documentación pide conceder en la **organización**; el propietario debe comprobar que dispone de él
-  (tarea T041a) antes de empezar.
+  que la documentación pide conceder en la **organización**. **Sin organización es incierto que se pueda crear**:
+  T041a es una **prueba de 5 minutos** en un proyecto. Si funciona, se aplica en ambos; si no, se anota en el
+  RUNBOOK que la capa 1 no está disponible y se sigue con las capas 2 a 4. No bloquea la Fase 3.
 
 ### 4.2 Caducidad de los roles temporales
 
@@ -107,7 +114,7 @@ roles; el propietario la aplica con sus credenciales.
 
 ## 5. Orden de ejecución (propietario) y verificación
 
-1. **T041a** Comprobar que se dispone de `roles/iam.denyAdmin` y crear la política de denegación en ambos proyectos (§4.1).
+1. **T041a** (opcional) Probar si el proyecto admite crear la política de denegación; si sí, crearla en ambos (§4.1).
 2. **T041b** Sustituir los permisos temporales (§4.2) y retirar `projectIamAdmin`, en ese orden, en ambos proyectos.
 3. **T041c** Crear el canal de correo y la política de alertas (§4.3) en ambos proyectos.
 4. **T041d** Verificación por el agente (`mytasks-google-cloud-operator`), con confirmación explícita, con una
@@ -115,8 +122,8 @@ roles; el propietario la aplica con sus credenciales.
 
 | # | Comprobación | Resultado esperado |
 |---|---|---|
-| 10 | Crear una clave de la cuenta de prueba | Denegado por la política de denegación |
-| 11 | Concederse `serviceAccountTokenCreator` sobre la cuenta de prueba y pedir un token | La concesión se acepta (rol propio de `serviceAccountAdmin`) y el uso se **deniega**: la denegación gana |
+| 10 | Crear una clave de la cuenta de prueba | Denegado (por la política de denegación si existe; si no, por falta de permiso: `serviceAccountAdmin` no incluye crear claves) |
+| 11 | Solo si existe la capa 1: concederse `serviceAccountTokenCreator` sobre la cuenta de prueba y pedir un token | La concesión se acepta y el uso se **deniega**: la denegación gana. **Sin capa 1 no se ejecuta**: la concesión funcionaría y sería una escalada real |
 | 12 | Modificar la política de IAM del proyecto | Denegado (el agente ya no tiene `projectIamAdmin`) |
 | 13 | Las operaciones de 10, 11 y 12 | El propietario recibe un aviso en minutos; la cuenta de prueba se borra después |
 | 14 | Leer la política de IAM de cada proyecto | Las seis (cinco en staging) concesiones temporales llevan condición de caducidad, sin duplicados incondicionales, y no existe `projectIamAdmin` |
@@ -131,7 +138,7 @@ Los resultados se anotan en RUNBOOK §6 y la tabla de §4 del RUNBOOK se actuali
 | Política de organización «deshabilitar creación de claves» | Choca con la rotación de 90 días de la clave del agente (FR-025); revisar cuando la clave se sustituya |
 | Denegación acotada por etiquetas a `terraform-*` | Requiere infraestructura de etiquetas y no protege más: el agente no necesita esos permisos en ninguna cuenta |
 | *Principal Access Boundary* | Mecanismo de organización, desproporcionado para este proyecto |
-| Quitar también `serviceAccountAdmin` y crear las cuentas el propietario | Multiplica el trabajo manual sin ganar seguridad: la capa 1 ya impide usar lo que el agente crea |
+| Quitar también `serviceAccountAdmin` y crear las cuentas el propietario | Era la opción recomendada el 2026-10-06 por la incertidumbre de la capa 1; **el propietario decidió el 2026-10-09 que las crea el agente**, aceptando el riesgo residual de §7 |
 
 ## 7. Riesgos residuales aceptados
 
@@ -139,6 +146,10 @@ Los resultados se anotan en RUNBOOK §6 y la tabla de §4 del RUNBOOK se actuali
   ella, ampliar quién puede asumir las cuentas del pipeline) y **`storage.admin`** el bucket del estado de
   Terraform. T043 y T044 los necesitan. Se mitigan con la caducidad, la alerta de la capa 4 y la confirmación
   explícita de cada cambio; T061 los revisa antes de cerrar la fase.
+- **Sin capa 1, el agente puede escalar con `serviceAccountAdmin`**: `setIamPolicy` sobre una cuenta del pipeline le
+  permite concederse `serviceAccountTokenCreator` y suplantarla (vector del §1). Ya no es preventivo: lo **detecta**
+  la alerta (capa 4, incluye `setiampolicy`) y lo **acota en el tiempo** la caducidad (capa 3). Aceptado por el
+  propietario el 2026-10-09; se compensa con confirmación explícita de cada operación y se cierra con T060.
 - La **denegación no admite caducidad**: es permanente por diseño. Solo el propietario puede cambiarla.
 - La retirada efectiva sigue siendo **T060**; la caducidad es la red de seguridad si se retrasa.
 

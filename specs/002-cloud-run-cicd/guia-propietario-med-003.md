@@ -17,15 +17,18 @@ Valores que se usan en toda la guía:
 
 ## Paso 0 · Comprobaciones previas (5 min)
 
-- [ ] **¿Hay una organización?** En el selector de proyectos de la consola, comprueba que por encima de `pdlco-mytasks` y `pdlco-mytasks-stg` aparece una organización. **Si no la hay, para y avísame**: el diseño la da por supuesta.
-- [ ] **¿Tienes `Deny Admin`?** *IAM y administración → IAM*, selecciona la **organización** en el selector, busca tu usuario y mira sus roles. Necesitas **Deny Admin** (`roles/iam.denyAdmin`) o un rol que lo incluya (por ejemplo *Security Admin*). Si te falta, concédetelo a ti mismo en la organización (hace falta ser *Organization Administrator* o similar). Es un rol **tuyo**, no del agente.
-- [ ] **Identifica el estado actual del agente.** En cada proyecto, *IAM*, busca `mytasks-ai-agent`. Debes ver: producción con 8 roles, staging con 5 (tabla del RUNBOOK §4). Anota cualquier diferencia antes de seguir.
+- [ ] **Organización.** Los proyectos no tienen organización (confirmado). No hace falta nada más: el paso 1 (denegación) pasa a ser una **prueba opcional** y **no bloquea** los pasos 2 y 3.
+- [X] **Identifica el estado actual del agente.** En cada proyecto, *IAM*, busca `mytasks-ai-agent`. Debes ver: producción con 8 roles, staging con 5 (tabla del RUNBOOK §4). Anota cualquier diferencia antes de seguir.
 
 Si algo no coincide con lo anterior, para y dímelo.
 
 ---
 
-## Paso 1 · T041a: política de denegación (10 min por proyecto)
+## Paso 1 · T041a (OPCIONAL): prueba de la política de denegación (5 min)
+
+**Salta este paso si no ves la pestaña Deny o la consola rechaza crear la política**: anótalo («denegación no disponible sin organización») y sigue con el paso 2. Sin ella, el agente (que conserva `Service Account Admin` para crear las cuentas del pipeline) queda cubierto solo por la caducidad y la alerta; es un riesgo aceptado por ti el 2026-10-09.
+
+Prueba primero en `pdlco-mytasks-stg`. Si funciona, repite en producción.
 
 *IAM y administración → IAM → pestaña **Deny*** → selector de proyecto → **Crear política de denegación**.
 
@@ -70,7 +73,7 @@ iam.googleapis.com/serviceAccounts.actAs
 | Rol (nombre en la consola) | Producción | Staging | Acción |
 |---|---|---|---|
 | Service Usage Admin | sí | sí | añadir condición |
-| Service Account Admin | sí | sí | añadir condición |
+| Service Account Admin (el agente **lo conserva**: crea las 6 cuentas del pipeline) | sí | sí | añadir condición |
 | Storage Admin | sí | no | añadir condición |
 | Workload Identity Pool Admin | sí | no | añadir condición |
 | Artifact Registry Administrator | sí | no | añadir condición |
@@ -142,12 +145,11 @@ Después **Acciones → Crear alerta de registro**:
 
 Cuando termines, dime solo esto:
 
-- [ ] Paso 0: organización **sí/no**, tienes `Deny Admin` **sí/no**.
-- [ ] Paso 1: política creada en los dos proyectos, y qué ocurre con `denypolicies`: **admite denegación / no admite**.
+- [ ] Paso 1 (opcional): **la consola admitió la política de denegación sí/no**, y en cuántos proyectos; si la admitió, qué ocurre con `denypolicies`: **admite denegación / no admite**.
 - [ ] Paso 2: roles condicionados y `Project IAM Admin` retirado en los dos proyectos, sin duplicados.
 - [ ] Paso 3: alerta creada en los dos proyectos.
 
-Con eso lanzo **T041d**: el operador verifica por el MCP, en solo lectura y con una cuenta de prueba desechable, que crear claves y asumir cuentas queda denegado aunque el agente se conceda el rol, y que te llega el aviso. Hasta entonces **no empieza ninguna operación de la Fase 3**.
+Con eso lanzo **T041d**: el operador verifica por el MCP, con una cuenta de prueba desechable, que crear claves queda denegado, que el agente no puede tocar la política de IAM del proyecto, que los roles llevan caducidad y que te llega el aviso. Solo si existe la denegación se prueba también que asumir la cuenta queda denegado aunque el agente se conceda el rol. Hasta entonces **no empieza ninguna operación de la Fase 3**.
 
 ---
 
