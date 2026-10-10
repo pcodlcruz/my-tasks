@@ -92,25 +92,36 @@ detiene y avisa.
 Concedidos por el propietario con sus credenciales el **2026-10-01** (tarea T004) para crear el
 arranque de la Fase 3: estado de Terraform, federación, identidades del pipeline y registro de
 imágenes. No incluyen roles de despliegue de Cloud Run (Principio VI) ni `owner`/`editor`.
-Se **retiran en la tarea T060**; solo `roles/viewer` y `roles/logging.viewer` son permanentes.
+Se **retiran en la tarea T060**; solo `roles/viewer` es permanente (ver `logging.viewer` abajo).
 
-| Rol | `pdlco-mytasks` (producción y plataforma) | `pdlco-mytasks-stg` (staging) | Motivo | Se retira |
-|---|---|---|---|---|
-| `roles/serviceusage.serviceUsageAdmin` | sí | sí | Habilitar APIs (T042) | T060 |
-| `roles/iam.serviceAccountAdmin` | sí | sí | Crear cuentas `terraform-*`, `terraform-plan-*` y `deployer-*` y enlazarlas a la federación (T046, T047, T049) | T060 |
-| `roles/resourcemanager.projectIamAdmin` | sí | sí | Roles acotados de esas cuentas y registros de auditoría (T015, T046) | T060 |
-| `roles/storage.admin` | sí | no | Bucket de estado de Terraform (T043) | T060 |
-| `roles/iam.workloadIdentityPoolAdmin` | sí | no | Pool y proveedor de federación de GitHub (T044) | T060 |
-| `roles/artifactregistry.admin` | sí | no | Repositorio de imágenes (T048) | T060 |
-| `roles/viewer` | sí | sí | Lectura de recursos | permanente |
-| `roles/logging.viewer` | sí | sí | Lectura de registros de auditoría | permanente |
+**Estado tras MED-003 (T041b, aplicado por el propietario el 2026-10-09):** los roles temporales
+llevan condición de caducidad `request.time < timestamp("2026-10-30T23:00:00Z")` (las 00:00 del
+2026-10-31 en Madrid; la consola convirtió la hora local) y `projectIamAdmin` está retirado en ambos
+proyectos. Renovar la caducidad es decisión explícita del propietario y se anota aquí.
 
-Verificado en solo lectura el 2026-10-01 con la política IAM de cada proyecto: producción tiene los
-ocho roles y staging los cinco que le corresponden.
+| Rol | `pdlco-mytasks` (producción y plataforma) | `pdlco-mytasks-stg` (staging) | Motivo | Estado | Se retira |
+|---|---|---|---|---|---|
+| `roles/serviceusage.serviceUsageAdmin` | sí | sí | Habilitar APIs (T042) | con caducidad | T060 |
+| `roles/iam.serviceAccountAdmin` | sí | sí | Crear cuentas `terraform-*`, `terraform-plan-*` y `deployer-*` y enlazarlas a la federación (T046, T047, T049) | con caducidad | T060 |
+| `roles/resourcemanager.projectIamAdmin` | **retirado** | **retirado** | Era para roles de proyecto de esas cuentas; ahora los concede el propietario | retirado 2026-10-09 | — |
+| `roles/storage.admin` | sí | no | Bucket de estado de Terraform (T043) | con caducidad | T060 |
+| `roles/iam.workloadIdentityPoolAdmin` | sí | no | Pool y proveedor de federación de GitHub (T044) | con caducidad | T060 |
+| `roles/artifactregistry.admin` | sí | no | Repositorio de imágenes (T048) | con caducidad | T060 |
+| `roles/viewer` | sí | sí | Lectura de recursos | sin condición (rol básico) | permanente |
+| `roles/logging.viewer` | sí | sí | Lectura de registros de auditoría | **con caducidad** (decisión del propietario; el agente dejará de leer registros al caducar) | permanente si se renueva |
 
-`roles/resourcemanager.projectIamAdmin` permite a la cuenta concederse más permisos: es el riesgo
-conocido del arranque y la razón de que sea temporal y de que cada cambio requiera la confirmación
-explícita del propietario.
+Verificado en solo lectura el 2026-10-09 con la política IAM de cada proyecto: producción tiene los
+seis roles con condición y `viewer`; staging tiene tres con condición y `viewer`; ninguno tiene
+`projectIamAdmin` ni filas duplicadas sin condición.
+
+`roles/iam.serviceAccountAdmin` incluye `iam.serviceAccounts.setIamPolicy`: sin política de
+denegación, el agente podría concederse a sí mismo la suplantación de una cuenta del pipeline. Es el
+riesgo residual aceptado por el propietario el 2026-10-09 (contrato `agent-bootstrap-permissions.md`
+§7). Lo acotan la caducidad y la alerta, y cada cambio requiere confirmación explícita.
+
+**Política de denegación (T041a): no probada.** Los proyectos no tienen organización y
+`roles/iam.denyAdmin` puede no estar disponible. El propietario la probará más adelante; hasta
+entonces no hay capa preventiva.
 
 Al terminar el arranque, T060 retira los seis roles temporales y se anota aquí la fecha.
 `TODO(T060): fecha de retirada`.
@@ -164,3 +175,157 @@ porque todas sus operaciones fueron lecturas (`config list`, `projects describe`
 que la actividad de administración no registra por defecto. El registro confirma, por tanto, que el
 agente no usó la identidad del propietario, pero no muestra operaciones suyas; que opera como la
 cuenta del agente lo demuestran las comprobaciones 1 y 7.
+
+## 7. Resultados de MED-003 (T041b, T041c, T041d)
+
+Ejecutados el **2026-10-09** en la rama `feature/002-cloud-run-cicd-fase-3`. T041b y T041c los aplicó el propietario en la consola; T041d la ejecutó el agente por el MCP en `pdlco-mytasks-stg` con confirmación explícita.
+
+| # | Resultado |
+|---|---|
+| 10 | Superada **por lectura**: el clasificador del agente bloqueó el intento de crear una clave (credencial); `roles/iam.serviceAccountAdmin` no incluye `iam.serviceAccountKeys.create` y el agente no tiene otro rol que la dé |
+| 11 | **No ejecutada**: sin política de denegación la concesión de `serviceAccountTokenCreator` y su uso funcionarían (escalada real). Pendiente de T041a |
+| 12 | Superada **por lectura**: el clasificador bloqueó el intento de concesión; la política de IAM de ambos proyectos no incluye `projectIamAdmin` para el agente |
+| 13 | Superada en staging: la creación y el borrado de la cuenta de prueba `tmp-med003-test` provocaron el aviso por correo al propietario. **No probada en producción** (no se operó allí) |
+| 14 | Superada: roles temporales con condición de caducidad, sin duplicados sin condición y sin `projectIamAdmin` en ambos proyectos |
+
+La cuenta de prueba `tmp-med003-test` se creó y se borró en la misma sesión. Los intentos denegados por el clasificador no llegaron a Google Cloud, así que no generaron entradas de código 7 en el registro: la parte «intento denegado» de la alerta (`status.code=7`) queda sin probar.
+
+## 8. Cambios del arranque de la Fase 3 (T042 en adelante)
+
+### T042: APIs habilitadas (2026-10-09)
+
+Habilitadas por el propietario desde la consola, no por el MCP: es una excepción a «todo por el MCP», anotada también en la PR. Verificado en solo lectura por el MCP (`services list --enabled`).
+
+| Proyecto | API | Motivo | Adopción en Terraform |
+|---|---|---|---|
+| `pdlco-mytasks` | `sts.googleapis.com` | Intercambio de tokens de la federación de GitHub (T044) | T051 |
+| `pdlco-mytasks-stg` | `run.googleapis.com` | Que exista el agente de servicio de Cloud Run de staging antes de darle lectura del repositorio de imágenes (T048); si no aparece, se resuelve en T048 | T064 |
+
+### T043: bucket de estado de Terraform (2026-10-09)
+
+Creado por el MCP, con confirmación del propietario, en `pdlco-mytasks`. Verificado con `buckets describe`. Se adopta en `infra/platform/` en T051 con `prevent_destroy` (T054).
+
+| Parámetro | Valor |
+|---|---|
+| Nombre | `pdlco-mytasks-tfstate` |
+| Región | `europe-southwest1` |
+| Versionado | activado |
+| Acceso uniforme | activado |
+| Prevención de acceso público | `enforced` |
+| Clase | Standard (por defecto; no aparece en la salida de `describe`) |
+
+### T044: pool y proveedor de federación de GitHub (2026-10-09)
+
+Creados por el MCP, con confirmación del propietario, en `pdlco-mytasks`. Verificado con `providers describe` (estado `ACTIVE`). Se adoptan en `infra/platform/` en T051 con `prevent_destroy` (T054). Los nombres no se pueden reutilizar durante 30 días tras borrarlos.
+
+| Parámetro | Valor |
+|---|---|
+| Pool | `github` (global), nombre visible `GitHub-Actions` |
+| Proveedor | `github-actions`, estado `ACTIVE` |
+| Recurso | `projects/2195266360/locations/global/workloadIdentityPools/github/providers/github-actions` |
+| Emisor | `https://token.actions.githubusercontent.com` |
+| Mapeo | `google.subject=assertion.sub`, `attribute.repository_id`, `attribute.repository_owner_id` |
+| Condición | `assertion.repository_owner_id=='210847116'&&assertion.repository_id=='1370451186'` (ids numéricos de `pcodlcruz` y `pcodlcruz/my-tasks`; sin comodines) |
+
+Pasos del propietario en GitHub (*Settings → Actions → General*), porque el repositorio es público: exigir aprobación para los workflows de todos los colaboradores externos y no enviar secretos ni tokens de escritura a workflows de forks. Activar 2FA en la cuenta. `TODO(propietario): confirmar que están aplicados`.
+
+### T046: cuentas `terraform-*` y vinculaciones (2026-10-09, parte del agente)
+
+Creadas por el MCP, con confirmación del propietario. Sin claves y **sin ningún rol de proyecto todavía**: los concede el propietario (el agente ya no tiene `projectIamAdmin`). La tarea T046 sigue abierta hasta que el propietario los conceda y se verifique.
+
+| Cuenta | Proyecto | Puede usarla (`roles/iam.workloadIdentityUser`) |
+|---|---|---|
+| `terraform-production@pdlco-mytasks.iam.gserviceaccount.com` | `pdlco-mytasks` | `principal://iam.googleapis.com/projects/2195266360/locations/global/workloadIdentityPools/github/subject/repo:pcodlcruz@210847116/my-tasks@1370451186:environment:infra-production` |
+| `terraform-staging@pdlco-mytasks-stg.iam.gserviceaccount.com` | `pdlco-mytasks-stg` | `principal://iam.googleapis.com/projects/2195266360/locations/global/workloadIdentityPools/github/subject/repo:pcodlcruz@210847116/my-tasks@1370451186:environment:infra-staging` |
+
+Acceso al bucket `pdlco-mytasks-tfstate` (`roles/storage.objectAdmin`, con condición por prefijo del nombre del objeto y del prefijo de listado):
+
+| Cuenta | Prefijos |
+|---|---|
+| `terraform-staging` | `staging/` |
+| `terraform-production` | `production/` y `platform/` |
+
+Pendiente de comprobar con una ejecución real (T058/T059) que `terraform init` y el bloqueo del estado funcionan con estas condiciones, incluido el listado.
+
+Hallazgo para la revisión de seguridad: el bucket conserva los enlaces heredados por defecto (`projectEditor`, `projectOwner` y `projectViewer` de `pdlco-mytasks` con `legacyBucketOwner`, `legacyObjectOwner` y lectura). Cualquier cuenta con rol Editor en producción (por ejemplo la cuenta de Compute por defecto) puede leer y escribir el estado fuera de los prefijos de `terraform-*`. Valorar retirarlos.
+
+### Revisión de seguridad de T046: HIGH-002 resuelto (2026-10-09)
+
+El propietario retiró `roles/iam.serviceAccountTokenCreator` a nivel de proyecto de `firebase-adminsdk-fbsvc@pdlco-mytasks.iam.gserviceaccount.com` en `pdlco-mytasks`: permitía suplantar cualquier cuenta del proyecto, incluida `terraform-production`. Antes se comprobó que nada la usa. Verificado por el MCP en solo lectura; la cuenta conserva `firebase.sdkAdminServiceAgent` y `firebaseauth.admin`. No regenerar claves de Admin SDK sin avisar (Firebase puede volver a concederlo). Pendientes del informe `security-review-t046.md`: HIGH-001, MED-001, MED-002, MED-003.
+
+### Restricción: el repositorio debe seguir siendo público (2026-10-09)
+
+La cuenta de GitHub es del plan **Free**. En Free, los *environments* con revisores obligatorios y los *rulesets* (protección de `main`, `develop`, `release/*` y `hotfix/*`) solo están disponibles en repositorios **públicos** ([environments](https://docs.github.com/en/actions/how-tos/deploy/configure-and-manage-deployments/manage-environments), [rulesets](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-rulesets/about-rulesets)). Hacer el repositorio privado desactivaría la aprobación del propietario (FR-020) y la protección de ramas (Principio VII). Pasarlo a privado exige antes contratar un plan Pro o superior. Comprobado el 2026-10-09: público, cuatro *rulesets* activos, revisor `pcodlcruz` en los *environments*.
+
+### Alerta de Terraform sobre cuentas de servicio (2026-10-09)
+
+Creada por el propietario en consola en ambos proyectos y verificada en solo lectura por el MCP (`monitoring policies list`): `Terraform: cambio de IAM en una cuenta de servicio`, activa, con el canal de correo del propietario. Consulta: registros de actividad de administración de `iam.googleapis.com`, `principalEmail` que contiene `terraform-` y método que contiene `setiampolicy`. Los nombres de método se confirman con el primer `apply` real. El agente no tiene permisos de escritura de Monitoring y no se le conceden (contrato `agent-bootstrap-permissions.md` §4.3).
+
+### MED-002 resuelto y MED-003 reclasificado (2026-10-09)
+
+El propietario retiró `roles/editor` de las cuentas de Compute por defecto de ambos proyectos (verificado en solo lectura: sin concesiones). Los enlaces heredados del bucket de estado no se tocan: no restringen nada, porque los roles básicos de proyecto ya incluyen permisos de Cloud Storage (informe `security-review-t046.md`, MED-003). Pendiente del informe: MED-001 (roles personalizados de Firestore e Identity Platform).
+
+### T046 completada: roles de proyecto de `terraform-*` (2026-10-09)
+
+Concedidos por el propietario en la consola según la lista de `security-review-t046.md` y verificados en solo lectura por el MCP. Sin `owner`, `editor` ni roles adicionales. Los roles personalizados de Firestore e Identity Platform (MED-001) se añaden en la Fase 4, cuando un `terraform plan` real fije sus permisos mínimos.
+
+| Rol | `terraform-production` | `terraform-staging` |
+|---|---|---|
+| `roles/serviceusage.serviceUsageAdmin` | sí | sí |
+| `roles/run.admin` | sí | sí |
+| `roles/iam.serviceAccountAdmin` | sí | sí |
+| `roles/resourcemanager.projectIamAdmin` con condición `modifiedGrantsByRole.hasOnly(['roles/datastore.user'])` | sí | sí |
+| `roles/iam.workloadIdentityPoolAdmin` | sí | no |
+| `roles/artifactregistry.admin` | sí | no |
+
+### T047: cuentas `terraform-plan-*` (2026-10-09)
+
+Creadas por el MCP, con confirmación del propietario. Sin claves y **sin ningún rol de proyecto** (opción C elegida por el propietario): quedan inertes hasta que la Fase 4 fije el rol de lectura mínimo. Verificado en solo lectura.
+
+| Cuenta | Proyecto | Puede usarla (`roles/iam.workloadIdentityUser`) | Lectura del estado (`roles/storage.objectViewer`, condición por prefijo) |
+|---|---|---|---|
+| `terraform-plan-production@pdlco-mytasks.iam.gserviceaccount.com` | `pdlco-mytasks` | `principal://iam.googleapis.com/projects/2195266360/locations/global/workloadIdentityPools/github/subject/repo:pcodlcruz@210847116/my-tasks@1370451186:pull_request` | `production/` y `platform/` |
+| `terraform-plan-staging@pdlco-mytasks-stg.iam.gserviceaccount.com` | `pdlco-mytasks-stg` | el mismo sujeto `…:pull_request` | `staging/` |
+
+El `plan` de estas cuentas debe ejecutarse con `-lock=false`: el bloqueo del estado exige crear un objeto y no tienen escritura. Pendiente de la Fase 4: elegir el rol de lectura del proyecto (rol personalizado de metadatos o `roles/viewer` si se comprueba que no expone documentos de Firestore).
+
+### T051: adopción en `infra/platform/` (2026-10-10)
+
+Declarados con bloques `import` (sin recrear): el pool `github`, el proveedor `github-actions`, `terraform-production`, `terraform-plan-production` y sus dos vinculaciones `workloadIdentityUser`. Las cuentas de staging **no** se declaran aquí: viven en `pdlco-mytasks-stg` y `terraform-production` no tiene acceso a ese proyecto; se adoptan en el root de staging (Fase 4). Los roles de proyecto y el acceso al bucket de estado no los gestiona Terraform. Validado con `terraform validate`; la ausencia de diferencias en el `plan` se confirmará con `infra.yml`.
+
+### T048: repositorio de Artifact Registry (2026-10-09)
+
+Creado por el MCP, con confirmación del propietario, en `pdlco-mytasks`. Verificado con `repositories describe`. Se adopta en `infra/platform/` en T052 con `prevent_destroy` (T054).
+
+| Parámetro | Valor |
+|---|---|
+| Repositorio | `projects/pdlco-mytasks/locations/europe-southwest1/repositories/mytasks` |
+| Formato / modo | Docker, `STANDARD_REPOSITORY` |
+| Etiquetas | inmutables (`immutableTags: true`) |
+| Cifrado | clave gestionada por Google |
+| Lectura (`roles/artifactregistry.reader`, a nivel de repositorio) | `service-838389521553@serverless-robot-prod.iam.gserviceaccount.com`, agente de servicio de Cloud Run del proyecto de staging (número 838389521553) |
+
+La escritura para `deployer-staging` y la lectura para `deployer-production` se conceden en T049.
+
+### T052 y T053: adopción en `infra/platform/` (2026-10-10)
+
+Declarados con bloques `import`: el repositorio `mytasks` (etiquetas inmutables), la lectura del agente de Cloud Run de staging, `deployer-production` con su vinculación de federación y su lectura del repositorio, y la escritura de `deployer-staging` sobre el repositorio. La cuenta `deployer-staging` vive en `pdlco-mytasks-stg` y se adopta en el root de staging (Fase 4). Los permisos del repositorio son `iam_member` (no autoritativos). Validado con `terraform validate`; la ausencia de diferencias en el `plan` se confirmará con `infra.yml`.
+
+### T054 y T055: protección y auditoría en `infra/platform/` (2026-10-10)
+
+`prevent_destroy` en el bucket de estado `pdlco-mytasks-tfstate` (declarado ahora, con `import`, `force_destroy = false` y los valores de `describe`), en el repositorio `mytasks`, en el pool `github` y en el proveedor `github-actions`. Los registros de auditoría de acceso a datos de `datastore.googleapis.com` e `iam.googleapis.com` (T015) se adoptan con `google_project_iam_audit_config`, uno por servicio. Validado con `terraform validate`; la ausencia de diferencias en el `plan` se confirmará con `infra.yml`.
+
+Limitación: `terraform-production` solo puede conceder `roles/datastore.user` a nivel de proyecto (condición de su `projectIamAdmin`). Mientras el `plan` no muestre cambios en la auditoría no escribe nada; si hay que cambiarla, el `apply` fallará y lo hace el propietario.
+
+### T049: cuentas `deployer-*` (2026-10-09)
+
+Creadas por el MCP, con confirmación del propietario. Sin claves y **sin ningún rol de proyecto** (verificado en solo lectura en ambos proyectos). Los permisos sobre los servicios de Cloud Run y las cuentas de ejecución se conceden en la Fase 4 (T064/T065), cuando esos recursos existen. Se adoptan en `infra/platform/` en T053.
+
+| Cuenta | Proyecto | Puede usarla (`roles/iam.workloadIdentityUser`) | Sobre el repositorio `mytasks` |
+|---|---|---|---|
+| `deployer-staging@pdlco-mytasks-stg.iam.gserviceaccount.com` | `pdlco-mytasks-stg` | `principal://iam.googleapis.com/projects/2195266360/locations/global/workloadIdentityPools/github/subject/repo:pcodlcruz@210847116/my-tasks@1370451186:environment:staging` | `roles/artifactregistry.writer` |
+| `deployer-production@pdlco-mytasks.iam.gserviceaccount.com` | `pdlco-mytasks` | el mismo sujeto con `…:environment:production` | `roles/artifactregistry.reader` |
+
+Política final del repositorio `mytasks`: lectura para `deployer-production` y para el agente de Cloud Run de staging; escritura solo para `deployer-staging`.
+
+Riesgo aceptado: `deployer-staging`, una cuenta de staging, escribe en un repositorio del proyecto de producción. Limitado al repositorio concreto y al *environment* `staging`, restringido a `develop`, `release/*` y `hotfix/*`.

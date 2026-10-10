@@ -42,3 +42,10 @@ docs/*
 # regla de arriba excluye el contenido de docs/ (docs/*) en vez del propio
 # directorio (docs/).
 !docs/design/
+# Terraform: state and plans never go to git; the lock file (.terraform.lock.hcl) does
+**/.terraform/
+*.tfstate
+*.tfstate.*
+*.tfplan
+tfplan
+crash.log
