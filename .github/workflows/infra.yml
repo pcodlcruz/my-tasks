@@ -142,10 +142,15 @@ jobs:
           set -uo pipefail
           status=0
           for root in $PRODUCTION_ROOTS; do
-            terraform -chdir="infra/$root" init -input=false
-            terraform -chdir="infra/$root" plan -input=false -lock=false -no-color \
-              -detailed-exitcode > "$RUNNER_TEMP/plan-$root.txt" 2>&1
-            code=$?
+            : > "$RUNNER_TEMP/plan-$root.txt"
+            if terraform -chdir="infra/$root" init -input=false -no-color \
+              >> "$RUNNER_TEMP/plan-$root.txt" 2>&1; then
+              terraform -chdir="infra/$root" plan -input=false -lock=false -no-color \
+                -detailed-exitcode >> "$RUNNER_TEMP/plan-$root.txt" 2>&1
+              code=$?
+            else
+              code=1
+            fi
             if [ "$code" -eq 1 ]; then status=1; fi
             {
               echo "### plan: $root (production project)"
@@ -168,10 +173,15 @@ jobs:
           set -uo pipefail
           status=0
           for root in $STAGING_ROOTS; do
-            terraform -chdir="infra/$root" init -input=false
-            terraform -chdir="infra/$root" plan -input=false -lock=false -no-color \
-              -detailed-exitcode > "$RUNNER_TEMP/plan-$root.txt" 2>&1
-            code=$?
+            : > "$RUNNER_TEMP/plan-$root.txt"
+            if terraform -chdir="infra/$root" init -input=false -no-color \
+              >> "$RUNNER_TEMP/plan-$root.txt" 2>&1; then
+              terraform -chdir="infra/$root" plan -input=false -lock=false -no-color \
+                -detailed-exitcode >> "$RUNNER_TEMP/plan-$root.txt" 2>&1
+              code=$?
+            else
+              code=1
+            fi
             if [ "$code" -eq 1 ]; then status=1; fi
             {
               echo "### plan: $root (staging project)"
@@ -182,6 +192,18 @@ jobs:
             } >> "$GITHUB_STEP_SUMMARY"
           done
           exit $status
+
+      # Surfaces the end of the plan output as an annotation of the check, so the cause is
+      # visible from the pull request without opening the raw logs. A plan holds no secrets
+      # (research R8).
+      - name: Annotate the failure
+        if: failure()
+        run: |
+          for file in "$RUNNER_TEMP"/plan-*.txt; do
+            [ -f "$file" ] || continue
+            message=$(tail -n 30 "$file" | sed ':a;N;$!ba;s/\n/%0A/g')
+            echo "::error title=$(basename "$file")::${message}"
+          done
 
   apply-staging:
     name: apply-staging
