@@ -289,6 +289,10 @@ Creadas por el MCP, con confirmación del propietario. Sin claves y **sin ningú
 
 El `plan` de estas cuentas debe ejecutarse con `-lock=false`: el bloqueo del estado exige crear un objeto y no tienen escritura. Pendiente de la Fase 4: elegir el rol de lectura del proyecto (rol personalizado de metadatos o `roles/viewer` si se comprueba que no expone documentos de Firestore).
 
+### T051: adopción en `infra/platform/` (2026-10-10)
+
+Declarados con bloques `import` (sin recrear): el pool `github`, el proveedor `github-actions`, `terraform-production`, `terraform-plan-production` y sus dos vinculaciones `workloadIdentityUser`. Las cuentas de staging **no** se declaran aquí: viven en `pdlco-mytasks-stg` y `terraform-production` no tiene acceso a ese proyecto; se adoptan en el root de staging (Fase 4). Los roles de proyecto y el acceso al bucket de estado no los gestiona Terraform. Validado con `terraform validate`; la ausencia de diferencias en el `plan` se confirmará con `infra.yml`.
+
 ### T048: repositorio de Artifact Registry (2026-10-09)
 
 Creado por el MCP, con confirmación del propietario, en `pdlco-mytasks`. Verificado con `repositories describe`. Se adopta en `infra/platform/` en T052 con `prevent_destroy` (T054).
