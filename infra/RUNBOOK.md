@@ -307,6 +307,10 @@ Creado por el MCP, con confirmación del propietario, en `pdlco-mytasks`. Verifi
 
 La escritura para `deployer-staging` y la lectura para `deployer-production` se conceden en T049.
 
+### T052 y T053: adopción en `infra/platform/` (2026-10-10)
+
+Declarados con bloques `import`: el repositorio `mytasks` (etiquetas inmutables), la lectura del agente de Cloud Run de staging, `deployer-production` con su vinculación de federación y su lectura del repositorio, y la escritura de `deployer-staging` sobre el repositorio. La cuenta `deployer-staging` vive en `pdlco-mytasks-stg` y se adopta en el root de staging (Fase 4). Los permisos del repositorio son `iam_member` (no autoritativos). Validado con `terraform validate`; la ausencia de diferencias en el `plan` se confirmará con `infra.yml`.
+
 ### T049: cuentas `deployer-*` (2026-10-09)
 
 Creadas por el MCP, con confirmación del propietario. Sin claves y **sin ningún rol de proyecto** (verificado en solo lectura en ambos proyectos). Los permisos sobre los servicios de Cloud Run y las cuentas de ejecución se conceden en la Fase 4 (T064/T065), cuando esos recursos existen. Se adoptan en `infra/platform/` en T053.
