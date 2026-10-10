@@ -25,6 +25,10 @@ locals {
 resource "google_iam_workload_identity_pool" "github" {
   workload_identity_pool_id = "github"
   display_name              = "GitHub-Actions"
+
+  lifecycle {
+    prevent_destroy = true
+  }
 }
 
 resource "google_iam_workload_identity_pool_provider" "github_actions" {
@@ -43,6 +47,11 @@ resource "google_iam_workload_identity_pool_provider" "github_actions" {
 
   oidc {
     issuer_uri = "https://token.actions.githubusercontent.com"
+  }
+
+  # Deleted names cannot be reused for 30 days and the pipeline would lose its login.
+  lifecycle {
+    prevent_destroy = true
   }
 }
 
@@ -118,6 +127,11 @@ resource "google_artifact_registry_repository" "mytasks" {
   docker_config {
     immutable_tags = true
   }
+
+  # Destroying it would delete every image, including the ones running in production.
+  lifecycle {
+    prevent_destroy = true
+  }
 }
 
 import {
@@ -189,4 +203,74 @@ import {
 import {
   to = google_artifact_registry_repository_iam_member.deployer_staging_writer
   id = "projects/${var.project_id}/locations/${var.region}/repositories/mytasks roles/artifactregistry.writer serviceAccount:deployer-staging@pdlco-mytasks-stg.iam.gserviceaccount.com"
+}
+
+# --- Terraform state bucket (T043, T054) ---
+# Losing it would orphan every resource of the three roots, so it can never be destroyed
+# or emptied by Terraform.
+
+resource "google_storage_bucket" "tfstate" {
+  name                        = "${var.project_id}-tfstate"
+  location                    = var.region
+  storage_class               = "STANDARD"
+  uniform_bucket_level_access = true
+  public_access_prevention    = "enforced"
+  force_destroy               = false
+
+  versioning {
+    enabled = true
+  }
+
+  soft_delete_policy {
+    retention_duration_seconds = 604800
+  }
+
+  lifecycle {
+    prevent_destroy = true
+  }
+}
+
+import {
+  to = google_storage_bucket.tfstate
+  id = "${var.project_id}/${var.project_id}-tfstate"
+}
+
+# --- Data access audit logging (T015, T055) ---
+# Firestore is audited under datastore.googleapis.com. Each resource owns the whole
+# configuration of its service, so no other log type is enabled by accident.
+
+resource "google_project_iam_audit_config" "firestore" {
+  project = var.project_id
+  service = "datastore.googleapis.com"
+
+  audit_log_config {
+    log_type = "DATA_READ"
+  }
+
+  audit_log_config {
+    log_type = "DATA_WRITE"
+  }
+}
+
+resource "google_project_iam_audit_config" "iam" {
+  project = var.project_id
+  service = "iam.googleapis.com"
+
+  audit_log_config {
+    log_type = "DATA_READ"
+  }
+
+  audit_log_config {
+    log_type = "DATA_WRITE"
+  }
+}
+
+import {
+  to = google_project_iam_audit_config.firestore
+  id = "${var.project_id} datastore.googleapis.com"
+}
+
+import {
+  to = google_project_iam_audit_config.iam
+  id = "${var.project_id} iam.googleapis.com"
 }
