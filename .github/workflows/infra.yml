@@ -143,7 +143,16 @@ jobs:
           status=0
           for root in $PRODUCTION_ROOTS; do
             : > "$RUNNER_TEMP/plan-$root.txt"
-            if terraform -chdir="infra/$root" init -input=false -no-color \
+            # Against a missing state the GCS backend tries to create it (and its lock), which
+            # the read-only identity cannot do. Until a first apply creates it there is nothing
+            # to plan against, so say so instead of failing; any other error still fails.
+            if ! out=$(gcloud storage objects describe \
+              "gs://pdlco-mytasks-tfstate/$root/default.tfstate" 2>&1) \
+              && echo "$out" | grep -q '404'; then
+              echo "The remote state of '$root' does not exist yet. Plan skipped; the first apply creates it." \
+                >> "$RUNNER_TEMP/plan-$root.txt"
+              code=0
+            elif terraform -chdir="infra/$root" init -input=false -no-color \
               >> "$RUNNER_TEMP/plan-$root.txt" 2>&1; then
               terraform -chdir="infra/$root" plan -input=false -lock=false -no-color \
                 -detailed-exitcode >> "$RUNNER_TEMP/plan-$root.txt" 2>&1
@@ -174,7 +183,16 @@ jobs:
           status=0
           for root in $STAGING_ROOTS; do
             : > "$RUNNER_TEMP/plan-$root.txt"
-            if terraform -chdir="infra/$root" init -input=false -no-color \
+            # Against a missing state the GCS backend tries to create it (and its lock), which
+            # the read-only identity cannot do. Until a first apply creates it there is nothing
+            # to plan against, so say so instead of failing; any other error still fails.
+            if ! out=$(gcloud storage objects describe \
+              "gs://pdlco-mytasks-tfstate/$root/default.tfstate" 2>&1) \
+              && echo "$out" | grep -q '404'; then
+              echo "The remote state of '$root' does not exist yet. Plan skipped; the first apply creates it." \
+                >> "$RUNNER_TEMP/plan-$root.txt"
+              code=0
+            elif terraform -chdir="infra/$root" init -input=false -no-color \
               >> "$RUNNER_TEMP/plan-$root.txt" 2>&1; then
               terraform -chdir="infra/$root" plan -input=false -lock=false -no-color \
                 -detailed-exitcode >> "$RUNNER_TEMP/plan-$root.txt" 2>&1
