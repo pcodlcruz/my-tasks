@@ -274,13 +274,9 @@ jobs:
             } >> "$GITHUB_STEP_SUMMARY"
           done
           echo "pending=${pending# }" >> "$GITHUB_OUTPUT"
-      # The saved plan is exactly what is applied below.
-      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
-        if: steps.plan.outputs.pending != ''
-        with:
-          name: tfplan-staging-${{ github.sha }}
-          path: ${{ runner.temp }}/plans
-          retention-days: 30
+      # The saved plan is exactly what is applied below. It is never uploaded as an artifact:
+      # a plan file holds sensitive values in clear and artifacts of a public repository are
+      # downloadable by any GitHub user (security-review-fase-3, MED-001).
       - name: terraform apply
         if: steps.plan.outputs.pending != ''
         env:
@@ -340,12 +336,7 @@ jobs:
             } >> "$GITHUB_STEP_SUMMARY"
           done
           echo "pending=${pending# }" >> "$GITHUB_OUTPUT"
-      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
-        if: steps.plan.outputs.pending != ''
-        with:
-          name: tfplan-production-${{ github.sha }}
-          path: ${{ runner.temp }}/plans
-          retention-days: 30
+      # The saved plan is applied below and never uploaded (see apply-staging).
       - name: terraform apply
         if: steps.plan.outputs.pending != ''
         env:
