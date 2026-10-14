@@ -190,6 +190,7 @@ jobs:
     outputs:
       pending: ${{ steps.plan.outputs.pending }}
       digest: ${{ steps.plan.outputs.digest }}
+      actions: ${{ steps.plan.outputs.actions }}
     env:
       ROOTS: ${{ needs.changes.outputs.staging_roots }}
     steps:
@@ -227,6 +228,7 @@ jobs:
     env:
       ROOTS: ${{ needs.changes.outputs.staging_roots }}
       SHOWN_DIGEST: ${{ needs.plan-staging.outputs.digest }}
+      SHOWN_ACTIONS: ${{ needs.plan-staging.outputs.actions }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -267,6 +269,7 @@ jobs:
     outputs:
       pending: ${{ steps.plan.outputs.pending }}
       digest: ${{ steps.plan.outputs.digest }}
+      actions: ${{ steps.plan.outputs.actions }}
     env:
       ROOTS: ${{ needs.changes.outputs.production_roots }}
     steps:
@@ -301,6 +304,7 @@ jobs:
     env:
       ROOTS: ${{ needs.changes.outputs.production_roots }}
       SHOWN_DIGEST: ${{ needs.plan-production.outputs.digest }}
+      SHOWN_ACTIONS: ${{ needs.plan-production.outputs.actions }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
