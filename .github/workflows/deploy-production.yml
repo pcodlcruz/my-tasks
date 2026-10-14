@@ -1,0 +1,37 @@
+# Deploys production on every push to main (contracts/pipeline.md).
+#
+# - Production never builds: it promotes the image that staging validated. deploy.yml looks up
+#   `validated-<tree hash>` of both components and, if one is missing, stops before touching
+#   anything and names the component and the hash ("version not validated in staging"). The
+#   digest it deploys is the one of that tag, so it is the same artifact staging tested.
+# - The job runs in the GitHub environment `production`, which only accepts main; the federated
+#   subject of deployer-production is bound to that environment, so no other workflow or branch
+#   can obtain its credentials. The owner approves each deployment there.
+# - Group `deploy-production` without cancelling: the run that is deploying finishes, and of the
+#   pending ones only the most recent is kept. Two deployments never overlap and the last one
+#   wins (FR-019). It is a different group from `deploy-staging` on purpose: the two environments
+#   are deployed independently.
+# - Only push events of this repository reach it, so forks never do.
+
+name: deploy-production
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: deploy-production
+    uses: ./.github/workflows/deploy.yml
+    with:
+      environment: production
+    permissions:
+      contents: read
+      id-token: write
