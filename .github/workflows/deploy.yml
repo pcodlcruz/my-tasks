@@ -287,7 +287,10 @@ jobs:
             tag_url=$(jq -r --arg t "$REVISION_TAG" \
               '[.status.traffic[]? | select(.tag == $t)][0].url // empty' <<< "$description")
             revision=$(jq -r '.status.latestCreatedRevisionName // empty' <<< "$description")
-            service_url=$(jq -r '.status.url // empty' <<< "$description")
+            # The deterministic URL, the one CORS, API_BASE_URL and the authorized domains use.
+            # `.status.url` is another form of the same service (…-<hash>-no.a.run.app) and is
+            # not what /config.js serves, so the smoke test would never find it there.
+            service_url="https://${service}-${PROJECT_NUMBER}.${REGION}.run.app"
             if [ -z "$tag_url" ] || [ -z "$revision" ]; then
               echo "::error::The new revision of $service has no tagged URL; traffic was not changed."
               exit 1
