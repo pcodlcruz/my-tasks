@@ -235,6 +235,8 @@ jobs:
           persist-credentials: false
       - name: Smoke test script
         run: .github/scripts/tests/test-smoke-test.sh
+      - name: Terraform plan script of infra.yml
+        run: .github/scripts/tests/test-infra-plan.sh
       - name: Variable check of the deployment
         run: |
           python3 -m pip install --quiet pyyaml==6.0.2
