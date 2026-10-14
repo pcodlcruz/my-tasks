@@ -1,8 +1,14 @@
 # --- Cloud Run services (T065, T066) ---
 # Terraform creates the services with a placeholder image and owns their shape (accounts,
-# limits, fixed variables, access). The pipeline owns what changes on every deploy: image,
-# traffic, APP_VERSION and the revision labels. Terraform ignores those, so a later apply never
-# reverts a deployment (contracts/pipeline.md).
+# limits, access). The pipeline owns what changes on every deploy: image, traffic, APP_VERSION
+# and the revision labels. Terraform ignores those, so a later apply never reverts a deployment
+# (contracts/pipeline.md).
+#
+# The environment variables are the exception to "Terraform owns it": `env` is a set of blocks,
+# so a single entry (APP_VERSION) cannot be ignored on its own and the whole block is. Terraform
+# therefore sets the variables when it creates a service and no longer corrects their drift. The
+# deployment compensates: it fails unless every fixed variable has the value this environment
+# expects, not only if it exists (deploy.yml, "Check the service variables").
 
 resource "google_cloud_run_v2_service" "api" {
   project  = var.project_id
@@ -32,7 +38,7 @@ resource "google_cloud_run_v2_service" "api" {
       }
 
       # No FIRESTORE_EMULATOR_HOST nor FIREBASE_AUTH_EMULATOR_HOST: the API refuses to start
-      # if they exist. APP_VERSION must stay the last entry, see ignore_changes below.
+      # if they exist. The pipeline overwrites APP_VERSION on every deployment.
       env {
         name  = "APP_ENV"
         value = var.environment
@@ -61,7 +67,7 @@ resource "google_cloud_run_v2_service" "api" {
       template[0].revision,
       template[0].labels,
       template[0].containers[0].image,
-      template[0].containers[0].env[3], # APP_VERSION
+      template[0].containers[0].env, # APP_VERSION is set by the pipeline, see the header
     ]
   }
 
@@ -99,8 +105,8 @@ resource "google_cloud_run_v2_service" "web" {
         cpu_idle = true
       }
 
-      # Public web configuration, served by the container as /config.js. APP_VERSION must stay
-      # the last entry, see ignore_changes below.
+      # Public web configuration, served by the container as /config.js. The pipeline
+      # overwrites APP_VERSION on every deployment.
       env {
         name  = "API_BASE_URL"
         value = local.api_url
@@ -137,7 +143,7 @@ resource "google_cloud_run_v2_service" "web" {
       template[0].revision,
       template[0].labels,
       template[0].containers[0].image,
-      template[0].containers[0].env[5], # APP_VERSION
+      template[0].containers[0].env, # APP_VERSION is set by the pipeline, see the header
     ]
   }
 

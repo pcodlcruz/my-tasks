@@ -355,7 +355,8 @@ Decisiones que conviene conocer:
 |---|---|
 | Dominios autorizados: el dominio de autenticación del proyecto (`<proyecto>.firebaseapp.com`), `<proyecto>.web.app` y la URL de `mytasks-web`; **sin `localhost`** | El desarrollo local usa emuladores, nunca un proyecto desplegado. La documentación confirma que `<proyecto>.firebaseapp.com` sirve `/__/auth/handler` sin Firebase Hosting |
 | Clave de API web gestionada por Terraform, limitada a `identitytoolkit` y `securetoken` y a los orígenes del entorno | La especificación no decía de dónde sale `FIREBASE_API_KEY`. La clave es pública por diseño (va en `/config.js`); la restricción es lo que impide usarla desde otro sitio |
-| Los servicios ignoran imagen, tráfico, `APP_VERSION` (la última variable), etiquetas y cliente | Los gestiona el pipeline; un `apply` posterior no revierte un despliegue |
+| Los servicios ignoran imagen, tráfico, **todo el bloque `env`**, etiquetas y cliente | Los gestiona el pipeline; un `apply` posterior no revierte un despliegue. `env` es un conjunto de bloques y Terraform no deja ignorar un solo elemento (`APP_VERSION`) por índice: el primer CI lo rechazó. Consecuencia: Terraform fija las variables al crear el servicio y ya no corrige su deriva |
+| `deploy.yml` comprueba el **valor** de las variables fijas (entorno, proyecto, CORS, URL de la API, dominio de autenticación, emuladores), no solo que existan | Compensa lo anterior y es lo que impide que un entorno corra con la configuración de otro (FR-014). Probado con un `gcloud` falso en `.github/scripts/tests/test_deploy_variable_check.py` |
 | La auditoría de datos se declara con `manage_data_access_audit` (staging `true`, producción `false`) | En producción ya la gestiona `infra/platform/`; dos recursos sobre el mismo servicio se pisarían |
 | Raíces en `infra/envs/<entorno>/` | Es lo que dicen el plan y las tareas; `infra.yml` se ajustó (el prefijo de estado sigue siendo `staging`) |
 
