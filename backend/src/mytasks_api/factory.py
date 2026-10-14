@@ -1,5 +1,3 @@
-import asyncio
-import logging
 import uuid
 from collections.abc import Awaitable, Callable
 from typing import Any
@@ -19,16 +17,11 @@ from mytasks_api.domain.task import (
     InvalidTransitionError,
     TaskNotFoundError,
 )
-from mytasks_api.logging_config import configure_logging, log_event, request_id_var
+from mytasks_api.logging_config import configure_logging, request_id_var
+from mytasks_api.readiness import ReadinessProbe
 from mytasks_api.repositories.task_repository import get_firestore_client
 from mytasks_api.routers.tasks import router as tasks_router
 from mytasks_api.schemas.task import ErrorOut, ReadinessOut
-
-logger = logging.getLogger(__name__)
-
-READINESS_COLLECTION = "_readyz"
-READINESS_DOCUMENT = "probe"
-READINESS_TIMEOUT_SECONDS = 3.0
 
 # The API only uses these methods and headers (contract in openapi.yaml).
 ALLOWED_METHODS = ["GET", "POST", "PATCH", "DELETE"]
@@ -62,6 +55,9 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         {} if settings.is_local else {"docs_url": None, "redoc_url": None, "openapi_url": None}
     )
     app = FastAPI(title="MyTasks API", **docs_options)
+    # One probe per app: its cached result is per instance, and the tests can reset it.
+    readiness = ReadinessProbe()
+    app.state.readiness = readiness
 
     app.add_middleware(
         CORSMiddleware,
@@ -101,18 +97,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     async def readyz(
         client_factory: Callable[[], firestore.AsyncClient] = Depends(get_firestore_client_factory),
     ) -> JSONResponse:
-        try:
-            async with asyncio.timeout(READINESS_TIMEOUT_SECONDS):
-                # Building the client discovers credentials, which can fail or block for
-                # seconds when the runtime identity is broken: it belongs inside the
-                # try and off the event loop, so a broken service answers 503, not 500.
-                client = await asyncio.to_thread(client_factory)
-                # Minimal read: it proves the runtime identity can reach Firestore
-                # without touching user data (the document does not need to exist).
-                await client.collection(READINESS_COLLECTION).document(READINESS_DOCUMENT).get()
-        except Exception as exc:
-            # The cause goes to the log, never to the anonymous response.
-            log_event(logger, logging.ERROR, "readiness_failed", reason=type(exc).__name__)
+        if not await readiness.is_ready(client_factory):
             return JSONResponse(
                 status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
                 content={"status": "unavailable"},

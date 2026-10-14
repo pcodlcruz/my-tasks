@@ -54,7 +54,7 @@ entorno; la SPA no debe poder apuntar al proyecto de otro entorno (FR-014).
 | Identidad | Proyecto | Quién la usa | Puede | No puede |
 |---|---|---|---|---|
 | `mytasks-ai-agent` | producción (plataforma) | El agente, solo por el MCP | Leer estado y registros de los dos proyectos; en el arranque, lo que el propietario conceda temporalmente | Desplegar, aplicar Terraform, administrar IAM (tras el arranque) |
-| `deployer-staging` | staging | `deploy-staging.yml` (federación) | Crear revisiones y cambiar tráfico de los dos servicios de staging; publicar y leer imágenes en el repositorio (proyecto de producción) | Tocar los servicios, el IAM o los datos de producción; tocar Firestore |
+| `deployer-staging` | staging | `deploy-staging.yml` (federación) | Crear revisiones y cambiar tráfico de los dos servicios de staging; publicar y leer imágenes en el repositorio (proyecto de producción) | Tocar los servicios, el IAM o los datos de producción; leer o escribir Firestore directamente (ver la regla sobre código desplegado) |
 | `deployer-production` | producción | `deploy-production.yml` (federación) | Crear revisiones y cambiar tráfico de los dos servicios de producción; leer imágenes | Tocar staging; publicar imágenes nuevas (solo promueve las validadas) |
 | `terraform-staging` | staging | `infra.yml` (federación, con aprobación) | Aplicar la infraestructura de la raíz `staging` | Actuar fuera del proyecto de staging |
 | `terraform-production` | producción | `infra.yml` (federación, con aprobación) | Aplicar las raíces `production` y `platform` | Actuar en el proyecto de staging |
@@ -76,6 +76,10 @@ Reglas:
 - Las identidades de despliegue y de Terraform solo son suplantables por la federación de GitHub,
   vinculada al *environment* correspondiente; no hay claves para ellas. Las `terraform-plan-*` se
   vinculan al evento `pull_request` del repositorio propio y son de solo lectura.
+- Riesgo aceptado (`security-review-fase-4.md`, LOW-001): `deployer-<env>` no accede a Firestore
+  por sí misma, pero puede desplegar una revisión que se ejecute como `mytasks-api-run-<env>`, que
+  sí tiene acceso a los datos de su entorno. Es inherente a desplegar; lo acotan las ramas que
+  admite el *environment* y la aprobación del propietario en `production`.
 - La única clave de larga duración del sistema es la de `mytasks-ai-agent` (FR-025).
 - Los permisos de arranque temporales de `mytasks-ai-agent` se retiran al terminar el arranque
   (runbook) y el agente queda de solo lectura.

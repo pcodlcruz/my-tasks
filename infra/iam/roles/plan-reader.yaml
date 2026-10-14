@@ -1,0 +1,46 @@
+# Custom role mytasksPlanReader (MED-001 of security-review-t046.md).
+# Granted by the owner to terraform-plan-<env> in the project of the environment. It lets
+# `terraform plan` refresh what the environment module manages and nothing else.
+#
+# Why not roles/viewer: the basic Viewer role includes datastore.entities.get (it reads
+# documents of Firestore) and firebaseauth.users.get (it reads user accounts), both confirmed in
+# the IAM documentation. The plan runs in pull requests of a public repository and its output is
+# published in the job summary, so this identity must not be able to read data.
+#
+# What it leaves out on purpose:
+#   datastore.entities.*     no access to the documents
+#   firebaseauth.users.*     no access to the user accounts
+#   firebaseauth.configs.getSecret   no access to the OAuth client secrets
+#   any write permission, and any permission to change an IAM policy
+title: MyTasks plan reader
+description: Read the resources the environment module manages so that terraform plan can refresh them. No access to data, users, secrets or writes.
+stage: GA
+includedPermissions:
+  - apikeys.keys.get
+  - apikeys.keys.getKeyString
+  - apikeys.keys.list
+  - appengine.applications.get
+  - datastore.databases.get
+  - datastore.databases.getMetadata
+  - datastore.databases.list
+  - datastore.locations.get
+  - datastore.locations.list
+  - datastore.operations.get
+  - datastore.operations.list
+  - datastore.schemas.get
+  - datastore.schemas.list
+  - firebaseauth.configs.get
+  - iam.serviceAccounts.get
+  - iam.serviceAccounts.getIamPolicy
+  - iam.serviceAccounts.list
+  - resourcemanager.projects.get
+  - resourcemanager.projects.getIamPolicy
+  - run.locations.list
+  - run.operations.get
+  - run.operations.list
+  - run.services.get
+  - run.services.getIamPolicy
+  - run.services.list
+  - serviceusage.services.get
+  - serviceusage.services.list
+  - serviceusage.services.use

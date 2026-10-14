@@ -1,0 +1,22 @@
+# Custom role mytasksPlatformPlanReader (MED-001 of security-review-t046.md).
+# Granted by the owner to terraform-plan-production, in the production project only, together
+# with mytasksPlanReader. It adds the reads the platform root needs: the federation, the image
+# registry and the state bucket. Staging has no platform resources, so terraform-plan-staging
+# does not get it.
+#
+# What it leaves out on purpose:
+#   artifactregistry.repositories.downloadArtifacts   no access to the images
+#   storage.objects.*        the state is read through the prefix-conditioned grant of T047
+title: MyTasks platform plan reader
+description: Read the federation pool and providers, the image registry and the state bucket metadata so that terraform plan can refresh the platform root. No access to images, objects or writes.
+stage: GA
+includedPermissions:
+  - artifactregistry.repositories.get
+  - artifactregistry.repositories.getIamPolicy
+  - artifactregistry.repositories.list
+  - iam.workloadIdentityPoolProviders.get
+  - iam.workloadIdentityPoolProviders.list
+  - iam.workloadIdentityPools.get
+  - iam.workloadIdentityPools.list
+  - storage.buckets.get
+  - storage.buckets.getIamPolicy

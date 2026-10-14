@@ -9,8 +9,10 @@ arranque único, la rotación de la clave del agente y la recuperación están e
 | Ruta | Qué contiene | Estado |
 |---|---|---|
 | `platform/` | Plataforma del proyecto de producción: federación de identidad, Artifact Registry, estado y cuentas del pipeline | esqueleto (T050) |
-| `modules/environment/` | Módulo de entorno reutilizado por staging y producción | Fase 4 |
-| `envs/staging/`, `envs/production/` | Instancias del módulo con los valores de cada entorno | Fases 4 y 5 |
+| `modules/environment/` | Módulo de entorno reutilizado por staging y producción | implementado (T062–T066) |
+| `envs/staging/` | Instancia el módulo con los valores de staging y adopta sus cuentas del pipeline | implementado (T067) |
+| `envs/production/` | Lo mismo para producción | Fase 5 |
+| `iam/roles/` | Definiciones de los roles personalizados que concede el propietario (no los aplica Terraform) | MED-001 |
 
 ## Cómo se aplica
 

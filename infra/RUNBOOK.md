@@ -342,3 +342,47 @@ Revisados por el propietario en la web de GitHub, a petición de `security-revie
 | *Environments* `infra-production` e `infra-staging` (revisor, sin bypass de administradores, ramas `main` y `develop`) | *Settings → Environments* | Revisado y conforme |
 
 Pendiente: 2FA de la cuenta (`TODO(propietario)`), y la prueba práctica con una PR desde un fork (opcional) que dejaría constancia de que el workflow queda en «Waiting for approval». Comprobar de nuevo estos ajustes si cambia el plan de GitHub o se hace el repositorio privado.
+
+## 9. Fase 4: staging y despliegue automático
+
+### Qué declara el código (T062–T067)
+
+`infra/modules/environment/` crea, por entorno: las APIs; la base `(default)` de Firestore nativo en `europe-southwest1` con protección contra borrado; el TTL de `tasks.purge_at`; los tres índices compuestos, leídos de `firestore.indexes.json` (no hay copia que pueda desviarse); la configuración de Identity Platform con los dominios autorizados; una clave de API web restringida; las cuentas `mytasks-api-run-<env>` (`roles/datastore.user`) y `mytasks-web-run-<env>` (sin roles); y los servicios `mytasks-api` y `mytasks-web`. `infra/envs/staging/` lo instancia (máximo 2 instancias, mínimo 0) y adopta por `import` `terraform-staging`, `terraform-plan-staging`, `deployer-staging` y sus vinculaciones de federación.
+
+Decisiones que conviene conocer:
+
+| Decisión | Motivo |
+|---|---|
+| Dominios autorizados: el dominio de autenticación del proyecto (`<proyecto>.firebaseapp.com`), `<proyecto>.web.app` y la URL de `mytasks-web`; **sin `localhost`** | El desarrollo local usa emuladores, nunca un proyecto desplegado. La documentación confirma que `<proyecto>.firebaseapp.com` sirve `/__/auth/handler` sin Firebase Hosting |
+| Clave de API web gestionada por Terraform, limitada a `identitytoolkit` y `securetoken` y a los orígenes del entorno | La especificación no decía de dónde sale `FIREBASE_API_KEY`. La clave es pública por diseño (va en `/config.js`); la restricción es lo que impide usarla desde otro sitio |
+| Los servicios ignoran imagen, tráfico, **todo el bloque `env`**, etiquetas y cliente | Los gestiona el pipeline; un `apply` posterior no revierte un despliegue. `env` es un conjunto de bloques y Terraform no deja ignorar un solo elemento (`APP_VERSION`) por índice: el primer CI lo rechazó. Consecuencia: Terraform fija las variables al crear el servicio y ya no corrige su deriva |
+| `deploy.yml` comprueba el **valor** de las variables fijas (entorno, proyecto, CORS, URL de la API, dominio de autenticación, emuladores), no solo que existan | Compensa lo anterior y es lo que impide que un entorno corra con la configuración de otro (FR-014). Probado con un `gcloud` falso en `.github/scripts/tests/test_deploy_variable_check.py` |
+| La auditoría de datos se declara con `manage_data_access_audit` (staging `true`, producción `false`) | En producción ya la gestiona `infra/platform/`; dos recursos sobre el mismo servicio se pisarían |
+| Raíces en `infra/envs/<entorno>/` | Es lo que dicen el plan y las tareas; `infra.yml` se ajustó (el prefijo de estado sigue siendo `staging`) |
+
+### Roles personalizados (MED-001 de `security-review-t046.md`)
+
+Definidos en `infra/iam/roles/` y concedidos por el propietario según [guia-propietario-med-001.md](../specs/002-cloud-run-cicd/guia-propietario-med-001.md): `mytasksEnvironmentAdmin` a `terraform-staging`, `mytasksPlanReader` a `terraform-plan-staging` (y, en la Fase 5, los equivalentes de producción más `mytasksPlatformPlanReader`). `roles/viewer` se descartó: incluye `datastore.entities.get` y `firebaseauth.users.get` (comprobado en la documentación de IAM), es decir, leería documentos y cuentas de usuario desde un `plan` que corre en PR de un repositorio público.
+
+`TODO(propietario)`: crear y conceder los roles en `pdlco-mytasks-stg` antes del primer `apply`. Estado: **sin aplicar**.
+
+Riesgos abiertos:
+
+- La lista de permisos no sale de un `plan` real (el sandbox del agente no ejecuta el proveedor). Si el primer `plan` o `apply` falla por un permiso, se añade a la definición y se actualiza el rol; no se amplía ningún rol predefinido.
+- Auditoría de acceso a datos en staging: `terraform-staging` solo puede conceder `roles/datastore.user` a nivel de proyecto. Si el `apply` no puede escribir la configuración de auditoría, la activa el propietario en la consola (como en §5) y se importa.
+- `FIREBASE_AUTH_DOMAIN` usa el dominio por defecto del proyecto. Se confirma de verdad en el primer inicio de sesión (T075); si no responde, el paso alternativo es registrar la app web en Firebase.
+
+### T068: proveedor de Google en Identity Platform de staging (propietario)
+
+Es un paso manual único por entorno (research R8): necesita un secreto de OAuth que no debe pasar por Terraform ni por el repositorio. Se hace **después** del `apply` de staging (T075), porque necesita la URL de `mytasks-web`.
+
+1. En `pdlco-mytasks-stg`, *APIs y servicios → Pantalla de consentimiento de OAuth*: configurarla si no existe (tipo y datos de contacto a tu criterio).
+2. *Credenciales → Crear credenciales → ID de cliente de OAuth → Aplicación web*, con estos valores:
+   - Orígenes de JavaScript autorizados: `https://mytasks-web-838389521553.europe-southwest1.run.app` y `https://pdlco-mytasks-stg.firebaseapp.com`.
+   - URI de redirección autorizados: `https://pdlco-mytasks-stg.firebaseapp.com/__/auth/handler`.
+3. *Identity Platform → Proveedores → Añadir proveedor → Google*: pegar el ID y el secreto del cliente. El secreto no se guarda en ningún fichero del repositorio.
+4. Anotar aquí la fecha y que el inicio de sesión de staging funciona. `TODO(propietario): fecha de T068`.
+
+### Primer despliegue de staging (T075)
+
+`deploy-staging` falla de forma esperada si los servicios aún no existen: el paso «Check the service variables» lo dice y nombra el servicio. Orden: fusionar la PR de la fase, aprobar el `apply` de `infra-staging` en `infra.yml`, y relanzar `deploy-staging`. Hasta T075 los servicios llevan la imagen de marcador `hello` y `APP_VERSION=unversioned`.
