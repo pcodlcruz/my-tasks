@@ -69,13 +69,13 @@ jobs:
           fi
 
           # A root exists once it has a main.tf. `platform` and `production` live in the
-          # production project; `staging` in the staging project (phase 4 adds the last two).
+          # production project; `envs/staging` in the staging project (phase 4 adds the last two).
           production_roots=""
-          for root in platform production; do
+          for root in platform envs/production; do
             if [ -f "infra/$root/main.tf" ]; then production_roots="$production_roots $root"; fi
           done
           staging_roots=""
-          if [ -f "infra/staging/main.tf" ]; then staging_roots="staging"; fi
+          if [ -f "infra/envs/staging/main.tf" ]; then staging_roots="envs/staging"; fi
 
           {
             echo "infra_changed=$infra_changed"
@@ -142,29 +142,30 @@ jobs:
           set -uo pipefail
           status=0
           for root in $PRODUCTION_ROOTS; do
-            : > "$RUNNER_TEMP/plan-$root.txt"
+            name=$(basename "$root")
+            : > "$RUNNER_TEMP/plan-$name.txt"
             # Against a missing state the GCS backend tries to create it (and its lock), which
             # the read-only identity cannot do. Until a first apply creates it there is nothing
             # to plan against, so say so instead of failing; any other error still fails.
             if ! out=$(gcloud storage objects describe \
-              "gs://pdlco-mytasks-tfstate/$root/default.tfstate" 2>&1) \
+              "gs://pdlco-mytasks-tfstate/$name/default.tfstate" 2>&1) \
               && echo "$out" | grep -q '404'; then
               echo "The remote state of '$root' does not exist yet. Plan skipped; the first apply creates it." \
-                >> "$RUNNER_TEMP/plan-$root.txt"
+                >> "$RUNNER_TEMP/plan-$name.txt"
               code=0
             elif terraform -chdir="infra/$root" init -input=false -no-color \
-              >> "$RUNNER_TEMP/plan-$root.txt" 2>&1; then
+              >> "$RUNNER_TEMP/plan-$name.txt" 2>&1; then
               terraform -chdir="infra/$root" plan -input=false -lock=false -no-color \
-                -detailed-exitcode >> "$RUNNER_TEMP/plan-$root.txt" 2>&1
+                -detailed-exitcode >> "$RUNNER_TEMP/plan-$name.txt" 2>&1
               code=$?
             else
               code=1
             fi
             if [ "$code" -eq 1 ]; then status=1; fi
             {
-              echo "### plan: $root (production project)"
+              echo "### plan: $name (production project)"
               echo '```'
-              head -c 60000 "$RUNNER_TEMP/plan-$root.txt"
+              head -c 60000 "$RUNNER_TEMP/plan-$name.txt"
               echo
               echo '```'
             } >> "$GITHUB_STEP_SUMMARY"
@@ -182,29 +183,30 @@ jobs:
           set -uo pipefail
           status=0
           for root in $STAGING_ROOTS; do
-            : > "$RUNNER_TEMP/plan-$root.txt"
+            name=$(basename "$root")
+            : > "$RUNNER_TEMP/plan-$name.txt"
             # Against a missing state the GCS backend tries to create it (and its lock), which
             # the read-only identity cannot do. Until a first apply creates it there is nothing
             # to plan against, so say so instead of failing; any other error still fails.
             if ! out=$(gcloud storage objects describe \
-              "gs://pdlco-mytasks-tfstate/$root/default.tfstate" 2>&1) \
+              "gs://pdlco-mytasks-tfstate/$name/default.tfstate" 2>&1) \
               && echo "$out" | grep -q '404'; then
               echo "The remote state of '$root' does not exist yet. Plan skipped; the first apply creates it." \
-                >> "$RUNNER_TEMP/plan-$root.txt"
+                >> "$RUNNER_TEMP/plan-$name.txt"
               code=0
             elif terraform -chdir="infra/$root" init -input=false -no-color \
-              >> "$RUNNER_TEMP/plan-$root.txt" 2>&1; then
+              >> "$RUNNER_TEMP/plan-$name.txt" 2>&1; then
               terraform -chdir="infra/$root" plan -input=false -lock=false -no-color \
-                -detailed-exitcode >> "$RUNNER_TEMP/plan-$root.txt" 2>&1
+                -detailed-exitcode >> "$RUNNER_TEMP/plan-$name.txt" 2>&1
               code=$?
             else
               code=1
             fi
             if [ "$code" -eq 1 ]; then status=1; fi
             {
-              echo "### plan: $root (staging project)"
+              echo "### plan: $name (staging project)"
               echo '```'
-              head -c 60000 "$RUNNER_TEMP/plan-$root.txt"
+              head -c 60000 "$RUNNER_TEMP/plan-$name.txt"
               echo
               echo '```'
             } >> "$GITHUB_STEP_SUMMARY"
@@ -259,16 +261,17 @@ jobs:
           mkdir -p "$RUNNER_TEMP/plans"
           pending=""
           for root in $ROOTS; do
+            name=$(basename "$root")
             terraform -chdir="infra/$root" init -input=false || exit 1
             terraform -chdir="infra/$root" plan -input=false -no-color -detailed-exitcode \
-              -out="$RUNNER_TEMP/plans/$root.tfplan" > "$RUNNER_TEMP/plan-$root.txt" 2>&1
+              -out="$RUNNER_TEMP/plans/$name.tfplan" > "$RUNNER_TEMP/plan-$name.txt" 2>&1
             code=$?
-            if [ "$code" -eq 1 ]; then cat "$RUNNER_TEMP/plan-$root.txt"; exit 1; fi
+            if [ "$code" -eq 1 ]; then cat "$RUNNER_TEMP/plan-$name.txt"; exit 1; fi
             if [ "$code" -eq 2 ]; then pending="$pending $root"; fi
             {
-              echo "### plan: $root"
+              echo "### plan: $name"
               echo '```'
-              head -c 60000 "$RUNNER_TEMP/plan-$root.txt"
+              head -c 60000 "$RUNNER_TEMP/plan-$name.txt"
               echo
               echo '```'
             } >> "$GITHUB_STEP_SUMMARY"
@@ -284,7 +287,8 @@ jobs:
         run: |
           set -euo pipefail
           for root in $PENDING; do
-            terraform -chdir="infra/$root" apply -input=false "$RUNNER_TEMP/plans/$root.tfplan"
+            name=$(basename "$root")
+            terraform -chdir="infra/$root" apply -input=false "$RUNNER_TEMP/plans/$name.tfplan"
           done
 
   apply-production:
@@ -321,16 +325,17 @@ jobs:
           mkdir -p "$RUNNER_TEMP/plans"
           pending=""
           for root in $ROOTS; do
+            name=$(basename "$root")
             terraform -chdir="infra/$root" init -input=false || exit 1
             terraform -chdir="infra/$root" plan -input=false -no-color -detailed-exitcode \
-              -out="$RUNNER_TEMP/plans/$root.tfplan" > "$RUNNER_TEMP/plan-$root.txt" 2>&1
+              -out="$RUNNER_TEMP/plans/$name.tfplan" > "$RUNNER_TEMP/plan-$name.txt" 2>&1
             code=$?
-            if [ "$code" -eq 1 ]; then cat "$RUNNER_TEMP/plan-$root.txt"; exit 1; fi
+            if [ "$code" -eq 1 ]; then cat "$RUNNER_TEMP/plan-$name.txt"; exit 1; fi
             if [ "$code" -eq 2 ]; then pending="$pending $root"; fi
             {
-              echo "### plan: $root"
+              echo "### plan: $name"
               echo '```'
-              head -c 60000 "$RUNNER_TEMP/plan-$root.txt"
+              head -c 60000 "$RUNNER_TEMP/plan-$name.txt"
               echo
               echo '```'
             } >> "$GITHUB_STEP_SUMMARY"
@@ -344,5 +349,6 @@ jobs:
         run: |
           set -euo pipefail
           for root in $PENDING; do
-            terraform -chdir="infra/$root" apply -input=false "$RUNNER_TEMP/plans/$root.tfplan"
+            name=$(basename "$root")
+            terraform -chdir="infra/$root" apply -input=false "$RUNNER_TEMP/plans/$name.tfplan"
           done
