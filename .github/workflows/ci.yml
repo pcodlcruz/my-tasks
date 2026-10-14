@@ -199,10 +199,10 @@ jobs:
           docker run -d --name api -p 8080:8080 \
             -e APP_ENV=staging -e GOOGLE_CLOUD_PROJECT=ci-project -e APP_VERSION=ci mytasks-api:ci
           for attempt in $(seq 1 30); do
-            if body=$(curl --silent --fail --max-time 5 http://localhost:8080/healthz); then break; fi
+            if body=$(curl --silent --fail --max-time 5 http://localhost:8080/health); then break; fi
             sleep 2
           done
-          echo "healthz: ${body:-<no response>}"
+          echo "health: ${body:-<no response>}"
           if ! echo "${body:-}" | grep -q '"version":"ci"'; then docker logs api; exit 1; fi
           docker rm -f api
       # Web: Dockerfile (Nginx unprivileged + runtime config), research R13.
