@@ -94,6 +94,18 @@ async def test_healthz_includes_the_version_without_authentication(
     assert response.json() == {"status": "ok", "version": "dev"}
 
 
+async def test_health_answers_like_healthz_without_authentication(
+    client: httpx.AsyncClient,
+) -> None:
+    # On Cloud Run the frontend of Google intercepts /healthz and never forwards it, so /health
+    # is the path the pipeline and the owner can actually reach there.
+    health = await client.get("/health")
+    healthz = await client.get("/healthz")
+
+    assert health.status_code == 200
+    assert health.json() == healthz.json() == {"status": "ok", "version": "dev"}
+
+
 async def test_readyz_returns_200_when_firestore_is_reachable(client: httpx.AsyncClient) -> None:
     response = await client.get("/readyz")
 

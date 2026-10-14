@@ -25,6 +25,7 @@ def test_export_contains_the_api_paths_and_schemas(tmp_path: Path) -> None:
     contract = json.loads(target.read_text(encoding="utf-8"))
 
     assert "/healthz" in contract["paths"]
+    assert "/health" in contract["paths"]
     assert "/readyz" in contract["paths"]
     assert any(path.startswith("/api/v1/tasks") for path in contract["paths"])
     assert "TaskOut" in contract["components"]["schemas"]
