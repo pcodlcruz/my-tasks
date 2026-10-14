@@ -50,9 +50,9 @@ variable "manage_data_access_audit" {
 }
 
 variable "placeholder_image" {
-  description = "Image of the first revision of each service. The pipeline replaces it; Terraform ignores the image afterwards."
+  description = "Image of the first revision of each service, pinned by digest (never a moving tag: it runs with the identity of the service until the first deployment). The pipeline replaces it; Terraform ignores the image afterwards."
   type        = string
-  default     = "us-docker.pkg.dev/cloudrun/container/hello"
+  default     = "us-docker.pkg.dev/cloudrun/container/hello@sha256:e2a01cf1e784fcc57c558ed2b1d1f76456de90771c0ad99ae3b6f57722c7dbf3"
 }
 
 variable "apis" {
