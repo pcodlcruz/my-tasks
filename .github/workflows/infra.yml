@@ -122,10 +122,14 @@ jobs:
         if: env.INFRA_CHANGED == 'true'
         run: |
           set -euo pipefail
+          # The output is also kept so a failure can be annotated on the check (see below).
+          : > "$RUNNER_TEMP/plan-validate.txt"
           for root in $PRODUCTION_ROOTS $STAGING_ROOTS; do
             echo "::group::validate $root"
-            terraform -chdir="infra/$root" init -backend=false -input=false
-            terraform -chdir="infra/$root" validate
+            {
+              terraform -chdir="infra/$root" init -backend=false -input=false -no-color
+              terraform -chdir="infra/$root" validate -no-color
+            } 2>&1 | tee -a "$RUNNER_TEMP/plan-validate.txt"
             echo "::endgroup::"
           done
 
