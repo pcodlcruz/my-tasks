@@ -222,6 +222,24 @@ jobs:
           test "$(curl --silent --output /dev/null --write-out '%{http_code}' http://localhost:8081/history)" = 200
           docker rm -f web
 
+  # Tests of the scripts the deployment depends on. Not a required check (the required names
+  # are fixed in contracts/pipeline.md); it still fails the workflow, so deploy.yml does not
+  # deploy when the smoke test or the variable check stop working.
+  scripts-tests:
+    name: scripts-tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Smoke test script
+        run: .github/scripts/tests/test-smoke-test.sh
+      - name: Variable check of the deployment
+        run: |
+          python3 -m pip install --quiet pyyaml==6.0.2
+          python3 .github/scripts/tests/test_deploy_variable_check.py
+
   secrets-scan:
     name: secrets-scan
     runs-on: ubuntu-latest

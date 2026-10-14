@@ -56,6 +56,7 @@ jobs:
       PACK_VERSION: "0.40.9"
       PROJECT_ID: ${{ inputs.environment == 'production' && 'pdlco-mytasks' || 'pdlco-mytasks-stg' }}
       DEPLOYER: ${{ inputs.environment == 'production' && 'deployer-production@pdlco-mytasks.iam.gserviceaccount.com' || 'deployer-staging@pdlco-mytasks-stg.iam.gserviceaccount.com' }}
+      PROJECT_NUMBER: ${{ inputs.environment == 'production' && '2195266360' || '838389521553' }}
       # Project number of the other environment: its API URL must never appear in /config.js.
       OTHER_PROJECT_NUMBER: ${{ inputs.environment == 'production' && '838389521553' || '2195266360' }}
       # Revision tag of this run. Unique per run and attempt, so a retry never reuses it.
@@ -135,13 +136,20 @@ jobs:
             echo "$name $hash: digest='${digest:-<none>}' build=$build"
           done
 
-      # A missing variable fails here, before any build or revision, and names what is missing
-      # (edge case of the spec). The variables are set by Terraform on the services; a service
-      # that does not exist yet means the infrastructure apply is still pending.
+      # A missing or wrong variable fails here, before any build or revision, and names it
+      # (edge case of the spec). Terraform sets the variables when it creates a service and no
+      # longer corrects their drift (cloud_run.tf), so this is what keeps an environment from
+      # running with another one's configuration (FR-014). A service that does not exist yet
+      # means the infrastructure apply is still pending.
       - name: Check the service variables
         run: |
           set -euo pipefail
 
+          web_url="https://mytasks-web-${PROJECT_NUMBER}.${REGION}.run.app"
+          api_url="https://mytasks-api-${PROJECT_NUMBER}.${REGION}.run.app"
+
+          # Each argument is NAME (must be set) or NAME=value (must be set to exactly that).
+          # Expected values are not secrets; the actual ones are never printed.
           check() {
             local service="$1"
             shift
@@ -151,9 +159,22 @@ jobs:
               echo "::error::Cannot read the service $service in $PROJECT_ID. If it does not exist yet, apply the infrastructure first (infra.yml) and run this deployment again. $json"
               exit 1
             fi
-            local missing=()
-            for variable in "$@"; do
-              if ! jq -e --arg v "$variable" \
+            local missing=() wrong=()
+            for spec in "$@"; do
+              local variable="${spec%%=*}"
+              if [[ "$spec" == *=* ]]; then
+                expected="${spec#*=}"
+                if jq -e --arg v "$variable" --arg e "$expected" \
+                  '[.spec.template.spec.containers[0].env[]? | select(.name == $v and (.value // "") == $e)] | length > 0' \
+                  <<< "$json" > /dev/null; then continue; fi
+                if jq -e --arg v "$variable" \
+                  '[.spec.template.spec.containers[0].env[]? | select(.name == $v)] | length > 0' \
+                  <<< "$json" > /dev/null; then
+                  wrong+=("$variable (expected '$expected')")
+                else
+                  missing+=("$variable")
+                fi
+              elif ! jq -e --arg v "$variable" \
                 '[.spec.template.spec.containers[0].env[]? | select(.name == $v and (.value // "") != "")] | length > 0' \
                 <<< "$json" > /dev/null; then
                 missing+=("$variable")
@@ -161,12 +182,18 @@ jobs:
             done
             if [ "${#missing[@]}" -gt 0 ]; then
               echo "::error::Service $service is missing required variable(s): ${missing[*]}. Set them in the infrastructure and apply it before deploying."
-              exit 1
             fi
+            if [ "${#wrong[@]}" -gt 0 ]; then
+              echo "::error::Service $service has variable(s) with the wrong value for $ENVIRONMENT: ${wrong[*]}. The infrastructure no longer corrects variables once the service exists: fix them in the service or recreate it."
+            fi
+            if [ "${#missing[@]}" -gt 0 ] || [ "${#wrong[@]}" -gt 0 ]; then exit 1; fi
           }
 
-          check mytasks-api APP_ENV GOOGLE_CLOUD_PROJECT CORS_ORIGINS APP_VERSION
-          check mytasks-web API_BASE_URL FIREBASE_API_KEY FIREBASE_AUTH_DOMAIN FIREBASE_PROJECT_ID USE_EMULATORS APP_VERSION
+          check mytasks-api "APP_ENV=$ENVIRONMENT" "GOOGLE_CLOUD_PROJECT=$PROJECT_ID" \
+            "CORS_ORIGINS=$web_url" APP_VERSION
+          check mytasks-web "API_BASE_URL=$api_url" FIREBASE_API_KEY \
+            "FIREBASE_AUTH_DOMAIN=${PROJECT_ID}.firebaseapp.com" "FIREBASE_PROJECT_ID=$PROJECT_ID" \
+            USE_EMULATORS=false APP_VERSION
 
       # --- Build (staging only, only when the image is missing) ---
 
