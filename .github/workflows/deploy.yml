@@ -1,0 +1,375 @@
+# Reusable deployment of one environment (contracts/pipeline.md, "Flujo de deploy.yml").
+# Called by deploy-staging.yml and deploy-production.yml; it never runs on its own.
+#
+# 1. ci.yml must pass first (FR-004): nothing is deployed from a red change.
+# 2. Each component is identified by the Git tree hash of its folder, so what was validated in
+#    staging is recognised as the same artifact when it reaches main (FR-006).
+# 3. Staging builds and publishes an immutable image if it is missing. Production only promotes
+#    the digest that carries `validated-<hash>`; without it the job fails before touching anything.
+# 4. A revision with no traffic and a tag is deployed per service, smoke-tested through its tag
+#    URL, and only then receives traffic: the API first, the web after. If the web fails, the API
+#    goes back to its previous revision.
+# 5. Staging adds `validated-<hash>` to both images once everything passed.
+#
+# Authentication is Workload Identity Federation only (no keys). The job is bound to the GitHub
+# environment, which is what the federated subject of deployer-<env> requires. Third-party
+# actions are pinned to a full commit SHA (the tag is in the comment). Values are passed to the
+# scripts through `env`, never interpolated into them.
+
+name: deploy
+
+on:
+  workflow_call:
+    inputs:
+      environment:
+        description: Environment to deploy, staging or production.
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  ci:
+    name: ci
+    uses: ./.github/workflows/ci.yml
+    permissions:
+      contents: read
+
+  deploy:
+    name: deploy-${{ inputs.environment }}
+    needs: ci
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    # The environment records every deployment (commit, branch, result and URL, FR-017).
+    environment:
+      name: ${{ inputs.environment }}
+      url: ${{ steps.traffic.outputs.web_url }}
+    permissions:
+      contents: read
+      id-token: write
+    env:
+      ENVIRONMENT: ${{ inputs.environment }}
+      REGION: europe-southwest1
+      REGISTRY: europe-southwest1-docker.pkg.dev/pdlco-mytasks/mytasks
+      WIF_PROVIDER: projects/2195266360/locations/global/workloadIdentityPools/github/providers/github-actions
+      PACK_VERSION: "0.40.9"
+      PROJECT_ID: ${{ inputs.environment == 'production' && 'pdlco-mytasks' || 'pdlco-mytasks-stg' }}
+      DEPLOYER: ${{ inputs.environment == 'production' && 'deployer-production@pdlco-mytasks.iam.gserviceaccount.com' || 'deployer-staging@pdlco-mytasks-stg.iam.gserviceaccount.com' }}
+      # Project number of the other environment: its API URL must never appear in /config.js.
+      OTHER_PROJECT_NUMBER: ${{ inputs.environment == 'production' && '838389521553' || '2195266360' }}
+      # Revision tag of this run. Unique per run and attempt, so a retry never reuses it.
+      REVISION_TAG: run${{ github.run_id }}-${{ github.run_attempt }}
+    steps:
+      - name: Check the environment
+        run: |
+          case "$ENVIRONMENT" in
+            staging | production) ;;
+            *) echo "::error::Unknown environment '$ENVIRONMENT' (staging or production)"; exit 1 ;;
+          esac
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      # Tree hash of each folder: identical content gives the identical hash on develop and on
+      # main, which is what lets production recognise the artifact staging validated.
+      - name: Identify the components
+        id: version
+        run: |
+          set -euo pipefail
+          {
+            echo "api_hash=$(git rev-parse HEAD:backend)"
+            echo "web_hash=$(git rev-parse HEAD:frontend)"
+          } >> "$GITHUB_OUTPUT"
+
+      - uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093 # v3.0.0
+        with:
+          workload_identity_provider: ${{ env.WIF_PROVIDER }}
+          service_account: ${{ env.DEPLOYER }}
+
+      # Looks the images up before anything else is touched. In production a component without
+      # `validated-<hash>` stops the job here, naming the component and the hash.
+      - name: Find the images
+        id: images
+        env:
+          API_HASH: ${{ steps.version.outputs.api_hash }}
+          WEB_HASH: ${{ steps.version.outputs.web_hash }}
+        run: |
+          set -euo pipefail
+
+          # Prints the digest of an image reference, or nothing if it does not exist. Any other
+          # failure (permissions, network) is an error and must not read as "missing".
+          digest_of() {
+            local ref="$1" out
+            if out=$(gcloud artifacts docker images describe "$ref" \
+              --format='value(image_summary.digest)' 2>&1); then
+              echo "$out"
+            elif grep -qiE 'not.?found' <<< "$out"; then
+              echo ""
+            else
+              echo "::error::Cannot look up $ref: $out" >&2
+              return 1
+            fi
+          }
+
+          for component in api web; do
+            name="mytasks-$component"
+            hash_var="${component^^}_HASH"
+            hash="${!hash_var}"
+            if [ "$ENVIRONMENT" = "production" ]; then
+              digest=$(digest_of "$REGISTRY/$name:validated-$hash")
+              if [ -z "$digest" ]; then
+                echo "::error::Version not validated in staging: $name has no validated-$hash tag. Production only promotes what staging validated."
+                exit 1
+              fi
+              build=false
+            else
+              digest=$(digest_of "$REGISTRY/$name:$hash")
+              if [ -n "$digest" ]; then build=false; else build=true; fi
+            fi
+            {
+              echo "${component}_digest=$digest"
+              echo "${component}_build=$build"
+            } >> "$GITHUB_OUTPUT"
+            echo "$name $hash: digest='${digest:-<none>}' build=$build"
+          done
+
+      # A missing variable fails here, before any build or revision, and names what is missing
+      # (edge case of the spec). The variables are set by Terraform on the services; a service
+      # that does not exist yet means the infrastructure apply is still pending.
+      - name: Check the service variables
+        run: |
+          set -euo pipefail
+
+          check() {
+            local service="$1"
+            shift
+            local json
+            if ! json=$(gcloud run services describe "$service" --project "$PROJECT_ID" \
+              --region "$REGION" --format=json 2>&1); then
+              echo "::error::Cannot read the service $service in $PROJECT_ID. If it does not exist yet, apply the infrastructure first (infra.yml) and run this deployment again. $json"
+              exit 1
+            fi
+            local missing=()
+            for variable in "$@"; do
+              if ! jq -e --arg v "$variable" \
+                '[.spec.template.spec.containers[0].env[]? | select(.name == $v and (.value // "") != "")] | length > 0' \
+                <<< "$json" > /dev/null; then
+                missing+=("$variable")
+              fi
+            done
+            if [ "${#missing[@]}" -gt 0 ]; then
+              echo "::error::Service $service is missing required variable(s): ${missing[*]}. Set them in the infrastructure and apply it before deploying."
+              exit 1
+            fi
+          }
+
+          check mytasks-api APP_ENV GOOGLE_CLOUD_PROJECT CORS_ORIGINS APP_VERSION
+          check mytasks-web API_BASE_URL FIREBASE_API_KEY FIREBASE_AUTH_DOMAIN FIREBASE_PROJECT_ID USE_EMULATORS APP_VERSION
+
+      # --- Build (staging only, only when the image is missing) ---
+
+      - name: Sign in to the registry
+        if: steps.images.outputs.api_build == 'true' || steps.images.outputs.web_build == 'true'
+        run: |
+          set -euo pipefail
+          gcloud auth print-access-token \
+            | docker login --username oauth2accesstoken --password-stdin "${REGISTRY%%/*}"
+
+      - uses: buildpacks/github-actions/setup-pack@af8c06ccd592e27001cbf78083dcc9b47aa6652a # v6.1.1
+        if: steps.images.outputs.api_build == 'true'
+        with:
+          pack-version: ${{ env.PACK_VERSION }}
+
+      # The builder is pinned by digest in backend/project.toml, which is part of the hash.
+      - name: Build and publish the API image
+        if: steps.images.outputs.api_build == 'true'
+        env:
+          API_HASH: ${{ steps.version.outputs.api_hash }}
+        run: pack build "$REGISTRY/mytasks-api:$API_HASH" --path backend --trust-builder --publish
+
+      - name: Build and publish the web image
+        if: steps.images.outputs.web_build == 'true'
+        env:
+          WEB_HASH: ${{ steps.version.outputs.web_hash }}
+        run: |
+          set -euo pipefail
+          docker build --tag "$REGISTRY/mytasks-web:$WEB_HASH" frontend
+          docker push "$REGISTRY/mytasks-web:$WEB_HASH"
+
+      # Deployments use the digest, never the tag, so what is deployed is exactly what was tested.
+      - name: Resolve the digests
+        id: digests
+        env:
+          API_HASH: ${{ steps.version.outputs.api_hash }}
+          WEB_HASH: ${{ steps.version.outputs.web_hash }}
+          API_DIGEST: ${{ steps.images.outputs.api_digest }}
+          WEB_DIGEST: ${{ steps.images.outputs.web_digest }}
+        run: |
+          set -euo pipefail
+          for component in api web; do
+            digest_var="${component^^}_DIGEST"
+            hash_var="${component^^}_HASH"
+            digest="${!digest_var}"
+            if [ -z "$digest" ]; then
+              digest=$(gcloud artifacts docker images describe \
+                "$REGISTRY/mytasks-$component:${!hash_var}" --format='value(image_summary.digest)')
+            fi
+            if ! [[ "$digest" =~ ^sha256:[0-9a-f]{64}$ ]]; then
+              echo "::error::mytasks-$component has no valid digest ('$digest')"
+              exit 1
+            fi
+            echo "${component}_digest=$digest" >> "$GITHUB_OUTPUT"
+          done
+
+      # --- Revisions without traffic (T071) ---
+
+      - name: Deploy the revisions without traffic
+        id: revisions
+        env:
+          API_HASH: ${{ steps.version.outputs.api_hash }}
+          WEB_HASH: ${{ steps.version.outputs.web_hash }}
+          API_DIGEST: ${{ steps.digests.outputs.api_digest }}
+          WEB_DIGEST: ${{ steps.digests.outputs.web_digest }}
+          COMMIT: ${{ github.sha }}
+          RUN_ID: ${{ github.run_id }}
+        run: |
+          set -euo pipefail
+
+          # Revision serving 100% of the traffic now: where the API goes back to if the web fails.
+          previous_api=$(gcloud run services describe mytasks-api --project "$PROJECT_ID" \
+            --region "$REGION" --format=json \
+            | jq -r '[.status.traffic[]? | select(.percent == 100)][0].revisionName // empty')
+          echo "previous_api_revision=$previous_api" >> "$GITHUB_OUTPUT"
+
+          for component in api web; do
+            service="mytasks-$component"
+            hash_var="${component^^}_HASH"
+            digest_var="${component^^}_DIGEST"
+            hash="${!hash_var}"
+            gcloud run deploy "$service" --project "$PROJECT_ID" --region "$REGION" \
+              --image "$REGISTRY/$service@${!digest_var}" \
+              --no-traffic --tag "$REVISION_TAG" \
+              --update-env-vars "APP_VERSION=$hash" \
+              --update-labels "commit=$COMMIT,tree-hash=$hash,pipeline-run=$RUN_ID" \
+              --quiet
+
+            description=$(gcloud run services describe "$service" --project "$PROJECT_ID" \
+              --region "$REGION" --format=json)
+            tag_url=$(jq -r --arg t "$REVISION_TAG" \
+              '[.status.traffic[]? | select(.tag == $t)][0].url // empty' <<< "$description")
+            revision=$(jq -r '.status.latestCreatedRevisionName // empty' <<< "$description")
+            service_url=$(jq -r '.status.url // empty' <<< "$description")
+            if [ -z "$tag_url" ] || [ -z "$revision" ]; then
+              echo "::error::The new revision of $service has no tagged URL; traffic was not changed."
+              exit 1
+            fi
+            {
+              echo "${component}_tag_url=$tag_url"
+              echo "${component}_revision=$revision"
+              echo "${component}_url=$service_url"
+            } >> "$GITHUB_OUTPUT"
+          done
+
+      # --- Smoke test through the tag URLs (T072) ---
+
+      - name: Smoke test
+        env:
+          API_URL: ${{ steps.revisions.outputs.api_tag_url }}
+          WEB_URL: ${{ steps.revisions.outputs.web_tag_url }}
+          EXPECTED_VERSION: ${{ steps.version.outputs.api_hash }}
+          EXPECTED_API_URL: ${{ steps.revisions.outputs.api_url }}
+        run: |
+          set -euo pipefail
+          export OTHER_API_URL="https://mytasks-api-${OTHER_PROJECT_NUMBER}.${REGION}.run.app"
+          .github/scripts/smoke-test.sh
+
+      # --- Traffic: API first, then the web; the API goes back if the web fails (T072) ---
+
+      - name: Move the traffic
+        id: traffic
+        env:
+          API_REVISION: ${{ steps.revisions.outputs.api_revision }}
+          WEB_REVISION: ${{ steps.revisions.outputs.web_revision }}
+          PREVIOUS_API_REVISION: ${{ steps.revisions.outputs.previous_api_revision }}
+          WEB_URL: ${{ steps.revisions.outputs.web_url }}
+        run: |
+          set -euo pipefail
+          gcloud run services update-traffic mytasks-api --project "$PROJECT_ID" \
+            --region "$REGION" --to-revisions "$API_REVISION=100"
+
+          if ! gcloud run services update-traffic mytasks-web --project "$PROJECT_ID" \
+            --region "$REGION" --to-revisions "$WEB_REVISION=100"; then
+            echo "::error::Moving the traffic of mytasks-web failed; sending mytasks-api back to its previous revision."
+            if [ -n "$PREVIOUS_API_REVISION" ]; then
+              gcloud run services update-traffic mytasks-api --project "$PROJECT_ID" \
+                --region "$REGION" --to-revisions "$PREVIOUS_API_REVISION=100"
+            else
+              echo "::error::There was no previous revision of mytasks-api to go back to."
+            fi
+            exit 1
+          fi
+          echo "web_url=$WEB_URL" >> "$GITHUB_OUTPUT"
+
+      # --- Validation (staging only, T073) ---
+      # Adds `validated-<hash>` to the images that passed. Production promotes only those.
+      - name: Mark the images as validated
+        if: inputs.environment == 'staging'
+        env:
+          API_HASH: ${{ steps.version.outputs.api_hash }}
+          WEB_HASH: ${{ steps.version.outputs.web_hash }}
+          API_DIGEST: ${{ steps.digests.outputs.api_digest }}
+          WEB_DIGEST: ${{ steps.digests.outputs.web_digest }}
+        run: |
+          set -euo pipefail
+          for component in api web; do
+            hash_var="${component^^}_HASH"
+            digest_var="${component^^}_DIGEST"
+            image="$REGISTRY/mytasks-$component"
+            tag="validated-${!hash_var}"
+            # Tags are immutable: re-adding the same tag to the same digest (a rerun) is fine,
+            # pointing it to another digest is an error.
+            existing=$(gcloud artifacts docker images describe "$image:$tag" \
+              --format='value(image_summary.digest)' 2> /dev/null || true)
+            if [ -z "$existing" ]; then
+              gcloud artifacts docker tags add "$image@${!digest_var}" "$image:$tag"
+            elif [ "$existing" != "${!digest_var}" ]; then
+              echo "::error::$image:$tag already points to $existing, not to ${!digest_var}"
+              exit 1
+            fi
+          done
+
+      # The tag URLs are only for the smoke test; they are removed whether the run passed or not.
+      - name: Remove the revision tags
+        if: always() && steps.revisions.outcome != 'skipped'
+        run: |
+          for service in mytasks-api mytasks-web; do
+            gcloud run services update-traffic "$service" --project "$PROJECT_ID" \
+              --region "$REGION" --remove-tags "$REVISION_TAG" \
+              || echo "::warning::Could not remove the tag $REVISION_TAG from $service"
+          done
+
+      - name: Record the deployment
+        if: always()
+        env:
+          RESULT: ${{ job.status }}
+          API_HASH: ${{ steps.version.outputs.api_hash }}
+          WEB_HASH: ${{ steps.version.outputs.web_hash }}
+          WEB_URL: ${{ steps.revisions.outputs.web_url }}
+          API_URL: ${{ steps.revisions.outputs.api_url }}
+          COMMIT: ${{ github.sha }}
+          BRANCH: ${{ github.ref_name }}
+        run: |
+          {
+            echo "### Deployment to $ENVIRONMENT: $RESULT"
+            echo
+            echo "| | |"
+            echo "|---|---|"
+            echo "| Commit | \`$COMMIT\` |"
+            echo "| Branch | \`$BRANCH\` |"
+            echo "| API (tree hash) | \`$API_HASH\` |"
+            echo "| Web (tree hash) | \`$WEB_HASH\` |"
+            echo "| Web URL | ${WEB_URL:-n/a} |"
+            echo "| API URL | ${API_URL:-n/a} |"
+          } >> "$GITHUB_STEP_SUMMARY"

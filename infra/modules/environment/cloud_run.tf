@@ -56,6 +56,7 @@ resource "google_cloud_run_v2_service" "api" {
     ignore_changes = [
       client,
       client_version,
+      labels,
       traffic,
       template[0].revision,
       template[0].labels,
@@ -131,6 +132,7 @@ resource "google_cloud_run_v2_service" "web" {
     ignore_changes = [
       client,
       client_version,
+      labels,
       traffic,
       template[0].revision,
       template[0].labels,
