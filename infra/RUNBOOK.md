@@ -410,6 +410,30 @@ La identidad de solo lectura necesita una vinculación nueva, porque el job de p
 
 Es de solo lectura: cualquier workflow que corra en `develop` o `main` (ramas protegidas) puede suplantarla, y solo puede leer metadatos. El `import` exige que la vinculación exista, así que se crea **antes** de fusionar la PR que la declara; sin ella, el job `plan-*` no puede autenticarse y el `apply` no llega a pedir aprobación.
 
-### Primer despliegue de staging (T075)
+### Primer despliegue de staging (T075, 2026-10-14)
 
-`deploy-staging` falla de forma esperada si los servicios aún no existen: el paso «Check the service variables» lo dice y nombra el servicio. Orden: fusionar la PR de la fase, aprobar el `apply` de `infra-staging` en `infra.yml`, y relanzar `deploy-staging`. Hasta T075 los servicios llevan la imagen de marcador `hello` y `APP_VERSION=unversioned`.
+Resultado verificado en solo lectura (MCP y peticiones a las URL públicas), run `38591380788`:
+
+| Comprobación | Resultado |
+|---|---|
+| Tráfico | `mytasks-api-00004-qip` y `mytasks-web-00004-bav`, 100 % cada uno; ninguna etiqueta de revisión sobrante |
+| Imágenes | por *digest* desde el repositorio `mytasks` (`mytasks-api@sha256:a043eebf…`, `mytasks-web@sha256:72080611…`) |
+| Etiquetas de la revisión | `commit`, `tree-hash` y `pipeline-run` presentes |
+| `APP_VERSION` | el hash de árbol de cada componente (API `e1a58419…`, web `0548e191…`) |
+| `GET /health` | `200` con `{"status":"ok","version":"e1a58419…"}`, igual que la etiqueta de la revisión |
+| `GET /readyz` | `200` (la identidad de ejecución llega a Firestore) |
+| `GET /api/v1/tasks` sin token | `401` |
+| `GET /config.js` | apunta a la API de staging; `USE_EMULATORS` en `false` |
+| Etiquetas `validated-<hash>` | presentes en las dos imágenes, con el mismo *digest* que la desplegada |
+
+**Duración**: 5 min 30 s en total (15:40:25 a 15:45:55 UTC): 1 min 28 s de CI, unos 1 min 50 s esperando la aprobación del *environment* `staging` y 2 min 11 s del job `deploy`. Sin la espera, unos 3 min 40 s. Es una medida; SC-001 (percentil 95 de < 15 min) se evalúa con las primeras 20 ejecuciones.
+
+**Pendiente de T075**: el paso 4 del escenario 3 del quickstart (iniciar sesión con Google en staging y crear una tarea) depende de T068. Se anotará allí.
+
+Lo que costó llegar aquí (para quien monte el siguiente entorno):
+
+1. El primer `deploy-staging` falla de forma esperada si los servicios aún no existen: el paso «Check the service variables» lo dice y nombra el servicio. Orden: `apply` de `infra-staging`, y después `deploy-staging`.
+2. **Un run de `deploy-staging` en «waiting» bloquea a los siguientes** (el grupo de concurrencia no cancela el que está en curso): los nuevos quedan en «pending». Hay que aprobar o cancelar el run viejo en cuanto aparezca; un run de un commit anterior no debe aprobarse.
+3. **`/healthz` no sirve en `run.app`**: el frontal de Google lo intercepta y responde su propio 404. La versión y el humo usan `/health` (research R6).
+4. **La URL de los servicios es la determinista** (`mytasks-<servicio>-<número de proyecto>.<región>.run.app`), no el `status.url` de Cloud Run (`…-<hash>-no.a.run.app`): CORS, `API_BASE_URL` y los dominios autorizados de Identity Platform solo reconocen la primera.
+5. Con el *environment* `staging` con revisor obligatorio, cada fusión en `develop` pide aprobación, también las que no cambian ni el backend ni el frontend.
