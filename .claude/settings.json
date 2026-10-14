@@ -40,6 +40,9 @@
         "~/.config/mytasks-agent/gcloud"
       ]
     },
+    "network": {
+      "allowLocalBinding": true
+    },
     "credentials": {
       "files": [
         { "path": "~/.config/gcloud", "mode": "deny" },

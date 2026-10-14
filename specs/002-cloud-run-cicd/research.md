@@ -79,6 +79,15 @@ confirmar se marca como *a verificar en la implementación*.
   (sí para otros proveedores). Diseño previsto: vincular cada identidad de despliegue al claim
   `sub` de GitHub con la forma `repo:OWNER/REPO:environment:ENTORNO`, mapeado a un atributo del
   proveedor. *A verificar en la implementación (Fase 3)* que el claim llega como se espera.
+  **Verificado el 2026-10-09 (T045), con un workflow temporal en la PR #27 (cerrada):** este
+  repositorio emite el `sub` **con los ids numéricos incluidos**, no con la forma prevista:
+  `repo:pcodlcruz@210847116/my-tasks@1370451186:environment:ENTORNO` para los *environments*
+  (comprobado con `staging`; el formato es el mismo para `production` e `infra-*`, no
+  ejercitados porque sus ramas permitidas no incluyen la rama de prueba) y
+  `repo:pcodlcruz@210847116/my-tasks@1370451186:pull_request` para las PR. Las vinculaciones de
+  T046, T047 y T049 usan esta forma exacta como sujeto (`principal://…/subject/<sub>`), con
+  `google.subject=assertion.sub`; un `sub` con la forma antigua no coincidiría con nada. Los
+  claims `repository_id` y `repository_owner_id` coinciden con los de la condición del proveedor.
 - **Identidades de `plan` en PR** (decidido por el propietario el 2026-09-30): el `plan` de
   `terraform-validate` necesita leer el estado y el proyecto, así que existen `terraform-plan-staging`
   y `terraform-plan-production`, de **solo lectura** (visor del proyecto y lectura del estado; sin

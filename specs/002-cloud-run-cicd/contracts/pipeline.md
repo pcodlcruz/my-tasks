@@ -120,8 +120,10 @@ propietario evita fusionar en `develop` mientras valida una release.
   de `develop` puede tocarla. Un cambio de plataforma que staging necesite llega antes por
   `release/*` → `main`. Cada apply está detrás del *environment* de GitHub con **aprobación
   obligatoria del propietario** (FR-020).
-- El plan que se aplica es el mismo que se mostró para aprobar (se guarda como artefacto del
-  workflow).
+- El plan que se aplica es el mismo que se mostró para aprobar (se guarda en disco dentro del
+  mismo job y se aplica ese fichero). **Nunca se sube como artefacto**: el fichero de plan
+  contiene valores sensibles en claro y los artefactos de un repositorio público son
+  descargables por cualquier usuario de GitHub.
 
 ## Interacción entre despliegue de aplicación e infraestructura
 
