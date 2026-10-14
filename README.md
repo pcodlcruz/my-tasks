@@ -43,7 +43,7 @@ Tres terminales desde la raíz del repositorio: emuladores, backend y frontend. 
 exactos están en [`quickstart.md`](specs/001-eisenhower-task-manager/quickstart.md#arranque).
 
 Con todo en marcha, `http://localhost:5173` muestra la pantalla de inicio de sesión y
-`http://localhost:8000/healthz` responde `{"status":"ok"}`.
+`http://localhost:8000/health` (o `/healthz`) responde `{"status":"ok"}`.
 
 El backend solo admite los emuladores con `APP_ENV=local` (ya incluido en `backend/.env.example`).
 Sin esa variable arranca como `production` y se niega a iniciar si ve variables de emulador o un

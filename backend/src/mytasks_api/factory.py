@@ -93,6 +93,14 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     async def healthz() -> dict[str, str]:
         return {"status": "ok", "version": settings.app_version}
 
+    # The same answer under a path Cloud Run lets through: the frontend of Google intercepts
+    # /healthz on run.app and never forwards it to the container, so the deploy pipeline and the
+    # owner use /health there. /healthz stays for local runs and Docker. It is a separate function
+    # on purpose: renaming healthz would change its operationId in the API contract.
+    @app.get("/health")
+    async def health() -> dict[str, str]:
+        return await healthz()
+
     @app.get("/readyz", responses={status.HTTP_503_SERVICE_UNAVAILABLE: {"model": ReadinessOut}})
     async def readyz(
         client_factory: Callable[[], firestore.AsyncClient] = Depends(get_firestore_client_factory),

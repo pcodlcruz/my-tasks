@@ -20,10 +20,13 @@ salvo los dos cambios de despliegue siguientes.
 
 | Endpoint | Cambio | Auth | Motivo |
 |---|---|---|---|
-| `GET /healthz` | añade el campo `version` (valor de `APP_VERSION`) | anónimo, sin datos | US4, humo de despliegue |
+| `GET /healthz` | añade el campo `version` (valor de `APP_VERSION`) | anónimo, sin datos | US4; solo local y Docker: **en `run.app` no llega al contenedor** |
+| `GET /health` (nuevo) | misma respuesta que `/healthz`, con `version` | anónimo, sin datos | US4, humo de despliegue |
 | `GET /readyz` (nuevo) | `200` si la lectura mínima de Firestore funciona; `503` si no | anónimo, sin datos | FR-016 |
 
-Ambos son cambios aditivos (compatibles hacia atrás).
+Los tres son cambios aditivos (compatibles hacia atrás). `/health` existe porque el frontal de Google
+interceptó `/healthz` en `run.app` (404 de Google, sin que la petición llegue al contenedor), cosa que
+se descubrió en el primer despliegue de staging (2026-10-14); `/readyz` sí llega.
 
 ## Variables de entorno por servicio
 

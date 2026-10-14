@@ -27,6 +27,10 @@ class Handler(BaseHTTPRequestHandler):
         port = self.server.server_address[1]
         own_api = f"http://127.0.0.1:{port}"
         if self.path == "/healthz":
+            # Like run.app: the frontend of Google answers this path itself, the container
+            # never sees it. A smoke test that used it would fail on the real thing.
+            self._send(404, "<!DOCTYPE html><title>Error 404 (Not Found)</title>", "text/html")
+        elif self.path == "/health":
             version = "other" if MODE == "wrong-version" else VERSION
             self._send(200, json.dumps({"status": "ok", "version": version}))
         elif self.path == "/readyz":

@@ -6,7 +6,7 @@
 # Inputs (environment variables):
 #   API_URL           URL of the mytasks-api revision under test
 #   WEB_URL           URL of the mytasks-web revision under test
-#   EXPECTED_VERSION  APP_VERSION that /healthz must report
+#   EXPECTED_VERSION  APP_VERSION that /health must report
 #   EXPECTED_API_URL  API URL of this environment that /config.js must contain
 #   OTHER_API_URL     (optional) API URL of the other environment that /config.js must NOT contain
 #
@@ -83,13 +83,14 @@ expect_status() {
   return 1
 }
 
-# API /healthz: 200 and the version this deployment is supposed to carry.
-if expect_status "API /healthz" "$api_url/healthz" 200 "$work_dir/healthz"; then
-  version=$(jq -r '.version // empty' "$work_dir/healthz" 2> /dev/null || true)
+# API /health: 200 and the version this deployment is supposed to carry. Not /healthz: on
+# run.app the frontend of Google intercepts that path and never forwards it to the container.
+if expect_status "API /health" "$api_url/health" 200 "$work_dir/health"; then
+  version=$(jq -r '.version // empty' "$work_dir/health" 2> /dev/null || true)
   if [ "$version" = "$EXPECTED_VERSION" ]; then
-    pass "API /healthz reports version $EXPECTED_VERSION"
+    pass "API /health reports version $EXPECTED_VERSION"
   else
-    fail "API /healthz reports version '${version:-none}', expected '$EXPECTED_VERSION'"
+    fail "API /health reports version '${version:-none}', expected '$EXPECTED_VERSION'"
   fi
 fi
 
