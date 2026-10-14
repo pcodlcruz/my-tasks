@@ -151,3 +151,50 @@ Decidir para producción (Fase 5) si se habilita la recuperación a un punto en 
 | LOW-001 | Baja | Contrato y aceptación de riesgo | `mytasks-google-cloud-architect` / propietario |
 | LOW-002 | Baja | IaC | `mytasks-iac-developer` |
 | LOW-003 | Baja | Decisión de arquitectura, luego IaC | `mytasks-google-cloud-architect` → `mytasks-iac-developer` |
+
+---
+
+## Adenda (2026-10-14): PR #30, plan visible antes de aprobar el `apply`
+
+**Alcance**: `infra.yml` (jobs `plan-*` y `apply-*`), `infra-plan.sh`, y las vinculaciones de federación de `terraform-plan-staging` y `terraform-plan-production` a los pushes a `develop` y `main`, creadas por el MCP con confirmación del propietario.
+
+**Resultado**: sin hallazgos críticos, altos ni medios. Mejora la seguridad: el propietario aprueba un `apply` habiendo leído el plan (FR-020) y el pipeline se niega a aplicar un plan distinto del mostrado.
+
+### [LOW-004] La huella del plan no cubre los valores sensibles
+| Campo | Valor |
+|---|---|
+| **Severidad** | Baja |
+| **Categoría** | OWASP CI/CD: integridad del flujo aprobado |
+| **Componente afectado** | `.github/scripts/infra-plan.sh` (`actions_of`, huella) |
+
+**Descripción**
+La huella se calcula sobre el texto del plan, donde Terraform enmascara los valores sensibles. Un cambio que solo afecte a un valor sensible aparecería igual en el plan mostrado y en el aplicado.
+
+**Evidencia**
+Los valores sensibles del módulo son `google_apikeys_key.web.key_string` y el bloque `env` que lo contiene, ambos con valor público por diseño (va en `/config.js`). No hay secretos en el estado (research R8).
+
+**Remediación requerida**
+Ninguna ahora. Si algún día entra un secreto en Terraform, la huella debería cubrirlo sin publicarlo (por ejemplo, un resumen del JSON del plan calculado dentro del job, sin subirlo) o el secreto no debería pasar por Terraform.
+
+**Destinatario**
+- Skill/agente: `mytasks-iac-developer`
+- Tipo de cambio: De implementación, solo si cambia el supuesto.
+
+### Riesgo aceptado: quién puede suplantar las cuentas `terraform-plan-*`
+
+Las dos vinculaciones nuevas usan como sujeto la rama (`…:ref:refs/heads/develop` y `…:ref:refs/heads/main`), porque el job de plan no tiene *environment*. Cualquier workflow que corra en esas ramas, incluido uno añadido después, puede usarlas. Está acotado por tres cosas: las ramas están protegidas por *rulesets* (el código llega por PR revisada); las cuentas son de solo lectura y no ven documentos, usuarios ni secretos (roles personalizados de MED-001); y la condición del *pool* sigue exigiendo el repositorio y el propietario por identificador numérico. Es el mismo límite de confianza que ya tienen los despliegues.
+
+### Comprobado en esta revisión
+
+- Los valores que llegan a los scripts (`$ROOTS`, la huella, las etiquetas) salen de nombres de directorio fijos y de salidas de jobs del propio workflow; no se interpola nada de la PR.
+- El job de plan usa `-lock=false` y una identidad sin escritura: no puede modificar el estado ni la infraestructura.
+- El fichero de sustitución del *backend* de la vista previa se escribe y se borra en el *runner* y lo genera el script, no la PR.
+- Una vista previa que falla es un aviso, pero no abre ninguna vía de aplicar algo sin ver: el plan real se hace en `plan-*` y el `apply` exige su huella.
+- Tests del script con un `terraform` falso (22), verificados contra una mutación de la huella.
+
+### Información insuficiente
+
+| Tema | Por qué no se pudo | Qué haría falta |
+|---|---|---|
+| Que el resumen publicado del plan no contiene ningún secreto | El agente no puede leer los resúmenes de los jobs | Que el propietario lo lea al revisar el plan y avise si algún valor parece un secreto |
+| Que el `plan` real de `staging` no tiene errores de permisos | La vista previa de la PR no dio aviso, pero el agente no ve su contenido | La lectura del resumen de `terraform-validate` de la PR #30 |
