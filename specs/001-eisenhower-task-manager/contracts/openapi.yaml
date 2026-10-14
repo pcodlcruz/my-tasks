@@ -34,6 +34,20 @@ paths:
                 properties:
                   status: { type: string, const: ok }
 
+  /health:
+    get:
+      summary: Igual que `/healthz`. Existe porque Cloud Run no deja pasar `/healthz` al contenedor
+      security: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, const: ok }
+
   /api/v1/tasks:
     get:
       summary: Lista tareas de una vista (tablero, historial o papelera)

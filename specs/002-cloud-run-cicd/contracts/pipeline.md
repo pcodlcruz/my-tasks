@@ -87,7 +87,8 @@ flowchart TD
    variable obligatoria, el job falla aquí con un mensaje que nombra lo que falta (edge case
    de la spec).
 5. **Humo** (todas obligatorias):
-   - API `/healthz` → `200` con `version` = versión esperada.
+   - API `/health` → `200` con `version` = versión esperada (no `/healthz`: el frontal de Google lo
+     intercepta en `run.app` y nunca llega al contenedor).
    - API `/readyz` → `200` (Firestore accesible con la identidad de ejecución).
    - API endpoint de datos sin token → `401` (no es anónimo).
    - Web `/` → `200`; `/config.js` contiene la URL de la API del entorno y no la de otro.
@@ -176,4 +177,4 @@ Una misma fusión puede tocar código de aplicación e `infra/**`; entonces corr
 - Fallo de cualquier workflow → notificación nativa de GitHub al propietario (correo y móvil),
   configurada en su cuenta y verificada según [../quickstart.md](../quickstart.md).
 - El estado por entorno se consulta en la pestaña *Environments* del repositorio (versión y
-  resultado) y en `/healthz` de cada API (campo `version`).
+  resultado) y en `/health` de cada API (campo `version`).

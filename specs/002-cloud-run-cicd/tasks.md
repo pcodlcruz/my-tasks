@@ -206,7 +206,7 @@ y backend en staging sin intervención.
 
 **Independent Test**: fusionar una PR trivial en `develop` y comprobar, sin intervenir, que el
 pipeline termina en verde en menos de 15 minutos y que staging sirve la nueva versión con
-`/healthz`, `/readyz` y `/config.js` correctos.
+`/health`, `/readyz` y `/config.js` correctos.
 
 - [x] T062 [US1] Crear `infra/modules/environment/` con las APIs del entorno y la base de datos Firestore nativa en `europe-southwest1` con `deletion_protection` y `prevent_destroy`, la política TTL de `purge_at` sobre `tasks` y los tres índices de `firestore.indexes.json` de la feature 001
 - [x] T063 [US1] Añadir al módulo Identity Platform con los dominios autorizados del frontend (URL determinista `mytasks-web-<número de proyecto>.europe-southwest1.run.app`) (mismo módulo que T062)
@@ -216,7 +216,7 @@ pipeline termina en verde en menos de 15 minutos y que staging sirve la nueva ve
 - [x] T066 [US1] En los servicios de T065 añadir `ignore_changes` sobre lo que gestiona el pipeline (imagen, tráfico, variable `APP_VERSION` y etiquetas de revisión `commit`, `tree-hash`, `pipeline-run`) y `deletion_protection` (depende de T065) **Desvío (2026-10-14):** `env` es un conjunto de bloques y Terraform no permite ignorar un solo elemento por índice (lo rechazó `terraform validate`), así que se ignora el bloque `env` entero. Terraform fija las variables al crear el servicio y no corrige su deriva; `deploy.yml` lo compensa comprobando el valor de las variables fijas.
 - [x] T067 [US1] Crear `infra/envs/staging/` que instancia el módulo con los valores de staging (máximo 2 instancias, mínimo 0), estado propio y `.terraform.lock.hcl` versionado (depende de T062–T066) **Nota (2026-10-14):** `infra.yml` buscaba las raíces en `infra/staging` y `infra/production`; ahora las busca en `infra/envs/…`, como dice este plan.
 - [ ] T068 [US1] (propietario) Configurar una vez el proveedor de Google en Identity Platform de staging y documentarlo en `infra/RUNBOOK.md` (consentimiento OAuth y cliente; riesgo R-2)
-- [x] T069 [P] [US1] Crear el script de pruebas de humo en `.github/scripts/smoke-test.sh`: API `/healthz` `200` con la versión esperada, `/readyz` `200`, endpoint de datos sin token `401`, web `/` `200` y `/config.js` con la URL de API del entorno y no la de otro
+- [x] T069 [P] [US1] Crear el script de pruebas de humo en `.github/scripts/smoke-test.sh`: API `/health` `200` con la versión esperada, `/readyz` `200`, endpoint de datos sin token `401`, web `/` `200` y `/config.js` con la URL de API del entorno y no la de otro
 - [x] T070 [US1] Crear `.github/workflows/deploy.yml` reutilizable, primera parte según [contracts/pipeline.md](./contracts/pipeline.md): invoca `ci.yml` y no despliega si falla, calcula el hash de árbol de `backend/` y `frontend/` y, solo en staging y solo si falta la imagen, construye y publica con etiqueta inmutable (`pack build --publish` para la API con el builder leído de `backend/`, Dockerfile para la web)
 - [x] T071 [US1] Añadir a `deploy.yml` la promoción y la revisión sin tráfico: en producción exige `validated-<hash>` de ambos componentes y falla antes de tocar nada si falta; despliega una revisión sin tráfico y etiquetada con `commit`, `tree-hash` y `pipeline-run`, y falla nombrando la variable si falta una obligatoria (mismo fichero que T070)
 - [x] T072 [US1] Añadir a `deploy.yml` el humo con `.github/scripts/smoke-test.sh` y el cambio de tráfico: primero la API y después la web, con reversión de la API si falla la web (depende de T069; mismo fichero que T071)
@@ -263,7 +263,7 @@ documentación operativa.
 seguridad final no tiene hallazgos bloqueantes.
 
 - [ ] T083 [US3] Comprobar el escenario 5 del quickstart por el MCP en solo lectura: una tarea creada en staging no existe en producción, las definiciones difieren solo en dimensionado e identificadores y cada API rechaza los tokens del otro proyecto (SC-009)
-- [ ] T084 [US4] Comprobar el escenario 8 del quickstart: un fallo controlado de pipeline notifica al propietario en menos de 5 minutos con el paso fallido y el enlace (SC-006) y la versión de cada entorno es consultable en *Environments* y en `/healthz` sin acceder a la infraestructura
+- [ ] T084 [US4] Comprobar el escenario 8 del quickstart: un fallo controlado de pipeline notifica al propietario en menos de 5 minutos con el paso fallido y el enlace (SC-006) y la versión de cada entorno es consultable en *Environments* y en `/health` sin acceder a la infraestructura
 - [ ] T085 [US4] (propietario) Conceder los permisos de facturación necesarios y declarar en Terraform los presupuestos con alertas al 50, 90 y 100 % por proyecto en `infra/envs/staging/` y `infra/platform/` (el de producción incluye la plataforma) (FR-026)
 - [ ] T086 [P] [US4] Confirmar con la documentación el precio y la capa gratuita de Artifact Registry, Firestore e Identity Platform, fijar los importes de los presupuestos de T085 y actualizar `specs/002-cloud-run-cicd/research.md` (R11 y *Lo que no se ha podido confirmar*) (FR-026)
 - [ ] T087 [P] [US3] Completar `infra/README.md` (en español): visión general, estructura de `infra/`, cómo se aplica (siempre vía pipeline) y reglas de protección contra borrado

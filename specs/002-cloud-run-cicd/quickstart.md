@@ -54,14 +54,14 @@ Ejecutar la lista de 9 comprobaciones de
 3. Consultar la versión y la salud:
 
    ```bash
-   curl -fsS https://mytasks-api-<n>.europe-southwest1.run.app/healthz
+   curl -fsS https://mytasks-api-<n>.europe-southwest1.run.app/health
    curl -fsS https://mytasks-api-<n>.europe-southwest1.run.app/readyz
    curl -fsS https://mytasks-web-<n>.europe-southwest1.run.app/config.js
    ```
 
 4. Abrir el frontend de staging, iniciar sesión con Google y crear una tarea.
 
-- **Resultado esperado**: pipeline en verde en < 15 min (95 % de las ejecuciones); `/healthz`
+- **Resultado esperado**: pipeline en verde en < 15 min (95 % de las ejecuciones); `/health`
   devuelve la versión del commit; `/readyz` `200`; `/config.js` apunta a la API de **staging**;
   el flujo de tareas funciona; el despliegue figura en GitHub con commit y resultado.
 
@@ -95,7 +95,7 @@ Ejecutar la lista de 9 comprobaciones de
 3. Comparar el resumen (digest) de la imagen desplegada en producción con el de staging.
 
 - **Resultado esperado**: producción se despliega en < 15 min sin reconstruir; **mismo digest**
-  que staging; `/healthz` de producción devuelve la misma versión; `/config.js` apunta a la API de
+  que staging; `/health` de producción devuelve la misma versión; `/config.js` apunta a la API de
   **producción**.
 - **Negativo**: llegar a `main` con un cambio que nunca desplegó en staging → el job falla antes
   de desplegar con el mensaje "versión no validada en staging" y producción no cambia.
@@ -112,7 +112,7 @@ Ejecutar la lista de 9 comprobaciones de
 ## Escenario 8 — Fallos visibles y estado consultable (US4, FR-018, SC-006)
 
 1. Forzar el fallo del escenario 4 y cronometrar hasta recibir la notificación.
-2. Consultar la versión de cada entorno en *Environments* y en `/healthz`.
+2. Consultar la versión de cada entorno en *Environments* y en `/health`.
 
 - **Resultado esperado**: notificación en < 5 min con el paso fallido y el enlace; versión de cada
   entorno conocida sin acceder a la infraestructura.

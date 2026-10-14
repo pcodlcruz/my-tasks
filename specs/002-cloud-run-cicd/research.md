@@ -176,8 +176,18 @@ confirmar se marca como *a verificar en la implementación*.
   falla ante un cambio incompatible (campo o endpoint retirado, tipo más restrictivo); retirar algo
   exige dos PR consecutivas (expandir y contraer).
 - **Pruebas de humo** (`smoke`): `mytasks-api` responde en `/readyz` (Firestore accesible) y en
-  `/healthz` con la versión esperada; un endpoint de datos sin token devuelve `401` (la API no
+  `/health` con la versión esperada; un endpoint de datos sin token devuelve `401` (la API no
   está abierta); `mytasks-web` sirve `/` y `/config.js` con la URL de API del entorno.
+- **Verificado en el primer despliegue de staging (2026-10-14): `/healthz` no sirve en `run.app`.**
+  El frontal de Google lo intercepta y responde con su propia página 404 sin reenviarlo al
+  contenedor; los registros de petición de Cloud Run no mostraban ninguna petición a `/healthz` y
+  una prueba directa lo confirmó (`/healthz` → 404 de Google; `/readyz`, `/livez`, `/health` y
+  cualquier otra ruta llegan al contenedor). La documentación de Cloud Run solo dice que «algunas
+  rutas acabadas en `z`» están reservadas y recomienda evitarlas todas; `/readyz` funciona hoy, pero
+  conviene vigilarlo. Decisión: se añade `/health` con la misma respuesta (cambio aditivo en el
+  contrato) y el humo, el CI y la versión visible (US4) usan `/health`. `/healthz` se conserva para
+  local y Docker. Lo habría detectado una prueba contra un servicio real, no una local ni la de
+  `images-build`.
 - **Alternatives considered**: despliegue directo con tráfico inmediato (la comprobación llega
   tarde); Cloud Deploy con *canary* (fuera de alcance de la spec).
 
@@ -255,7 +265,7 @@ confirmar se marca como *a verificar en la implementación*.
   - **Registro de despliegues (FR-017)**: los *environments* de GitHub registran cada despliegue
     con commit, rama, resultado y URL; además, cada revisión de Cloud Run lleva etiquetas de
     commit, hash de árbol y ejecución del pipeline (`commit`, `tree-hash`, `pipeline-run`).
-  - **Versión visible (US4)**: `APP_VERSION` se expone en `/healthz` y en `/config.js`.
+  - **Versión visible (US4)**: `APP_VERSION` se expone en `/health` y en `/config.js`.
   - **Notificaciones (FR-018, SC-006)**: las notificaciones nativas de GitHub Actions por fallo de
     workflow (correo/móvil del propietario), documentadas en el runbook y verificadas en el
     quickstart. Sin servicio propio.
