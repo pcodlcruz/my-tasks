@@ -16,6 +16,8 @@
 #   bound to the approved environment. A plan made inside the approved job cannot be read before
 #   approving. The read-only identity is bound to the pull_request event and to pushes to
 #   develop / main instead, so the plan job runs before the gate.
+# - A run can also be started by hand (workflow_dispatch) on develop or main, and a change to
+#   this workflow or to infra-plan.sh triggers one, because it changes what gets applied.
 # - No `paths` filter on the pull_request trigger: `terraform-validate` is a required status
 #   check and a filtered-out workflow would leave it pending. The job decides inside whether
 #   anything under infra/** changed; the filter is only used on the push trigger.
@@ -33,7 +35,11 @@ on:
     branches: [develop, main, "release/*", "hotfix/*"]
   push:
     branches: [develop, main]
-    paths: ["infra/**"]
+    paths: ["infra/**", ".github/workflows/infra.yml", ".github/scripts/infra-plan.sh"]
+  # Plans (and, after the approval, applies) the current state of develop or main on demand.
+  # Started from any other branch it only runs the `changes` job: every plan and apply job below
+  # is bound to develop or main.
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -72,11 +78,12 @@ jobs:
           set -euo pipefail
           infra_changed=false
           if [ "$EVENT_NAME" = "pull_request" ]; then
-            if [ -n "$(git diff --name-only "$BASE_SHA...$HEAD_SHA" -- infra)" ]; then
+            # The pipeline itself counts: changing how plans are made changes what gets applied.
+            if [ -n "$(git diff --name-only "$BASE_SHA...$HEAD_SHA" -- infra .github/workflows/infra.yml .github/scripts/infra-plan.sh)" ]; then
               infra_changed=true
             fi
           else
-            # The push trigger already filters by infra/**.
+            # The push trigger already filters by paths; a manual run always plans.
             infra_changed=true
           fi
 
@@ -183,7 +190,7 @@ jobs:
     needs: changes
     runs-on: ubuntu-latest
     timeout-minutes: 20
-    if: github.event_name == 'push' && github.ref == 'refs/heads/develop' && needs.changes.outputs.staging_roots != ''
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/develop' && needs.changes.outputs.staging_roots != ''
     permissions:
       contents: read
       id-token: write
@@ -262,7 +269,7 @@ jobs:
     needs: changes
     runs-on: ubuntu-latest
     timeout-minutes: 20
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && needs.changes.outputs.production_roots != ''
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main' && needs.changes.outputs.production_roots != ''
     permissions:
       contents: read
       id-token: write
