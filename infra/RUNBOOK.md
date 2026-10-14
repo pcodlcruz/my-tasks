@@ -370,7 +370,21 @@ Riesgos abiertos:
 
 - La lista de permisos no sale de un `plan` real (el sandbox del agente no ejecuta el proveedor). Si el primer `plan` o `apply` falla por un permiso, se añade a la definición y se actualiza el rol; no se amplía ningún rol predefinido.
 - Auditoría de acceso a datos en staging: `terraform-staging` solo puede conceder `roles/datastore.user` a nivel de proyecto. Si el `apply` no puede escribir la configuración de auditoría, la activa el propietario en la consola (como en §5) y se importa.
-- `FIREBASE_AUTH_DOMAIN` usa el dominio por defecto del proyecto. Se confirma de verdad en el primer inicio de sesión (T075); si no responde, el paso alternativo es registrar la app web en Firebase.
+- `FIREBASE_AUTH_DOMAIN` usa el dominio por defecto del proyecto. Se confirma de verdad en el primer inicio de sesión (T075); staging ya es un proyecto Firebase desde el 2026-10-14, así que el dominio `<proyecto>.firebaseapp.com` debería existir.
+- Identity Platform no se puede inicializar con `terraform-staging` (ver el paso previo de abajo).
+
+### Paso previo al primer `apply` de un entorno nuevo: habilitar Identity Platform (propietario)
+
+Descubierto el 2026-10-14 en el primer `apply` de staging: todo se creó salvo `google_identity_platform_config`, que falló con `403 INSUFFICIENT_PERMISSION`. Los registros de auditoría mostraron la causa: `InitializeIdentityPlatform` se concede con `firebaseauth.configs.create`, pero en un proyecto que **aún no es un proyecto Firebase** dispara por dentro `AddFirebase`, que exige `firebase.projects.update`. Ningún rol de Identity Platform lo incluye y la documentación del recurso no lo menciona.
+
+Decisión del propietario (2026-10-14): **no ampliar `mytasksEnvironmentAdmin`** con `firebase.projects.update`; Identity Platform se habilita a mano una vez por entorno nuevo.
+
+1. En la consola de Google Cloud del proyecto del entorno, *Identity Platform → Habilitar*, con una cuenta de propietario. Esto convierte el proyecto en un proyecto Firebase, como ya es producción.
+2. Comprobarlo en solo lectura: `firebase.googleapis.com` entre las APIs habilitadas y la entrada `EnableIdentityPlatform` en los registros de auditoría de `identitytoolkit.googleapis.com`.
+3. Que la raíz del entorno **adopte** la configuración con un bloque `import` (`projects/<proyecto>/config`), como hace `infra/envs/staging/main.tf`. Sin él, el `apply` falla con `400 INVALID_PROJECT_ID: Identity Platform has already been enabled for this project`: el proveedor intenta crear una configuración que ya existe. Con el `import` solo la lee y la actualiza.
+4. Lanzar `infra` (*Actions → infra → Run workflow*, rama `develop`, o fusionando el cambio), leer `plan-staging` y aprobar el `apply`.
+
+Hecho en staging el 2026-10-14 (14:57 UTC); el 400 de arriba se vio en el segundo intento y se resolvió con el `import`. Producción ya tiene Identity Platform habilitado, así que **su raíz (Fase 5, T077) necesita el mismo `import`**. Para recrear un entorno desde cero (SC-007) este paso va **antes** del primer `apply`.
 
 ### T068: proveedor de Google en Identity Platform de staging (propietario)
 

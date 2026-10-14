@@ -10,6 +10,11 @@
 #   firebaseauth.users.*     no access to the user accounts
 #   firebaseauth.configs.getSecret   no access to the OAuth client secrets
 #   apikeys.keys.delete
+#   firebase.projects.update   needed to initialise Identity Platform in a project that is not a
+#                              Firebase project yet (InitializeIdentityPlatform calls AddFirebase).
+#                              Left out on purpose: the owner enables Identity Platform by hand once
+#                              per new environment (infra/RUNBOOK.md), and this role only updates
+#                              its configuration.
 title: MyTasks environment administrator
 description: Create and update the Firestore database, indexes, TTL, Identity Platform configuration and web API key of one environment. No access to data, users, secrets or deletion.
 stage: GA
