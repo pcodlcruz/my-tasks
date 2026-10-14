@@ -474,6 +474,13 @@ Producción comparte proyecto con la plataforma y no estaba vacía, pero lo que 
 - `.github/scripts/tests/test_env_roots_parity.py` (job `scripts-tests`) compara las dos raíces y falla si difieren en algo que no sea dimensionado e identificadores. Comprobado que detecta una desviación.
 - `.github/workflows/deploy-production.yml` se lanza en cada push a `main`, usa el *environment* `production` y `deployer-production`, y llama al mismo `deploy.yml`. Producción **no construye**: promueve el *digest* de `validated-<hash>` de ambos componentes y, si falta uno, falla antes de tocar nada nombrando el componente y el hash.
 
+### Recuperación de datos de Firestore (LOW-003 de la fase 4, decisión de 2026-10-14)
+
+- **Producción** habilita la recuperación a un punto en el tiempo (`firestore_point_in_time_recovery = true`): conserva 7 días de versiones y permite restaurar la base a cualquier instante de esa ventana si un fallo de la aplicación o un token comprometido borra datos de forma definitiva. Se crea ya habilitada con el primer `apply`.
+- **Staging** la deja desactivada (solo datos de prueba). Es la única diferencia del módulo entre entornos además del dimensionado, y el test de paridad la lista como permitida.
+- **No hay copias programadas.** Las especificaciones no exigen copias de seguridad y la ventana de 7 días cubre el riesgo identificado. Si se quiere retención mayor, la opción es una programación de copias (`google_firestore_backup_schedule`), que habría que diseñar con `mytasks-google-cloud-architect`.
+- La restauración es una operación manual del propietario (exportar o clonar desde un instante con el MCP/consola); no hay procedimiento probado todavía.
+
 ### Antes del primer `apply` de producción (propietario)
 
 Crear y conceder los roles personalizados en `pdlco-mytasks` (`specs/002-cloud-run-cicd/guia-propietario-med-001.md`, sección de producción). Sin ellos, `terraform-production` no puede crear Firestore ni la clave de API, y la vista previa de `platform` sigue saliendo como aviso.

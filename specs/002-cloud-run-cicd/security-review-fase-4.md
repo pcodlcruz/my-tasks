@@ -117,6 +117,8 @@ Decidir para producción (Fase 5) si se habilita la recuperación a un punto en 
 - Skill/agente: `mytasks-google-cloud-architect` (decisión) y luego `mytasks-iac-developer`.
 - Tipo de cambio: Arquitectónico y de configuración.
 
+**Resuelto (2026-10-14):** producción habilita la recuperación a un punto en el tiempo (variable `firestore_point_in_time_recovery` del módulo, `true` en producción y `false` en staging); no se añaden copias programadas. Decisión y límites en `infra/RUNBOOK.md` §10. El efecto real llega con el primer `apply` de producción.
+
 ---
 
 ## Qué está bien
