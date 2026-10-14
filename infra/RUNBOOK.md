@@ -452,3 +452,36 @@ Lo que costó llegar aquí (para quien monte el siguiente entorno):
 3. **`/healthz` no sirve en `run.app`**: el frontal de Google lo intercepta y responde su propio 404. La versión y el humo usan `/health` (research R6).
 4. **La URL de los servicios es la determinista** (`mytasks-<servicio>-<número de proyecto>.<región>.run.app`), no el `status.url` de Cloud Run (`…-<hash>-no.a.run.app`): CORS, `API_BASE_URL` y los dominios autorizados de Identity Platform solo reconocen la primera.
 5. Con el *environment* `staging` con revisor obligatorio, cada fusión en `develop` pide aprobación, también las que no cambian ni el backend ni el frontend.
+
+## 10. Fase 5: producción y promoción
+
+### Estado de producción antes de la fase (leído en solo lectura el 2026-10-14)
+
+Producción comparte proyecto con la plataforma y no estaba vacía, pero lo que ya existía no choca con el módulo:
+
+| Recurso | Estado | Consecuencia |
+|---|---|---|
+| Base de Firestore, índices y TTL | no existen | los crea el módulo |
+| Servicios de Cloud Run y cuentas de ejecución | no existen | los crea el módulo |
+| Identity Platform | existe desde el 2025-12-03, con seis `UpdateConfig` del propietario | la raíz lo **adopta con `import`**; el plan mostrará qué cambia en los dominios autorizados |
+| Proveedor Google de Identity Platform | existe (creado por Firebase el 2025-12-03) | T078 está hecha en la práctica; falta confirmar con un inicio de sesión real tras el primer despliegue |
+| Agente de servicio de Cloud Run | existe, con `roles/run.serviceAgent` | lee el repositorio de imágenes (mismo proyecto) sin concesión extra |
+| Auditoría de acceso a datos | la declara `infra/platform/` | `manage_data_access_audit = false` en esta raíz, para no declararla dos veces |
+
+### Qué declara el código (T077, T079)
+
+- `infra/envs/production/` instancia el mismo módulo que staging con otro dimensionado (máximo 5 instancias, mínimo 0) y otros identificadores. No declara las cuentas del pipeline: son de `infra/platform/` y la raíz solo las nombra por correo.
+- `.github/scripts/tests/test_env_roots_parity.py` (job `scripts-tests`) compara las dos raíces y falla si difieren en algo que no sea dimensionado e identificadores. Comprobado que detecta una desviación.
+- `.github/workflows/deploy-production.yml` se lanza en cada push a `main`, usa el *environment* `production` y `deployer-production`, y llama al mismo `deploy.yml`. Producción **no construye**: promueve el *digest* de `validated-<hash>` de ambos componentes y, si falta uno, falla antes de tocar nada nombrando el componente y el hash.
+
+### Antes del primer `apply` de producción (propietario)
+
+Crear y conceder los roles personalizados en `pdlco-mytasks` (`specs/002-cloud-run-cicd/guia-propietario-med-001.md`, sección de producción). Sin ellos, `terraform-production` no puede crear Firestore ni la clave de API, y la vista previa de `platform` sigue saliendo como aviso.
+
+### Primer despliegue de producción (T081)
+
+1. Crear la release (`develop` → `release/*` → `main`), lo que despliega esa versión también en staging.
+2. Fusionar en `main`. Se lanzan `infra` y `deploy-production`.
+3. `infra`: leer `plan-production` (cubre `platform` y `envs/production`) y aprobar el `apply`. La primera vez ejecuta las importaciones de la plataforma. **En el plan, mirar sobre todo los dominios autorizados de Identity Platform.**
+4. `deploy-production` falla de forma esperada si los servicios aún no existen (como pasó en staging); relanzarlo tras el `apply`. Exige que staging haya validado **exactamente** el mismo contenido: el hash de árbol de `backend/` y de `frontend/` en `main` debe tener su `validated-<hash>`.
+5. Comprobar el escenario 6 del quickstart: mismo *digest* que staging, `/health` con la misma versión, `/config.js` apuntando a la API de producción.

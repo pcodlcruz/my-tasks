@@ -241,6 +241,8 @@ jobs:
         run: |
           python3 -m pip install --quiet pyyaml==6.0.2
           python3 .github/scripts/tests/test_deploy_variable_check.py
+      - name: Parity of the staging and production roots
+        run: python3 .github/scripts/tests/test_env_roots_parity.py
 
   secrets-scan:
     name: secrets-scan
