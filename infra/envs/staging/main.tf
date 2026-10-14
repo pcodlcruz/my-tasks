@@ -28,6 +28,16 @@ module "environment" {
   manage_data_access_audit = true
 }
 
+# Identity Platform is enabled by hand once per environment, because enabling it in a project that
+# is not a Firebase project yet needs firebase.projects.update, which the apply identity does not
+# have (infra/RUNBOOK.md). The provider cannot create a configuration that already exists (it fails
+# with "Identity Platform has already been enabled for this project"), so it is adopted: Terraform
+# then only reads and updates it, which the identity can do.
+import {
+  to = module.environment.google_identity_platform_config.default
+  id = "projects/${var.project_id}/config"
+}
+
 # --- Pipeline identities of staging (T046, T047, T049) ---
 # Project roles are granted by the owner, not by Terraform: the agent and the pipeline cannot
 # grant them (see infra/RUNBOOK.md). Only the accounts and who may impersonate them are managed.
