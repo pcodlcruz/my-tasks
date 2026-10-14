@@ -37,6 +37,8 @@ Se auditó el código de la fase: `.github/workflows/infra.yml`, `infra/platform
 **Destinatario**: `mytasks-iac-developer` (ningún skill cubre GitHub Actions, ver nota del propietario) · Tipo: De implementación.
 
 ### [MED-002] El aislamiento de las identidades depende de ajustes de GitHub sin confirmar
+
+> **Punto 1 CONFIRMADO por el propietario el 2026-10-14** (anotado en RUNBOOK §8). Las casillas de tokens y secretos para forks no aparecen en la interfaz, por lo que se asume el comportamiento por defecto de GitHub, sin prueba práctica. Queda pendiente 2FA y, opcional, el punto 2 (restringir por `ref` / `job_workflow_ref`).
 | Campo | Valor |
 |---|---|
 | **Severidad** | Media |

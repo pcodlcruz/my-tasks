@@ -227,7 +227,7 @@ Creados por el MCP, con confirmación del propietario, en `pdlco-mytasks`. Verif
 | Mapeo | `google.subject=assertion.sub`, `attribute.repository_id`, `attribute.repository_owner_id` |
 | Condición | `assertion.repository_owner_id=='210847116'&&assertion.repository_id=='1370451186'` (ids numéricos de `pcodlcruz` y `pcodlcruz/my-tasks`; sin comodines) |
 
-Pasos del propietario en GitHub (*Settings → Actions → General*), porque el repositorio es público: exigir aprobación para los workflows de todos los colaboradores externos y no enviar secretos ni tokens de escritura a workflows de forks. Activar 2FA en la cuenta. `TODO(propietario): confirmar que están aplicados`.
+Pasos del propietario en GitHub (*Settings → Actions → General*), porque el repositorio es público: exigir aprobación para los workflows de todos los colaboradores externos y no enviar secretos ni tokens de escritura a workflows de forks. Activar 2FA en la cuenta. Ajustes de Actions confirmados el 2026-10-14 (ver «Confirmación de los ajustes de GitHub» abajo). `TODO(propietario): confirmar 2FA`.
 
 ### T046: cuentas `terraform-*` y vinculaciones (2026-10-09, parte del agente)
 
@@ -329,3 +329,16 @@ Creadas por el MCP, con confirmación del propietario. Sin claves y **sin ningú
 Política final del repositorio `mytasks`: lectura para `deployer-production` y para el agente de Cloud Run de staging; escritura solo para `deployer-staging`.
 
 Riesgo aceptado: `deployer-staging`, una cuenta de staging, escribe en un repositorio del proyecto de producción. Limitado al repositorio concreto y al *environment* `staging`, restringido a `develop`, `release/*` y `hotfix/*`.
+
+### Confirmación de los ajustes de GitHub (2026-10-14)
+
+Revisados por el propietario en la web de GitHub, a petición de `security-review-fase-3.md` (MED-002, punto 1). El agente no puede leerlos: lo anotado es lo que el propietario comunicó.
+
+| Ajuste | Dónde | Resultado |
+|---|---|---|
+| Aprobación de workflows de colaboradores externos | *Settings → Actions → General* | Revisado y conforme (aprobación para todos los colaboradores externos) |
+| Tokens de escritura y secretos hacia workflows de forks | *Settings → Actions → General* | La interfaz **no muestra** las casillas; se da por bueno el comportamiento por defecto de GitHub (los forks reciben token de solo lectura y sin secretos). No verificado con una PR de prueba desde un fork |
+| Permisos por defecto del token y aprobación de PR por workflows | *Settings → Actions → General* | Revisado y conforme |
+| *Environments* `infra-production` e `infra-staging` (revisor, sin bypass de administradores, ramas `main` y `develop`) | *Settings → Environments* | Revisado y conforme |
+
+Pendiente: 2FA de la cuenta (`TODO(propietario)`), y la prueba práctica con una PR desde un fork (opcional) que dejaría constancia de que el workflow queda en «Waiting for approval». Comprobar de nuevo estos ajustes si cambia el plan de GitHub o se hace el repositorio privado.
