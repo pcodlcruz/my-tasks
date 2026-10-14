@@ -387,7 +387,7 @@ Es un paso manual único por entorno (research R8): necesita un secreto de OAuth
 
 El primer diseño de `infra.yml` calculaba el plan dentro del job aprobado, de modo que el propietario aprobaba sin poder leerlo (incumplía FR-020). Ahora cada `apply` va precedido de un job `plan-<entorno>` sin aprobación que publica el plan completo, y `apply-<entorno>` se niega a aplicar si su plan tiene otra huella (contrato `pipeline.md`). Para ver el plan: *Actions → el run de `infra` → job `plan-staging` o `plan-production` → Summary*; después, aprobar el `apply`.
 
-La identidad de solo lectura necesita una vinculación nueva, porque el job de plan no tiene *environment* y su sujeto de federación es la rama. Se creó **una vez por el MCP** (arranque, como las de la Fase 3) y el código la adopta con `import`:
+La identidad de solo lectura necesita una vinculación nueva, porque el job de plan no tiene *environment* y su sujeto de federación es la rama. Se creó **una vez por el MCP el 2026-10-14**, con confirmación explícita del propietario (arranque, como las de la Fase 3), y el código la adopta con `import`:
 
 | Cuenta | Sujeto (`roles/iam.workloadIdentityUser`) |
 |---|---|
