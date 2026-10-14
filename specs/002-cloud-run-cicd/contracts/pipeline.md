@@ -14,7 +14,7 @@ workflow.
 | `deploy.yml` | `workflow_call` (lo invocan los dos siguientes) | Sí | el de quien lo llama |
 | `deploy-staging.yml` | `push` a `develop`, `release/*`, `hotfix/*` | Sí, solo staging | `staging` |
 | `deploy-production.yml` | `push` a `main` | Sí, solo producción | `production` |
-| `infra.yml` | `pull_request` (plan; el job se omite sin cambios en `infra/**`); `push` a `develop`/`main` con cambios en `infra/**` (apply) | Solo infraestructura | `infra-staging`, `infra-production` |
+| `infra.yml` | `pull_request` (plan; el job se omite sin cambios en `infra/**`, en `infra.yml` ni en `infra-plan.sh`); `push` a `develop`/`main` con cambios en esas mismas rutas (plan y, tras aprobar, apply); `workflow_dispatch` en `develop` o `main` (lo mismo, a demanda) | Solo infraestructura | `infra-staging`, `infra-production` |
 
 Los despliegues y `infra.yml` solo corren para el repositorio propio (no para *forks*).
 Las PR nunca acceden a identidades de despliegue ni de escritura; la única identidad de Google
