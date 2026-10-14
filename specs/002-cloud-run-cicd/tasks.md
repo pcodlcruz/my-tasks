@@ -240,7 +240,7 @@ verificaciones de solo lectura (Fichas 4 y 6).
 **Independent Test**: fusionar una release en `main` y comprobar que producción sirve la misma
 imagen (mismo *digest*) que staging y que un cambio sin imagen validada no se despliega.
 
-- [ ] T077 [US2] Crear `infra/envs/production/` que instancia el mismo módulo con los valores de producción (máximo 5 instancias, mínimo 0), estado propio y `.terraform.lock.hcl` versionado; comparar con la raíz `staging` y comprobar que solo difieren dimensionado e identificadores
+- [ ] T077 [US2] Crear `infra/envs/production/` que instancia el mismo módulo con los valores de producción (máximo 5 instancias, mínimo 0), estado propio y `.terraform.lock.hcl` versionado; comparar con la raíz `staging` y comprobar que solo difieren dimensionado e identificadores **Nota (2026-10-14):** producción ya tiene Identity Platform habilitado, así que esta raíz debe adoptar su configuración con un bloque `import` (`projects/<proyecto>/config`) o el `apply` falla con 400; ver `infra/RUNBOOK.md` §9.
 - [ ] T078 [US2] (propietario) Configurar una vez el proveedor de Google en Identity Platform de producción y documentarlo en `infra/RUNBOOK.md` (riesgo R-2)
 - [ ] T079 [US2] Crear `.github/workflows/deploy-production.yml` con disparador `push` a `main`, *environment* `production`, federación con `deployer-production`, promoción del mismo *digest* exigiendo `validated-<hash>` de ambos componentes (si falta, falla antes de tocar nada con el componente y el hash) y grupo de concurrencia `deploy-production` sin cancelar la ejecución en curso
 - [ ] T080 [US2] (propietario) Configurar los rulesets de `main`, `develop`, `release/*` y `hotfix/*` con los nueve *required status checks* de [contracts/pipeline.md](./contracts/pipeline.md)

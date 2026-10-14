@@ -381,9 +381,10 @@ Decisión del propietario (2026-10-14): **no ampliar `mytasksEnvironmentAdmin`**
 
 1. En la consola de Google Cloud del proyecto del entorno, *Identity Platform → Habilitar*, con una cuenta de propietario. Esto convierte el proyecto en un proyecto Firebase, como ya es producción.
 2. Comprobarlo en solo lectura: `firebase.googleapis.com` entre las APIs habilitadas y la entrada `EnableIdentityPlatform` en los registros de auditoría de `identitytoolkit.googleapis.com`.
-3. Lanzar `infra` a mano (*Actions → infra → Run workflow*, rama `develop`), leer `plan-staging` y aprobar el `apply`.
+3. Que la raíz del entorno **adopte** la configuración con un bloque `import` (`projects/<proyecto>/config`), como hace `infra/envs/staging/main.tf`. Sin él, el `apply` falla con `400 INVALID_PROJECT_ID: Identity Platform has already been enabled for this project`: el proveedor intenta crear una configuración que ya existe. Con el `import` solo la lee y la actualiza.
+4. Lanzar `infra` (*Actions → infra → Run workflow*, rama `develop`, o fusionando el cambio), leer `plan-staging` y aprobar el `apply`.
 
-Hecho en staging el 2026-10-14 (14:57 UTC). Producción ya estaba habilitado. Si el proveedor volviera a fallar por intentar inicializar un proyecto ya inicializado, la salida es adoptar la configuración con un bloque `import` (`projects/<proyecto>/config`) en lugar de crearla. Para recrear un entorno desde cero (SC-007) este paso va **antes** del primer `apply`.
+Hecho en staging el 2026-10-14 (14:57 UTC); el 400 de arriba se vio en el segundo intento y se resolvió con el `import`. Producción ya tiene Identity Platform habilitado, así que **su raíz (Fase 5, T077) necesita el mismo `import`**. Para recrear un entorno desde cero (SC-007) este paso va **antes** del primer `apply`.
 
 ### T068: proveedor de Google en Identity Platform de staging (propietario)
 
