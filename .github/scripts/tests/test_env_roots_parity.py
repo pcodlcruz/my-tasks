@@ -22,6 +22,7 @@ MODULE_ARGUMENTS_THAT_DIFFER = {
     "terraform_service_account_email": "staging adopts its own account, production refers to the platform one",
     "deployer_service_account_email": "same as above",
     "manage_data_access_audit": "production shares its project with the platform, which owns the audit",
+    "firestore_point_in_time_recovery": "production keeps 7 days of versions of the owner's tasks, staging only test data",
 }
 # Values of terraform.tfvars that may differ: identifiers and sizing.
 TFVARS_THAT_DIFFER = {"project_id", "project_number", "api_max_instances", "web_max_instances"}
@@ -94,6 +95,8 @@ check(
 )
 check("production leaves the data access audit to the platform", production_module["manage_data_access_audit"] == "false")
 check("staging owns its data access audit", staging_module["manage_data_access_audit"] == "true")
+check("production enables point-in-time recovery", production_module["firestore_point_in_time_recovery"] == "true")
+check("staging leaves point-in-time recovery off", staging_module["firestore_point_in_time_recovery"] == "false")
 
 staging_vars, production_vars = tfvars(STAGING / "terraform.tfvars"), tfvars(PRODUCTION / "terraform.tfvars")
 check("both tfvars set the same variables", set(staging_vars) == set(production_vars))

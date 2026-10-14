@@ -49,6 +49,11 @@ variable "manage_data_access_audit" {
   type        = bool
 }
 
+variable "firestore_point_in_time_recovery" {
+  description = "Enable point-in-time recovery of Firestore (7 days of versions). Production sets it to true so a definitive delete can be undone; staging keeps it off."
+  type        = bool
+}
+
 variable "placeholder_image" {
   description = "Image of the first revision of each service, pinned by digest (never a moving tag: it runs with the identity of the service until the first deployment). The pipeline replaces it; Terraform ignores the image afterwards."
   type        = string

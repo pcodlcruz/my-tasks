@@ -31,6 +31,10 @@ module "environment" {
   # The project is shared with the platform, which already declares the audit of Firestore and IAM
   # (two resources on the same service would overwrite each other).
   manage_data_access_audit = false
+
+  # Production keeps 7 days of versions of the tasks, so a definitive delete (an application bug or
+  # a compromised token) can be undone. Cheap for this volume (LOW-003 of the phase 4 review).
+  firestore_point_in_time_recovery = true
 }
 
 # Identity Platform already exists in production (created by the owner on 2025-12-03, with the

@@ -26,6 +26,9 @@ module "environment" {
 
   # The project is not shared with the platform, so this root owns the audit configuration.
   manage_data_access_audit = true
+
+  # Staging holds test data only; point-in-time recovery stays off (LOW-003 of the phase 4 review).
+  firestore_point_in_time_recovery = false
 }
 
 # Identity Platform is enabled by hand once per environment, because enabling it in a project that
