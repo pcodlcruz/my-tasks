@@ -32,7 +32,29 @@ case "$cmd" in
     ;;
   plan)
     cat "$FAKE_PLANS/$name.txt"
-    exit "$(cat "$FAKE_PLANS/$name.code")"
+    code=$(cat "$FAKE_PLANS/$name.code")
+    # Like the real thing, a plan with changes ends with a separator and a note that depends on
+    # whether the plan is saved: this is what made the first digest differ between the plan shown
+    # (no -out) and the plan to apply (-out).
+    if [ "$code" = 2 ]; then
+      echo
+      echo "─────────────────────────────────────────────────────────────"
+      echo
+      case "$*" in
+        *-out=*)
+          out=$(grep -o -e '-out=[^ ]*' <<< "$*" | cut -d= -f2)
+          echo "Saved the plan to: $out"
+          echo
+          echo "To perform exactly these actions, run the following command to apply:"
+          echo "    terraform apply \"$out\""
+          ;;
+        *)
+          echo "Note: You didn't use the -out option to save this plan, so Terraform can't"
+          echo "guarantee to take exactly these actions if you run \"terraform apply\" now."
+          ;;
+      esac
+    fi
+    exit "$code"
     ;;
 esac
 EOF
@@ -148,6 +170,10 @@ plan_file staging 2 "Refreshing state... [id=ZZZ] (another run, other noise)" "g
 FAKE_STATE=exists run_plan --read-only envs/staging
 check "the digest ignores the refresh noise" '[ "$(output_of digest)" = "$first" ]'
 
+plan_file staging 2 "Refreshing state... [id=a]" "google_x.one"
+FAKE_STATE=exists run_plan --save-dir "$work/saved" envs/staging
+check "the digest is the same for the plan shown (no -out) and the plan to apply (-out)" '[ "$(output_of digest)" = "$first" ]'
+
 plan_file staging 2 "Refreshing state... [id=a]" "google_x.two"
 FAKE_STATE=exists run_plan --read-only envs/staging
 check "the digest changes when the planned actions change" '[ "$(output_of digest)" != "$first" ]'
@@ -163,6 +189,31 @@ check "a changed plan is refused with exit 3" '[ "$code" -eq 3 ] && grep -q "Not
 plan_file staging 0 "Refreshing state... [id=a]"
 FAKE_STATE=exists run_plan --save-dir "$work/saved" --expect-digest "$first" envs/staging
 check "no changes when changes were expected is refused too" '[ "$code" -eq 3 ]'
+
+# --- what differs when the plan changed ---
+
+plan_file staging 2 "Refreshing state... [id=a]" "google_x.one"
+FAKE_STATE=exists run_plan --read-only envs/staging
+shown_digest=$(output_of digest)
+shown_actions=$(awk '/^actions<</ { on = 1; next } /^plan_actions_/ { on = 0 } on' "$work/outputs")
+check "the planned actions are passed on as an output, without the trailer" '[ -n "$shown_actions" ] && grep -q "google_x.one will be created" <<< "$shown_actions" && ! grep -q "Note: You" <<< "$shown_actions"'
+
+plan_file staging 0 "Refreshing state... [id=a]"
+FAKE_STATE=exists run_plan --read-only envs/staging
+check "nothing pending: no actions output" '! grep -q "^actions<<" "$work/outputs"'
+
+plan_file staging 2 "Refreshing state... [id=a]" "google_x.changed"
+SHOWN_ACTIONS="$shown_actions" FAKE_STATE=exists run_plan --save-dir "$work/saved" --expect-digest "$shown_digest" envs/staging
+check "a refused plan shows what differs in the summary" '[ "$code" -eq 3 ] && grep -q "What differs between the plan shown" "$work/summary" && grep -q -e "-  # google_x.one will be created" "$work/summary" && grep -q -e "+  # google_x.changed will be created" "$work/summary"'
+check "and in an annotation readable without the logs" 'grep -q "::error title=plan-diff::" <<< "$output"'
+
+FAKE_STATE=exists run_plan --save-dir "$work/saved" --expect-digest "$shown_digest" envs/staging
+check "without the shown actions the refusal still works, without a diff" '[ "$code" -eq 3 ] && ! grep -q "What differs" "$work/summary"'
+
+big=$(head -c 100100 /dev/zero | tr '\0' 'a')
+plan_file staging 2 "Refreshing state... [id=a]" "$big"
+FAKE_STATE=exists run_plan --read-only envs/staging
+check "a very large plan only gets the digest" '[ -n "$(output_of digest)" ] && ! grep -q "^actions<<" "$work/outputs"'
 
 # --- several roots ---
 

@@ -54,10 +54,21 @@ status=0
 pending=""
 digest_input=""
 
-# The part of the plan that lists what will change. Everything before it (refresh lines, lock
-# messages, drift notes) varies between runs of the same plan.
+# The part of the plan that lists what will change. Neither what comes before it (refresh lines,
+# lock messages, drift notes) nor what comes after it is stable between runs of the same plan:
+# after the actions Terraform prints a separator line and then a note that depends on whether
+# the plan is saved ("You didn't use the -out option" or "Saved the plan to"), so the plan shown
+# (not saved) and the plan to apply (saved) would never have the same digest. The extract stops
+# at the first separator line and drops the blank lines before it.
 actions_of() {
-  sed -n '/^Terraform will perform the following actions/,$p' "$1"
+  awk '
+    /^Terraform will perform the following actions/ { on = 1 }
+    on && index($0, "─") == 1 { exit }
+    on {
+      if ($0 ~ /^[[:space:]]*$/) { blank++ }
+      else { while (blank > 0) { print ""; blank-- } print }
+    }
+  ' "$1"
 }
 
 for root in "${roots[@]}"; do
@@ -139,17 +150,44 @@ if [ -n "$pending" ]; then
   digest=$(printf '%s' "$digest_input" | sha256sum | cut -d' ' -f1)
 fi
 
+# The planned actions are also passed on, so that the apply job can show what differs if its plan
+# is not the one that was shown. Plans are public in the job summary anyway. A job output is
+# limited, and it reaches the apply job as one environment variable (128 KB at most), so a very
+# large plan only gets the digest. The limit is in bytes, not characters.
+actions_limit=100000
+actions_bytes=$(printf '%s' "$digest_input" | wc -c | tr -d ' ')
 if [ -n "${GITHUB_OUTPUT:-}" ]; then
   {
     echo "pending=$pending"
     echo "digest=$digest"
+    if [ -n "$pending" ] && [ "$actions_bytes" -le "$actions_limit" ]; then
+      delimiter="plan_actions_$(date +%s%N)"
+      echo "actions<<$delimiter"
+      printf '%s\n' "$digest_input"
+      echo "$delimiter"
+    fi
   } >> "$GITHUB_OUTPUT"
 fi
 
 if [ "$status" -ne 0 ]; then exit "$status"; fi
 
 if [ -n "$expect_digest" ] && [ "$digest" != "$expect_digest" ]; then
-  echo "::error::The plan changed since the one that was shown for approval (expected digest ${expect_digest:0:12}, got ${digest:0:12}). Nothing was applied. Read the new plan in the summary and run the workflow again."
+  message="The plan changed since the one that was shown for approval (expected digest ${expect_digest:0:12}, got ${digest:0:12}). Nothing was applied. Read the new plan in the summary and run the workflow again."
+  echo "::error::$message"
+  if [ -n "${SHOWN_ACTIONS:-}" ]; then
+    printf '%s\n' "$SHOWN_ACTIONS" > "$tmp/shown-actions.txt"
+    printf '%s\n' "$digest_input" > "$tmp/applied-actions.txt"
+    difference=$(diff -u "$tmp/shown-actions.txt" "$tmp/applied-actions.txt" | head -n 80 || true)
+    {
+      echo "### What differs between the plan shown and the plan to apply"
+      echo '```diff'
+      echo "$difference"
+      echo '```'
+    } >> "$summary"
+    # The first lines also go to an annotation, which is readable without opening the logs.
+    annotation=$(head -n 25 <<< "$difference" | sed ':a;N;$!ba;s/\n/%0A/g')
+    echo "::error title=plan-diff::$annotation"
+  fi
   exit 3
 fi
 exit 0
