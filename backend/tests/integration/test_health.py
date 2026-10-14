@@ -46,6 +46,30 @@ def _override_client(factory: Callable[[], Any]) -> Iterator[None]:
     app.dependency_overrides.pop(get_firestore_client_factory, None)
 
 
+@pytest.fixture(autouse=True)
+def _fresh_readiness() -> Iterator[None]:
+    # The app is shared and /readyz remembers its last answer for a few seconds: without
+    # this, the result of one test would leak into the next.
+    from mytasks_api.main import app
+
+    app.state.readiness.reset()
+    yield
+    app.state.readiness.reset()
+
+
+class _CountingFirestore(_UnreachableFirestore):
+    reads = 0
+
+    async def get(self, **_: Any) -> None:
+        type(self).reads += 1
+
+
+@pytest.fixture
+def counting_firestore() -> Iterator[None]:
+    _CountingFirestore.reads = 0
+    yield from _override_client(_CountingFirestore)
+
+
 @pytest.fixture
 def unreachable_firestore() -> Iterator[None]:
     yield from _override_client(_UnreachableFirestore)
@@ -117,6 +141,15 @@ async def test_readyz_does_not_leak_internal_details_on_failure(
     assert "unreachable" not in response.text
     assert "credentials" not in response.text
     assert "internal detail" not in response.text
+
+
+async def test_readyz_reads_firestore_once_for_many_anonymous_requests(
+    client: httpx.AsyncClient, counting_firestore: None
+) -> None:
+    responses = [await client.get("/readyz") for _ in range(25)]
+
+    assert {response.status_code for response in responses} == {200}
+    assert _CountingFirestore.reads == 1
 
 
 async def test_readyz_does_not_read_user_data(client: httpx.AsyncClient) -> None:
