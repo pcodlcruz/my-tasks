@@ -383,6 +383,19 @@ Es un paso manual único por entorno (research R8): necesita un secreto de OAuth
 3. *Identity Platform → Proveedores → Añadir proveedor → Google*: pegar el ID y el secreto del cliente. El secreto no se guarda en ningún fichero del repositorio.
 4. Anotar aquí la fecha y que el inicio de sesión de staging funciona. `TODO(propietario): fecha de T068`.
 
+### Plan visible antes de aprobar (corrección de T057)
+
+El primer diseño de `infra.yml` calculaba el plan dentro del job aprobado, de modo que el propietario aprobaba sin poder leerlo (incumplía FR-020). Ahora cada `apply` va precedido de un job `plan-<entorno>` sin aprobación que publica el plan completo, y `apply-<entorno>` se niega a aplicar si su plan tiene otra huella (contrato `pipeline.md`). Para ver el plan: *Actions → el run de `infra` → job `plan-staging` o `plan-production` → Summary*; después, aprobar el `apply`.
+
+La identidad de solo lectura necesita una vinculación nueva, porque el job de plan no tiene *environment* y su sujeto de federación es la rama. Se creó **una vez por el MCP el 2026-10-14**, con confirmación explícita del propietario (arranque, como las de la Fase 3), y el código la adopta con `import`:
+
+| Cuenta | Sujeto (`roles/iam.workloadIdentityUser`) |
+|---|---|
+| `terraform-plan-staging@pdlco-mytasks-stg.iam.gserviceaccount.com` | `principal://iam.googleapis.com/projects/2195266360/locations/global/workloadIdentityPools/github/subject/repo:pcodlcruz@210847116/my-tasks@1370451186:ref:refs/heads/develop` |
+| `terraform-plan-production@pdlco-mytasks.iam.gserviceaccount.com` | el mismo sujeto con `…:ref:refs/heads/main` |
+
+Es de solo lectura: cualquier workflow que corra en `develop` o `main` (ramas protegidas) puede suplantarla, y solo puede leer metadatos. El `import` exige que la vinculación exista, así que se crea **antes** de fusionar la PR que la declara; sin ella, el job `plan-*` no puede autenticarse y el `apply` no llega a pedir aprobación.
+
 ### Primer despliegue de staging (T075)
 
 `deploy-staging` falla de forma esperada si los servicios aún no existen: el paso «Check the service variables» lo dice y nombra el servicio. Orden: fusionar la PR de la fase, aprobar el `apply` de `infra-staging` en `infra.yml`, y relanzar `deploy-staging`. Hasta T075 los servicios llevan la imagen de marcador `hello` y `APP_VERSION=unversioned`.

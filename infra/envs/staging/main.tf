@@ -64,6 +64,14 @@ resource "google_service_account_iam_member" "terraform_plan_staging_wif" {
   member             = "${local.pool_principal}/${local.github_subject_base}:pull_request"
 }
 
+# plan before the apply approval: pushes to develop. The plan job has no environment (the
+# approval would come before it), so its subject is the branch. The identity is read-only.
+resource "google_service_account_iam_member" "terraform_plan_staging_wif_develop" {
+  service_account_id = google_service_account.terraform_plan_staging.name
+  role               = "roles/iam.workloadIdentityUser"
+  member             = "${local.pool_principal}/${local.github_subject_base}:ref:refs/heads/develop"
+}
+
 # deploy: jobs bound to the staging environment, which only runs from develop, release/* and
 # hotfix/*.
 resource "google_service_account_iam_member" "deployer_staging_wif" {
@@ -95,6 +103,11 @@ import {
 import {
   to = google_service_account_iam_member.terraform_plan_staging_wif
   id = "projects/${var.project_id}/serviceAccounts/terraform-plan-staging@${var.project_id}.iam.gserviceaccount.com roles/iam.workloadIdentityUser ${local.pool_principal}/${local.github_subject_base}:pull_request"
+}
+
+import {
+  to = google_service_account_iam_member.terraform_plan_staging_wif_develop
+  id = "projects/${var.project_id}/serviceAccounts/terraform-plan-staging@${var.project_id}.iam.gserviceaccount.com roles/iam.workloadIdentityUser ${local.pool_principal}/${local.github_subject_base}:ref:refs/heads/develop"
 }
 
 import {

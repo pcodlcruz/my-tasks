@@ -93,6 +93,19 @@ resource "google_service_account_iam_member" "terraform_plan_production_wif" {
   member             = "${local.pool_principal}/${local.github_subject_base}:pull_request"
 }
 
+# plan before the apply approval: pushes to main. The plan job has no environment (the approval
+# would come before it), so its subject is the branch. The identity is read-only.
+resource "google_service_account_iam_member" "terraform_plan_production_wif_main" {
+  service_account_id = google_service_account.terraform_plan_production.name
+  role               = "roles/iam.workloadIdentityUser"
+  member             = "${local.pool_principal}/${local.github_subject_base}:ref:refs/heads/main"
+}
+
+import {
+  to = google_service_account_iam_member.terraform_plan_production_wif_main
+  id = "projects/${var.project_id}/serviceAccounts/terraform-plan-production@${var.project_id}.iam.gserviceaccount.com roles/iam.workloadIdentityUser principal://iam.googleapis.com/projects/${local.project_number}/locations/global/workloadIdentityPools/github/subject/${local.github_subject_base}:ref:refs/heads/main"
+}
+
 import {
   to = google_service_account.terraform_production
   id = "projects/${var.project_id}/serviceAccounts/terraform-production@${var.project_id}.iam.gserviceaccount.com"

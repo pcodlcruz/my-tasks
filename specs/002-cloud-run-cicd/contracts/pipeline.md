@@ -120,10 +120,22 @@ propietario evita fusionar en `develop` mientras valida una release.
   de `develop` puede tocarla. Un cambio de plataforma que staging necesite llega antes por
   `release/*` → `main`. Cada apply está detrás del *environment* de GitHub con **aprobación
   obligatoria del propietario** (FR-020).
-- El plan que se aplica es el mismo que se mostró para aprobar (se guarda en disco dentro del
-  mismo job y se aplica ese fichero). **Nunca se sube como artefacto**: el fichero de plan
-  contiene valores sensibles en claro y los artefactos de un repositorio público son
-  descargables por cualquier usuario de GitHub.
+- **El propietario lee el plan antes de aprobar.** GitHub pide la aprobación de un *environment*
+  antes de que arranque el job, y la identidad de aplicar está vinculada a ese *environment*,
+  así que un plan hecho dentro del job aprobado no se puede leer antes. Por eso hay dos jobs:
+  `plan-<entorno>` (sin aprobación, con la identidad de solo lectura `terraform-plan-<env>`,
+  vinculada también a los pushes a `develop` y `main`) publica el plan completo en el resumen, y
+  `apply-<entorno>` (con aprobación) vuelve a calcularlo con la identidad de aplicar.
+- **Lo que se aplica es lo que se vio.** `apply-<entorno>` compara la huella (SHA-256 de la parte
+  del plan que lista los cambios, sin el ruido del refresco) con la del plan mostrado y, si
+  difiere, **no aplica nada** y falla; se vuelve a lanzar y se lee el plan nuevo. El plan guardado
+  en disco es el que se aplica. Si no hay nada que aplicar, no se pide aprobación.
+- **Antes del primer `apply` de una raíz** (aún sin estado remoto) se planifica contra un estado
+  vacío (*vista previa*): así el primer `apply` también se puede revisar en la PR. Un error en una
+  vista previa es un aviso, no un fallo, porque el plan real se hace al aplicar.
+- **Nunca se sube un plan como artefacto**: el fichero de plan contiene valores sensibles en
+  claro y los artefactos de un repositorio público son descargables por cualquier usuario de
+  GitHub.
 
 ## Interacción entre despliegue de aplicación e infraestructura
 
