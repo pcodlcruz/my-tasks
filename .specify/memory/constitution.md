@@ -1,42 +1,46 @@
 <!--
 Informe de Impacto de Sincronización (Sync Impact Report)
-Cambio de versión: 1.0.0 → 1.1.0
-Justificación: cambio material en "Restricciones Técnicas" (MINOR): la persistencia pasa de
-  PostgreSQL (supuesto no confirmado en 1.0.0) a Firestore por decisión del propietario, por
-  coste. Se ajustan el stack backend (sin SQLAlchemy/Alembic) y el entorno local (emulador de
-  Firestore, Principio IV). Ningún principio se redefine.
-Historial: 1.0.0 (2026-09-14) fue la ratificación definitiva tras la revisión estructural; las
-  versiones 1.0.0–2.0.0 previas a esa ratificación fueron borradores del mismo día.
-Principios modificados en 1.0.0 (respecto al borrador 2.0.0):
-  - "II. Buenas Prácticas de Ingeniería de Software" → "I. Simplicidad y Complejidad
-    Justificada" (reglas concretas y verificables en lugar de "mejores prácticas").
-  - "I. Calidad Mediante Tests" → "II. Tests por Niveles" (define qué tests debe tener una
-    feature, no solo que deben pasar).
-  - "III. Paridad de Entornos" → "IV. Paridad de Entornos" (mapea ramas GitFlow a entornos).
-  - "IV. Identidad de Agente…" → "V." (sin cambio de fondo; bullets redundantes retirados de
-    la sección de infraestructura).
-  - "V. Despliegue Automatizado…" → "VI." (sin cambio de fondo).
-  - "VI. Desarrollo Dirigido por Agentes y Skills" → "VIII." (recortado).
-  - "VII. Idioma y Convenciones" → "IX." (añade identificadores de código; recortado).
-Principios añadidos:
-  - III. Seguridad de Aplicación.
-  - VII. Revisión Humana Obligatoria (PR obligatoria; los agentes no aprueban ni fusionan
-    sus propias PRs).
-Secciones añadidas:
-  - Convenciones Normativas (glosario DEBE / DEBERÍA / PROHIBIDO).
-  - Restricciones Técnicas (stack fijado: React + TypeScript / FastAPI / Firestore).
-  - Mecanismos de Cumplimiento (tabla regla → mecanismo → estado).
-Secciones eliminadas: ninguna. Redundancia eliminada: cada regla vive en un único sitio;
-  "Definition of Done" y las secciones operativas referencian por número de principio.
-Idioma: todo el documento pasa a español (encabezados e informe incluidos), conforme al
-  Principio IX.
-Pendientes / TODOs:
-  - TODO(SERVICE_ACCOUNT_ID): identificador de la cuenta de servicio del agente para Google
-    Cloud, pendiente de que lo facilite el propietario del proyecto.
-  - Los mecanismos de cumplimiento figuran como "pendiente" hasta que existan el repositorio
-    remoto y la configuración del harness (ver tabla).
-Plantillas que requieren seguimiento: ninguna; las plantillas de plan/spec/tasks leen este
-  documento en tiempo de ejecución y no se modifican aquí.
+Cambio de versión: 1.2.1 → 1.3.0 (MINOR: ampliación material de los Principios IV y V y de la
+  restricción de identidad en la nube).
+Motivo: la feature 002-cloud-run-cicd (hallazgos D1/D2 de `/speckit-analyze`) hace que el
+  pipeline CI/CD despliegue y aplique Terraform con identidades de servicio propias, lo que la
+  redacción 1.2.1 prohibía literalmente ("toda interacción con Google Cloud" por el MCP; "cualquier
+  otra" cuenta de servicio PROHIBIDA).
+Cambios:
+  - Principio IV: staging se despliega desde `develop`, `release/*` y `hotfix/*` (antes solo
+    `develop`); producción sigue desde `main`.
+  - Principio V: la obligación de usar el MCP y las prohibiciones (`gcloud`/`gsutil`/`bq`/SDK
+    directos, credenciales personales) aplican al agente; el pipeline CI/CD actúa con identidades
+    de servicio propias, federadas y sin claves de larga duración, que el agente no puede usar.
+  - Restricciones Técnicas, "Identidad en la nube": distingue la cuenta del agente de las cuentas
+    exclusivas del pipeline (`terraform-*`, `terraform-plan-*`, `deployer-*`).
+  - Sin cambios en la tabla de Mecanismos de Cumplimiento: siguen *pendiente*; pasarán a *activo*
+    en una enmienda PATCH posterior cuando se implementen (tarea T091 de la feature 002).
+  - `CLAUDE.md` actualizado en la misma PR (reglas siempre activas V, VI y GitFlow).
+Pendientes / TODOs: los mismos que en 1.2.0 (ver tabla de Mecanismos de Cumplimiento).
+Plantillas que requieren seguimiento: ninguna.
+Nota de gobernanza: esta enmienda la redacta un agente; solo el propietario la ratifica al
+  fusionar la PR.
+
+Historial anterior (1.2.1):
+Cambio de versión: 1.2.0 → 1.2.1 (PATCH: corrección de nombre, sin cambio de intención en
+  ningún principio).
+Cambios:
+  - Todas las menciones a los skills de rol (`security-auditor`, `backend-developer`,
+    `frontend-developer`, `google-cloud-architect`) pasan a su nombre real en este repo,
+    `mytasks-<nombre>`. Motivo: Claude Code da prioridad al skill de usuario
+    (`~/.claude/skills/`) sobre el de proyecto cuando ambos comparten nombre — sin el prefijo,
+    invocar por ejemplo `backend-developer` ejecutaba la versión genérica de usuario (stack
+    Python/SQLAlchemy por defecto) en vez de la de este proyecto (Firestore, ver Restricciones
+    Técnicas). Los 7 skills de rol se copiaron de `~/.claude/skills/` a `.claude/skills/` de
+    este repo y se renombraron con ese prefijo para que la invocación resuelva siempre a la
+    versión adaptada. Ningún principio cambia de significado; solo el identificador con el que
+    se le referencia.
+Pendientes / TODOs: los mismos que en 1.2.0 (ver tabla de Mecanismos de Cumplimiento).
+Plantillas que requieren seguimiento: ninguna.
+Nota de gobernanza: este PATCH lo aplicó un agente como corrección mecánica de nombre; queda
+  pendiente de ratificación por el propietario en la revisión de la PR correspondiente, igual
+  que cualquier otro cambio a este fichero.
 -->
 
 # Constitución del Gestor Personal de Tareas
@@ -84,7 +88,7 @@ genere tareas de test consistentes y que la cobertura no dependa del criterio de
 - Las dependencias DEBEN estar fijadas por versión (lockfiles) y actualizarse de forma
   planificada.
 - Todo cambio que afecte a autenticación, autorización o modelo de datos DEBE pasar una
-  revisión con el skill `security-auditor` antes de fusionarse.
+  revisión con el skill `mytasks-security-auditor` antes de fusionarse.
 
 **Rationale**: el sistema gestiona datos personales; la seguridad de la aplicación merece el
 mismo rigor que ya se exige a la identidad en la nube.
@@ -93,7 +97,8 @@ mismo rigor que ya se exige a la identidad en la nube.
 Existen tres entornos con la misma topología y configuración (el dimensionado puede diferir):
 - **Local**: desarrollo y ejecución de tests (con el emulador de Firestore); único entorno
   donde se prueba manualmente.
-- **Staging** (Google Cloud): validación previa a producción; se despliega desde `develop`.
+- **Staging** (Google Cloud): validación previa a producción; se despliega desde `develop`,
+  `release/*` y `hotfix/*`.
 - **Producción** (Google Cloud): producto real; se despliega desde `main` (releases y hotfixes).
 
 Un cambio DEBE superar staging antes de promoverse a producción. Está PROHIBIDO usar staging o
@@ -103,11 +108,13 @@ producción como entorno de desarrollo o de pruebas manuales ad-hoc.
 despliega dónde y protege a los usuarios reales durante la iteración.
 
 ### V. Identidad de Agente y Acceso Exclusivo por MCP Oficial (NON-NEGOTIABLE)
-Toda interacción con Google Cloud DEBE realizarse a través del MCP oficial de Google Cloud con
-la cuenta de servicio dedicada al agente. Está PROHIBIDO ejecutar directamente `gcloud`,
-`gsutil`, `bq` o sus equivalentes de API/SDK fuera del MCP, y está PROHIBIDO usar credenciales
-personales del usuario para cualquier operación, de lectura o escritura, en cualquier entorno.
-Los cambios de infraestructura DEBEN confirmarse explícitamente por el propietario antes de
+Toda interacción **del agente** con Google Cloud DEBE realizarse a través del MCP oficial de
+Google Cloud con la cuenta de servicio dedicada al agente. Está PROHIBIDO que el agente ejecute
+directamente `gcloud`, `gsutil`, `bq` o sus equivalentes de API/SDK fuera del MCP, y está
+PROHIBIDO usar credenciales personales del usuario para cualquier operación, de lectura o
+escritura, en cualquier entorno. El pipeline CI/CD (Principio VI) actúa con identidades de
+servicio propias, federadas y sin claves de larga duración, que el agente no puede usar. Los
+cambios de infraestructura DEBEN confirmarse explícitamente por el propietario antes de
 aplicarse.
 
 **Rationale**: una única vía de acceso con identidad de servicio auditable elimina operaciones
@@ -123,12 +130,20 @@ humana y trazabilidad del despliegue.
 
 ### VII. Revisión Humana Obligatoria (NON-NEGOTIABLE)
 Todo cambio de código se integra exclusivamente mediante Pull Request. Están PROHIBIDOS los
-commits directos a `main`, `develop`, `release/*` y `hotfix/*`. Cada PR DEBE contar con la
-aprobación del propietario del proyecto (humano) y con los checks de CI en verde antes de
-fusionarse. Un agente NUNCA aprueba ni fusiona una PR que él mismo haya abierto o modificado.
+commits directos a `main`, `develop`, `release/*` y `hotfix/*`; esta prohibición se hace
+cumplir con reglas de rama (rulesets de GitHub) sin actores exentos ("bypass"), incluido el
+propio propietario. Como las PR se abren bajo la identidad de GitHub del propietario (no existe
+una cuenta de GitHub separada para el agente), no se exige un review formal con aprobación de
+un tercero: GitHub lo impide en cualquier caso al ser un proyecto de un único mantenedor
+("no puedes aprobar tu propia PR"). La ratificación humana se ejerce mediante la fusión
+("merge") explícita del propietario tras revisar el diff: un agente NUNCA ejecuta `merge` (ni
+equivalentes) sobre una PR, la haya abierto él mismo o no. Los checks de CI, cuando existan,
+DEBEN estar en verde antes de fusionar.
 
-**Rationale**: en un proyecto donde los agentes producen la mayor parte del código, la
-aprobación humana es el control real de calidad y de intención.
+**Rationale**: en un proyecto de un único mantenedor, exigir una aprobación formal de GitHub
+distinta del autor es técnicamente irrealizable. El control real de calidad e intención se
+obtiene con dos garantías separables y verificables: ninguna rama protegida acepta push
+directo (ni siquiera del propietario), y solo el propietario ejecuta la fusión.
 
 ### VIII. Desarrollo Dirigido por Agentes y Skills
 Toda tarea que entre en el alcance de un agente o skill definido en `.claude/` DEBE realizarse
@@ -155,17 +170,18 @@ Stack fijado por esta constitución; cambiarlo requiere enmienda, no una decisi�
 
 - **Frontend**: React 18+, TypeScript en modo estricto, TanStack Query (estado servidor),
   Zustand (estado cliente), Vitest (unitarios) y Playwright (end-to-end). Ver skill
-  `frontend-developer`.
-- **Backend**: Python 3.12+, FastAPI, pytest. Ver skill `backend-developer` (su preferencia
+  `mytasks-frontend-developer`.
+- **Backend**: Python 3.12+, FastAPI, pytest. Ver skill `mytasks-backend-developer` (su preferencia
   por SQLAlchemy/Alembic no aplica: la persistencia es Firestore, ver siguiente punto).
 - **Base de datos**: Firestore (modo nativo) mediante la librería oficial
   `google-cloud-firestore`. En local se usa el emulador de Firestore; los tests de integración
   (Principio II) se ejecutan contra el emulador, nunca contra un proyecto real.
 - **Nube**: Google Cloud exclusivamente. El servicio concreto de ejecución (p. ej. Cloud Run)
-  y la topología los define el skill `google-cloud-architect` en el plan de arquitectura.
-- **Identidad en la nube**: cuenta de servicio dedicada al agente.
-  TODO(SERVICE_ACCOUNT_ID): identificador pendiente de que lo facilite el propietario; hasta
-  entonces está PROHIBIDA cualquier operación real sobre Google Cloud.
+  y la topología los define el skill `mytasks-google-cloud-architect` en el plan de arquitectura.
+- **Identidad en la nube**: La cuenta de servicio dedicada al agente es
+  `mytasks-ai-agent@pdlco-mytasks.iam.gserviceaccount.com`. Está PROHIBIDO que el agente use
+  cualquier otra. Las cuentas `terraform-*`, `terraform-plan-*` y `deployer-*` son exclusivas del
+  pipeline CI/CD (Principios V y VI) y el agente no puede usarlas.
 
 ## Control de Versiones y Gestión de Proyecto
 
@@ -184,8 +200,9 @@ de la PR.
 
 | Regla | Mecanismo | Estado |
 |---|---|---|
-| PR obligatoria, sin commits directos, aprobación humana, CI en verde (VII) | Branch protection en GitHub para `main`, `develop`, `release/*`, `hotfix/*`: PR requerida, 1 aprobación del propietario, required status checks, sin auto-aprobación | pendiente |
-| Prohibición de `gcloud`/`gsutil`/`bq` directos (V) | Regla `deny` en `.claude/settings.json` para `Bash(gcloud:*)`, `Bash(gsutil:*)`, `Bash(bq:*)` | pendiente |
+| PR obligatoria, sin commits directos, fusión manual del propietario (VII) | Rulesets de GitHub en `main`, `develop`, `release/*`, `hotfix/*`: PR requerida, sin `bypass_actors`, borrado y push no-fast-forward bloqueados | activo |
+| Checks de CI en verde antes de fusionar (VII) | Required status checks en los rulesets anteriores | pendiente (sin pipeline de CI aún) |
+| Prohibición de `gcloud`/`gsutil`/`bq` directos (V) | Regla `deny` en `.claude/settings.json` para `Bash(gcloud:*)`, `Bash(gsutil:*)`, `Bash(bq:*)` | activo |
 | Sin credenciales personales (V) | El MCP de Google Cloud se configura únicamente con la cuenta de servicio del agente; sin *Application Default Credentials* personales en el entorno del agente | pendiente |
 | Despliegue solo vía pipeline (VI) | Solo la identidad del pipeline de CI/CD tiene permisos de despliegue; la cuenta de servicio del agente no los tiene | pendiente |
 | Tests por niveles (II) | Jobs de `pytest`, `Vitest` y `Playwright` como required status checks | pendiente |
@@ -198,11 +215,12 @@ Una tarea, PR o despliegue solo se considera completo cuando se cumplen todos es
 
 - [ ] Complejidad añadida justificada en el plan o ausente (I).
 - [ ] Tests del nivel correspondiente incluidos en la PR, en verde en local y en CI (II).
-- [ ] Sin secretos en el repositorio; revisión `security-auditor` hecha si tocó auth,
+- [ ] Sin secretos en el repositorio; revisión `mytasks-security-auditor` hecha si tocó auth,
       autorización o modelo de datos (III).
 - [ ] Si hay despliegue: staging validado antes de producción, siempre vía pipeline (IV, VI).
 - [ ] Ninguna operación en Google Cloud fuera del MCP oficial ni con credenciales personales (V).
-- [ ] PR aprobada por el propietario; el agente no ha aprobado ni fusionado su propia PR (VII).
+- [ ] PR fusionada explícitamente por el propietario tras revisar el diff; ningún agente ha
+      ejecutado `merge` sobre ella (VII).
 - [ ] Tarea realizada con el agente/skill correspondiente o excepción justificada (VIII).
 - [ ] Código y commits en inglés con Conventional Commits; PR, Issues y docs en español (IX).
 
@@ -228,4 +246,4 @@ activas (V, VI, VII, VIII, IX) se reflejan además en `CLAUDE.md` para que apliq
 los comandos de Spec Kit; toda enmienda a esas reglas DEBE actualizar ambos ficheros en la
 misma PR.
 
-**Versión**: 1.1.0 | **Ratificada**: 2026-09-14 | **Última enmienda**: 2026-09-14
+**Versión**: 1.3.0 | **Ratificada**: 2026-09-14 | **Última enmienda**: 2026-10-01

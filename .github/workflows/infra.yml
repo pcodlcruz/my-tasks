@@ -1,0 +1,339 @@
+# Infrastructure pipeline: Terraform plan on pull requests, apply on push after the owner's
+# approval (contracts/pipeline.md, "Flujo de infra.yml").
+#
+# - Pull request (own repository): fmt, validate and plan with the read-only identity
+#   `terraform-plan-<env>`. Nothing is applied. The plan is published in the job summary. Until a
+#   root has remote state (before its first apply) it is planned against an empty state, so the
+#   first apply can be reviewed in the pull request too.
+# - Push to develop / main: first a `plan-*` job, with no approval and the read-only identity,
+#   publishes the full plan. Then `apply-*` waits for the owner's approval of the GitHub
+#   environment (FR-020), plans again with the apply identity and applies only if that plan has
+#   the same digest as the one that was shown. A plan that changed in between is refused.
+#   develop applies `envs/staging` (terraform-staging, environment infra-staging); main applies
+#   `platform` and `envs/production` (terraform-production, environment infra-production).
+#   When there is nothing to apply, no approval is requested.
+# - Why two jobs: GitHub asks for the approval before a job starts, and the apply identity is
+#   bound to the approved environment. A plan made inside the approved job cannot be read before
+#   approving. The read-only identity is bound to the pull_request event and to pushes to
+#   develop / main instead, so the plan job runs before the gate.
+# - A run can also be started by hand (workflow_dispatch) on develop or main, and a change to
+#   this workflow or to infra-plan.sh triggers one, because it changes what gets applied.
+# - No `paths` filter on the pull_request trigger: `terraform-validate` is a required status
+#   check and a filtered-out workflow would leave it pending. The job decides inside whether
+#   anything under infra/** changed; the filter is only used on the push trigger.
+# - Authentication is Workload Identity Federation only (no keys). `id-token: write` is granted
+#   only to the jobs that authenticate.
+# - The plan logic lives in .github/scripts/infra-plan.sh (tested in .github/scripts/tests).
+# - A plan file is never uploaded as an artifact: it keeps sensitive values in clear and the
+#   artifacts of a public repository are downloadable by anyone.
+# - Third-party actions are pinned to a full commit SHA (the tag is in the comment).
+
+name: infra
+
+on:
+  pull_request:
+    branches: [develop, main, "release/*", "hotfix/*"]
+  push:
+    branches: [develop, main]
+    paths: ["infra/**", ".github/workflows/infra.yml", ".github/scripts/infra-plan.sh"]
+  # Plans (and, after the approval, applies) the current state of develop or main on demand.
+  # Started from any other branch it only runs the `changes` job: every plan and apply job below
+  # is bound to develop or main.
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  TERRAFORM_VERSION: "1.14.3"
+  WIF_PROVIDER: projects/2195266360/locations/global/workloadIdentityPools/github/providers/github-actions
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  # Decides which Terraform roots exist and whether the change touches infra/**.
+  # No credentials: it only reads the repository.
+  changes:
+    name: changes
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      infra_changed: ${{ steps.detect.outputs.infra_changed }}
+      production_roots: ${{ steps.detect.outputs.production_roots }}
+      staging_roots: ${{ steps.detect.outputs.staging_roots }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Detect the roots and the changes
+        id: detect
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set -euo pipefail
+          infra_changed=false
+          if [ "$EVENT_NAME" = "pull_request" ]; then
+            # The pipeline itself counts: changing how plans are made changes what gets applied.
+            if [ -n "$(git diff --name-only "$BASE_SHA...$HEAD_SHA" -- infra .github/workflows/infra.yml .github/scripts/infra-plan.sh)" ]; then
+              infra_changed=true
+            fi
+          else
+            # The push trigger already filters by paths; a manual run always plans.
+            infra_changed=true
+          fi
+
+          # A root exists once it has a main.tf. `platform` and `envs/production` live in the
+          # production project; `envs/staging` in the staging project.
+          production_roots=""
+          for root in platform envs/production; do
+            if [ -f "infra/$root/main.tf" ]; then production_roots="$production_roots $root"; fi
+          done
+          staging_roots=""
+          if [ -f "infra/envs/staging/main.tf" ]; then staging_roots="envs/staging"; fi
+
+          {
+            echo "infra_changed=$infra_changed"
+            echo "production_roots=${production_roots# }"
+            echo "staging_roots=$staging_roots"
+          } >> "$GITHUB_OUTPUT"
+
+  # Required status check. It always runs; the steps are skipped when infra/** has no changes,
+  # which still counts as passed.
+  terraform-validate:
+    name: terraform-validate
+    needs: changes
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    if: github.event_name == 'pull_request'
+    permissions:
+      contents: read
+      id-token: write
+    env:
+      INFRA_CHANGED: ${{ needs.changes.outputs.infra_changed }}
+      PRODUCTION_ROOTS: ${{ needs.changes.outputs.production_roots }}
+      STAGING_ROOTS: ${{ needs.changes.outputs.staging_roots }}
+      # Pull requests from forks get no OIDC token and never reach Google Cloud: they only
+      # run fmt and validate.
+      SAME_REPO: ${{ github.event.pull_request.head.repo.full_name == github.repository }}
+    steps:
+      - name: Nothing to validate
+        if: env.INFRA_CHANGED != 'true'
+        run: echo "No changes under infra/**, so terraform-validate passes without running." >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        if: env.INFRA_CHANGED == 'true'
+        with:
+          persist-credentials: false
+      - uses: hashicorp/setup-terraform@dfe3c3f87815947d99a8997f908cb6525fc44e9e # v4.0.1
+        if: env.INFRA_CHANGED == 'true'
+        with:
+          terraform_version: ${{ env.TERRAFORM_VERSION }}
+          terraform_wrapper: false
+      - name: terraform fmt
+        if: env.INFRA_CHANGED == 'true'
+        run: terraform fmt -check -recursive -diff infra
+      # Validation does not need the backend or credentials.
+      - name: terraform validate
+        if: env.INFRA_CHANGED == 'true'
+        run: |
+          set -euo pipefail
+          # The output is also kept so a failure can be annotated on the check (see below).
+          : > "$RUNNER_TEMP/plan-validate.txt"
+          for root in $PRODUCTION_ROOTS $STAGING_ROOTS; do
+            echo "::group::validate $root"
+            {
+              terraform -chdir="infra/$root" init -backend=false -input=false -no-color
+              terraform -chdir="infra/$root" validate -no-color
+            } 2>&1 | tee -a "$RUNNER_TEMP/plan-validate.txt"
+            echo "::endgroup::"
+          done
+
+      - uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093 # v3.0.0
+        if: env.INFRA_CHANGED == 'true' && env.SAME_REPO == 'true' && env.PRODUCTION_ROOTS != ''
+        with:
+          workload_identity_provider: ${{ env.WIF_PROVIDER }}
+          service_account: terraform-plan-production@pdlco-mytasks.iam.gserviceaccount.com
+      - name: terraform plan (production and platform)
+        if: env.INFRA_CHANGED == 'true' && env.SAME_REPO == 'true' && env.PRODUCTION_ROOTS != ''
+        run: .github/scripts/infra-plan.sh --read-only --label "production project" $PRODUCTION_ROOTS
+
+      - uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093 # v3.0.0
+        if: env.INFRA_CHANGED == 'true' && env.SAME_REPO == 'true' && env.STAGING_ROOTS != ''
+        with:
+          workload_identity_provider: ${{ env.WIF_PROVIDER }}
+          service_account: terraform-plan-staging@pdlco-mytasks-stg.iam.gserviceaccount.com
+      - name: terraform plan (staging)
+        if: env.INFRA_CHANGED == 'true' && env.SAME_REPO == 'true' && env.STAGING_ROOTS != ''
+        run: .github/scripts/infra-plan.sh --read-only --label "staging project" $STAGING_ROOTS
+
+      # Surfaces the end of the plan output as an annotation of the check, so the cause is
+      # visible from the pull request without opening the raw logs. A plan holds no secrets
+      # (research R8).
+      - name: Annotate the failure
+        if: failure()
+        run: |
+          for file in "$RUNNER_TEMP"/plan-*.txt; do
+            [ -f "$file" ] || continue
+            message=$(tail -n 30 "$file" | sed ':a;N;$!ba;s/\n/%0A/g')
+            echo "::error title=$(basename "$file")::${message}"
+          done
+
+  # --- staging: develop ---
+
+  # No approval and a read-only identity: the owner reads this plan before approving the apply.
+  plan-staging:
+    name: plan-staging
+    needs: changes
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/develop' && needs.changes.outputs.staging_roots != ''
+    permissions:
+      contents: read
+      id-token: write
+    outputs:
+      pending: ${{ steps.plan.outputs.pending }}
+      digest: ${{ steps.plan.outputs.digest }}
+      actions: ${{ steps.plan.outputs.actions }}
+    env:
+      ROOTS: ${{ needs.changes.outputs.staging_roots }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: hashicorp/setup-terraform@dfe3c3f87815947d99a8997f908cb6525fc44e9e # v4.0.1
+        with:
+          terraform_version: ${{ env.TERRAFORM_VERSION }}
+          terraform_wrapper: false
+      - uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093 # v3.0.0
+        with:
+          workload_identity_provider: ${{ env.WIF_PROVIDER }}
+          service_account: terraform-plan-staging@pdlco-mytasks-stg.iam.gserviceaccount.com
+      - name: terraform plan
+        id: plan
+        run: .github/scripts/infra-plan.sh --read-only --label "staging project" $ROOTS
+
+  apply-staging:
+    name: apply-staging
+    needs: [changes, plan-staging]
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    # Nothing to apply: no approval is requested.
+    if: needs.plan-staging.outputs.pending != ''
+    environment: infra-staging
+    permissions:
+      contents: read
+      id-token: write
+    # Own group (never shared with deploy-*): a shared group that does not cancel keeps only the
+    # latest pending run and could drop an apply.
+    concurrency:
+      group: infra-staging
+      cancel-in-progress: false
+    env:
+      ROOTS: ${{ needs.changes.outputs.staging_roots }}
+      SHOWN_DIGEST: ${{ needs.plan-staging.outputs.digest }}
+      SHOWN_ACTIONS: ${{ needs.plan-staging.outputs.actions }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: hashicorp/setup-terraform@dfe3c3f87815947d99a8997f908cb6525fc44e9e # v4.0.1
+        with:
+          terraform_version: ${{ env.TERRAFORM_VERSION }}
+          terraform_wrapper: false
+      - uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093 # v3.0.0
+        with:
+          workload_identity_provider: ${{ env.WIF_PROVIDER }}
+          service_account: terraform-staging@pdlco-mytasks-stg.iam.gserviceaccount.com
+      # The plan saved here is exactly what is applied below, and it is refused if it differs
+      # from the one shown in plan-staging. It is never uploaded as an artifact.
+      - name: terraform plan
+        id: plan
+        run: .github/scripts/infra-plan.sh --label "staging project" --save-dir "$RUNNER_TEMP/plans" --expect-digest "$SHOWN_DIGEST" $ROOTS
+      - name: terraform apply
+        env:
+          PENDING: ${{ steps.plan.outputs.pending }}
+        run: |
+          set -euo pipefail
+          for root in $PENDING; do
+            terraform -chdir="infra/$root" apply -input=false "$RUNNER_TEMP/plans/$(basename "$root").tfplan"
+          done
+
+  # --- production and platform: main ---
+
+  plan-production:
+    name: plan-production
+    needs: changes
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main' && needs.changes.outputs.production_roots != ''
+    permissions:
+      contents: read
+      id-token: write
+    outputs:
+      pending: ${{ steps.plan.outputs.pending }}
+      digest: ${{ steps.plan.outputs.digest }}
+      actions: ${{ steps.plan.outputs.actions }}
+    env:
+      ROOTS: ${{ needs.changes.outputs.production_roots }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: hashicorp/setup-terraform@dfe3c3f87815947d99a8997f908cb6525fc44e9e # v4.0.1
+        with:
+          terraform_version: ${{ env.TERRAFORM_VERSION }}
+          terraform_wrapper: false
+      - uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093 # v3.0.0
+        with:
+          workload_identity_provider: ${{ env.WIF_PROVIDER }}
+          service_account: terraform-plan-production@pdlco-mytasks.iam.gserviceaccount.com
+      - name: terraform plan
+        id: plan
+        run: .github/scripts/infra-plan.sh --read-only --label "production project" $ROOTS
+
+  apply-production:
+    name: apply-production
+    needs: [changes, plan-production]
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    if: needs.plan-production.outputs.pending != ''
+    environment: infra-production
+    permissions:
+      contents: read
+      id-token: write
+    concurrency:
+      group: infra-production
+      cancel-in-progress: false
+    env:
+      ROOTS: ${{ needs.changes.outputs.production_roots }}
+      SHOWN_DIGEST: ${{ needs.plan-production.outputs.digest }}
+      SHOWN_ACTIONS: ${{ needs.plan-production.outputs.actions }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: hashicorp/setup-terraform@dfe3c3f87815947d99a8997f908cb6525fc44e9e # v4.0.1
+        with:
+          terraform_version: ${{ env.TERRAFORM_VERSION }}
+          terraform_wrapper: false
+      - uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093 # v3.0.0
+        with:
+          workload_identity_provider: ${{ env.WIF_PROVIDER }}
+          service_account: terraform-production@pdlco-mytasks.iam.gserviceaccount.com
+      # The saved plan is applied below, refused if it differs from the one shown, and never
+      # uploaded (see apply-staging).
+      - name: terraform plan
+        id: plan
+        run: .github/scripts/infra-plan.sh --label "production project" --save-dir "$RUNNER_TEMP/plans" --expect-digest "$SHOWN_DIGEST" $ROOTS
+      - name: terraform apply
+        env:
+          PENDING: ${{ steps.plan.outputs.pending }}
+        run: |
+          set -euo pipefail
+          for root in $PENDING; do
+            terraform -chdir="infra/$root" apply -input=false "$RUNNER_TEMP/plans/$(basename "$root").tfplan"
+          done

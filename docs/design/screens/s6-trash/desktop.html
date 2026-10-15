@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+
+<html class="h-full bg-surface-alt" lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Papelera - MyTasks</title>
+<!-- Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Inter Font -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS v3 -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "surface-container": "#ededf9",
+            "on-primary": "#ffffff",
+            "inverse-primary": "#b7c4ff",
+            "on-tertiary-container": "#ffc9b7",
+            "secondary-fixed": "#89f5e7",
+            "on-secondary-fixed-variant": "#005049",
+            "tertiary-fixed-dim": "#ffb59c",
+            "inverse-surface": "#2e3039",
+            "surface-bright": "#faf8ff",
+            "do-now": "#B91C1C",
+            "on-surface-variant": "#434655",
+            "on-tertiary": "#ffffff",
+            "secondary-fixed-dim": "#6bd8cb",
+            "schedule": "#1D4ED8",
+            "tertiary-container": "#a73400",
+            "surface-container-lowest": "#ffffff",
+            "on-tertiary-fixed": "#390c00",
+            "eliminate": "#475569",
+            "border": "#CBD5E1",
+            "secondary-container": "#86f2e4",
+            "on-surface": "#1a1b23",
+            "secondary": "#006a61",
+            "surface-variant": "#e2e1ed",
+            "tertiary-fixed": "#ffdbcf",
+            "on-secondary-container": "#006f66",
+            "on-tertiary-fixed-variant": "#832700",
+            "delegate": "#B45309",
+            "surface-alt": "#F8FAFC",
+            "outline": "#747686",
+            "primary-container": "#1d4ed8",
+            "outline-variant": "#c4c5d7",
+            "scope-work": "#7C3AED",
+            "on-primary-container": "#cad3ff",
+            "surface": "#FFFFFF",
+            "error": "#B91C1C",
+            "on-background": "#1a1b23",
+            "background": "#faf8ff",
+            "surface-dim": "#d9d9e5",
+            "on-primary-fixed": "#001551",
+            "surface-container-high": "#e8e7f3",
+            "success": "#15803D",
+            "on-secondary": "#ffffff",
+            "on-secondary-fixed": "#00201d",
+            "on-primary-fixed-variant": "#0039b5",
+            "surface-container-low": "#f3f2fe",
+            "tertiary": "#7f2500",
+            "on-error": "#ffffff",
+            "on-error-container": "#93000a",
+            "primary-fixed": "#dce1ff",
+            "scope-personal": "#0D9488",
+            "surface-tint": "#2151da",
+            "text-muted": "#475569",
+            "error-container": "#ffdad6",
+            "surface-container-highest": "#e2e1ed",
+            "primary-fixed-dim": "#b7c4ff",
+            "text": "#0F172A",
+            "primary": "#0037b0",
+            "inverse-on-surface": "#f0f0fb"
+          },
+          borderRadius: {
+            "DEFAULT": "0.125rem",
+            "lg": "0.25rem",
+            "xl": "0.5rem",
+            "card": "10px",
+            "full": "0.75rem"
+          },
+          spacing: {
+            "space-2xl": "48px",
+            "gutter": "24px",
+            "space-md": "12px",
+            "space-lg": "16px",
+            "space-xs": "4px",
+            "space-sm": "8px",
+            "margin": "24px",
+            "space-xl": "32px"
+          },
+          fontFamily: {
+            heading: ["Inter", "sans-serif"],
+            display: ["Inter", "sans-serif"],
+            "body-strong": ["Inter", "sans-serif"],
+            body: ["Inter", "sans-serif"],
+            caption: ["Inter", "sans-serif"]
+          },
+          fontSize: {
+            heading: ["20px", { lineHeight: "28px", fontWeight: "600" }],
+            display: ["28px", { lineHeight: "36px", fontWeight: "700" }],
+            "body-strong": ["16px", { lineHeight: "24px", fontWeight: "600" }],
+            body: ["16px", { lineHeight: "24px", fontWeight: "400" }],
+            caption: ["13px", { lineHeight: "18px", fontWeight: "400" }]
+          },
+          boxShadow: {
+            card: "0 1px 2px rgba(15, 23, 42, 0.08)",
+            modal: "0 8px 24px rgba(15, 23, 42, 0.16)"
+          }
+        }
+      }
+    };
+  </script>
+</head>
+<body class="min-h-full bg-surface-alt text-text flex flex-col font-body selection:bg-primary-container selection:text-white antialiased">
+<!-- 1. Cabecera de navegación superior (Desktop TopNavBar) -->
+<header class="w-full bg-surface border-b border-border shadow-sm sticky top-0 z-40">
+<div class="max-w-7xl mx-auto px-margin h-16 flex items-center justify-between">
+<!-- Izquierda: Brand / Logo -->
+<div class="flex items-center space-x-3">
+<div class="w-9 h-9 rounded-xl bg-primary text-on-primary flex items-center justify-center shadow-sm">
+<span class="material-symbols-outlined text-[22px]" data-icon="grid_view">grid_view</span>
+</div>
+<span class="font-heading text-heading font-bold text-primary tracking-tight">MyTasks</span>
+</div>
+<!-- Centro: Pestañas de navegación escritorio -->
+<nav aria-label="Navegación principal" class="hidden md:flex items-center space-x-1">
+<a class="flex items-center space-x-2 px-space-md py-2 rounded-xl text-text-muted hover:text-text hover:bg-surface-container-low transition-colors duration-150 font-body text-[14px]" href="#tablero">
+<span class="material-symbols-outlined text-[20px]" data-icon="dashboard">dashboard</span>
+<span>Tablero</span>
+</a>
+<a class="flex items-center space-x-2 px-space-md py-2 rounded-xl text-text-muted hover:text-text hover:bg-surface-container-low transition-colors duration-150 font-body text-[14px]" href="#historial">
+<span class="material-symbols-outlined text-[20px]" data-icon="history">history</span>
+<span>Historial</span>
+</a>
+<a aria-current="page" class="flex items-center space-x-2 px-space-md py-2 rounded-xl bg-primary-container/10 text-schedule font-body-strong text-[14px] border border-schedule/20 transition-all duration-150" href="#papelera">
+<span class="material-symbols-outlined text-[20px]" data-icon="delete" data-weight="fill" style="font-variation-settings: 'FILL' 1;">delete</span>
+<span>Papelera</span>
+</a>
+</nav>
+<!-- Derecha: Perfil de usuario y Cerrar sesión -->
+<div class="flex items-center space-x-4">
+<div class="flex items-center space-x-3 pl-2 pr-1 border-r border-border">
+<div class="w-8 h-8 rounded-full bg-primary-fixed text-primary flex items-center justify-center font-heading text-caption font-bold ring-2 ring-border">
+            CM
+          </div>
+<div class="hidden lg:flex flex-col text-left leading-tight">
+<span class="font-heading text-[13px] font-semibold text-text">Carlos Mendoza</span>
+<span class="font-caption text-[11px] text-text-muted">carlos.mendoza@gmail.com</span>
+</div>
+</div>
+<button class="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-xl text-text-muted hover:text-do-now hover:bg-error-container/20 transition-all duration-150 font-body text-caption" title="Cerrar sesión" type="button">
+<span class="material-symbols-outlined text-[18px]" data-icon="logout">logout</span>
+<span class="font-medium hidden sm:inline">Cerrar sesión</span>
+</button>
+</div>
+</div>
+</header>
+<!-- Contenido principal centrado -->
+<main class="flex-1 max-w-7xl w-full mx-auto px-margin py-space-xl">
+<!-- 2. Título principal y estructura de cabecera -->
+<div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 pb-space-lg">
+<div class="flex items-baseline space-x-3">
+<h1 class="font-heading text-display text-text tracking-tight flex items-center gap-2">
+          Papelera
+        </h1>
+<span class="font-caption text-caption text-text-muted bg-surface border border-border px-2.5 py-0.5 rounded-full font-medium">
+          6 tareas en la papelera
+        </span>
+</div>
+<div class="flex items-center space-x-3">
+<button class="inline-flex items-center space-x-2 px-space-md py-2 text-do-now bg-surface border border-do-now/30 hover:bg-do-now hover:text-white rounded-xl font-heading text-caption font-semibold transition-all duration-150 shadow-sm active:scale-95 focus:outline-none focus:ring-2 focus:ring-do-now/50" type="button">
+<span class="material-symbols-outlined text-[18px]" data-icon="delete_sweep">delete_sweep</span>
+<span>Vaciar papelera</span>
+</button>
+</div>
+</div>
+<!-- 3. Banner sutil de aviso fijo -->
+<div class="mb-space-lg p-space-md bg-[#EFF6FF] border border-[#BFDBFE] rounded-[10px] flex items-center space-x-3 text-text shadow-sm" role="status">
+<span class="material-symbols-outlined text-schedule text-[22px] flex-shrink-0" data-icon="info">info</span>
+<p class="font-body text-[14px] leading-relaxed text-text">
+<span class="font-body-strong text-schedule">Aviso:</span> Las tareas se eliminan automáticamente a los 30 días.
+      </p>
+</div>
+<!-- 4. Barra de control / búsqueda rápida y filtros -->
+<div class="bg-surface border border-border rounded-[10px] p-space-md mb-space-lg flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4 shadow-card">
+<!-- Buscador -->
+<div class="relative flex-1 max-w-md">
+<div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-text-muted">
+<span class="material-symbols-outlined text-[20px]" data-icon="search">search</span>
+</div>
+<input class="w-full pl-10 pr-4 py-2 bg-surface-alt border border-border rounded-xl font-body text-caption placeholder-text-muted focus:bg-surface focus:outline-none focus:border-schedule focus:ring-1 focus:ring-schedule transition-all" placeholder="Buscar en la papelera..." type="text"/>
+</div>
+<!-- Filtros de ámbito -->
+<div aria-label="Filtros por ámbito" class="flex items-center space-x-2 overflow-x-auto pb-1 md:pb-0" role="tablist">
+<button aria-selected="true" class="px-3.5 py-1.5 rounded-xl font-heading text-caption font-semibold bg-primary text-on-primary shadow-sm transition-all focus:outline-none" role="tab" type="button">
+          Todas (6)
+        </button>
+<button aria-selected="false" class="px-3.5 py-1.5 rounded-xl font-heading text-caption font-medium bg-surface-alt border border-border text-text-muted hover:text-text hover:bg-surface-container-high transition-all focus:outline-none" role="tab" type="button">
+          Laboral (4)
+        </button>
+<button aria-selected="false" class="px-3.5 py-1.5 rounded-xl font-heading text-caption font-medium bg-surface-alt border border-border text-text-muted hover:text-text hover:bg-surface-container-high transition-all focus:outline-none" role="tab" type="button">
+          Personal (2)
+        </button>
+</div>
+</div>
+<!-- 5. Lista vertical de tareas en la papelera -->
+<div class="space-y-3" role="list">
+<!-- Fila 1: Laboral / Urgente - Activa -->
+<div class="group bg-surface border border-border rounded-[10px] p-4 flex flex-col lg:flex-row lg:items-center justify-between gap-4 shadow-card hover:border-schedule/40 transition-all duration-150 relative overflow-hidden" role="listitem">
+<!-- Indicador de cuadrante lateral izquierdo -->
+<div class="absolute left-0 top-0 bottom-0 w-1.5 bg-do-now"></div>
+<div class="flex flex-col md:flex-row md:items-center gap-3 pl-2.5">
+<!-- Título y metadatos -->
+<div class="flex flex-col">
+<span class="font-heading text-[15px] font-semibold text-text leading-snug">
+              Revisar logs de servidor heredado
+            </span>
+<div class="flex flex-wrap items-center gap-2 pt-1.5">
+<!-- Ámbito -->
+<span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold bg-scope-work/10 text-scope-work border border-scope-work/20">
+                Laboral
+              </span>
+<!-- Estado original -->
+<span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium bg-slate-100 text-slate-700 border border-slate-300">
+                Activa
+              </span>
+<!-- Cuadrante origen -->
+<span class="inline-flex items-center text-[11px] text-do-now font-medium">
+                Cuadrante I: Hacer
+              </span>
+<span class="text-border">•</span>
+<!-- Expiración -->
+<span class="inline-flex items-center gap-1 font-caption text-caption text-text-muted">
+<span class="material-symbols-outlined text-[15px] text-text-muted" data-icon="hourglass_top">hourglass_top</span>
+                Se eliminará en 12 días
+              </span>
+</div>
+</div>
+</div>
+<!-- Acciones a la derecha -->
+<div class="flex items-center space-x-2.5 pl-2.5 lg:pl-0 flex-shrink-0 self-end lg:self-center">
+<button class="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-xl border border-border hover:border-schedule text-text hover:text-schedule bg-surface hover:bg-schedule/5 font-heading text-caption font-semibold transition-all duration-150 active:scale-95 shadow-xs" title="Restaurar al tablero" type="button">
+<span class="material-symbols-outlined text-[18px]" data-icon="restore">restore</span>
+<span>Restaurar</span>
+</button>
+<button class="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-xl border border-do-now/30 text-do-now hover:bg-do-now hover:text-white bg-surface font-heading text-caption font-semibold transition-all duration-150 active:scale-95 shadow-xs" title="Eliminar de forma irreversible" type="button">
+<span class="material-symbols-outlined text-[18px]" data-icon="delete_forever">delete_forever</span>
+<span>Eliminar definitivamente</span>
+</button>
+</div>
+</div>
+<!-- Fila 2: Laboral / Planificar - Completada -->
+<div class="group bg-surface border border-border rounded-[10px] p-4 flex flex-col lg:flex-row lg:items-center justify-between gap-4 shadow-card hover:border-schedule/40 transition-all duration-150 relative overflow-hidden" role="listitem">
+<div class="absolute left-0 top-0 bottom-0 w-1.5 bg-schedule"></div>
+<div class="flex flex-col md:flex-row md:items-center gap-3 pl-2.5">
+<div class="flex flex-col">
+<span class="font-heading text-[15px] font-semibold text-text leading-snug">
+              Actualizar contratos de proveedores Q2
+            </span>
+<div class="flex flex-wrap items-center gap-2 pt-1.5">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold bg-scope-work/10 text-scope-work border border-scope-work/20">
+                Laboral
+              </span>
+<span class="inline-flex items-center gap-0.5 px-2 py-0.5 rounded text-[11px] font-semibold bg-success/10 text-success border border-success/20">
+<span class="material-symbols-outlined text-[13px]" data-icon="check">check</span>
+                Completada
+              </span>
+<span class="inline-flex items-center text-[11px] text-schedule font-medium">
+                Cuadrante II: Planificar
+              </span>
+<span class="text-border">•</span>
+<span class="inline-flex items-center gap-1 font-caption text-caption text-do-now font-medium">
+<span class="material-symbols-outlined text-[15px]" data-icon="timer">timer</span>
+                Se eliminará en 5 días
+              </span>
+</div>
+</div>
+</div>
+<div class="flex items-center space-x-2.5 pl-2.5 lg:pl-0 flex-shrink-0 self-end lg:self-center">
+<button class="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-xl border border-border hover:border-schedule text-text hover:text-schedule bg-surface hover:bg-schedule/5 font-heading text-caption font-semibold transition-all duration-150 active:scale-95 shadow-xs" type="button">
+<span class="material-symbols-outlined text-[18px]" data-icon="restore">restore</span>
+<span>Restaurar</span>
+</button>
+<button class="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-xl border border-do-now/30 text-do-now hover:bg-do-now hover:text-white bg-surface font-heading text-caption font-semibold transition-all duration-150 active:scale-95 shadow-xs" type="button">
+<span class="material-symbols-outlined text-[18px]" data-icon="delete_forever">delete_forever</span>
+<span>Eliminar definitivamente</span>
+</button>
+</div>
+</div>
+<!-- Fila 3: Personal / Delegar - Activa -->
+<div class="group bg-surface border border-border rounded-[10px] p-4 flex flex-col lg:flex-row lg:items-center justify-between gap-4 shadow-card hover:border-schedule/40 transition-all duration-150 relative overflow-hidden" role="listitem">
+<div class="absolute left-0 top-0 bottom-0 w-1.5 bg-delegate"></div>
+<div class="flex flex-col md:flex-row md:items-center gap-3 pl-2.5">
+<div class="flex flex-col">
+<span class="font-heading text-[15px] font-semibold text-text leading-snug">
+              Comprar accesorios de oficina
+            </span>
+<div class="flex flex-wrap items-center gap-2 pt-1.5">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold bg-scope-personal/10 text-scope-personal border border-scope-personal/20">
+                Personal
+              </span>
+<span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium bg-slate-100 text-slate-700 border border-slate-300">
+                Activa
+              </span>
+<span class="inline-flex items-center text-[11px] text-delegate font-medium">
+                Cuadrante III: Delegar
+              </span>
+<span class="text-border">•</span>
+<span class="inline-flex items-center gap-1 font-caption text-caption text-text-muted">
+<span class="material-symbols-outlined text-[15px] text-text-muted" data-icon="hourglass_top">hourglass_top</span>
+                Se eliminará en 28 días
+              </span>
+</div>
+</div>
+</div>
+<div class="flex items-center space-x-2.5 pl-2.5 lg:pl-0 flex-shrink-0 self-end lg:self-center">
+<button class="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-xl border border-border hover:border-schedule text-text hover:text-schedule bg-surface hover:bg-schedule/5 font-heading text-caption font-semibold transition-all duration-150 active:scale-95 shadow-xs" type="button">
+<span class="material-symbols-outlined text-[18px]" data-icon="restore">restore</span>
+<span>Restaurar</span>
+</button>
+<button class="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-xl border border-do-now/30 text-do-now hover:bg-do-now hover:text-white bg-surface font-heading text-caption font-semibold transition-all duration-150 active:scale-95 shadow-xs" type="button">
+<span class="material-symbols-outlined text-[18px]" data-icon="delete_forever">delete_forever</span>
+<span>Eliminar definitivamente</span>
+</button>
+</div>
+</div>
+<!-- Fila 4: Laboral / Urgente - Completada -->
+<div class="group bg-surface border border-border rounded-[10px] p-4 flex flex-col lg:flex-row lg:items-center justify-between gap-4 shadow-card hover:border-schedule/40 transition-all duration-150 relative overflow-hidden" role="listitem">
+<div class="absolute left-0 top-0 bottom-0 w-1.5 bg-do-now"></div>
+<div class="flex flex-col md:flex-row md:items-center gap-3 pl-2.5">
+<div class="flex flex-col">
+<span class="font-heading text-[15px] font-semibold text-text leading-snug">
+              Enviar recordatorio de pago facturas vencidas
+            </span>
+<div class="flex flex-wrap items-center gap-2 pt-1.5">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold bg-scope-work/10 text-scope-work border border-scope-work/20">
+                Laboral
+              </span>
+<span class="inline-flex items-center gap-0.5 px-2 py-0.5 rounded text-[11px] font-semibold bg-success/10 text-success border border-success/20">
+<span class="material-symbols-outlined text-[13px]" data-icon="check">check</span>
+                Completada
+              </span>
+<span class="inline-flex items-center text-[11px] text-do-now font-medium">
+                Cuadrante I: Hacer
+              </span>
+<span class="text-border">•</span>
+<span class="inline-flex items-center gap-1 font-caption text-caption text-text-muted">
+<span class="material-symbols-outlined text-[15px] text-text-muted" data-icon="hourglass_top">hourglass_top</span>
+                Se eliminará en 19 días
+              </span>
+</div>
+</div>
+</div>
+<div class="flex items-center space-x-2.5 pl-2.5 lg:pl-0 flex-shrink-0 self-end lg:self-center">
+<button class="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-xl border border-border hover:border-schedule text-text hover:text-schedule bg-surface hover:bg-schedule/5 font-heading text-caption font-semibold transition-all duration-150 active:scale-95 shadow-xs" type="button">
+<span class="material-symbols-outlined text-[18px]" data-icon="restore">restore</span>
+<span>Restaurar</span>
+</button>
+<button class="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-xl border border-do-now/30 text-do-now hover:bg-do-now hover:text-white bg-surface font-heading text-caption font-semibold transition-all duration-150 active:scale-95 shadow-xs" type="button">
+<span class="material-symbols-outlined text-[18px]" data-icon="delete_forever">delete_forever</span>
+<span>Eliminar definitivamente</span>
+</button>
+</div>
+</div>
+<!-- Fila 5: Personal / Descartar - Activa -->
+<div class="group bg-surface border border-border rounded-[10px] p-4 flex flex-col lg:flex-row lg:items-center justify-between gap-4 shadow-card hover:border-schedule/40 transition-all duration-150 relative overflow-hidden" role="listitem">
+<div class="absolute left-0 top-0 bottom-0 w-1.5 bg-eliminate"></div>
+<div class="flex flex-col md:flex-row md:items-center gap-3 pl-2.5">
+<div class="flex flex-col">
+<span class="font-heading text-[15px] font-semibold text-text leading-snug">
+              Limpiar carpetas de descargas y temporales
+            </span>
+<div class="flex flex-wrap items-center gap-2 pt-1.5">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold bg-scope-personal/10 text-scope-personal border border-scope-personal/20">
+                Personal
+              </span>
+<span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium bg-slate-100 text-slate-700 border border-slate-300">
+                Activa
+              </span>
+<span class="inline-flex items-center text-[11px] text-eliminate font-medium">
+                Cuadrante IV: Eliminar
+              </span>
+<span class="text-border">•</span>
+<span class="inline-flex items-center gap-1 font-caption text-caption text-text-muted">
+<span class="material-symbols-outlined text-[15px] text-text-muted" data-icon="hourglass_top">hourglass_top</span>
+                Se eliminará en 14 días
+              </span>
+</div>
+</div>
+</div>
+<div class="flex items-center space-x-2.5 pl-2.5 lg:pl-0 flex-shrink-0 self-end lg:self-center">
+<button class="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-xl border border-border hover:border-schedule text-text hover:text-schedule bg-surface hover:bg-schedule/5 font-heading text-caption font-semibold transition-all duration-150 active:scale-95 shadow-xs" type="button">
+<span class="material-symbols-outlined text-[18px]" data-icon="restore">restore</span>
+<span>Restaurar</span>
+</button>
+<button class="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-xl border border-do-now/30 text-do-now hover:bg-do-now hover:text-white bg-surface font-heading text-caption font-semibold transition-all duration-150 active:scale-95 shadow-xs" type="button">
+<span class="material-symbols-outlined text-[18px]" data-icon="delete_forever">delete_forever</span>
+<span>Eliminar definitivamente</span>
+</button>
+</div>
+</div>
+<!-- Fila 6: Laboral / Planificar - Activa -->
+<div class="group bg-surface border border-border rounded-[10px] p-4 flex flex-col lg:flex-row lg:items-center justify-between gap-4 shadow-card hover:border-schedule/40 transition-all duration-150 relative overflow-hidden" role="listitem">
+<div class="absolute left-0 top-0 bottom-0 w-1.5 bg-schedule"></div>
+<div class="flex flex-col md:flex-row md:items-center gap-3 pl-2.5">
+<div class="flex flex-col">
+<span class="font-heading text-[15px] font-semibold text-text leading-snug">
+              Borrador de especificaciones técnicas API v2
+            </span>
+<div class="flex flex-wrap items-center gap-2 pt-1.5">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold bg-scope-work/10 text-scope-work border border-scope-work/20">
+                Laboral
+              </span>
+<span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium bg-slate-100 text-slate-700 border border-slate-300">
+                Activa
+              </span>
+<span class="inline-flex items-center text-[11px] text-schedule font-medium">
+                Cuadrante II: Planificar
+              </span>
+<span class="text-border">•</span>
+<span class="inline-flex items-center gap-1 font-caption text-caption text-text-muted">
+<span class="material-symbols-outlined text-[15px] text-text-muted" data-icon="hourglass_top">hourglass_top</span>
+                Se eliminará en 23 días
+              </span>
+</div>
+</div>
+</div>
+<div class="flex items-center space-x-2.5 pl-2.5 lg:pl-0 flex-shrink-0 self-end lg:self-center">
+<button class="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-xl border border-border hover:border-schedule text-text hover:text-schedule bg-surface hover:bg-schedule/5 font-heading text-caption font-semibold transition-all duration-150 active:scale-95 shadow-xs" type="button">
+<span class="material-symbols-outlined text-[18px]" data-icon="restore">restore</span>
+<span>Restaurar</span>
+</button>
+<button class="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-xl border border-do-now/30 text-do-now hover:bg-do-now hover:text-white bg-surface font-heading text-caption font-semibold transition-all duration-150 active:scale-95 shadow-xs" type="button">
+<span class="material-symbols-outlined text-[18px]" data-icon="delete_forever">delete_forever</span>
+<span>Eliminar definitivamente</span>
+</button>
+</div>
+</div>
+</div>
+<!-- 6. Paginación / botón al final: "Cargar más" -->
+<div class="mt-space-xl flex justify-center pb-space-lg">
+<button class="inline-flex items-center space-x-2 px-space-xl py-2.5 bg-surface border border-border rounded-xl text-text hover:text-primary hover:border-primary/50 hover:bg-surface-container-low transition-all duration-150 font-heading text-caption font-semibold shadow-card active:scale-95 focus:outline-none focus:ring-2 focus:ring-primary/20" type="button">
+<span>Cargar más</span>
+<span class="material-symbols-outlined text-[20px]" data-icon="expand_more">expand_more</span>
+</button>
+</div>
+</main>
+<!-- 7. Pie de página discreto -->
+<footer class="w-full bg-surface border-t border-border mt-auto py-4">
+<div class="max-w-7xl mx-auto px-margin flex flex-col sm:flex-row items-center justify-between text-text-muted font-caption text-[12px] gap-2">
+<div class="flex items-center space-x-2">
+<span class="font-heading font-semibold text-text">MyTasks</span>
+<span>•</span>
+<span>Gestor de Tareas con Matriz de Eisenhower</span>
+</div>
+<div>
+<span>© 2025 MyTasks. Todos los derechos reservados.</span>
+</div>
+</div>
+</footer>
+</body></html>

@@ -1,0 +1,32 @@
+# Deploys staging on every push to develop, release/* and hotfix/* (contracts/pipeline.md).
+#
+# - The job runs in the GitHub environment `staging`, which only accepts those branches; the
+#   federated subject of deployer-staging is bound to that environment, so no other workflow or
+#   branch can obtain its credentials.
+# - Group `deploy-staging` without cancelling: the run that is deploying finishes, and of the
+#   pending ones only the most recent is kept. Two deployments never overlap and the last one
+#   wins (FR-019). The group is shared by the three branches on purpose: there is one staging.
+# - Only push events of this repository reach it, so forks never do.
+
+name: deploy-staging
+
+on:
+  push:
+    branches: [develop, "release/*", "hotfix/*"]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-staging
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: deploy-staging
+    uses: ./.github/workflows/deploy.yml
+    with:
+      environment: staging
+    permissions:
+      contents: read
+      id-token: write

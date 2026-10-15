@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+
+<html class="h-full" lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Papelera - MyTasks</title>
+<!-- Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Google Fonts: Inter -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "surface-alt": "#F8FAFC",
+            "on-secondary-container": "#006f66",
+            "on-error": "#ffffff",
+            "surface-variant": "#e2e1ed",
+            "border": "#CBD5E1",
+            "on-surface": "#1a1b23",
+            "secondary-fixed-dim": "#6bd8cb",
+            "tertiary": "#7f2500",
+            "scope-work": "#7C3AED",
+            "tertiary-fixed": "#ffdbcf",
+            "on-background": "#1a1b23",
+            "outline": "#747686",
+            "secondary-fixed": "#89f5e7",
+            "on-secondary": "#ffffff",
+            "secondary": "#006a61",
+            "inverse-on-surface": "#f0f0fb",
+            "on-tertiary-container": "#ffc9b7",
+            "scope-personal": "#0D9488",
+            "error-container": "#ffdad6",
+            "error": "#B91C1C",
+            "surface-container-lowest": "#ffffff",
+            "on-tertiary-fixed": "#390c00",
+            "on-primary-fixed-variant": "#0039b5",
+            "success": "#15803D",
+            "primary-fixed": "#dce1ff",
+            "primary-fixed-dim": "#b7c4ff",
+            "primary-container": "#1d4ed8",
+            "surface-bright": "#faf8ff",
+            "background": "#faf8ff",
+            "surface-container": "#ededf9",
+            "surface-container-highest": "#e2e1ed",
+            "tertiary-fixed-dim": "#ffb59c",
+            "eliminate": "#475569",
+            "on-tertiary": "#ffffff",
+            "text-muted": "#475569",
+            "on-error-container": "#93000a",
+            "surface": "#FFFFFF",
+            "inverse-primary": "#b7c4ff",
+            "on-tertiary-fixed-variant": "#832700",
+            "on-primary-container": "#cad3ff",
+            "outline-variant": "#c4c5d7",
+            "surface-container-low": "#f3f2fe",
+            "primary": "#0037b0",
+            "surface-tint": "#2151da",
+            "on-secondary-fixed-variant": "#005049",
+            "on-primary": "#ffffff",
+            "on-secondary-fixed": "#00201d",
+            "do-now": "#B91C1C",
+            "delegate": "#B45309",
+            "surface-container-high": "#e8e7f3",
+            "on-surface-variant": "#434655",
+            "schedule": "#1D4ED8",
+            "surface-dim": "#d9d9e5",
+            "inverse-surface": "#2e3039",
+            "tertiary-container": "#a73400",
+            "secondary-container": "#86f2e4",
+            "on-primary-fixed": "#001551",
+            "text": "#0F172A"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.125rem",
+            "lg": "0.25rem",
+            "xl": "0.5rem",
+            "full": "0.75rem"
+          },
+          "spacing": {
+            "space-lg": "16px",
+            "space-sm": "8px",
+            "gutter": "24px",
+            "space-md": "12px",
+            "space-xs": "4px",
+            "space-xl": "32px",
+            "space-2xl": "48px",
+            "margin": "24px"
+          },
+          "fontFamily": {
+            "caption": ["Inter"],
+            "body": ["Inter"],
+            "body-strong": ["Inter"],
+            "display": ["Inter"],
+            "heading": ["Inter"]
+          },
+          "fontSize": {
+            "caption": ["13px", { "lineHeight": "18px", "fontWeight": "400" }],
+            "body": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+            "body-strong": ["16px", { "lineHeight": "24px", "fontWeight": "600" }],
+            "display": ["28px", { "lineHeight": "36px", "fontWeight": "700" }],
+            "heading": ["20px", { "lineHeight": "28px", "fontWeight": "600" }]
+          }
+        }
+      }
+    };
+  </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-text min-h-full flex flex-col font-body antialiased selection:bg-primary-fixed">
+<!-- Top App Bar Navigation / Header Superior Móvil -->
+<header class="sticky top-0 z-40 bg-surface shadow-sm">
+<div class="w-full flex items-center justify-between px-space-lg py-space-sm">
+<div class="flex items-center gap-space-sm">
+<button aria-label="Volver a la vista anterior" class="p-space-xs text-text hover:bg-surface-container rounded-lg transition-colors duration-150 flex items-center justify-center" type="button">
+<span class="material-symbols-outlined text-[24px]">arrow_back</span>
+</button>
+<div>
+<div class="flex items-center gap-space-xs">
+<h1 class="text-heading font-heading font-bold text-text">Papelera</h1>
+<span class="bg-surface-container-highest text-text-muted text-caption font-caption px-space-xs py-0.5 rounded-full font-semibold">6 tareas</span>
+</div>
+<p class="text-caption font-caption text-text-muted">Elementos descartados temporalmente</p>
+</div>
+</div>
+<!-- Acción destructiva global -->
+<button aria-label="Vaciar toda la papelera permanentemente" class="flex items-center gap-1 text-error hover:bg-error-container/40 px-space-sm py-1.5 rounded-lg font-body-strong text-caption transition-colors duration-150 active:opacity-80 focus:outline-none focus:ring-2 focus:ring-error" onclick="confirmEmptyTrash()" type="button">
+<span class="material-symbols-outlined text-[18px]">delete_sweep</span>
+<span class="font-body-strong">Vaciar papelera</span>
+</button>
+</div>
+</header>
+<!-- Contenedor Principal de Contenido Móvil -->
+<main class="flex-1 w-full max-w-xl mx-auto px-space-lg pt-space-md pb-24 flex flex-col gap-space-md">
+<!-- Barra de búsqueda accesible -->
+<section aria-label="Buscador de tareas eliminadas">
+<div class="relative w-full">
+<label class="sr-only" for="search-trash">Buscar en la papelera</label>
+<span class="absolute inset-y-0 left-0 pl-space-md flex items-center pointer-events-none text-text-muted">
+<span class="material-symbols-outlined text-[20px]">search</span>
+</span>
+<input class="w-full pl-10 pr-space-md py-2.5 bg-surface border border-border text-text placeholder-text-muted rounded-xl text-body font-body shadow-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all duration-150" id="search-trash" placeholder="Buscar en la papelera..." type="search"/>
+</div>
+</section>
+<!-- Filtros de Ámbito / Segmentación -->
+<nav aria-label="Filtrar por ámbito de tarea" class="flex items-center gap-space-xs overflow-x-auto pb-1 no-scrollbar">
+<button class="bg-primary text-on-primary font-body-strong text-caption px-space-md py-1.5 rounded-full shadow-sm flex items-center gap-1.5 shrink-0 transition-colors" type="button">
+<span class="material-symbols-outlined text-[16px]">all_inclusive</span>
+<span>Todas (6)</span>
+</button>
+<button class="bg-surface border border-border hover:bg-surface-container text-text font-body text-caption px-space-md py-1.5 rounded-full shrink-0 transition-colors flex items-center gap-1.5" type="button">
+<span class="w-2.5 h-2.5 rounded-full bg-scope-work inline-block"></span>
+<span>Laboral (4)</span>
+</button>
+<button class="bg-surface border border-border hover:bg-surface-container text-text font-body text-caption px-space-md py-1.5 rounded-full shrink-0 transition-colors flex items-center gap-1.5" type="button">
+<span class="w-2.5 h-2.5 rounded-full bg-scope-personal inline-block"></span>
+<span>Personal (2)</span>
+</button>
+</nav>
+<!-- Banner Informativo de Retención (WCAG AA Compliant) -->
+<aside aria-label="Aviso legal de retención de datos" class="bg-surface-container-low border border-outline-variant/60 rounded-xl p-space-md shadow-sm" role="note">
+<div class="flex items-start gap-space-sm">
+<div aria-hidden="true" class="text-schedule shrink-0 mt-0.5">
+<span class="material-symbols-outlined text-[22px]">info</span>
+</div>
+<div class="flex-1">
+<h2 class="text-caption font-body-strong text-text">Aviso de retención automática</h2>
+<p class="text-caption font-caption text-text-muted mt-0.5 leading-relaxed">
+            Las tareas se eliminan automáticamente de forma irreversible a los 30 días de haber sido enviadas a la papelera.
+          </p>
+</div>
+</div>
+</aside>
+<!-- Lista de Tarjetas Eisenhower Descartadas -->
+<section aria-label="Lista de tareas en papelera" class="flex flex-col gap-space-sm">
+<!-- Tarea 1: Cuadrante I (Hacer ahora) -->
+<article class="bg-surface border border-border border-l-4 border-l-do-now rounded-xl p-space-md shadow-sm flex flex-col gap-space-sm transition-all duration-150 hover:shadow-md">
+<div class="flex items-start justify-between gap-space-xs">
+<div class="flex flex-wrap items-center gap-1.5">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold bg-error-container text-do-now tracking-wide">
+              Cuadrante I: Hacer ahora
+            </span>
+<span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium text-white bg-scope-work">
+              Laboral
+            </span>
+</div>
+<!-- Contador de Expiración -->
+<div class="flex items-center gap-1 text-do-now text-caption font-body-strong shrink-0">
+<span class="material-symbols-outlined text-[16px]">schedule</span>
+<span>Expira en 5 días</span>
+</div>
+</div>
+<div>
+<h3 class="text-body font-body-strong text-text leading-snug">
+            Revisar logs de servidor heredado y parches críticos
+          </h3>
+<p class="text-caption font-caption text-text-muted mt-1">
+            Se detectaron anomalías de rendimiento en el clúster de autenticación.
+          </p>
+</div>
+<div class="pt-space-xs border-t border-border/60 flex items-center justify-between gap-space-sm mt-1">
+<button aria-label="Restaurar 'Revisar logs de servidor heredado y parches críticos'" class="inline-flex items-center justify-center gap-1 text-primary hover:bg-surface-container-low px-space-sm py-1.5 rounded-lg text-caption font-body-strong transition-colors focus:ring-2 focus:ring-primary focus:outline-none" type="button">
+<span class="material-symbols-outlined text-[18px]">restore_from_trash</span>
+<span>Restaurar</span>
+</button>
+<button aria-label="Eliminar definitivamente 'Revisar logs de servidor heredado y parches críticos'" class="inline-flex items-center justify-center gap-1 text-error hover:bg-error-container/30 px-space-sm py-1.5 rounded-lg text-caption font-body-strong transition-colors focus:ring-2 focus:ring-error focus:outline-none" type="button">
+<span class="material-symbols-outlined text-[18px]">delete_forever</span>
+<span>Eliminar definitivamente</span>
+</button>
+</div>
+</article>
+<!-- Tarea 2: Cuadrante II (Planificar) -->
+<article class="bg-surface border border-border border-l-4 border-l-schedule rounded-xl p-space-md shadow-sm flex flex-col gap-space-sm transition-all duration-150 hover:shadow-md">
+<div class="flex items-start justify-between gap-space-xs">
+<div class="flex flex-wrap items-center gap-1.5">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold bg-primary-fixed text-schedule tracking-wide">
+              Cuadrante II: Planificar
+            </span>
+<span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium text-white bg-scope-work">
+              Laboral
+            </span>
+</div>
+<div class="flex items-center gap-1 text-text-muted text-caption font-caption shrink-0">
+<span class="material-symbols-outlined text-[16px]">hourglass_empty</span>
+<span>Se eliminará en 12 días</span>
+</div>
+</div>
+<div>
+<h3 class="text-body font-body-strong text-text leading-snug">
+            Actualizar contratos de proveedores Q2
+          </h3>
+<p class="text-caption font-caption text-text-muted mt-1">
+            Revisión de SLA y términos de servicio con equipo jurídico.
+          </p>
+</div>
+<div class="pt-space-xs border-t border-border/60 flex items-center justify-between gap-space-sm mt-1">
+<button class="inline-flex items-center justify-center gap-1 text-primary hover:bg-surface-container-low px-space-sm py-1.5 rounded-lg text-caption font-body-strong transition-colors focus:ring-2 focus:ring-primary focus:outline-none" type="button">
+<span class="material-symbols-outlined text-[18px]">restore_from_trash</span>
+<span>Restaurar</span>
+</button>
+<button class="inline-flex items-center justify-center gap-1 text-error hover:bg-error-container/30 px-space-sm py-1.5 rounded-lg text-caption font-body-strong transition-colors focus:ring-2 focus:ring-error focus:outline-none" type="button">
+<span class="material-symbols-outlined text-[18px]">delete_forever</span>
+<span>Eliminar definitivamente</span>
+</button>
+</div>
+</article>
+<!-- Tarea 3: Cuadrante III (Delegar) -->
+<article class="bg-surface border border-border border-l-4 border-l-delegate rounded-xl p-space-md shadow-sm flex flex-col gap-space-sm transition-all duration-150 hover:shadow-md">
+<div class="flex items-start justify-between gap-space-xs">
+<div class="flex flex-wrap items-center gap-1.5">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold bg-tertiary-fixed text-delegate tracking-wide">
+              Cuadrante III: Delegar
+            </span>
+<span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium text-white bg-scope-personal">
+              Personal
+            </span>
+</div>
+<div class="flex items-center gap-1 text-text-muted text-caption font-caption shrink-0">
+<span class="material-symbols-outlined text-[16px]">hourglass_empty</span>
+<span>Se eliminará en 18 días</span>
+</div>
+</div>
+<div>
+<h3 class="text-body font-body-strong text-text leading-snug">
+            Comprar accesorios de oficina y soportes ergonómicos
+          </h3>
+<p class="text-caption font-caption text-text-muted mt-1">
+            Presupuesto aprobado por administración del hogar.
+          </p>
+</div>
+<div class="pt-space-xs border-t border-border/60 flex items-center justify-between gap-space-sm mt-1">
+<button class="inline-flex items-center justify-center gap-1 text-primary hover:bg-surface-container-low px-space-sm py-1.5 rounded-lg text-caption font-body-strong transition-colors focus:ring-2 focus:ring-primary focus:outline-none" type="button">
+<span class="material-symbols-outlined text-[18px]">restore_from_trash</span>
+<span>Restaurar</span>
+</button>
+<button class="inline-flex items-center justify-center gap-1 text-error hover:bg-error-container/30 px-space-sm py-1.5 rounded-lg text-caption font-body-strong transition-colors focus:ring-2 focus:ring-error focus:outline-none" type="button">
+<span class="material-symbols-outlined text-[18px]">delete_forever</span>
+<span>Eliminar definitivamente</span>
+</button>
+</div>
+</article>
+<!-- Tarea 4: Cuadrante IV (Eliminar) -->
+<article class="bg-surface border border-border border-l-4 border-l-eliminate rounded-xl p-space-md shadow-sm flex flex-col gap-space-sm transition-all duration-150 hover:shadow-md">
+<div class="flex items-start justify-between gap-space-xs">
+<div class="flex flex-wrap items-center gap-1.5">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold bg-surface-container-high text-eliminate tracking-wide">
+              Cuadrante IV: Eliminar
+            </span>
+<span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium text-white bg-scope-work">
+              Laboral
+            </span>
+</div>
+<div class="flex items-center gap-1 text-do-now text-caption font-body-strong shrink-0">
+<span class="material-symbols-outlined text-[16px]">schedule</span>
+<span>Expira en 2 días</span>
+</div>
+</div>
+<div>
+<h3 class="text-body font-body-strong text-text leading-snug">
+            Enviar recordatorio de pago facturas vencidas
+          </h3>
+<p class="text-caption font-caption text-text-muted mt-1">
+            Tarea completada por tesorería central sin necesidad de intervención manual.
+          </p>
+</div>
+<div class="pt-space-xs border-t border-border/60 flex items-center justify-between gap-space-sm mt-1">
+<button class="inline-flex items-center justify-center gap-1 text-primary hover:bg-surface-container-low px-space-sm py-1.5 rounded-lg text-caption font-body-strong transition-colors focus:ring-2 focus:ring-primary focus:outline-none" type="button">
+<span class="material-symbols-outlined text-[18px]">restore_from_trash</span>
+<span>Restaurar</span>
+</button>
+<button class="inline-flex items-center justify-center gap-1 text-error hover:bg-error-container/30 px-space-sm py-1.5 rounded-lg text-caption font-body-strong transition-colors focus:ring-2 focus:ring-error focus:outline-none" type="button">
+<span class="material-symbols-outlined text-[18px]">delete_forever</span>
+<span>Eliminar definitivamente</span>
+</button>
+</div>
+</article>
+</section>
+<!-- Botón Cargar Más Tareas -->
+<div class="pt-space-sm pb- space-sm flex justify-center">
+<button class="w-full py-2.5 px-space-lg bg-surface border border-border hover:bg-surface-container active:scale-[0.99] text-text font-body-strong text-caption rounded-xl shadow-sm flex items-center justify-center gap-2 transition-all" type="button">
+<span class="material-symbols-outlined text-[18px]">expand_more</span>
+<span>Cargar más tareas (2 restantes)</span>
+</button>
+</div>
+</main>
+<!-- Barra de Navegación Inferior Móvil Fija (BottomNavBar) -->
+<nav aria-label="Navegación principal de la aplicación" class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center py-space-sm px-space-md shadow-sm bg-surface">
+<!-- Matriz (Inactivo) -->
+<a class="flex flex-col items-center justify-center text-text-muted font-caption hover:text-primary transition-colors duration-150 active:scale-95 py-1 px-3" href="#">
+<span class="material-symbols-outlined text-[24px]">grid_view</span>
+<span class="text-caption font-caption mt-0.5">Matriz</span>
+</a>
+<!-- Hoy (Inactivo) -->
+<a class="flex flex-col items-center justify-center text-text-muted font-caption hover:text-primary transition-colors duration-150 active:scale-95 py-1 px-3" href="#">
+<span class="material-symbols-outlined text-[24px]">today</span>
+<span class="text-caption font-caption mt-0.5">Hoy</span>
+</a>
+<!-- Historial (Activo por afinidad a tareas archivadas/eliminadas) -->
+<a aria-current="page" class="flex flex-col items-center justify-center text-primary font-body-strong transition-colors duration-150 active:scale-95 py-1 px-3" href="#">
+<span class="material-symbols-outlined text-[24px]" style="font-variation-settings: 'FILL' 1;">history</span>
+<span class="text-caption font-body-strong mt-0.5">Historial</span>
+</a>
+<!-- Ajustes (Inactivo) -->
+<a class="flex flex-col items-center justify-center text-text-muted font-caption hover:text-primary transition-colors duration-150 active:scale-95 py-1 px-3" href="#">
+<span class="material-symbols-outlined text-[24px]">settings</span>
+<span class="text-caption font-caption mt-0.5">Ajustes</span>
+</a>
+</nav>
+<!-- Script interactivo accesible para avisos -->
+<script>
+    function confirmEmptyTrash() {
+      const confirmAction = window.confirm("¿Deseas vaciar la papelera? Todas las tareas eliminadas se perderán de manera definitiva e irreversible.");
+      if (confirmAction) {
+        alert("La papelera ha sido vaciada satisfactoriamente.");
+      }
+    }
+  </script>
+</body></html>

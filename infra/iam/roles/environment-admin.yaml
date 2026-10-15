@@ -1,0 +1,45 @@
+# Custom role mytasksEnvironmentAdmin (MED-001 of security-review-t046.md).
+# Granted by the owner to terraform-<env> in the project of the environment, on top of the
+# predefined roles of T046. It covers only what the environment module creates and the
+# predefined roles do not: the Firestore database and its indexes and TTL, the Identity
+# Platform configuration and the browser API key.
+#
+# What it leaves out on purpose:
+#   datastore.entities.*     no access to the documents (the tasks of the owner)
+#   datastore.databases.delete / bulkDelete / export / import / clone
+#   firebaseauth.users.*     no access to the user accounts
+#   firebaseauth.configs.getSecret   no access to the OAuth client secrets
+#   apikeys.keys.delete
+#   firebase.projects.update   needed to initialise Identity Platform in a project that is not a
+#                              Firebase project yet (InitializeIdentityPlatform calls AddFirebase).
+#                              Left out on purpose: the owner enables Identity Platform by hand once
+#                              per new environment (infra/RUNBOOK.md), and this role only updates
+#                              its configuration.
+title: MyTasks environment administrator
+description: Create and update the Firestore database, indexes, TTL, Identity Platform configuration and web API key of one environment. No access to data, users, secrets or deletion.
+stage: GA
+includedPermissions:
+  - apikeys.keys.create
+  - apikeys.keys.get
+  - apikeys.keys.getKeyString
+  - apikeys.keys.list
+  - apikeys.keys.update
+  - appengine.applications.get
+  - datastore.databases.create
+  - datastore.databases.get
+  - datastore.databases.getMetadata
+  - datastore.databases.list
+  - datastore.databases.update
+  - datastore.locations.get
+  - datastore.locations.list
+  - datastore.operations.get
+  - datastore.operations.list
+  - datastore.schemas.create
+  - datastore.schemas.delete
+  - datastore.schemas.get
+  - datastore.schemas.list
+  - datastore.schemas.update
+  - firebaseauth.configs.create
+  - firebaseauth.configs.get
+  - firebaseauth.configs.update
+  - resourcemanager.projects.get

@@ -1,0 +1,51 @@
+# Environment variables and secrets (Principio III de la constitución:
+# está PROHIBIDO almacenar secretos en el repositorio)
+.env
+.env.*
+!.env.example
+
+# Python (backend)
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.venv/
+venv/
+
+# Node (frontend)
+node_modules/
+dist/
+build/
+coverage/
+
+# Firestore emulator
+*-debug.log
+.firebase/
+
+# Playwright
+playwright-report/
+test-results/
+
+# Editores / SO
+.DS_Store
+.idea/
+.vscode/
+
+# Worktrees aislados de agentes (Claude Code)
+.claude/worktrees/
+
+# exluded at moment, but can be added later if needed
+docs/*
+# excepción: el design system y las pantallas de Stitch de esta feature se
+# versionan (specs/001-eisenhower-task-manager/plan.md § Project Structure).
+# Git no puede reincluir un hijo de un directorio ya excluido, por eso la
+# regla de arriba excluye el contenido de docs/ (docs/*) en vez del propio
+# directorio (docs/).
+!docs/design/
+# Terraform: state and plans never go to git; the lock file (.terraform.lock.hcl) does
+**/.terraform/
+*.tfstate
+*.tfstate.*
+*.tfplan
+tfplan
+crash.log

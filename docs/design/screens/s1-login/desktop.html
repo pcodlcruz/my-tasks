@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+
+<html class="h-full" lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Iniciar sesión - MyTasks</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "error-container": "#ffdad6",
+            "primary-container": "#1d4ed8",
+            "outline-variant": "#c4c5d7",
+            "surface-container": "#ededf9",
+            "primary": "#0037b0",
+            "on-background": "#1a1b23",
+            "on-primary-fixed-variant": "#0039b5",
+            "tertiary": "#7f2500",
+            "surface-container-lowest": "#ffffff",
+            "on-error": "#ffffff",
+            "do-now": "#B91C1C",
+            "primary-fixed": "#dce1ff",
+            "primary-fixed-dim": "#b7c4ff",
+            "on-surface-variant": "#434655",
+            "inverse-surface": "#2e3039",
+            "eliminate": "#475569",
+            "delegate": "#B45309",
+            "background": "#faf8ff",
+            "inverse-primary": "#b7c4ff",
+            "on-secondary-fixed-variant": "#005049",
+            "on-primary-fixed": "#001551",
+            "surface-container-low": "#f3f2fe",
+            "tertiary-fixed-dim": "#ffb59c",
+            "error": "#B91C1C",
+            "on-tertiary-container": "#ffc9b7",
+            "on-secondary-container": "#006f66",
+            "text": "#0F172A",
+            "on-secondary": "#ffffff",
+            "surface-tint": "#2151da",
+            "schedule": "#1D4ED8",
+            "on-error-container": "#93000a",
+            "on-tertiary-fixed-variant": "#832700",
+            "outline": "#747686",
+            "on-tertiary-fixed": "#390c00",
+            "on-tertiary": "#ffffff",
+            "secondary-fixed": "#89f5e7",
+            "scope-personal": "#0D9488",
+            "on-secondary-fixed": "#00201d",
+            "success": "#15803D",
+            "tertiary-container": "#a73400",
+            "surface-variant": "#e2e1ed",
+            "surface-alt": "#F8FAFC",
+            "secondary-fixed-dim": "#6bd8cb",
+            "secondary-container": "#86f2e4",
+            "surface-container-highest": "#e2e1ed",
+            "scope-work": "#7C3AED",
+            "surface-container-high": "#e8e7f3",
+            "secondary": "#006a61",
+            "text-muted": "#475569",
+            "tertiary-fixed": "#ffdbcf",
+            "border": "#CBD5E1",
+            "on-primary-container": "#cad3ff",
+            "inverse-on-surface": "#f0f0fb",
+            "on-primary": "#ffffff",
+            "surface-dim": "#d9d9e5",
+            "surface-bright": "#faf8ff",
+            "on-surface": "#1a1b23",
+            "surface": "#FFFFFF"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.125rem",
+            "lg": "0.25rem",
+            "xl": "0.5rem",
+            "full": "0.75rem"
+          },
+          "spacing": {
+            "space-2xl": "48px",
+            "gutter": "24px",
+            "space-md": "12px",
+            "space-lg": "16px",
+            "space-xs": "4px",
+            "space-xl": "32px",
+            "margin": "24px",
+            "space-sm": "8px"
+          },
+          "fontFamily": {
+            "caption": ["Inter", "sans-serif"],
+            "body-strong": ["Inter", "sans-serif"],
+            "heading": ["Inter", "sans-serif"],
+            "body": ["Inter", "sans-serif"],
+            "display": ["Inter", "sans-serif"]
+          },
+          "fontSize": {
+            "caption": ["13px", { "lineHeight": "18px", "fontWeight": "400" }],
+            "body-strong": ["16px", { "lineHeight": "24px", "fontWeight": "600" }],
+            "heading": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+            "body": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+            "display": ["28px", { "lineHeight": "36px", "fontWeight": "700" }]
+          }
+        }
+      }
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+    .google-btn {
+      height: 40px;
+      border-radius: 4px;
+      border: 1px solid #747775;
+      background-color: #FFFFFF;
+      transition: box-shadow 0.2s ease, background-color 0.15s ease;
+    }
+    .google-btn:hover {
+      box-shadow: 0 1px 3px 1px rgba(60,64,67,.15), 0 1px 2px 0 rgba(60,64,67,.3);
+      background-color: #F8FAFD;
+    }
+    .google-btn:focus-visible {
+      outline: 2px solid #1D4ED8;
+      outline-offset: 2px;
+    }
+  </style>
+</head>
+<body class="h-full bg-surface-alt font-body text-text antialiased flex flex-col justify-between">
+<!-- Header mínimo contextual sin navegación compleja (pantalla transaccional / auth) -->
+<header class="w-full px-space-xl py-space-lg flex items-center justify-between border-b border-border bg-surface">
+<div class="flex items-center space-x-space-sm">
+<div class="w-8 h-8 rounded-lg bg-schedule/10 flex items-center justify-center text-schedule">
+<!-- Icono estilizado cuadrantes matriz Eisenhower -->
+<span class="material-symbols-outlined" data-icon="grid_view" style="font-variation-settings: 'FILL' 1;">grid_view</span>
+</div>
+<span class="font-heading text-heading font-bold text-text">MyTasks</span>
+</div>
+<div class="flex items-center space-x-space-sm">
+<span class="inline-flex items-center gap-1.5 px-space-sm py-1 rounded bg-surface-container text-text-muted text-caption font-caption">
+<span class="w-2 h-2 rounded-full bg-success"></span>
+        v1.0 • Producción
+      </span>
+</div>
+</header>
+<!-- Contenedor Principal: Vista de escritorio con Layout de Showcase (Tarjeta Principal + Panel de Referencia/Estados) -->
+<main class="flex-1 w-full max-w-7xl mx-auto px-space-xl py-space-xl grid grid-cols-1 lg:grid-cols-12 gap-space-xl items-start">
+<!-- Columna Izquierda: Flujo Principal de Autenticación (7 columnas) -->
+<section aria-labelledby="login-heading" class="lg:col-span-7 flex flex-col justify-center items-center py-space-lg">
+<div class="w-full max-w-md bg-surface border border-border rounded-xl p-space-xl shadow-sm">
+<!-- Encabezado de la Tarjeta -->
+<div class="flex flex-col items-center text-center">
+<div class="w-14 h-14 rounded-xl bg-schedule/10 border border-schedule/20 flex items-center justify-center text-schedule mb-space-md shadow-sm">
+<span class="material-symbols-outlined text-3xl" data-icon="grid_view" style="font-variation-settings: 'FILL' 1;">grid_view</span>
+</div>
+<h1 class="font-display text-display text-text font-bold tracking-tight" id="login-heading">MyTasks</h1>
+<p class="font-body text-body text-text-muted mt-space-xs">Organiza tus tareas con la matriz de Eisenhower</p>
+</div>
+<!-- Matriz Simbólica Visual de Ayuda -->
+<div class="my-space-xl p-space-md bg-surface-alt rounded-lg border border-border grid grid-cols-2 gap-2 text-xs">
+<div class="p-2 bg-surface rounded border-l-4 border-do-now flex items-center gap-1.5">
+<span class="font-semibold text-do-now">Q1</span>
+<span class="text-text-muted">Hacer ya</span>
+</div>
+<div class="p-2 bg-surface rounded border-l-4 border-schedule flex items-center gap-1.5">
+<span class="font-semibold text-schedule">Q2</span>
+<span class="text-text-muted">Planificar</span>
+</div>
+<div class="p-2 bg-surface rounded border-l-4 border-delegate flex items-center gap-1.5">
+<span class="font-semibold text-delegate">Q3</span>
+<span class="text-text-muted">Delegar</span>
+</div>
+<div class="p-2 bg-surface rounded border-l-4 border-eliminate flex items-center gap-1.5">
+<span class="font-semibold text-eliminate">Q4</span>
+<span class="text-text-muted">Eliminar</span>
+</div>
+</div>
+<!-- Acción de Login: Botón Oficial Google -->
+<div class="space-y-space-md">
+<button aria-label="Iniciar sesión con Google" class="google-btn w-full flex items-center justify-center px-4" type="button">
+<!-- Icono Oficial Google SVG -->
+<svg aria-hidden="true" class="w-[18px] h-[18px] mr-3 shrink-0" viewbox="0 0 18 18" xmlns="http://www.w3.org/2000/svg">
+<path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.616z" fill="#4285F4"></path>
+<path d="M9 18c2.43 0 4.467-.806 5.956-2.184l-2.908-2.258c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332C2.438 15.983 5.482 18 9 18z" fill="#34A853"></path>
+<path d="M3.964 10.707c-.18-.54-.282-1.117-.282-1.707s.102-1.167.282-1.707V4.961H.957C.347 6.175 0 7.55 0 9s.347 2.825.957 4.039l3.007-2.332z" fill="#FBBC05"></path>
+<path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0 5.482 0 2.438 2.017.957 4.961L3.964 7.293C4.672 5.166 6.656 3.58 9 3.58z" fill="#EA4335"></path>
+</svg>
+<span style="font-family: 'Roboto', 'Inter', sans-serif; font-size: 14px; font-weight: 500; color: #1F1F1F;">
+              Iniciar sesión con Google
+            </span>
+</button>
+<!-- Texto de Ayuda / Garantía de Privacidad -->
+<p class="font-caption text-caption text-text-muted text-center leading-normal px-2">
+            La primera vez, tu cuenta se crea automáticamente. No usamos contraseñas.
+          </p>
+</div>
+<!-- Garantía de seguridad mínima de confianza -->
+<div class="mt-space-xl pt-space-md border-t border-border flex items-center justify-center gap-2 text-text-muted font-caption text-caption">
+<span class="material-symbols-outlined text-sm text-success" data-icon="lock" style="font-variation-settings: 'FILL' 1;">lock</span>
+<span>Autenticación OAuth 2.0 segura y cifrada</span>
+</div>
+</div>
+</section>
+<!-- Columna Derecha: Panel de Referencia / QA UI States (5 columnas) -->
+<aside aria-label="Estados de referencia de interfaz" class="lg:col-span-5 bg-surface border border-border rounded-xl p-space-lg shadow-sm">
+<div class="border-b border-border pb-space-sm mb-space-md flex items-center justify-between">
+<div>
+<span class="font-caption text-caption font-semibold uppercase tracking-wider text-schedule">Documentación de Componente</span>
+<h2 class="font-heading text-heading text-text">Estados de referencia / UI States</h2>
+</div>
+<span class="px-2 py-0.5 rounded bg-surface-container font-caption text-caption text-text-muted border border-border">WCAG 2.1 AA</span>
+</div>
+<p class="font-caption text-caption text-text-muted mb-space-lg">
+        Especificación técnica de comportamientos asíncronos y contingencias para la autenticación única con Google.
+      </p>
+<div class="space-y-space-lg">
+<!-- Estado 1: Loading State -->
+<div class="p-space-md bg-surface-alt rounded-lg border border-border space-y-space-sm">
+<div class="flex items-center justify-between">
+<span class="font-body-strong text-caption text-text flex items-center gap-1.5">
+<span class="w-2 h-2 rounded-full bg-primary-container"></span>
+              Estado de Carga (Loading state)
+            </span>
+<span class="font-caption text-caption text-text-muted">aria-busy="true"</span>
+</div>
+<!-- Botón de carga no interactivo -->
+<button aria-label="Cargando" class="google-btn w-full flex items-center justify-center px-4 opacity-60 cursor-not-allowed select-none bg-surface" disabled="" type="button">
+<!-- Spinner accesible con animación CSS Tailwind -->
+<svg class="animate-spin -ml-1 mr-3 h-4 w-4 text-schedule" fill="none" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+<path class="opacity-75" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" fill="currentColor"></path>
+</svg>
+<span style="font-family: 'Roboto', 'Inter', sans-serif; font-size: 14px; font-weight: 500; color: #1F1F1F;">
+              Iniciando sesión...
+            </span>
+</button>
+<p class="font-caption text-caption text-text-muted">
+            Transición tras clic: Deshabilita pulsaciones dobles, oscurece al 60% e indica espera con aria-label="Cargando".
+          </p>
+</div>
+<!-- Estado 2: Error State -->
+<div class="p-space-md bg-surface-alt rounded-lg border border-border space-y-space-sm">
+<div class="flex items-center justify-between">
+<span class="font-body-strong text-caption text-text flex items-center gap-1.5">
+<span class="w-2 h-2 rounded-full bg-error"></span>
+              Estado de Error (Error state)
+            </span>
+<span class="font-caption text-caption text-error font-medium">Contraste: 4.53:1</span>
+</div>
+<!-- Banner de error formalizado con tokens -->
+<div class="w-full p-space-sm rounded border border-do-now/30 bg-[#FEF2F2] flex items-start gap-space-sm text-do-now shadow-sm" role="alert">
+<span class="material-symbols-outlined text-lg shrink-0 mt-0.5" data-icon="error" style="font-variation-settings: 'FILL' 1;">error</span>
+<div class="flex-1 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1">
+<span class="font-caption text-caption font-medium">No se pudo iniciar sesión.</span>
+<button class="underline font-body-strong text-caption text-do-now hover:text-red-900 transition-colors self-start sm:self-auto focus:outline-none focus:ring-1 focus:ring-do-now rounded" type="button">
+                Reintentar
+              </button>
+</div>
+</div>
+<p class="font-caption text-caption text-text-muted">
+            Desencadenado por rechazo de ventana OAuth, caída de conexión o token revocado.
+          </p>
+</div>
+<!-- Especificaciones de Token y Accesibilidad -->
+<div class="p-space-sm rounded bg-surface border border-border text-caption text-text-muted">
+<span class="font-body-strong text-text block mb-1">Criterios de conformidad:</span>
+<ul class="list-disc list-inside space-y-1">
+<li>Google Identity Branding Guidelines (Mayo 2023)</li>
+<li>WCAG 2.1 AA contraste texto regular &gt; 4.5:1</li>
+<li>Navegación nativa por teclado con <code class="bg-surface-container px-1 py-0.5 rounded text-text">Tab</code> y anillo visible</li>
+</ul>
+</div>
+</div>
+</aside>
+</main>
+<!-- Pie de página minimalista -->
+<footer class="w-full py-space-md px-space-xl border-t border-border bg-surface text-center">
+<p class="font-caption text-caption text-text-muted">
+      © 2025 MyTasks. Enfoque estructurado con la matriz de Dwight D. Eisenhower.
+    </p>
+</footer>
+</body></html>
