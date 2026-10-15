@@ -6,6 +6,8 @@
 #    staging is recognised as the same artifact when it reaches main (FR-006).
 # 3. Staging builds and publishes an immutable image if it is missing. Production only promotes
 #    the digest that carries `validated-<hash>`; without it the job fails before touching anything.
+#    Whatever image is used, new or existing, must carry the provenance labels of this pipeline
+#    for that component and hash (image-provenance.sh); otherwise the job fails before deploying.
 # 4. A revision with no traffic and a tag is deployed per service, smoke-tested through its tag
 #    URL, and only then receives traffic: the API first, the web after. If the web fails, the API
 #    goes back to its previous revision.
@@ -88,6 +90,14 @@ jobs:
         with:
           workload_identity_provider: ${{ env.WIF_PROVIDER }}
           service_account: ${{ env.DEPLOYER }}
+
+      # Needed to build and push (staging) and to read the labels of every image before it is used
+      # (both environments, "Check the provenance").
+      - name: Sign in to the registry
+        run: |
+          set -euo pipefail
+          gcloud auth print-access-token \
+            | docker login --username oauth2accesstoken --password-stdin "${REGISTRY%%/*}"
 
       # Looks the images up before anything else is touched. In production a component without
       # `validated-<hash>` stops the job here, naming the component and the hash.
@@ -197,33 +207,42 @@ jobs:
 
       # --- Build (staging only, only when the image is missing) ---
 
-      - name: Sign in to the registry
-        if: steps.images.outputs.api_build == 'true' || steps.images.outputs.web_build == 'true'
-        run: |
-          set -euo pipefail
-          gcloud auth print-access-token \
-            | docker login --username oauth2accesstoken --password-stdin "${REGISTRY%%/*}"
-
       - uses: buildpacks/github-actions/setup-pack@af8c06ccd592e27001cbf78083dcc9b47aa6652a # v6.1.1
         if: steps.images.outputs.api_build == 'true'
         with:
           pack-version: ${{ env.PACK_VERSION }}
 
+      # An image is first built under a temporary tag, unique per run and attempt, and only then
+      # published as `<hash>` with its provenance labels (image-provenance.sh). So `<hash>` is
+      # never an unlabelled image that this pipeline built. The temporary tags are not removed
+      # (they do not carry `validated-` and production never uses them).
       # The builder is pinned by digest in backend/project.toml, which is part of the hash.
       - name: Build and publish the API image
         if: steps.images.outputs.api_build == 'true'
         env:
           API_HASH: ${{ steps.version.outputs.api_hash }}
-        run: pack build "$REGISTRY/mytasks-api:$API_HASH" --path backend --trust-builder --publish
+          COMMIT: ${{ github.sha }}
+          RUN_ID: ${{ github.run_id }}
+          RUN_ATTEMPT: ${{ github.run_attempt }}
+        run: |
+          set -euo pipefail
+          build_ref="$REGISTRY/mytasks-api:build-$API_HASH-$RUN_ID-$RUN_ATTEMPT"
+          pack build "$build_ref" --path backend --trust-builder --publish
+          .github/scripts/image-provenance.sh stamp api "$API_HASH" "$build_ref" "$REGISTRY/mytasks-api:$API_HASH"
 
       - name: Build and publish the web image
         if: steps.images.outputs.web_build == 'true'
         env:
           WEB_HASH: ${{ steps.version.outputs.web_hash }}
+          COMMIT: ${{ github.sha }}
+          RUN_ID: ${{ github.run_id }}
+          RUN_ATTEMPT: ${{ github.run_attempt }}
         run: |
           set -euo pipefail
-          docker build --tag "$REGISTRY/mytasks-web:$WEB_HASH" frontend
-          docker push "$REGISTRY/mytasks-web:$WEB_HASH"
+          build_ref="$REGISTRY/mytasks-web:build-$WEB_HASH-$RUN_ID-$RUN_ATTEMPT"
+          docker build --tag "$build_ref" frontend
+          docker push "$build_ref"
+          .github/scripts/image-provenance.sh stamp web "$WEB_HASH" "$build_ref" "$REGISTRY/mytasks-web:$WEB_HASH"
 
       # Deployments use the digest, never the tag, so what is deployed is exactly what was tested.
       - name: Resolve the digests
@@ -248,6 +267,25 @@ jobs:
               exit 1
             fi
             echo "${component}_digest=$digest" >> "$GITHUB_OUTPUT"
+          done
+
+      # MED-001 of the phase 4 review: an image that already exists is used (staging) or promoted
+      # (production) only if its labels say this pipeline built it from this component's tree.
+      # It is checked by digest, the same reference that is deployed and that gets
+      # `validated-<hash>`, so nothing can change between the check and its use.
+      - name: Check the provenance
+        env:
+          API_HASH: ${{ steps.version.outputs.api_hash }}
+          WEB_HASH: ${{ steps.version.outputs.web_hash }}
+          API_DIGEST: ${{ steps.digests.outputs.api_digest }}
+          WEB_DIGEST: ${{ steps.digests.outputs.web_digest }}
+        run: |
+          set -euo pipefail
+          for component in api web; do
+            hash_var="${component^^}_HASH"
+            digest_var="${component^^}_DIGEST"
+            .github/scripts/image-provenance.sh verify "$component" "${!hash_var}" \
+              "$REGISTRY/mytasks-$component@${!digest_var}"
           done
 
       # --- Revisions without traffic (T071) ---

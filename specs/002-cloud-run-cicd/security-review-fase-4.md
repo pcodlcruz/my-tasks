@@ -47,6 +47,8 @@ Registrar la procedencia al construir (etiquetas o anotaciones de la imagen con 
 - Skill/agente: ningún skill cubre GitHub Actions (decisión previa del propietario para `infra.yml`); a mano, o `mytasks-google-cloud-architect` si se quiere un diseño de firma de artefactos primero.
 - Tipo de cambio: De implementación (workflow) y, si se firma, arquitectónico.
 
+**Estado (2026-10-15): corregido en la rama `feature/002-cloud-run-cicd-fase-5-med-001`** (opción A del propietario). `deploy.yml` construye con una etiqueta temporal y `image-provenance.sh stamp` republica `<hash>` con las etiquetas de procedencia; el paso «Check the provenance» las exige por *digest* antes de crear revisiones o añadir `validated-<hash>`, en staging y en producción. Test con un `docker` falso (26 casos, verificado contra una mutación). **Riesgo residual aceptado:** las etiquetas no protegen frente a una identidad con escritura en el registro (`deployer-staging`); lo cubriría una atestación firmada (opción C, backlog). Se cambia un comentario en `backend/project.toml` y `frontend/Dockerfile` a propósito: las imágenes ya publicadas en staging no llevan etiquetas y son inmutables, así que el nuevo hash fuerza una reconstrucción. Sin verificar contra Artifact Registry real hasta el primer despliegue (`docker buildx imagetools inspect --format '{{json .Image}}'` y `docker build --provenance=false`).
+
 ---
 
 ### [LOW-001] El contrato afirma que `deployer-*` no puede tocar los datos, pero puede ejecutar código con la identidad que sí puede

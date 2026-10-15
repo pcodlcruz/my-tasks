@@ -8,6 +8,9 @@
 #
 # Base images are pinned by digest (Principio III). To bump them, pull the new tag, copy
 # its digest here and let the pipeline rebuild: the Dockerfile is part of the tree hash.
+#
+# deploy.yml publishes this image with provenance labels (image-provenance.sh); they are added
+# on top of the built image, so nothing about them belongs in this file.
 
 # node:22-alpine
 FROM node@sha256:0a7108bf6c7bf5de370ffb1a3ed6be93d405b43ff159f681a8d18c0e2bc2e402 AS build

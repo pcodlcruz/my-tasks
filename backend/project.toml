@@ -6,6 +6,9 @@
 # Pinned by digest, never `latest` (Principio III). To bump it:
 #   docker pull gcr.io/buildpacks/builder:google-24   # copy the new digest below
 # The Python version is pinned separately, in backend/.python-version.
+#
+# This image is published by deploy.yml with provenance labels (image-provenance.sh), which
+# is why `pack build` output is re-stamped there: pack has no `--label`.
 [_]
 schema-version = "0.2"
 id = "mytasks-api"
