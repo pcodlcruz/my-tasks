@@ -17,6 +17,7 @@ includedPermissions:
   - iam.workloadIdentityPoolProviders.get
   - iam.workloadIdentityPoolProviders.list
   - iam.workloadIdentityPools.get
+  - iam.workloadIdentityPools.getAttestationRules
   - iam.workloadIdentityPools.list
   - storage.buckets.get
   - storage.buckets.getIamPolicy

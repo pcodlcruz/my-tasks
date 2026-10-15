@@ -85,4 +85,14 @@ Desde la raíz del repositorio, con tu cuenta personal:
 
 3. Avísame y lo verifico en solo lectura, como hice en staging.
 
+### Corrección (2026-10-15): permiso que faltaba en `mytasksPlatformPlanReader`
+
+La vista previa de `platform` en la PR #41 falló con `403 iam.workloadIdentityPools.getAttestationRules`: el proveedor de Terraform lee las reglas de atestación del *pool* y el rol no incluía ese permiso (el rol predefinido `roles/iam.workloadIdentityPoolViewer` sí lo tiene). Está añadido en `infra/iam/roles/platform-plan-reader.yaml`. Los roles personalizados no se actualizan solos al cambiar el fichero; ejecuta una vez, con tu cuenta (no hay que volver a conceder el rol):
+
+```
+gcloud iam roles update mytasksPlatformPlanReader --project=pdlco-mytasks --file=infra/iam/roles/platform-plan-reader.yaml
+```
+
+La identidad de `apply` no se ve afectada: `terraform-production` tiene `roles/iam.workloadIdentityPoolAdmin`.
+
 **Identity Platform de producción no hace falta habilitarlo**: ya lo está desde el 2025-12-03, con el proveedor Google. La raíz de producción lo adopta con `import` (en staging hubo que habilitarlo a mano porque el proyecto aún no era Firebase). Lo que sí conviene que mires en el plan es la lista de **dominios autorizados**: Terraform la fija a los dominios por defecto del proyecto y a la web de producción, de modo que cualquier otro que hayas añadido a mano en estos meses (por ejemplo `localhost`) desaparece.
