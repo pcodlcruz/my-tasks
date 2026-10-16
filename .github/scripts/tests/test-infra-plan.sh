@@ -128,6 +128,7 @@ check "changes: the root is pending and has a digest" '[ "$code" -eq 0 ] && [ "$
 plan_file staging 1 "Refreshing state... [id=a]"
 FAKE_STATE=exists run_plan --read-only envs/staging
 check "a failed plan fails the job" '[ "$code" -eq 1 ]'
+check "a failed plan leaves the cause as an annotation" 'grep -q "^::error::Plan of staging failed.*Error: something went wrong" <<< "$output"'
 
 FAKE_INIT_FAIL=staging FAKE_STATE=exists run_plan --read-only envs/staging
 check "a failed init fails the job" '[ "$code" -eq 1 ]'
