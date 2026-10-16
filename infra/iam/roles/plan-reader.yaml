@@ -1,5 +1,6 @@
 # Custom role mytasksPlanReader (MED-001 of security-review-t046.md).
-# Granted by the owner to terraform-plan-<env> in the project of the environment. It lets
+# Granted by the owner to terraform-plan-<env> in the project of the environment, and since
+# 2026-10-16 also to terraform-production (its apply plans the platform root; T081). It lets
 # `terraform plan` refresh what the environment module manages and nothing else.
 #
 # Why not roles/viewer: the basic Viewer role includes datastore.entities.get (it reads
