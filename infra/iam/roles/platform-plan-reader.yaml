@@ -3,6 +3,8 @@
 # with mytasksPlanReader. It adds the reads the platform root needs: the federation, the image
 # registry and the state bucket. Staging has no platform resources, so terraform-plan-staging
 # does not get it.
+# Also granted to terraform-production (with mytasksPlanReader): its apply plans the platform
+# root again, and without the bucket and project policy reads that plan fails.
 #
 # What it leaves out on purpose:
 #   artifactregistry.repositories.downloadArtifacts   no access to the images

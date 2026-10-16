@@ -131,6 +131,9 @@ EOF
       else
         result="failed"
         status=1
+        # The end of the output is also an annotation of the check: the summary is easy to miss
+        # and the raw log only has the exit code. A plan holds no secrets (research R8).
+        echo "::error::Plan of $name failed. End of the output:%0A$(tail -n 15 "$out" | awk 'BEGIN { ORS = "%0A" } { print }')"
       fi
       ;;
   esac
