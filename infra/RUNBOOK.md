@@ -490,6 +490,6 @@ Crear y conceder los roles personalizados en `pdlco-mytasks` (`specs/002-cloud-r
 
 1. Crear la release (`develop` → `release/*` → `main`), lo que despliega esa versión también en staging.
 2. Fusionar en `main`. Se lanzan `infra` y `deploy-production`.
-3. `infra`: leer `plan-production` (cubre `platform` y `envs/production`) y aprobar el `apply`. La primera vez ejecuta las importaciones de la plataforma. **En el plan, mirar sobre todo los dominios autorizados de Identity Platform.**
+3. `infra`: leer `plan-production` (solo `envs/production`) y aprobar el `apply`. **En el plan, mirar sobre todo los dominios autorizados de Identity Platform.** `platform` ya no se aplica desde el pipeline: `terraform-production` no puede leerlo entero (ni el bucket de estado ni las auditorías del proyecto, a propósito) y el `apply` del 2026-10-15 falló por eso, sin ningún `Error:` en el log (el detalle de cada plan va al resumen del job). `plan-platform` solo lo previsualiza con `terraform-plan-production`; sus importaciones se ejecutarán cuando haya un camino de aplicación aprobado (T058/T059).
 4. `deploy-production` falla de forma esperada si los servicios aún no existen (como pasó en staging); relanzarlo tras el `apply`. Exige que staging haya validado **exactamente** el mismo contenido: el hash de árbol de `backend/` y de `frontend/` en `main` debe tener su `validated-<hash>`.
 5. Comprobar el escenario 6 del quickstart: mismo *digest* que staging, `/health` con la misma versión, `/config.js` apuntando a la API de producción.
