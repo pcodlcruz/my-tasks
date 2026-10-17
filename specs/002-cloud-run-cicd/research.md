@@ -285,10 +285,31 @@ confirmar se marca como *a verificar en la implementación*.
 - **Rationale**: uso personal. Según la documentación: la capa gratuita de Cloud Run incluye
   2 millones de solicitudes, 180 000 vCPU-segundos y 360 000 GiB-segundos al mes; con
   instancias mínimas 0 no se cobra sin tráfico, y con mínimo 1 se cobra el ciclo de vida completo
-  (más barato en reposo). Coste estimado ≈ 0–5 USD/mes por entorno. **No verificado** con la
-  documentación consultada: precio y capa gratuita de Artifact Registry, de Firestore y de
-  Identity Platform; se espera que sean marginales para este volumen y deben confirmarse antes
-  de fijar el presupuesto (Fase 6).
+  (más barato en reposo). Coste estimado ≈ 0–5 USD/mes por entorno.
+- **Confirmado en la Fase 6 (T086, 2026-10-17)** con el MCP de documentación de Google:
+  - **Firestore** (edición Standard): capa gratuita diaria de 1 GiB almacenados, 50 000 lecturas,
+    20 000 escrituras y 20 000 borrados de documentos y 10 GiB/mes de salida; se aplica a **una**
+    base de datos por proyecto. Fuera de la capa: 0,30 USD por millón de lecturas, 0,90 USD por
+    millón de escrituras y 0,10 USD por millón de borrados (precios de `us-central1`; el de la
+    región usada puede diferir). La **recuperación a un punto en el tiempo (PITR)** no tiene capa
+    gratuita (0,20 USD por GiB-mes; activada solo en producción, LOW-003 de la fase 4).
+    Fuente: `firebase.google.com/docs/firestore/pricing` y `…/enterprise/pricing`.
+  - **Identity Platform**: con inicio de sesión de Google (nivel 1) la capa gratuita es de 50 000
+    usuarios activos al mes con facturación activada (3 000 diarios sin ella); por encima,
+    0,0025–0,0055 USD por usuario. Fuente: `firebase.google.com/docs/auth` y
+    `docs.cloud.google.com/identity-platform/quotas`.
+  - **Artifact Registry**: los primeros 0,5 GB al mes sin coste y 0,10 USD por GB-mes por encima.
+    **Salvedad:** su página propia de precios no está en el corpus consultado; la cifra procede
+    de las páginas de Firebase que la citan (`firebase.google.com/docs/app-hosting/costs` y
+    `…/functions/faq-and-troubleshooting`). Comprobarla en la consola de facturación antes de
+    fiar el importe.
+  - **Conclusión:** para uso personal los tres son marginales; el coste dominante es Cloud Run
+    (0–5 USD/mes por entorno) más el almacenamiento de imágenes si las etiquetas `build-*` se
+    acumulan (limpieza en el backlog).
+- **Presupuestos propuestos (FR-026, pendientes de ratificar por el propietario en T085):**
+  10 USD/mes en `pdlco-mytasks-stg` y 15 USD/mes en `pdlco-mytasks` (incluye la plataforma y el
+  PITR), con alertas al 50, 90 y 100 %. Son márgenes de aviso sobre el coste esperado, no un
+  tope: un presupuesto de Google Cloud avisa pero no detiene el gasto.
 - **Trade-off**: con mínimo 0 el primer acceso tras un periodo de inactividad sufre arranque en
   frío (~1–2 s según la guía de selección). Aceptado para uso personal; si molesta, subir a 1 en
   producción tiene coste fijo pequeño.
@@ -498,7 +519,8 @@ Consultas al MCP `google-developer-knowledge` (2026-09-29):
 - Que el claim `environment` de GitHub llegue mapeable en el proveedor de identidad y que el
   `sub` de un `pull_request` se pueda acotar al repositorio propio (R3).
 - Si `gcloud-mcp` bloquea por sí mismo el cambio de identidad (R12, R-6).
-- Precios de Artifact Registry, Firestore e Identity Platform (R11).
+- Precio propio de Artifact Registry (R11): confirmado solo de forma indirecta (ver R11). Los de
+  Firestore e Identity Platform se confirmaron en la Fase 6 (T086).
 - Buildpacks (R13): dependencias de producción desde `uv.lock`, fijación de la versión de Python,
   usuario sin privilegios de la imagen final, repetibilidad de las construcciones y cualquier
   soporte de SPA estática en el buildpack de Node.

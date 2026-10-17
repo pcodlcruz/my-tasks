@@ -1,8 +1,9 @@
 # Runbook de operación
 
-Procedimientos operativos de la infraestructura y del acceso del agente a Google Cloud. Se irá
-completando por fases (feature `002-cloud-run-cicd`); esta versión cubre la identidad aislada del
-agente (Fase 1, FR-022 a FR-025).
+Procedimientos operativos de la infraestructura y del acceso del agente a Google Cloud (feature
+`002-cloud-run-cicd`). **Si llegas sin contexto, empieza por la [sección 11](#11-guía-operativa-t088-fr-021)**
+(entornos y URL, flujo de despliegue, recuperación de fallos, retirada de un entorno); las
+secciones 1 a 10 son el detalle y el historial de cada decisión.
 
 Contrato de diseño: [`specs/002-cloud-run-cicd/contracts/agent-identity.md`](../specs/002-cloud-run-cicd/contracts/agent-identity.md).
 
@@ -493,3 +494,67 @@ Crear y conceder los roles personalizados en `pdlco-mytasks` (`specs/002-cloud-r
 3. `infra`: leer `plan-production` (cubre `platform` y `envs/production`) y aprobar el `apply`. La primera vez ejecuta las importaciones de la plataforma. **En el plan, mirar sobre todo los dominios autorizados de Identity Platform.**
 4. `deploy-production` falla de forma esperada si los servicios aún no existen (como pasó en staging); relanzarlo tras el `apply`. Exige que staging haya validado **exactamente** el mismo contenido: el hash de árbol de `backend/` y de `frontend/` en `main` debe tener su `validated-<hash>`.
 5. Comprobar el escenario 6 del quickstart: mismo *digest* que staging, `/health` con la misma versión, `/config.js` apuntando a la API de producción.
+
+## 11. Guía operativa (T088, FR-021)
+
+Resumen de operación para quien llega sin contexto. El detalle y la historia de cada decisión están en las secciones 1 a 10; esta guía solo las ordena.
+
+### Entornos y URL
+
+| | Staging | Producción |
+|---|---|---|
+| Proyecto | `pdlco-mytasks-stg` (nº 838389521553) | `pdlco-mytasks` (nº 2195266360) |
+| Región | `europe-southwest1` | `europe-southwest1` |
+| Web | `https://mytasks-web-838389521553.europe-southwest1.run.app` | `https://mytasks-web-2195266360.europe-southwest1.run.app` |
+| API | `https://mytasks-api-838389521553.europe-southwest1.run.app` | `https://mytasks-api-2195266360.europe-southwest1.run.app` |
+| Rama que lo despliega | `develop` (también `release/*` y `hotfix/*`) | `main` |
+| Identidad del despliegue | `deployer-staging` | `deployer-production` |
+
+Usa siempre la URL determinista de la tabla, no el `status.url` de Cloud Run (sección 9, punto 4). La versión que sirve cada entorno se lee sin entrar en la infraestructura: `GET /health` de la API (`version`), `APP_VERSION` en `GET /config.js` de la web y la pestaña *Environments* de GitHub.
+
+### Flujo de despliegue
+
+1. Una PR a `develop` pasa los checks requeridos por los *rulesets* (CI y, si toca `infra/`, `fmt`, `validate` y el plan de solo lectura de `infra.yml`).
+2. Al fusionar en `develop`, `deploy-staging` calcula el hash de árbol de `backend/` y `frontend/`, reutiliza la imagen si ya existe o la construye, comprueba su procedencia, crea las revisiones **sin tráfico**, pasa el humo por la URL con etiqueta, mueve el tráfico (primero la API, después la web) y marca las imágenes como `validated-<hash>`. Si cambia `infra/`, `infra` aplica `staging` tras aprobación del propietario.
+3. La release sale de `develop` como rama `release/*` nueva y se abre una PR a `main` (`release/*` no admite `push` directo).
+4. Al fusionar en `main`, `deploy-production` **no construye**: promueve el mismo *digest* que validó staging y falla antes de tocar nada si falta `validated-<hash>` de algún componente. `infra` aplica `production` y `platform` tras aprobación del *environment* `infra-production`.
+5. Cada despliegue deja un resumen en la ejecución con el resultado, las versiones y las URL.
+
+Orden en un entorno nuevo: `apply` de `infra` primero (crea los servicios) y `deploy` después; el primer `deploy` falla de forma esperada si los servicios no existen (sección 9, punto 1).
+
+### Recuperación de un despliegue fallido
+
+| Dónde falla | Qué queda | Qué hacer |
+|---|---|---|
+| Antes de «Deploy the revisions without traffic» (variables, procedencia, imagen) | Nada cambia | Leer el error del paso (nombra el servicio, el componente o el hash), corregir y relanzar |
+| En «Smoke test» | Revisiones nuevas sin tráfico; el tráfico sigue en la anterior | Las etiquetas de revisión se retiran solas. Corregir y volver a fusionar; el hash nuevo reconstruye |
+| En «Move the traffic» de la web | La API vuelve sola a su revisión anterior (el paso lo registra con `::error::`) | Comprobar con `GET /health` que la API sirve la versión previa y relanzar |
+| Despliegue correcto pero defectuoso | La versión mala sirve tráfico | **Revertir el commit** y dejar que el pipeline despliegue el contenido anterior: en staging, PR a `develop`; en producción, el contenido revertido tiene que haber pasado antes por staging (`validated-<hash>`), así que la reversión también viaja `develop` → release → `main`. Un hash que ya se validó una vez se reutiliza sin reconstruir |
+| «Versión no validada en staging» en producción | Producción sin cambios | Es el comportamiento esperado: dejar que staging despliegue y valide ese contenido y relanzar |
+| `infra` falla en el plan | Sin `apply` | El detalle del plan está en el **resumen de la ejecución** (el log solo da `exit code 1`); buscar las líneas `Error:` |
+
+Un run de `deploy-staging` en «waiting» bloquea a los siguientes: aprobarlo o cancelarlo en cuanto aparezca, y no aprobar nunca el de un commit anterior (sección 9, punto 2). **No hay procedimiento de reversión manual del tráfico**: los despliegues los hace solo el pipeline (Principio VI) y el agente no puede crear revisiones (T082).
+
+### Arranque único y permisos temporales
+
+El arranque (estado, federación, cuentas del pipeline, repositorio) se hizo una vez por el MCP y ahora lo declara `infra/platform/`: sección 8. Los permisos temporales de `mytasks-ai-agent` y su retirada (T060, caducan el 2026-10-30 23:00 UTC) están en la sección 4. Los roles personalizados que concede el propietario, en `infra/iam/roles/` y `guia-propietario-med-001.md`.
+
+### Proveedor de Google en Identity Platform (R-2)
+
+Terraform no puede inicializar Identity Platform en un proyecto que no es Firebase (sección 9, «Paso previo al primer `apply`»). Staging lo activó el propietario en la consola de Firebase (T068, sección 9). Producción ya lo tenía desde el 2025-12-03 y la raíz lo adopta con `import` (sección 10). Si el inicio de sesión con Google falla tras un `apply`, comprobar primero los **dominios autorizados** y los orígenes de JavaScript del cliente OAuth. Falta confirmar con un inicio de sesión real en producción (T078).
+
+### Rotación y revocación de la clave del agente
+
+Rotación cada 90 días: sección 2. Revocación inmediata: sección 3. Comprobaciones de la identidad aislada: sección 1.
+
+### Retirar un entorno (levantar la protección contra borrado)
+
+**Procedimiento no probado todavía** (lo ejercita T089 en un proyecto desechable). Un entorno tiene datos reales, así que retirarlo es siempre una decisión explícita del propietario. Las protecciones están en el código (`infra/README.md`, «Protección contra borrado») y hay que levantarlas **todas, en una PR y con su `apply`**, antes de que un plan pueda destruir nada:
+
+1. Quitar `prevent_destroy` de la base de Firestore del módulo (`infra/modules/environment/main.tf`) y poner `delete_protection_state = "DELETE_PROTECTION_DISABLED"`. Terraform no admite una variable en `lifecycle`, así que es un cambio de código.
+2. Poner `deletion_protection = false` en los dos servicios de Cloud Run (`infra/modules/environment/cloud_run.tf`).
+3. Aplicar esa PR por `infra` y leer el plan: solo debe cambiar las protecciones.
+4. En una segunda PR, retirar la raíz del entorno (`infra/envs/<entorno>/`). `infra.yml` detecta las raíces por la existencia de su `main.tf`, así que puede que haga falta ajustar el workflow y el estado remoto antes de que un plan muestre la destrucción: comprobarlo al preparar la PR y leer ese plan antes de aprobar.
+5. La base de Firestore tiene `deletion_policy = "ABANDON"`: Terraform **la deja sin borrar** aunque destruya el recurso. Borrar los datos es un paso manual aparte, decidido por el propietario tras comprobar que no hace falta ninguna tarea.
+
+`infra/platform/` (bucket de estado, repositorio, pool y proveedor) no se retira con un entorno: lo comparten staging y producción, y un pool borrado bloquea su nombre 30 días.
