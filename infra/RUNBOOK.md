@@ -362,7 +362,7 @@ Decisiones que conviene conocer:
 
 ### Roles personalizados (MED-001 de `security-review-t046.md`)
 
-Definidos en `infra/iam/roles/` y concedidos por el propietario según [guia-propietario-med-001.md](../specs/002-cloud-run-cicd/guia-propietario-med-001.md): `mytasksEnvironmentAdmin` a `terraform-staging`, `mytasksPlanReader` a `terraform-plan-staging` (y, en la Fase 5, los equivalentes de producción más `mytasksPlatformPlanReader`). `roles/viewer` se descartó: incluye `datastore.entities.get` y `firebaseauth.users.get` (comprobado en la documentación de IAM), es decir, leería documentos y cuentas de usuario desde un `plan` que corre en PR de un repositorio público.
+Definidos en `infra/iam/roles/` y concedidos por el propietario según [guia-propietario-med-001.md](../specs/002-cloud-run-cicd/guia-propietario-med-001.md): `mytasksEnvironmentAdmin` a `terraform-staging`, `mytasksPlanReader` a `terraform-plan-staging` (y, en la Fase 5, los equivalentes de producción más `mytasksPlatformPlanReader`). **Desde el 2026-10-16 (T081) `terraform-production` también recibe `mytasksPlanReader` y `mytasksPlatformPlanReader`** (solo lectura): su `apply` planifica `platform` y sin las lecturas del bucket de estado y de la política del proyecto el plan fallaba ([guía](../specs/002-cloud-run-cicd/guia-propietario-t081-platform.md), [revisión](../specs/002-cloud-run-cicd/security-review-t081.md)). `roles/viewer` se descartó: incluye `datastore.entities.get` y `firebaseauth.users.get` (comprobado en la documentación de IAM), es decir, leería documentos y cuentas de usuario desde un `plan` que corre en PR de un repositorio público.
 
 `TODO(propietario)`: crear y conceder los roles en `pdlco-mytasks-stg` antes del primer `apply`. Estado: **sin aplicar**.
 
