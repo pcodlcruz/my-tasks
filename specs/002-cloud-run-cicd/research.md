@@ -225,6 +225,12 @@ confirmar se marca como *a verificar en la implementación*.
 - **Coste de la decisión**: SC-007 se cumple con un paso manual **documentado** (la spec exige "sin
   pasos manuales no documentados"). Riesgo R-2 del plan.
 - **Requisito previo**: Identity Platform necesita el plan de facturación activo en el proyecto.
+- **Verificado en el primer `apply` de staging (2026-10-14)**: inicializar Identity Platform en un
+  proyecto que no es de Firebase exige `firebase.projects.update` (dispara `AddFirebase`), y
+  `terraform-<env>` no lo tiene (decisión del propietario: no ampliar `mytasksEnvironmentAdmin`).
+  Por eso se habilita **a mano una vez por entorno** y la raíz del entorno adopta la configuración
+  con un bloque `import` (`projects/<proyecto>/config`). En producción, Identity Platform ya
+  existía y también se adopta con `import`. Detalle y pasos: `infra/RUNBOOK.md`.
 - **Alternatives considered**: guardar el secreto del cliente en Secret Manager y aplicarlo por
   Terraform (el secreto acabaría en el estado y exige otro paso manual para crearlo de todos
   modos).
