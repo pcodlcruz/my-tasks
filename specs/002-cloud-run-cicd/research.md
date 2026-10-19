@@ -312,7 +312,7 @@ confirmar se marca como *a verificar en la implementación*.
   - **Conclusión:** para uso personal los tres son marginales; el coste dominante es Cloud Run
     (0–5 USD/mes por entorno) más el almacenamiento de imágenes si las etiquetas `build-*` se
     acumulan (limpieza en el backlog).
-- **Presupuestos propuestos (FR-026, pendientes de ratificar por el propietario en T085):**
+- **Presupuestos propuestos (FR-026, pendientes de ratificar por el propietario en T085; se crean a mano en la consola, no en Terraform, para no dar a las cuentas `terraform-*` un rol sobre la cuenta de facturación):**
   10 USD/mes en `pdlco-mytasks-stg` y 15 USD/mes en `pdlco-mytasks` (incluye la plataforma y el
   PITR), con alertas al 50, 90 y 100 %. Son márgenes de aviso sobre el coste esperado, no un
   tope: un presupuesto de Google Cloud avisa pero no detiene el gasto.

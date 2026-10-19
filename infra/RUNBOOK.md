@@ -549,7 +549,7 @@ Rotación cada 90 días: sección 2. Revocación inmediata: sección 3. Comproba
 
 ### Retirar un entorno (levantar la protección contra borrado)
 
-**Procedimiento no probado todavía** (lo ejercita T089 en un proyecto desechable). Un entorno tiene datos reales, así que retirarlo es siempre una decisión explícita del propietario. Las protecciones están en el código (`infra/README.md`, «Protección contra borrado») y hay que levantarlas **todas, en una PR y con su `apply`**, antes de que un plan pueda destruir nada:
+**Procedimiento no probado** (decisión del propietario de 2026-10-19: no se recrea ni retira un entorno en un proyecto desechable, T089 paso 2). Un entorno tiene datos reales, así que retirarlo es siempre una decisión explícita del propietario. Las protecciones están en el código (`infra/README.md`, «Protección contra borrado») y hay que levantarlas **todas, en una PR y con su `apply`**, antes de que un plan pueda destruir nada:
 
 1. Quitar `prevent_destroy` de la base de Firestore del módulo (`infra/modules/environment/main.tf`) y poner `delete_protection_state = "DELETE_PROTECTION_DISABLED"`. Terraform no admite una variable en `lifecycle`, así que es un cambio de código.
 2. Poner `deletion_protection = false` en los dos servicios de Cloud Run (`infra/modules/environment/cloud_run.tf`).
