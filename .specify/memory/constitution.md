@@ -1,5 +1,16 @@
 <!--
 Informe de Impacto de Sincronización (Sync Impact Report)
+Cambio de versión: 1.3.1 → 1.3.2 (PATCH: "Checks de CI (VII)" pasa a *activo*).
+Cambios (tabla de Mecanismos de Cumplimiento):
+  - "Checks de CI (VII)": pendiente → activo. Leído de la API pública de GitHub el 2026-10-19
+    (T092, `security-review-t092.md`): los rulesets de `main`, `develop`, `release/*` y
+    `hotfix/*` están activos y exigen los nueve checks de `ci.yml`.
+  - Siguen *pendiente*: Conventional Commits (sin `commitlint` en CI) e idioma de PRs e Issues.
+Pendientes / TODOs: los demás, como en 1.2.0.
+Plantillas que requieren seguimiento: ninguna.
+Nota de gobernanza: la redacta un agente; solo el propietario la ratifica, al fusionar la PR.
+
+Historial anterior (1.3.1):
 Cambio de versión: 1.3.0 → 1.3.1 (PATCH: pasan a *activo* mecanismos ya implementados por la
   feature 002-cloud-run-cicd; ningún principio cambia de significado).
 Cambios (tabla de Mecanismos de Cumplimiento, tarea T091):
@@ -219,7 +230,7 @@ de la PR.
 | Regla | Mecanismo | Estado |
 |---|---|---|
 | PR obligatoria, sin commits directos, fusión manual del propietario (VII) | Rulesets de GitHub en `main`, `develop`, `release/*`, `hotfix/*`: PR requerida, sin `bypass_actors`, borrado y push no-fast-forward bloqueados | activo |
-| Checks de CI en verde antes de fusionar (VII) | Required status checks en los rulesets anteriores: los nueve de `ci.yml` | pendiente (verificado en `develop` y `main`; falta comprobar `release/*` y `hotfix/*`) |
+| Checks de CI en verde antes de fusionar (VII) | Required status checks en los rulesets anteriores: los nueve de `ci.yml` | activo |
 | Prohibición de `gcloud`/`gsutil`/`bq` directos (V) | Regla `deny` en `.claude/settings.json` para `Bash(gcloud:*)`, `Bash(gsutil:*)`, `Bash(bq:*)` | activo |
 | Sin credenciales personales (V) | El MCP de Google Cloud se configura únicamente con la cuenta de servicio del agente; sin *Application Default Credentials* personales en el entorno del agente | activo |
 | Despliegue solo vía pipeline (VI) | Solo las cuentas `deployer-*` del pipeline de CI/CD (federadas, sin claves) tienen permisos de despliegue; la cuenta de servicio del agente no los tiene | activo |
@@ -264,4 +275,4 @@ activas (V, VI, VII, VIII, IX) se reflejan además en `CLAUDE.md` para que apliq
 los comandos de Spec Kit; toda enmienda a esas reglas DEBE actualizar ambos ficheros en la
 misma PR.
 
-**Versión**: 1.3.1 | **Ratificada**: 2026-09-14 | **Última enmienda**: 2026-10-19
+**Versión**: 1.3.2 | **Ratificada**: 2026-09-14 | **Última enmienda**: 2026-10-19
