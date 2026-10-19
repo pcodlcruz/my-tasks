@@ -1,5 +1,23 @@
 <!--
 Informe de Impacto de Sincronización (Sync Impact Report)
+Cambio de versión: 1.3.0 → 1.3.1 (PATCH: pasan a *activo* mecanismos ya implementados por la
+  feature 002-cloud-run-cicd; ningún principio cambia de significado).
+Cambios (tabla de Mecanismos de Cumplimiento, tarea T091):
+  - "Sin credenciales personales (V)": pendiente → activo (el MCP opera como
+    `mytasks-ai-agent`, comprobado el 2026-10-19).
+  - "Despliegue solo vía pipeline (VI)": pendiente → activo (el agente no tiene ningún rol de
+    despliegue en `pdlco-mytasks` ni en `pdlco-mytasks-stg`; despliegan las cuentas `deployer-*`).
+  - "Tests por niveles (II)": pendiente → activo (`backend-tests`, `frontend-tests` y `e2e`
+    son required status checks).
+  - "Checks de CI (VII)": SIGUE *pendiente* por decisión del propietario: verificado en
+    `develop` y `main`, falta comprobar los rulesets de `release/*` y `hotfix/*`.
+  - Siguen *pendiente*: Conventional Commits (sin `commitlint` en CI) e idioma de PRs e Issues.
+Pendientes / TODOs: comprobar los rulesets de `release/*` y `hotfix/*` y pasar entonces
+  "Checks de CI" a *activo*; los demás, como en 1.2.0.
+Plantillas que requieren seguimiento: ninguna.
+Nota de gobernanza: ratificada por el propietario el 2026-10-19 (T091).
+
+Historial anterior (1.3.0):
 Cambio de versión: 1.2.1 → 1.3.0 (MINOR: ampliación material de los Principios IV y V y de la
   restricción de identidad en la nube).
 Motivo: la feature 002-cloud-run-cicd (hallazgos D1/D2 de `/speckit-analyze`) hace que el
@@ -201,11 +219,11 @@ de la PR.
 | Regla | Mecanismo | Estado |
 |---|---|---|
 | PR obligatoria, sin commits directos, fusión manual del propietario (VII) | Rulesets de GitHub en `main`, `develop`, `release/*`, `hotfix/*`: PR requerida, sin `bypass_actors`, borrado y push no-fast-forward bloqueados | activo |
-| Checks de CI en verde antes de fusionar (VII) | Required status checks en los rulesets anteriores | pendiente (sin pipeline de CI aún) |
+| Checks de CI en verde antes de fusionar (VII) | Required status checks en los rulesets anteriores: los nueve de `ci.yml` | pendiente (verificado en `develop` y `main`; falta comprobar `release/*` y `hotfix/*`) |
 | Prohibición de `gcloud`/`gsutil`/`bq` directos (V) | Regla `deny` en `.claude/settings.json` para `Bash(gcloud:*)`, `Bash(gsutil:*)`, `Bash(bq:*)` | activo |
-| Sin credenciales personales (V) | El MCP de Google Cloud se configura únicamente con la cuenta de servicio del agente; sin *Application Default Credentials* personales en el entorno del agente | pendiente |
-| Despliegue solo vía pipeline (VI) | Solo la identidad del pipeline de CI/CD tiene permisos de despliegue; la cuenta de servicio del agente no los tiene | pendiente |
-| Tests por niveles (II) | Jobs de `pytest`, `Vitest` y `Playwright` como required status checks | pendiente |
+| Sin credenciales personales (V) | El MCP de Google Cloud se configura únicamente con la cuenta de servicio del agente; sin *Application Default Credentials* personales en el entorno del agente | activo |
+| Despliegue solo vía pipeline (VI) | Solo las cuentas `deployer-*` del pipeline de CI/CD (federadas, sin claves) tienen permisos de despliegue; la cuenta de servicio del agente no los tiene | activo |
+| Tests por niveles (II) | Jobs de `pytest`, `Vitest` y `Playwright` (`backend-tests`, `frontend-tests`, `e2e`) como required status checks | activo |
 | Conventional Commits (IX) | `commitlint` en CI como required status check | pendiente |
 | Idioma de PRs e Issues (IX) | Plantillas de PR e Issue en español; verificación en revisión | pendiente |
 
@@ -246,4 +264,4 @@ activas (V, VI, VII, VIII, IX) se reflejan además en `CLAUDE.md` para que apliq
 los comandos de Spec Kit; toda enmienda a esas reglas DEBE actualizar ambos ficheros en la
 misma PR.
 
-**Versión**: 1.3.0 | **Ratificada**: 2026-09-14 | **Última enmienda**: 2026-10-01
+**Versión**: 1.3.1 | **Ratificada**: 2026-09-14 | **Última enmienda**: 2026-10-19
