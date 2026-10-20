@@ -48,7 +48,7 @@ expresamente los riesgos siguientes. Hasta que lo ratifique, T093 sigue abierta.
 | R-5 | FR-026 (T085): sin presupuestos ni alertas de gasto | Un coste inesperado no avisaría al propietario | Es un requisito **DEBERÍA**, no DEBE; la carga es de uso personal y de bajo volumen; Cloud Run escala a cero y Firestore e Identity Platform tienen capa gratuita (R11) | El propietario revisa la facturación a mano con la periodicidad que decida; `maxScale` limita el escalado (2 en staging, 5 en producción) |
 | R-6 | Negativos sin ejecutar: `api-contract-compat`, versión no validada en staging (escenario 6); duraciones SC-001 y SC-002 | Esas ramas negativas y los tiempos objetivo no están medidos | Las ramas positivas están demostradas | Se medirán en el siguiente cambio real |
 
-**Ratificación**: _Nombre y fecha del propietario: ____________________ ._
+**Ratificación**: el propietario (Francisco de la Cruz) ratifica R-1 a R-6 el **2026-10-20**, por indicación expresa en la sesión. Comprobado antes de registrarla: `deploy-staging.yml` y `deploy-production.yml` declaran `concurrency` por entorno con `cancel-in-progress: false` (las ejecuciones se encolan, no se cancelan), como se afirma en R-2.
 
 ## Pendientes antes de dar la feature por terminada
 
