@@ -34,10 +34,26 @@ Cada escenario se marca con lo que se ha **demostrado** y lo que **no**. Las com
 | Tarea hecha con el agente/skill correspondiente o excepción justificada (VIII) | ✅ | Excepción documentada: ningún skill cubre GitHub Actions (`infra.yml`, `deploy*.yml`). |
 | Código y commits en inglés, PR, Issues y docs en español (IX) | ✅ | Conventional Commits en todos los commits de la fase. |
 
+## Aceptación de riesgos (pendiente de ratificar por el propietario)
+
+Propuesta de cierre de T093: en lugar de ejecutar las comprobaciones que faltan, el propietario acepta
+expresamente los riesgos siguientes. Hasta que lo ratifique, T093 sigue abierta.
+
+| # | Qué no se ha demostrado | Riesgo que se acepta | Por qué es tolerable | Cómo se mitiga |
+|---|---|---|---|---|
+| R-1 | Escenario 4 (T076): un humo fallido no cambia el tráfico; una variable ausente falla nombrándola | Un defecto en esas ramas de `deploy.yml` solo se descubriría con un fallo real | El pipeline de staging y de producción ha desplegado correctamente de extremo a extremo; la lógica de comprobación tiene tests en `scripts-tests`; un despliegue fallido deja la revisión anterior sirviendo tráfico en Cloud Run por diseño | Recuperación de despliegue fallido en RUNBOOK; el primer fallo real se tratará como la prueba del escenario |
+| R-2 | Escenario 9 (T076): dos fusiones seguidas en `develop` | Que la concurrencia no serialice o cancele mal las ejecuciones | Está configurada con `concurrency` por entorno; el revisor del *environment* de `staging` ya serializa de hecho los despliegues | Revisión manual de *Actions* si coinciden dos ejecuciones |
+| R-3 | Escenario 7 (T059): intento activo de desplegar como agente o con `deployer-*` desde `feature/*` | Que un permiso o condición de federación no sea tan restrictivo como se lee | Lectura de la política IAM: el agente no tiene roles de despliegue; la federación exige entorno concreto y ids numéricos de propietario y repositorio; informes de seguridad T046, T081 y T092 sin críticos ni altos | Los *environments* con revisores y los *rulesets* son una segunda capa; la caducidad del 2026-10-30 reduce aún más el alcance del agente (T060) |
+| R-4 | Escenario 10 / SC-007 (MED-002 de T092): recreación de un entorno desde el RUNBOOK y retirada de un entorno | El RUNBOOK podría tener pasos erróneos u omitidos al recrear o retirar un entorno | Staging y producción se crearon siguiendo esos mismos pasos; la decisión ya se tomó el 2026-10-19 | Las correcciones que aparezcan al usarlo se anotan en el RUNBOOK |
+| R-5 | FR-026 (T085): sin presupuestos ni alertas de gasto | Un coste inesperado no avisaría al propietario | Es un requisito **DEBERÍA**, no DEBE; la carga es de uso personal y de bajo volumen; Cloud Run escala a cero y Firestore e Identity Platform tienen capa gratuita (R11) | El propietario revisa la facturación a mano con la periodicidad que decida; `maxScale` limita el escalado (2 en staging, 5 en producción) |
+| R-6 | Negativos sin ejecutar: `api-contract-compat`, versión no validada en staging (escenario 6); duraciones SC-001 y SC-002 | Esas ramas negativas y los tiempos objetivo no están medidos | Las ramas positivas están demostradas | Se medirán en el siguiente cambio real |
+
+**Ratificación**: _Nombre y fecha del propietario: ____________________ ._
+
 ## Pendientes antes de dar la feature por terminada
 
 **Del propietario**
-- T085: crear los presupuestos con alertas (`guia-propietario-t085.md`).
+- ~~T085: crear los presupuestos con alertas~~ **Descartada (2026-10-20)**: riesgo R-5.
 - MED-001 de T092: retirar `serviceAccountTokenCreator` de proyecto a `firebase-adminsdk-fbsvc` en staging.
 - LOW-001 de T092: `can_admins_bypass` de `staging`; decidir el revisor.
 - LOW-002 de T092: anotar la fecha de rotación de la clave (vence el 2026-12-29).
