@@ -32,6 +32,7 @@ Lo comprobado y correcto:
 
 | Campo | Valor |
 |---|---|
+| **Estado** | **Cerrado (2026-10-20)**: el propietario retiró el rol; comprobado por el MCP en solo lectura, `firebase-adminsdk-fbsvc` solo conserva `roles/firebase.sdkAdminServiceAgent` en `pdlco-mytasks-stg`. Si se vuelve a activar el login en la consola de Firebase, comprobar que no se reañade. |
 | **Severidad** | Media (sin clave de usuario ni uso conocido: baja probabilidad) |
 | **Categoría** | CIS GCP 1.5 — `serviceAccountTokenCreator` a nivel de proyecto |
 | **Componente afectado** | `pdlco-mytasks-stg`: cuentas `terraform-staging`, `deployer-staging`, cuentas de ejecución |
