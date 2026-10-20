@@ -55,7 +55,7 @@ expresamente los riesgos siguientes. Hasta que lo ratifique, T093 sigue abierta.
 **Del propietario**
 - ~~T085: crear los presupuestos con alertas~~ **Descartada (2026-10-20)**: riesgo R-5.
 - ~~MED-001 de T092~~ **Hecho (2026-10-20)**, verificado por el MCP.
-- LOW-001 de T092: `can_admins_bypass` de `staging`; decidir el revisor.
+- ~~LOW-001 de T092~~ **Hecho (2026-10-20)**: `can_admins_bypass: false` en `staging`, verificado. La decisión del revisor sigue aplazada (afecta a R-2).
 - LOW-002 de T092: anotar la fecha de rotación de la clave (vence el 2026-12-29).
 
 **Escenarios por ejecutar**

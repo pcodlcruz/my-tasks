@@ -79,6 +79,7 @@ Mantener el riesgo aceptado y visible: SC-007 consta como no verificado en T093.
 
 | Campo | Valor |
 |---|---|
+| **Estado** | **Cerrado (2026-10-20)** en lo que afecta a la seguridad: `can_admins_bypass: false`, comprobado por la API pública de GitHub (`updated_at` 2026-10-20). El revisor (`pcodlcruz`) se mantiene; la decisión de si quitarlo o evitar despliegues redundantes sigue aplazada (no es un hallazgo de seguridad). |
 | **Severidad** | Baja |
 | **Categoría** | Configuración y hardening |
 | **Componente afectado** | *Environment* `staging` de GitHub |
