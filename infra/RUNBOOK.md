@@ -64,7 +64,8 @@ La clave de `mytasks-ai-agent` es la única credencial de larga duración del si
 rotación es un acto del propietario con sus credenciales; el agente no la hace.
 
 **Recordatorio**: crea un evento periódico de 90 días en tu calendario (*"Rotar clave
-mytasks-ai-agent"*). Anota aquí la fecha de la última rotación: `TODO(propietario): fecha`.
+mytasks-ai-agent"*). Última rotación (creación de la clave
+vigente): **2026-09-30**. Próxima rotación: **2026-12-29**.
 
 1. Crea una clave nueva de la cuenta de servicio con tus credenciales (consola de IAM o `gcloud`
    desde tu terminal) y guárdala en `~/.config/mytasks-agent/` con permisos `0600`.

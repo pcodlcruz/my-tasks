@@ -103,6 +103,7 @@ Poner `can_admins_bypass` en `false` en `staging`, o retirar el revisor si se de
 
 | Campo | Valor |
 |---|---|
+| **Estado** | **Cerrado (2026-10-20)**: fechas (creación 2026-09-30, rotación 2026-12-29) anotadas en RUNBOOK §2; el propietario confirma el recordatorio del calendario. |
 | **Severidad** | Baja |
 | **Categoría** | Autenticación; gestión de secretos |
 | **Componente afectado** | `mytasks-ai-agent`, RUNBOOK §2 |
