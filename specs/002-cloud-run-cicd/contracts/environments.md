@@ -69,6 +69,15 @@ entorno; la SPA no debe poder apuntar al proyecto de otro entorno (FR-014).
 
 Reglas:
 - Ninguna cuenta de servicio tiene `roles/owner` ni `roles/editor`.
+- Los permisos de proyecto de las cuentas `terraform-*` y `terraform-plan-*` no usan roles
+  básicos ni predefinidos amplios, sino tres roles personalizados definidos en
+  `infra/iam/roles/` y concedidos por el propietario (MED-001 de `security-review-t046.md`):
+  `mytasksEnvironmentAdmin` (`terraform-<env>`), `mytasksPlanReader` (`terraform-plan-<env>`) y
+  `mytasksPlatformPlanReader` (lectura de la plataforma). `roles/viewer` se descartó porque
+  incluye `datastore.entities.get` y `firebaseauth.users.get`, y un `plan` corre en PR de un
+  repositorio público. Desde T081 (2026-10-16) `terraform-production` también recibe
+  `mytasksPlanReader` y `mytasksPlatformPlanReader`: su `apply` planifica `platform` y necesita
+  leer el bucket de estado y la política del proyecto (`security-review-t081.md`).
 - Como producción comparte proyecto con la plataforma, los roles de despliegue se conceden sobre
   el servicio, la cuenta de ejecución o el repositorio concretos, no sobre todo el proyecto.
 - Momento de concesión: los permisos de `deployer-*` sobre el repositorio de imágenes se conceden
