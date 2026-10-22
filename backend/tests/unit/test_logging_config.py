@@ -4,7 +4,7 @@ import logging
 
 import pytest
 
-from mytasks_api.logging_config import JsonFormatter, request_id_var
+from mytasks_api.logging_config import JsonFormatter, email_fingerprint, request_id_var
 
 pytestmark = pytest.mark.unit
 
@@ -48,3 +48,19 @@ def test_json_formatter_never_emits_unlisted_fields() -> None:
 
     assert "token" not in line
     assert "title" not in line
+
+
+def test_json_formatter_emits_the_access_audit_fields() -> None:
+    line = _log_line(action="revoke", actor_uid="admin-1", target="3f2a9c1b7d4e")
+
+    assert line["actor_uid"] == "admin-1"
+    assert line["target"] == "3f2a9c1b7d4e"
+
+
+def test_email_fingerprint_is_stable_short_and_hides_the_address() -> None:
+    first = email_fingerprint("ana@example.com")
+
+    assert first == email_fingerprint("ana@example.com")
+    assert first != email_fingerprint("bob@example.com")
+    assert len(first) == 12
+    assert "ana" not in first

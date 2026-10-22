@@ -32,6 +32,9 @@ export default defineConfig({
         FIRESTORE_EMULATOR_HOST: 'localhost:8080',
         FIREBASE_AUTH_EMULATOR_HOST: 'localhost:9099',
         CORS_ORIGINS: `http://localhost:${FRONTEND_PORT}`,
+        // The one address that becomes admin without an invitation. Keep in sync with
+        // ADMIN_E2E_EMAIL in tests/e2e/fixtures/auth.ts.
+        BOOTSTRAP_ADMIN_EMAIL: 'admin-e2e@example.com',
       },
     },
     {

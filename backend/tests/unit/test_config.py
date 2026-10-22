@@ -23,6 +23,24 @@ def _settings(**values: object) -> Settings:
     return Settings(_env_file=None, **values)  # type: ignore[call-arg,arg-type]
 
 
+def test_bootstrap_admin_email_is_disabled_by_default() -> None:
+    settings = _settings(app_env="local")
+
+    assert settings.bootstrap_admin_email is None
+
+
+@pytest.mark.parametrize(
+    ("raw", "expected"),
+    [(" Admin@Example.COM ", "admin@example.com"), ("", None), ("   ", None)],
+)
+def test_bootstrap_admin_email_is_normalized_and_blank_means_disabled(
+    raw: str, expected: str | None
+) -> None:
+    settings = _settings(app_env="local", bootstrap_admin_email=raw)
+
+    assert settings.bootstrap_admin_email == expected
+
+
 def test_app_env_defaults_to_production() -> None:
     settings = _settings(google_cloud_project="mytasks-prod")
 

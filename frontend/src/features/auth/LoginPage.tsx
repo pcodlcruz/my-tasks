@@ -85,7 +85,7 @@ export function LoginPage(): JSX.Element {
             )}
           </button>
           <p className="mt-4 text-center text-caption text-text-muted">
-            La primera vez, tu cuenta se crea automáticamente. No usamos contraseñas.
+            El acceso es solo por invitación del administrador. No usamos contraseñas.
           </p>
         </div>
       </div>

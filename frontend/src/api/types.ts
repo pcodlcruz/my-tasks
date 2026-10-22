@@ -61,3 +61,12 @@ export interface ApiError {
   message: string
   details?: Record<string, unknown>[]
 }
+
+export type Role = 'user' | 'admin'
+
+// The account behind the signed-in Google user (GET /api/v1/me).
+export interface Account {
+  uid: string
+  email: string
+  role: Role
+}
