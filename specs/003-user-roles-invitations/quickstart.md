@@ -35,7 +35,7 @@ modelo en [data-model.md](data-model.md).
 cd backend && pytest tests/unit tests/integration
 
 # Frontend: unitarios y e2e
-cd frontend && npm test && npm run e2e
+cd frontend && npm test && npm run test:e2e
 ```
 
 Resultado esperado: todo en verde, incluida la prueba parametrizada que comprueba el 403 en

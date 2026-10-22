@@ -119,13 +119,18 @@ backend/
         test_access_enforcement.py, test_access_audit.py
 
 frontend/src/
-├── features/auth/useAccount.ts      # NUEVO: consulta /me
-├── features/auth/AccessDeniedPage.tsx   # NUEVO
-├── features/admin/AccessPage.tsx    # NUEVO: invitaciones y usuarios
-├── app/ProtectedRoute.tsx           # MODIFICADO: cuenta activa; ruta de admin
-├── app/AppHeader.tsx                # MODIFICADO: enlace solo para admin
-├── api/access.ts, api/types.ts      # NUEVO / MODIFICADO
-└── (tests Vitest junto a cada pieza; Playwright en frontend/e2e)
+├── features/auth/useAccount.ts      # NUEVO (Fase 1): consulta /me
+├── features/auth/AccessDeniedPage.tsx   # NUEVO (Fase 1)
+├── features/auth/LoginPage.tsx      # MODIFICADO (Fase 1): aviso de acceso por invitación
+├── features/admin/AccessPage.tsx    # NUEVO (Fase 3): invitaciones y usuarios
+├── app/ProtectedRoute.tsx           # MODIFICADO: cuenta activa (Fase 1); ruta de admin (Fase 3)
+├── app/AppHeader.tsx                # MODIFICADO (Fase 3): enlace solo para admin
+└── api/access.ts, api/types.ts      # NUEVO / MODIFICADO
+
+frontend/tests/
+├── unit/                            # Vitest, junto a las carpetas existentes (app, features, api)
+└── e2e/                             # Playwright; fixtures/auth.ts siembra invitaciones por REST
+                                     #   al emulador y añade loginAsAdmin
 
 .github/workflows/deploy.yml         # MODIFICADO: inyecta BOOTSTRAP_ADMIN_EMAIL
 infra/                               # sin recursos nuevos (ver research.md R5)
@@ -137,12 +142,17 @@ la única vía a Firestore (las reglas de Firestore ya deniegan todo acceso de c
 
 ## Fases propuestas para `tasks.md`
 
-1. **Backend: cuentas y aplicación del acceso** (dominio, repositorio, `/me`, dependencia
-   `get_active_user`, bootstrap, ajuste de fixtures y de los endpoints de tareas).
+1. **Acceso por invitación de extremo a extremo** (dominio, repositorio, `/me`, dependencia
+   `get_active_user`, bootstrap, ajuste de fixtures y endpoints de tareas; frontend mínimo con
+   la consulta de cuenta y la pantalla sin acceso; fixtures e2e que siembran invitaciones;
+   variable `BOOTSTRAP_ADMIN_EMAIL` en `deploy.yml`). Se entrega completa porque `develop` se
+   despliega a staging al fusionar: un backend que denegara sin frontend que llame a `/me`
+   dejaría fuera al propietario y rompería el check `e2e`, que es obligatorio.
 2. **Backend: administración** (invitar, listar, revocar, reactivar, auditoría).
-3. **Frontend** (sesión con cuenta, pantalla sin acceso, pantalla de administración, e2e).
-4. **Pipeline y cierre** (variable por entorno en `deploy.yml`, anotación en la spec 001,
-   revisión de seguridad, validación en staging).
+3. **Frontend: pantalla de administración** (ruta y enlace solo para `admin`, e2e de invitar y
+   revocar).
+4. **Documentación y cierre** (runbook, anotación en la spec 001, contrato, revisión de
+   seguridad final, validación en staging).
 
 ## Complexity Tracking
 
