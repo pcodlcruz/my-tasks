@@ -24,6 +24,11 @@ export function isStaleTaskError(error: unknown): boolean {
   )
 }
 
+// Signed in with Google but without an active account: not invited, or access withdrawn.
+export function isAccessDeniedError(error: unknown): boolean {
+  return error instanceof ApiClientError && error.code === 'access_denied'
+}
+
 // Errors whose message, already written in Spanish by the server, is shown as is.
 const USER_FACING_ERROR_CODES = ['task_limit_reached', 'auth_unavailable']
 
