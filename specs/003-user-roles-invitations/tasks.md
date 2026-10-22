@@ -100,7 +100,7 @@ emuladores, con las invitaciones sembradas en Firestore (por la fixture e2e o a 
 ### Pipeline
 
 - [X] T028 [US1] Añadir `BOOTSTRAP_ADMIN_EMAIL` a `--update-env-vars` del paso de despliegue de la API y exigir que exista en un paso propio «Check the bootstrap administrator» (falla si falta o no es una dirección válida) en `.github/workflows/deploy.yml`, leyéndola de `vars.BOOTSTRAP_ADMIN_EMAIL` del GitHub Environment (sin secretos); test en `.github/scripts/tests/test_deploy_bootstrap_admin.py`, registrado en el job `scripts-tests` de `ci.yml`
-- [ ] T029 [US1] (propietario) Crear la variable `BOOTSTRAP_ADMIN_EMAIL` con el correo de tu cuenta Google en los GitHub Environments `staging` y `production` (Settings → Environments → Variables). **Debe estar hecha antes de fusionar la PR de esta fase**
+- [X] T029 [US1] (propietario) Crear la variable `BOOTSTRAP_ADMIN_EMAIL` con el correo de tu cuenta Google en los GitHub Environments `staging` y `production` (Settings → Environments → Variables). **Debe estar hecha antes de fusionar la PR de esta fase**
 
 ### Revisión de seguridad
 
