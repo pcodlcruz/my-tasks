@@ -63,6 +63,9 @@ jobs:
       OTHER_PROJECT_NUMBER: ${{ inputs.environment == 'production' && '838389521553' || '2195266360' }}
       # Revision tag of this run. Unique per run and attempt, so a retry never reuses it.
       REVISION_TAG: run${{ github.run_id }}-${{ github.run_attempt }}
+      # Address that becomes admin on its first sign-in when it has no account yet (feature 003).
+      # A variable of the GitHub environment, not a secret: it is an address, not a credential.
+      BOOTSTRAP_ADMIN_EMAIL: ${{ vars.BOOTSTRAP_ADMIN_EMAIL }}
     steps:
       - name: Check the environment
         run: |
@@ -70,6 +73,17 @@ jobs:
             staging | production) ;;
             *) echo "::error::Unknown environment '$ENVIRONMENT' (staging or production)"; exit 1 ;;
           esac
+
+      # Without it nobody could ever become admin of this environment, and the access rules
+      # (invitation only) would leave the owner outside. A comma would split the list that
+      # `gcloud run deploy --update-env-vars` receives, so exactly one address is accepted.
+      - name: Check the bootstrap administrator
+        run: |
+          set -euo pipefail
+          if ! [[ "${BOOTSTRAP_ADMIN_EMAIL:-}" =~ ^[^,[:space:]@]+@[^,[:space:]@]+\.[^,[:space:]@]+$ ]]; then
+            echo "::error::The GitHub environment '$ENVIRONMENT' needs the variable BOOTSTRAP_ADMIN_EMAIL with one e-mail address (Settings > Environments > $ENVIRONMENT > Variables). It is the account that becomes admin on its first sign-in."
+            exit 1
+          fi
 
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -313,10 +327,16 @@ jobs:
             hash_var="${component^^}_HASH"
             digest_var="${component^^}_DIGEST"
             hash="${!hash_var}"
+            update_env="APP_VERSION=$hash"
+            # Only the API decides who is admin; the web has no use for the address. It is set
+            # here, not by Terraform, because Terraform ignores `env` once a service exists.
+            if [ "$component" = api ]; then
+              update_env="$update_env,BOOTSTRAP_ADMIN_EMAIL=$BOOTSTRAP_ADMIN_EMAIL"
+            fi
             gcloud run deploy "$service" --project "$PROJECT_ID" --region "$REGION" \
               --image "$REGISTRY/$service@${!digest_var}" \
               --no-traffic --tag "$REVISION_TAG" \
-              --update-env-vars "APP_VERSION=$hash" \
+              --update-env-vars "$update_env" \
               --update-labels "commit=$COMMIT,tree-hash=$hash,pipeline-run=$RUN_ID" \
               --quiet
 
