@@ -3,12 +3,17 @@ from typing import Literal
 
 from fastapi import APIRouter, Depends, Path, Query, Response, status
 
-from mytasks_api.auth import CurrentUser, get_current_user
+from mytasks_api.auth import CurrentUser, get_active_user
 from mytasks_api.domain.task import Scope, TaskNotFoundError
-from mytasks_api.schemas.task import TaskCreate, TaskOut, TaskPage, TaskUpdate
+from mytasks_api.schemas.task import ErrorOut, TaskCreate, TaskOut, TaskPage, TaskUpdate
 from mytasks_api.services.task_service import TaskService, get_task_service
 
-router = APIRouter(prefix="/api/v1/tasks", tags=["tasks"])
+# Every operation needs an active account: a valid token without one is answered with 403.
+router = APIRouter(
+    prefix="/api/v1/tasks",
+    tags=["tasks"],
+    responses={status.HTTP_403_FORBIDDEN: {"model": ErrorOut}},
+)
 
 # Firestore generates alphanumeric ids and rejects reserved ones (`__something__`).
 # Any other shape cannot correspond to a task, so it is treated as missing.
@@ -17,7 +22,7 @@ _TASK_ID_PATTERN = re.compile(r"(?!__.*__$)[A-Za-z0-9_-]{1,128}")
 
 async def valid_task_id(
     task_id: str = Path(min_length=1, max_length=128),
-    _: CurrentUser = Depends(get_current_user),
+    _: CurrentUser = Depends(get_active_user),
 ) -> str:
     # Depends on authentication so a 401 is never masked by a 404.
     if _TASK_ID_PATTERN.fullmatch(task_id) is None:
@@ -34,7 +39,7 @@ async def list_tasks(
     scope: Scope | None = Query(default=None),
     cursor: str | None = Query(default=None, max_length=512),
     limit: int = Query(default=50, ge=1, le=100),
-    current_user: CurrentUser = Depends(get_current_user),
+    current_user: CurrentUser = Depends(get_active_user),
     service: TaskService = Depends(get_task_service),
 ) -> TaskPage:
     if view == "history":
@@ -49,7 +54,7 @@ async def list_tasks(
 @router.post("", status_code=status.HTTP_201_CREATED, response_model=TaskOut)
 async def create_task(
     payload: TaskCreate,
-    current_user: CurrentUser = Depends(get_current_user),
+    current_user: CurrentUser = Depends(get_active_user),
     service: TaskService = Depends(get_task_service),
 ) -> TaskOut:
     task = await service.create_task(current_user.uid, payload)
@@ -59,7 +64,7 @@ async def create_task(
 @router.get("/{task_id}", response_model=TaskOut)
 async def get_task(
     task_id: str = TaskId,
-    current_user: CurrentUser = Depends(get_current_user),
+    current_user: CurrentUser = Depends(get_active_user),
     service: TaskService = Depends(get_task_service),
 ) -> TaskOut:
     task = await service.get_task(current_user.uid, task_id)
@@ -70,7 +75,7 @@ async def get_task(
 async def update_task(
     payload: TaskUpdate,
     task_id: str = TaskId,
-    current_user: CurrentUser = Depends(get_current_user),
+    current_user: CurrentUser = Depends(get_active_user),
     service: TaskService = Depends(get_task_service),
 ) -> TaskOut:
     task = await service.update_task(current_user.uid, task_id, payload)
@@ -80,7 +85,7 @@ async def update_task(
 @router.delete("/{task_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_task(
     task_id: str = TaskId,
-    current_user: CurrentUser = Depends(get_current_user),
+    current_user: CurrentUser = Depends(get_active_user),
     service: TaskService = Depends(get_task_service),
 ) -> Response:
     await service.delete_task(current_user.uid, task_id)
@@ -90,7 +95,7 @@ async def delete_task(
 @router.post("/{task_id}/complete", response_model=TaskOut)
 async def complete_task(
     task_id: str = TaskId,
-    current_user: CurrentUser = Depends(get_current_user),
+    current_user: CurrentUser = Depends(get_active_user),
     service: TaskService = Depends(get_task_service),
 ) -> TaskOut:
     return TaskOut.from_task(await service.complete_task(current_user.uid, task_id))
@@ -99,7 +104,7 @@ async def complete_task(
 @router.post("/{task_id}/reopen", response_model=TaskOut)
 async def reopen_task(
     task_id: str = TaskId,
-    current_user: CurrentUser = Depends(get_current_user),
+    current_user: CurrentUser = Depends(get_active_user),
     service: TaskService = Depends(get_task_service),
 ) -> TaskOut:
     return TaskOut.from_task(await service.reopen_task(current_user.uid, task_id))
@@ -108,7 +113,7 @@ async def reopen_task(
 @router.post("/{task_id}/trash", response_model=TaskOut)
 async def trash_task(
     task_id: str = TaskId,
-    current_user: CurrentUser = Depends(get_current_user),
+    current_user: CurrentUser = Depends(get_active_user),
     service: TaskService = Depends(get_task_service),
 ) -> TaskOut:
     return TaskOut.from_task(await service.trash_task(current_user.uid, task_id))
@@ -117,7 +122,7 @@ async def trash_task(
 @router.post("/{task_id}/restore", response_model=TaskOut)
 async def restore_task(
     task_id: str = TaskId,
-    current_user: CurrentUser = Depends(get_current_user),
+    current_user: CurrentUser = Depends(get_active_user),
     service: TaskService = Depends(get_task_service),
 ) -> TaskOut:
     return TaskOut.from_task(await service.restore_task(current_user.uid, task_id))

@@ -1,5 +1,5 @@
 import logging
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 
 import firebase_admin
 from fastapi import Depends, HTTPException, status
@@ -7,7 +7,9 @@ from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from firebase_admin import auth
 
 from mytasks_api.config import Settings, get_settings
+from mytasks_api.domain.account import Role
 from mytasks_api.logging_config import log_event
+from mytasks_api.services.access_service import AccessService, get_access_service
 
 logger = logging.getLogger(__name__)
 
@@ -18,6 +20,11 @@ _bearer_scheme = HTTPBearer(auto_error=False)
 class CurrentUser:
     uid: str
     email: str | None
+    # Whether Google verified the address: invitations and the bootstrap admin are only
+    # honored for verified ones.
+    email_verified: bool = False
+    # Filled in by `get_active_user` from the account; a bare token carries no role.
+    role: Role | None = None
 
 
 def _init_firebase_app(settings: Settings) -> firebase_admin.App:
@@ -70,4 +77,22 @@ async def get_current_user(
         # the client's fault, so it is not answered with a 401.
         raise _verifier_unavailable(exc) from exc
 
-    return CurrentUser(uid=decoded["uid"], email=decoded.get("email"))
+    return CurrentUser(
+        uid=decoded["uid"],
+        email=decoded.get("email"),
+        email_verified=decoded.get("email_verified") is True,
+    )
+
+
+async def get_active_user(
+    current_user: CurrentUser = Depends(get_current_user),
+    service: AccessService = Depends(get_access_service),
+) -> CurrentUser:
+    """A verified token is not enough: the caller must also hold an active account.
+
+    Authentication (401) is always evaluated first; without an account the answer is 403.
+    Any failure to read the account propagates as an error, so access is never granted by
+    default (FR-018).
+    """
+    account = await service.require_active(current_user.uid)
+    return replace(current_user, role=account.role)

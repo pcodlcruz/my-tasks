@@ -10,6 +10,7 @@ from fastapi.responses import JSONResponse
 from google.cloud import firestore
 
 from mytasks_api.config import Settings, get_settings
+from mytasks_api.domain.account import AccessDeniedError
 from mytasks_api.domain.task import (
     MAX_ACTIVE_TASKS,
     ActiveTaskLimitError,
@@ -20,6 +21,7 @@ from mytasks_api.domain.task import (
 from mytasks_api.logging_config import configure_logging, request_id_var
 from mytasks_api.readiness import ReadinessProbe
 from mytasks_api.repositories.task_repository import get_firestore_client
+from mytasks_api.routers.me import router as me_router
 from mytasks_api.routers.tasks import router as tasks_router
 from mytasks_api.schemas.task import ErrorOut, ReadinessOut
 
@@ -85,6 +87,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             response.headers[header] = value
         return response
 
+    app.include_router(me_router)
     app.include_router(tasks_router)
 
     # Anonymous and data-free on purpose: they are probed by the deploy pipeline and by
@@ -129,6 +132,13 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             details=jsonable_encoder(exc.errors()),
         )
         return _error_response(status.HTTP_422_UNPROCESSABLE_CONTENT, error)
+
+    @app.exception_handler(AccessDeniedError)
+    async def access_denied_handler(_: Request, __: AccessDeniedError) -> JSONResponse:
+        # One message for every cause (no invitation, revoked, wrong role): it must not
+        # reveal whether an address is invited or has an account (FR-017).
+        error = ErrorOut(code="access_denied", message="No tienes acceso a esta aplicación.")
+        return _error_response(status.HTTP_403_FORBIDDEN, error)
 
     @app.exception_handler(TaskNotFoundError)
     async def task_not_found_handler(_: Request, __: TaskNotFoundError) -> JSONResponse:

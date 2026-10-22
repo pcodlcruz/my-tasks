@@ -1,3 +1,4 @@
+import hashlib
 import json
 import logging
 import sys
@@ -10,7 +11,7 @@ request_id_var: ContextVar[str | None] = ContextVar("request_id", default=None)
 
 # Closed list of fields allowed in a log entry: never the token nor task content
 # (Principle III). Anything not listed here is dropped.
-_LOGGED_FIELDS = ("action", "uid", "task_id", "reason")
+_LOGGED_FIELDS = ("action", "uid", "task_id", "reason", "actor_uid", "target")
 
 
 class JsonFormatter(logging.Formatter):
@@ -29,6 +30,12 @@ class JsonFormatter(logging.Formatter):
             if value is not None:
                 payload[field] = value
         return json.dumps(payload, ensure_ascii=False)
+
+
+def email_fingerprint(email: str) -> str:
+    """Short, stable stand-in for an address, so access events can be correlated without
+    writing the address itself to the log."""
+    return hashlib.sha256(email.encode()).hexdigest()[:12]
 
 
 def log_event(logger: logging.Logger, level: int, message: str, **fields: str) -> None:
