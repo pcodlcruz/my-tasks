@@ -1,0 +1,192 @@
+openapi: 3.1.0
+info:
+  title: MyTasks API — acceso y administración (feature 003)
+  version: 1.1.0
+  description: >-
+    Añade a `specs/001-eisenhower-task-manager/contracts/openapi.yaml` los endpoints de
+    cuenta y administración, y el error 403 `access_denied` en todos los endpoints de tareas.
+    Todos los endpoints exigen `Authorization: Bearer <ID token de Firebase>`.
+
+paths:
+  /api/v1/me:
+    get:
+      operationId: getMe
+      summary: Cuenta de la sesión; acepta la invitación pendiente o aplica el bootstrap
+      responses:
+        "200":
+          description: Cuenta activa.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/MeOut" }
+        "401": { $ref: "#/components/responses/Unauthenticated" }
+        "403": { $ref: "#/components/responses/AccessDenied" }
+
+  /api/v1/admin/access:
+    get:
+      operationId: listAccess
+      summary: Lista invitaciones y cuentas (solo admin)
+      responses:
+        "200":
+          description: Hasta 100 invitaciones y 100 cuentas.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AccessListOut" }
+        "401": { $ref: "#/components/responses/Unauthenticated" }
+        "403": { $ref: "#/components/responses/AccessDenied" }
+
+  /api/v1/admin/invitations:
+    post:
+      operationId: createInvitation
+      summary: Invita un correo, o reactiva la cuenta revocada con ese correo (solo admin)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/InvitationIn" }
+      responses:
+        "201":
+          description: Invitación creada o cuenta reactivada.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/InviteResultOut" }
+        "200":
+          description: Ya había una invitación pendiente para ese correo; no se duplica.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/InviteResultOut" }
+        "401": { $ref: "#/components/responses/Unauthenticated" }
+        "403": { $ref: "#/components/responses/AccessDenied" }
+        "409":
+          description: El correo ya tiene una cuenta activa.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorOut" }
+        "422": { $ref: "#/components/responses/ValidationError" }
+
+  /api/v1/admin/invitations/{email}:
+    delete:
+      operationId: revokeInvitation
+      summary: Revoca una invitación pendiente (solo admin)
+      parameters:
+        - { name: email, in: path, required: true, schema: { type: string, maxLength: 254 } }
+      responses:
+        "204": { description: Invitación revocada. }
+        "401": { $ref: "#/components/responses/Unauthenticated" }
+        "403": { $ref: "#/components/responses/AccessDenied" }
+        "404":
+          description: No hay invitación pendiente para ese correo.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorOut" }
+
+  /api/v1/admin/users/{uid}:
+    delete:
+      operationId: revokeUserAccess
+      summary: Retira el acceso a un usuario; sus tareas se conservan (solo admin)
+      parameters:
+        - { name: uid, in: path, required: true, schema: { type: string, maxLength: 128 } }
+      responses:
+        "204": { description: Acceso retirado. }
+        "401": { $ref: "#/components/responses/Unauthenticated" }
+        "403": { $ref: "#/components/responses/AccessDenied" }
+        "404":
+          description: La cuenta no existe.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorOut" }
+        "409":
+          description: No se puede retirar el acceso a un administrador.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorOut" }
+
+components:
+  responses:
+    Unauthenticated:
+      description: Falta el token o no es válido.
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/ErrorOut" }
+    AccessDenied:
+      description: >-
+        Autenticado sin acceso: sin invitación, acceso retirado o rol insuficiente. El mensaje
+        no distingue entre los dos primeros casos.
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/ErrorOut" }
+          example: { code: access_denied, message: No tienes acceso a esta aplicación. }
+    ValidationError:
+      description: Entrada no válida.
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/ErrorOut" }
+
+  schemas:
+    Role: { type: string, enum: [user, admin] }
+    AccountStatus: { type: string, enum: [active, revoked] }
+    InvitationStatus: { type: string, enum: [pending, accepted, revoked] }
+
+    MeOut:
+      type: object
+      required: [uid, email, role]
+      properties:
+        uid: { type: string }
+        email: { type: string }
+        role: { $ref: "#/components/schemas/Role" }
+
+    InvitationIn:
+      type: object
+      required: [email]
+      additionalProperties: false
+      properties:
+        email: { type: string, format: email, maxLength: 254 }
+
+    InvitationOut:
+      type: object
+      required: [email, status, created_at]
+      properties:
+        email: { type: string }
+        status: { $ref: "#/components/schemas/InvitationStatus" }
+        created_at: { type: string, format: date-time }
+        accepted_at: { type: [string, "null"], format: date-time }
+
+    AccountOut:
+      type: object
+      required: [uid, email, role, status, created_at]
+      properties:
+        uid: { type: string }
+        email: { type: string }
+        role: { $ref: "#/components/schemas/Role" }
+        status: { $ref: "#/components/schemas/AccountStatus" }
+        created_at: { type: string, format: date-time }
+
+    InviteResultOut:
+      type: object
+      required: [outcome, email]
+      properties:
+        outcome: { type: string, enum: [invited, already_pending, reactivated] }
+        email: { type: string }
+
+    AccessListOut:
+      type: object
+      required: [invitations, accounts]
+      properties:
+        invitations:
+          type: array
+          items: { $ref: "#/components/schemas/InvitationOut" }
+        accounts:
+          type: array
+          items: { $ref: "#/components/schemas/AccountOut" }
+
+    ErrorOut:
+      type: object
+      required: [code, message]
+      properties:
+        code: { type: string }
+        message: { type: string }
+        details: {}
+
+x-changes-to-existing-contract:
+  - Todos los endpoints bajo /api/v1/tasks pasan a poder responder 403 `access_denied`
+    (cuenta inexistente o revocada). El 401 sigue significando "sin token válido" y se evalúa
+    antes que el 403.
