@@ -63,48 +63,48 @@ emuladores, con las invitaciones sembradas en Firestore (por la fixture e2e o a 
 
 ### Tests (escribir primero y comprobar que fallan)
 
-- [ ] T001 [P] [US1] Tests unitarios de dominio (normalización de correo, validación, transiciones de estado de cuenta e invitación, rechazo de revocar un `admin`) en `backend/tests/unit/domain/test_account.py`
-- [ ] T002 [P] [US1] Tests unitarios del servicio de sesión (invitación pendiente → cuenta `user` y aceptada una sola vez; bootstrap solo con correo verificado y cuenta inexistente; correo no verificado denegado; sin invitación denegado; fallo del repositorio → denegado) en `backend/tests/unit/services/test_access_service.py`
-- [ ] T003 [P] [US1] Test de integración de `GET /api/v1/me` (desconocido → 403 sin crear `users/{uid}`; invitado → 200 y `accepted`; segunda llamada no duplica; dos llamadas simultáneas aceptan una sola vez; bootstrap conserva las tareas existentes; cuenta revocada → 403; sin token → 401) en `backend/tests/integration/test_me.py`
-- [ ] T004 [P] [US4] Test de integración parametrizado que recorre **cada** endpoint de `/api/v1/tasks` y comprueba 401 sin token, 403 `access_denied` sin cuenta y con cuenta revocada, y que el 401 precede al 403, en `backend/tests/integration/test_access_enforcement.py`
-- [ ] T005 [P] [US1] Test unitario de `bootstrap_admin_email` (opcional, normalizado, vacío = desactivado) en `backend/tests/unit/test_config.py`
-- [ ] T006 [P] [US1] Tests Vitest de `useAccount` (200 → cuenta; 403 → sin acceso; 401/red → error distinguible) en `frontend/tests/unit/features/auth/useAccount.test.ts`
-- [ ] T007 [P] [US1] Tests Vitest de `ProtectedRoute` y `AccessDeniedPage` (cuenta activa deja pasar; sin acceso muestra el mensaje y el cierre de sesión; carga muestra estado de espera) en `frontend/tests/unit/app/ProtectedRoute.test.tsx` y `frontend/tests/unit/features/auth/AccessDeniedPage.test.tsx`
-- [ ] T008 [P] [US1] Test e2e Playwright: un desconocido ve «necesitas una invitación» y no obtiene datos; el administrador de bootstrap entra con su cuenta, en `frontend/tests/e2e/access-denied.spec.ts`
+- [X] T001 [P] [US1] Tests unitarios de dominio (normalización de correo, validación, transiciones de estado de cuenta e invitación, rechazo de revocar un `admin`) en `backend/tests/unit/domain/test_account.py`
+- [X] T002 [P] [US1] Tests unitarios del servicio de sesión (invitación pendiente → cuenta `user` y aceptada una sola vez; bootstrap solo con correo verificado y cuenta inexistente; correo no verificado denegado; sin invitación denegado; fallo del repositorio → denegado) en `backend/tests/unit/services/test_access_service.py`
+- [X] T003 [P] [US1] Test de integración de `GET /api/v1/me` (desconocido → 403 sin crear `users/{uid}`; invitado → 200 y `accepted`; segunda llamada no duplica; dos llamadas simultáneas aceptan una sola vez; bootstrap conserva las tareas existentes; cuenta revocada → 403; sin token → 401) en `backend/tests/integration/test_me.py`
+- [X] T004 [P] [US4] Test de integración parametrizado que recorre **cada** endpoint de `/api/v1/tasks` y comprueba 401 sin token, 403 `access_denied` sin cuenta y con cuenta revocada, y que el 401 precede al 403, en `backend/tests/integration/test_access_enforcement.py`
+- [X] T005 [P] [US1] Test unitario de `bootstrap_admin_email` (opcional, normalizado, vacío = desactivado) en `backend/tests/unit/test_config.py`
+- [X] T006 [P] [US1] Tests Vitest de `useAccount` (200 → cuenta; 403 → sin acceso; 401/red → error distinguible) en `frontend/tests/unit/features/auth/useAccount.test.tsx`
+- [X] T007 [P] [US1] Tests Vitest de `ProtectedRoute` y `AccessDeniedPage` (cuenta activa deja pasar; sin acceso muestra el mensaje y el cierre de sesión; carga muestra estado de espera) en `frontend/tests/unit/app/ProtectedRoute.test.tsx` y `frontend/tests/unit/features/auth/AccessDeniedPage.test.tsx`
+- [X] T008 [P] [US1] Test e2e Playwright: un desconocido ve «necesitas una invitación» y no obtiene datos; el administrador de bootstrap entra con su cuenta, en `frontend/tests/e2e/access-denied.spec.ts`
 
 ### Implementation — backend
 
-- [ ] T009 [P] [US1] Crear el dominio (`Role`, `AccountStatus`, `InvitationStatus`, `normalize_email`, errores `AccessDeniedError`/`InvalidEmailError`) en `backend/src/mytasks_api/domain/account.py` (T001)
-- [ ] T010 [P] [US1] Añadir `bootstrap_admin_email` a `Settings` y documentarlo en `backend/.env.example` (T005)
-- [ ] T011 [US1] Crear el repositorio de cuentas e invitaciones (leer `users/{uid}`, aceptar invitación en transacción, crear cuenta bootstrap, actualizar el correo guardado) en `backend/src/mytasks_api/repositories/account_repository.py` (depende de T009)
-- [ ] T012 [US1] Crear `AccessService.resolve_session(uid, email, email_verified)` con la lógica de R3 en `backend/src/mytasks_api/services/access_service.py` (depende de T009, T010, T011)
-- [ ] T013 [US1] Extender `CurrentUser` con `email_verified` y añadir la dependencia `get_active_user` (cuenta activa o `AccessDeniedError`; fallo cerrado ante error del repositorio) en `backend/src/mytasks_api/auth.py`
-- [ ] T014 [P] [US1] Crear los esquemas `MeOut` y `ErrorOut` de acceso en `backend/src/mytasks_api/schemas/access.py`
-- [ ] T015 [US1] Crear `GET /api/v1/me` en `backend/src/mytasks_api/routers/me.py` y registrarlo, junto al manejador 403 `access_denied` (mensaje idéntico para «sin invitación» y «revocado», FR-017), en `backend/src/mytasks_api/factory.py` (depende de T012, T013, T014)
-- [ ] T016 [US4] Sustituir `get_current_user` por `get_active_user` en todos los endpoints y en `valid_task_id` de `backend/src/mytasks_api/routers/tasks.py` (depende de T013)
-- [ ] T017 [P] [US1] Añadir los campos `actor_uid` y `target` (hash SHA-256 truncado del correo) a la lista cerrada de `log_event` y los eventos `access_denied` e `invitation_accepted` en `backend/src/mytasks_api/logging_config.py`, con su test en `backend/tests/unit/test_logging_config.py`
-- [ ] T018 [US4] Actualizar `backend/tests/conftest.py`: `google_user` crea por defecto la cuenta activa `users/{uid}`, nueva fixture `google_user_without_account` y helpers de siembra de invitaciones y cuentas revocadas
-- [ ] T019 [US4] Ejecutar la suite completa de `backend/` (incluida `test_performance.py`) y corregir regresiones; confirmar que los tests de la feature 001 pasan sin cambiar su intención
-- [ ] T020 [P] [US1] Ampliar `backend/scripts/export_openapi.py` y su test `backend/tests/unit/test_export_openapi.py` para que el contrato exportado incluya `/api/v1/me` y el 403 en las tareas (conforme a [contracts/access.yaml](./contracts/access.yaml))
+- [X] T009 [P] [US1] Crear el dominio (`Role`, `AccountStatus`, `InvitationStatus`, `normalize_email`, errores `AccessDeniedError`/`InvalidEmailError`) en `backend/src/mytasks_api/domain/account.py` (T001)
+- [X] T010 [P] [US1] Añadir `bootstrap_admin_email` a `Settings` y documentarlo en `backend/.env.example` (T005)
+- [X] T011 [US1] Crear el repositorio de cuentas e invitaciones (leer `users/{uid}`, aceptar invitación en transacción, crear cuenta bootstrap) en `backend/src/mytasks_api/repositories/account_repository.py` (depende de T009). Nota: la actualización del correo guardado desde `/me` queda fuera hasta decidir qué hacer si el nuevo correo ya pertenece a otra cuenta (hallazgo F4 de `/speckit-analyze`); la cuenta se identifica por `uid`
+- [X] T012 [US1] Crear `AccessService.resolve_session(uid, email, email_verified)` con la lógica de R3 en `backend/src/mytasks_api/services/access_service.py` (depende de T009, T010, T011)
+- [X] T013 [US1] Extender `CurrentUser` con `email_verified` y añadir la dependencia `get_active_user` (cuenta activa o `AccessDeniedError`; fallo cerrado ante error del repositorio) en `backend/src/mytasks_api/auth.py`
+- [X] T014 [P] [US1] Crear los esquemas `MeOut` y `ErrorOut` de acceso en `backend/src/mytasks_api/schemas/access.py`
+- [X] T015 [US1] Crear `GET /api/v1/me` en `backend/src/mytasks_api/routers/me.py` y registrarlo, junto al manejador 403 `access_denied` (mensaje idéntico para «sin invitación» y «revocado», FR-017), en `backend/src/mytasks_api/factory.py` (depende de T012, T013, T014)
+- [X] T016 [US4] Sustituir `get_current_user` por `get_active_user` en todos los endpoints y en `valid_task_id` de `backend/src/mytasks_api/routers/tasks.py` (depende de T013)
+- [X] T017 [P] [US1] Añadir los campos `actor_uid` y `target` (hash SHA-256 truncado del correo) a la lista cerrada de `log_event` y los eventos `access_denied` e `invitation_accepted` en `backend/src/mytasks_api/logging_config.py`, con su test en `backend/tests/unit/test_logging_config.py`
+- [X] T018 [US4] Actualizar `backend/tests/conftest.py`: `google_user` crea por defecto la cuenta activa `users/{uid}`, nueva fixture `google_user_without_account` y helpers de siembra de invitaciones y cuentas revocadas
+- [X] T019 [US4] Ejecutar la suite completa de `backend/` (incluida `test_performance.py`) y corregir regresiones; confirmar que los tests de la feature 001 pasan sin cambiar su intención
+- [X] T020 [P] [US1] Ampliar `backend/scripts/export_openapi.py` y su test `backend/tests/unit/test_export_openapi.py` para que el contrato exportado incluya `/api/v1/me` y el 403 en las tareas (conforme a [contracts/access.yaml](./contracts/access.yaml))
 
 ### Implementation — frontend mínimo
 
-- [ ] T021 [P] [US1] Añadir los tipos y el cliente de la API de cuenta (`getMe`) en `frontend/src/api/types.ts` y `frontend/src/api/access.ts`
-- [ ] T022 [US1] Crear `useAccount` (TanStack Query sobre `GET /api/v1/me`) en `frontend/src/features/auth/useAccount.ts` (depende de T021; T006)
-- [ ] T023 [P] [US1] Crear `AccessDeniedPage` («necesitas una invitación», cierre de sesión, sin revelar el motivo) en `frontend/src/features/auth/AccessDeniedPage.tsx` (T007)
-- [ ] T024 [P] [US1] Actualizar `frontend/src/features/auth/LoginPage.tsx`: sustituir el texto «La primera vez, tu cuenta se crea automáticamente» por el aviso de acceso solo por invitación
-- [ ] T025 [US1] Integrar la cuenta en `frontend/src/app/ProtectedRoute.tsx` (carga → cuenta activa → 403 a `AccessDeniedPage`) (depende de T022, T023)
-- [ ] T026 [US4] Adaptar las fixtures e2e en `frontend/tests/e2e/fixtures/auth.ts`: `loginAsGoogleUser(email, { invited = true })` siembra `invitations/{email}` por REST en el emulador de Firestore desde el proceso de Playwright (nunca desde el bundle) antes de iniciar sesión, y nuevo helper `loginAsAdmin`; en `frontend/playwright.config.ts` pasar `BOOTSTRAP_ADMIN_EMAIL=admin-e2e@example.com` al backend. Los specs `us1`–`us5` existentes no deben necesitar cambios
-- [ ] T027 [US4] Ejecutar `npm test`, `npm run lint`, el chequeo de tipos y `npm run test:e2e` completos; confirmar que los e2e de la feature 001 siguen en verde (depende de T025, T026)
+- [X] T021 [P] [US1] Añadir los tipos y el cliente de la API de cuenta (`getMe`) en `frontend/src/api/types.ts` y `frontend/src/api/access.ts`
+- [X] T022 [US1] Crear `useAccount` (TanStack Query sobre `GET /api/v1/me`) en `frontend/src/features/auth/useAccount.ts` (depende de T021; T006)
+- [X] T023 [P] [US1] Crear `AccessDeniedPage` («necesitas una invitación», cierre de sesión, sin revelar el motivo) en `frontend/src/features/auth/AccessDeniedPage.tsx` (T007)
+- [X] T024 [P] [US1] Actualizar `frontend/src/features/auth/LoginPage.tsx`: sustituir el texto «La primera vez, tu cuenta se crea automáticamente» por el aviso de acceso solo por invitación
+- [X] T025 [US1] Integrar la cuenta en `frontend/src/app/ProtectedRoute.tsx` (carga → cuenta activa → 403 a `AccessDeniedPage`) (depende de T022, T023)
+- [X] T026 [US4] Adaptar las fixtures e2e en `frontend/tests/e2e/fixtures/auth.ts`: `loginAsGoogleUser(email, { invited = true })` siembra `invitations/{email}` por REST en el emulador de Firestore desde el proceso de Playwright (nunca desde el bundle) antes de iniciar sesión, y nuevo helper `loginAsAdmin`; en `frontend/playwright.config.ts` pasar `BOOTSTRAP_ADMIN_EMAIL=admin-e2e@example.com` al backend. Los specs `us1`–`us5` existentes no deben necesitar cambios
+- [X] T027 [US4] Ejecutar `npm test`, `npm run lint`, el chequeo de tipos y `npm run test:e2e` completos; confirmar que los e2e de la feature 001 siguen en verde (depende de T025, T026)
 
 ### Pipeline
 
-- [ ] T028 [US1] Añadir `BOOTSTRAP_ADMIN_EMAIL` a `--update-env-vars` del paso de despliegue de la API y exigir que exista en el paso «Check the service variables» (falla si falta) en `.github/workflows/deploy.yml`, leyéndola de `vars.BOOTSTRAP_ADMIN_EMAIL` del GitHub Environment (sin secretos)
+- [X] T028 [US1] Añadir `BOOTSTRAP_ADMIN_EMAIL` a `--update-env-vars` del paso de despliegue de la API y exigir que exista en un paso propio «Check the bootstrap administrator» (falla si falta o no es una dirección válida) en `.github/workflows/deploy.yml`, leyéndola de `vars.BOOTSTRAP_ADMIN_EMAIL` del GitHub Environment (sin secretos); test en `.github/scripts/tests/test_deploy_bootstrap_admin.py`, registrado en el job `scripts-tests` de `ci.yml`
 - [ ] T029 [US1] (propietario) Crear la variable `BOOTSTRAP_ADMIN_EMAIL` con el correo de tu cuenta Google en los GitHub Environments `staging` y `production` (Settings → Environments → Variables). **Debe estar hecha antes de fusionar la PR de esta fase**
 
 ### Revisión de seguridad
 
-- [ ] T030 [US1] Revisión de seguridad de la fase con `mytasks-security-auditor` (autenticación, autorización, modelo de datos y gate de sesión del cliente, Principio III) y registro en `specs/003-user-roles-invitations/security-review-fase-1.md`; corregir los hallazgos CRITICAL/HIGH antes de abrir la PR
+- [X] T030 [US1] Revisión de seguridad de la fase con `mytasks-security-auditor` (autenticación, autorización, modelo de datos y gate de sesión del cliente, Principio III) y registro en `specs/003-user-roles-invitations/security-review-fase-1.md`; corregir los hallazgos CRITICAL/HIGH antes de abrir la PR
 
 **Checkpoint**: la API rechaza a cualquiera sin cuenta activa; el propietario puede entrar como
 admin en staging; T003, T004, T008 y la suite de la feature 001 (backend y e2e) en verde.
