@@ -1,11 +1,12 @@
 import asyncio
 from collections.abc import Awaitable, Callable
 from datetime import datetime
-from typing import Any, Concatenate
+from typing import Any, Concatenate, cast
 
 from fastapi import Depends
 from google.api_core import exceptions as google_exceptions
 from google.cloud import firestore
+from google.cloud.firestore_v1.async_aggregation import AsyncAggregationQuery
 from google.cloud.firestore_v1.base_query import FieldFilter
 
 from mytasks_api.domain.account import (
@@ -14,6 +15,7 @@ from mytasks_api.domain.account import (
     AccountStatus,
     Invitation,
     InvitationStatus,
+    PendingInvitationLimitError,
     Role,
     reactivate_account,
     reinvite,
@@ -181,15 +183,23 @@ async def _create_bootstrap_admin(
 async def _upsert_pending_invitation(
     transaction: firestore.AsyncTransaction,
     invitation_ref: firestore.AsyncDocumentReference,
+    pending_count: AsyncAggregationQuery,
     email: str,
     invited_by: str,
     now: datetime,
+    max_pending: int,
 ) -> tuple[Invitation, bool]:
     snapshot = await invitation_ref.get(transaction=transaction)
     data = snapshot.to_dict() if snapshot.exists else None
     if data is not None and data.get("status") == InvitationStatus.PENDING.value:
         # Already waiting: nothing changes, so the original date and author are kept.
         return _document_to_invitation(data), False
+
+    # Counted inside the transaction, which locks the pending range: two invitations racing
+    # for the last slot cannot both get it.
+    counts = await pending_count.get(transaction=transaction)
+    if counts[0][0].value >= max_pending:
+        raise PendingInvitationLimitError
 
     if data is not None and data.get("status") == InvitationStatus.REVOKED.value:
         invitation = reinvite(_document_to_invitation(data), invited_by, now)
@@ -318,13 +328,27 @@ class AccountRepository:
         return None
 
     async def upsert_pending_invitation(
-        self, email: str, invited_by: str, now: datetime
+        self, email: str, invited_by: str, now: datetime, max_pending: int
     ) -> tuple[Invitation, bool]:
         """Leave a pending invitation for `email`. The flag says whether this call made it
-        (False when one was already waiting, which is left untouched)."""
+        (False when one was already waiting, which is left untouched). Raises
+        `PendingInvitationLimitError` when `max_pending` invitations are already waiting."""
+        # The library's stubs declare the class itself as the return type of `count`.
+        pending_count = cast(
+            "AsyncAggregationQuery",
+            self._client.collection(INVITATIONS_COLLECTION)
+            .where(filter=FieldFilter("status", "==", InvitationStatus.PENDING.value))
+            .count(alias="pending"),
+        )
         return await _retry_on_abort(
             lambda: _upsert_pending_invitation(
-                self._client.transaction(), self._invitation_ref(email), email, invited_by, now
+                self._client.transaction(),
+                self._invitation_ref(email),
+                pending_count,
+                email,
+                invited_by,
+                now,
+                max_pending,
             )
         )
 

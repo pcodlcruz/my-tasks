@@ -14,9 +14,11 @@ from mytasks_api.domain.account import (
     InvitationNotFoundError,
     InvitationStatus,
     InviteOutcome,
+    PendingInvitationLimitError,
     Role,
     revoke_account,
 )
+from mytasks_api.services import access_service
 from mytasks_api.services.access_service import AccessService
 
 pytestmark = pytest.mark.unit
@@ -33,11 +35,14 @@ class FakeAccountRepository:
         return next((a for a in self.accounts.values() if a.email == email), None)
 
     async def upsert_pending_invitation(
-        self, email: str, invited_by: str, now: datetime
+        self, email: str, invited_by: str, now: datetime, max_pending: int
     ) -> tuple[Invitation, bool]:
         current = self.invitations.get(email)
         if current is not None and current.status is InvitationStatus.PENDING:
             return current, False
+        pending = sum(i.status is InvitationStatus.PENDING for i in self.invitations.values())
+        if pending >= max_pending:
+            raise PendingInvitationLimitError
         fresh = Invitation(email, InvitationStatus.PENDING, invited_by, now, None, None)
         self.invitations[email] = fresh
         return fresh, True
@@ -162,6 +167,62 @@ async def test_invite_rejects_an_invalid_address_and_stores_nothing(raw: str) ->
         await _service(repository).invite("admin-1", raw)
 
     assert repository.invitations == {}
+
+
+def test_the_pending_invitation_limit_is_50() -> None:
+    assert access_service.MAX_PENDING_INVITATIONS == 50
+
+
+async def test_invite_beyond_the_pending_limit_fails_and_stores_nothing(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(access_service, "MAX_PENDING_INVITATIONS", 2)
+    repository = FakeAccountRepository()
+    service = _service(repository)
+    await service.invite("admin-1", "a@example.com")
+    await service.invite("admin-1", "b@example.com")
+
+    with pytest.raises(PendingInvitationLimitError):
+        await service.invite("admin-1", "c@example.com")
+
+    assert "c@example.com" not in repository.invitations
+
+
+async def test_inviting_an_already_pending_address_at_the_limit_is_not_refused(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(access_service, "MAX_PENDING_INVITATIONS", 1)
+    service = _service(FakeAccountRepository())
+    await service.invite("admin-1", "a@example.com")
+
+    result = await service.invite("admin-1", "a@example.com")
+
+    assert result.outcome is InviteOutcome.ALREADY_PENDING
+
+
+async def test_reactivating_an_account_at_the_limit_is_not_refused(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(access_service, "MAX_PENDING_INVITATIONS", 1)
+    repository = FakeAccountRepository()
+    repository.accounts["uid-1"] = _account(status=AccountStatus.REVOKED)
+    service = _service(repository)
+    await service.invite("admin-1", "other@example.com")
+
+    result = await service.invite("admin-1", "ana@example.com")
+
+    assert result.outcome is InviteOutcome.REACTIVATED
+
+
+async def test_revoking_an_invitation_frees_a_slot(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(access_service, "MAX_PENDING_INVITATIONS", 1)
+    service = _service(FakeAccountRepository())
+    await service.invite("admin-1", "a@example.com")
+    await service.revoke_invitation("admin-1", "a@example.com")
+
+    result = await service.invite("admin-1", "b@example.com")
+
+    assert result.outcome is InviteOutcome.INVITED
 
 
 async def test_revoke_invitation_revokes_a_pending_one() -> None:

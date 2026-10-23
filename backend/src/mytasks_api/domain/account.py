@@ -50,6 +50,10 @@ class AccountAlreadyActiveError(Exception):
     """The address already belongs to an account with access; there is nothing to invite."""
 
 
+class PendingInvitationLimitError(Exception):
+    """Too many invitations are waiting at once; one must be accepted or revoked first."""
+
+
 class AccountNotFoundError(Exception):
     pass
 

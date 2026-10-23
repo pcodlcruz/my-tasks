@@ -25,6 +25,9 @@ logger = logging.getLogger(__name__)
 # The management screen shows the latest of each list; there is no paging in this version.
 ACCESS_LIST_LIMIT = 100
 
+# Bounds the invitations waiting at once, so the pending ones always fit in that list.
+MAX_PENDING_INVITATIONS = 50
+
 
 @dataclass(frozen=True)
 class InviteResult:
@@ -121,7 +124,7 @@ class AccessService:
             return InviteResult(InviteOutcome.REACTIVATED, email)
 
         _, created_now = await self._repository.upsert_pending_invitation(
-            email, admin_uid, datetime.now(UTC)
+            email, admin_uid, datetime.now(UTC), MAX_PENDING_INVITATIONS
         )
         if not created_now:
             return InviteResult(InviteOutcome.ALREADY_PENDING, email)

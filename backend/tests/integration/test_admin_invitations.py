@@ -180,6 +180,141 @@ async def test_an_invited_person_can_then_sign_in_and_gets_the_user_role(
     assert me.json()["role"] == "user"
 
 
+async def _pending_count(firestore_client: firestore.AsyncClient) -> int:
+    documents = firestore_client.collection("invitations").stream()
+    return len([d async for d in documents if (d.to_dict() or {})["status"] == "pending"])
+
+
+async def _seed_pending(seed_invitation: SeedInvitationFactory, count: int) -> None:
+    for index in range(count):
+        await seed_invitation(f"seed{index}@example.com")
+
+
+async def test_invite_beyond_50_pending_returns_409_and_creates_nothing(
+    client: httpx.AsyncClient,
+    firestore_client: firestore.AsyncClient,
+    admin_user: AdminUserFactory,
+    seed_invitation: SeedInvitationFactory,
+) -> None:
+    admin = await admin_user()
+    await _seed_pending(seed_invitation, 50)
+
+    response = await client.post(
+        URL, json={"email": "extra@example.com"}, headers=_auth(admin.id_token)
+    )
+
+    assert response.status_code == 409
+    assert response.json()["code"] == "invitation_limit_reached"
+    assert await _invitation(firestore_client, "extra@example.com") == {}
+    assert await _pending_count(firestore_client) == 50
+
+
+async def test_the_50th_pending_invitation_is_accepted(
+    client: httpx.AsyncClient,
+    firestore_client: firestore.AsyncClient,
+    admin_user: AdminUserFactory,
+    seed_invitation: SeedInvitationFactory,
+) -> None:
+    admin = await admin_user()
+    await _seed_pending(seed_invitation, 49)
+
+    response = await client.post(
+        URL, json={"email": "last@example.com"}, headers=_auth(admin.id_token)
+    )
+
+    assert response.status_code == 201
+    assert await _pending_count(firestore_client) == 50
+
+
+async def test_inviting_an_already_pending_address_at_the_limit_returns_200(
+    client: httpx.AsyncClient,
+    admin_user: AdminUserFactory,
+    seed_invitation: SeedInvitationFactory,
+) -> None:
+    admin = await admin_user()
+    await _seed_pending(seed_invitation, 50)
+
+    response = await client.post(
+        URL, json={"email": "seed0@example.com"}, headers=_auth(admin.id_token)
+    )
+
+    assert response.status_code == 200
+    assert response.json()["outcome"] == "already_pending"
+
+
+async def test_only_pending_invitations_count_towards_the_limit(
+    client: httpx.AsyncClient,
+    admin_user: AdminUserFactory,
+    seed_invitation: SeedInvitationFactory,
+) -> None:
+    admin = await admin_user()
+    await _seed_pending(seed_invitation, 49)
+    for index in range(10):
+        await seed_invitation(f"done{index}@example.com", status="accepted")
+        await seed_invitation(f"gone{index}@example.com", status="revoked")
+
+    response = await client.post(
+        URL, json={"email": "new@example.com"}, headers=_auth(admin.id_token)
+    )
+
+    assert response.status_code == 201
+
+
+async def test_revoking_an_invitation_at_the_limit_frees_a_slot(
+    client: httpx.AsyncClient,
+    admin_user: AdminUserFactory,
+    seed_invitation: SeedInvitationFactory,
+) -> None:
+    admin = await admin_user()
+    await _seed_pending(seed_invitation, 50)
+    revoked = await client.delete(f"{URL}/seed0@example.com", headers=_auth(admin.id_token))
+
+    response = await client.post(
+        URL, json={"email": "new@example.com"}, headers=_auth(admin.id_token)
+    )
+
+    assert revoked.status_code == 204
+    assert response.status_code == 201
+
+
+async def test_reactivating_an_account_at_the_limit_is_not_refused(
+    client: httpx.AsyncClient,
+    admin_user: AdminUserFactory,
+    google_user_without_account: GoogleUserFactory,
+    seed_account: SeedAccountFactory,
+    seed_invitation: SeedInvitationFactory,
+) -> None:
+    admin = await admin_user()
+    ana = await google_user_without_account("ana@example.com")
+    await seed_account(ana.uid, "ana@example.com", status="revoked")
+    await _seed_pending(seed_invitation, 50)
+
+    response = await client.post(
+        URL, json={"email": "ana@example.com"}, headers=_auth(admin.id_token)
+    )
+
+    assert response.status_code == 201
+    assert response.json()["outcome"] == "reactivated"
+
+
+async def test_two_invitations_at_once_with_one_slot_left_create_only_one(
+    client: httpx.AsyncClient,
+    firestore_client: firestore.AsyncClient,
+    admin_user: AdminUserFactory,
+    seed_invitation: SeedInvitationFactory,
+) -> None:
+    admin = await admin_user()
+    await _seed_pending(seed_invitation, 49)
+
+    responses = await asyncio.gather(
+        client.post(URL, json={"email": "a@example.com"}, headers=_auth(admin.id_token)),
+        client.post(URL, json={"email": "b@example.com"}, headers=_auth(admin.id_token)),
+    )
+
+    assert sorted(response.status_code for response in responses) == [201, 409]
+    assert await _pending_count(firestore_client) == 50
+
+
 @pytest.mark.parametrize(
     "email",
     ["", "   ", "no-at-sign", "a@b", "two@@example.com", "a b@example.com", "x/y@example.com"],

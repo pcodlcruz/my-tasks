@@ -17,6 +17,7 @@ from mytasks_api.domain.account import (
     AdminAccountProtectedError,
     InvalidEmailError,
     InvitationNotFoundError,
+    PendingInvitationLimitError,
 )
 from mytasks_api.domain.task import (
     MAX_ACTIVE_TASKS,
@@ -32,6 +33,7 @@ from mytasks_api.routers.admin import router as admin_router
 from mytasks_api.routers.me import router as me_router
 from mytasks_api.routers.tasks import router as tasks_router
 from mytasks_api.schemas.task import ErrorOut, ReadinessOut
+from mytasks_api.services.access_service import MAX_PENDING_INVITATIONS
 
 # The API only uses these methods and headers (contract in openapi.yaml).
 ALLOWED_METHODS = ["GET", "POST", "PATCH", "DELETE"]
@@ -159,6 +161,17 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         _: Request, __: AccountAlreadyActiveError
     ) -> JSONResponse:
         error = ErrorOut(code="already_active", message="Esa persona ya tiene acceso.")
+        return _error_response(status.HTTP_409_CONFLICT, error)
+
+    @app.exception_handler(PendingInvitationLimitError)
+    async def invitation_limit_handler(_: Request, __: PendingInvitationLimitError) -> JSONResponse:
+        error = ErrorOut(
+            code="invitation_limit_reached",
+            message=(
+                f"Hay {MAX_PENDING_INVITATIONS} invitaciones pendientes. "
+                "Revoca alguna o espera a que se acepte."
+            ),
+        )
         return _error_response(status.HTTP_409_CONFLICT, error)
 
     @app.exception_handler(AdminAccountProtectedError)
