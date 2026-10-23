@@ -1,11 +1,14 @@
 openapi: 3.1.0
 info:
   title: MyTasks API
-  version: 1.1.0
+  version: 1.2.0
   description: >-
-    API del Gestor Personal de Tareas (feature 001-eisenhower-task-manager).
+    API del Gestor Personal de Tareas (feature 001-eisenhower-task-manager; cuenta y
+    administración, feature 003-user-roles-invitations).
     Todas las rutas bajo /api/v1 exigen un ID token de Firebase Auth en
-    `Authorization: Bearer <token>`. El usuario se identifica siempre por el
+    `Authorization: Bearer <token>`, y además una cuenta activa: el acceso es solo por
+    invitación (403 `access_denied` si no la hay o fue retirada) y `/api/v1/admin` exige rol
+    `admin`. El usuario se identifica siempre por el
     `uid` del token; una tarea de otro usuario responde 404. Cada usuario puede
     tener como máximo 500 tareas activas (FR-016). Todas las respuestas incluyen
     `X-Request-ID` (generado por el servidor, para correlacionar con los logs) y
@@ -48,6 +51,109 @@ paths:
                 properties:
                   status: { type: string, const: ok }
 
+  # Cuenta y administración: añadidas por la feature 003-user-roles-invitations (fuente:
+  # specs/003-user-roles-invitations/contracts/access.yaml).
+  /api/v1/me:
+    get:
+      summary: Cuenta de la sesión; acepta la invitación pendiente o aplica el bootstrap
+      description: >-
+        Único punto que crea cuentas: si no existe `users/{uid}` y hay una invitación pendiente
+        para el correo verificado del token, la acepta; si el correo es `BOOTSTRAP_ADMIN_EMAIL`,
+        crea el administrador. En cualquier otro caso, 403.
+      responses:
+        "200":
+          description: Cuenta activa.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/MeOut" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/AccessDenied" }
+        "503": { $ref: "#/components/responses/AuthUnavailable" }
+
+  /api/v1/admin/access:
+    get:
+      summary: Lista invitaciones y cuentas (solo admin)
+      responses:
+        "200":
+          description: Hasta 100 invitaciones y 100 cuentas, las más recientes.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AccessListOut" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/AccessDenied" }
+        "503": { $ref: "#/components/responses/AuthUnavailable" }
+
+  /api/v1/admin/invitations:
+    post:
+      summary: Invita un correo, o reactiva la cuenta revocada con ese correo (solo admin)
+      description: >-
+        Como máximo 50 invitaciones pendientes a la vez. Reinvitar a una dirección ya pendiente
+        y reactivar una cuenta no consumen hueco.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/InvitationIn" }
+      responses:
+        "201":
+          description: Invitación creada o cuenta reactivada.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/InviteResultOut" }
+        "200":
+          description: Ya había una invitación pendiente para ese correo; no se duplica.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/InviteResultOut" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/AccessDenied" }
+        "409":
+          description: >-
+            El correo ya tiene una cuenta activa (código `already_active`), o ya hay 50
+            invitaciones pendientes (código `invitation_limit_reached`).
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "422": { $ref: "#/components/responses/ValidationError" }
+        "503": { $ref: "#/components/responses/AuthUnavailable" }
+
+  /api/v1/admin/invitations/{email}:
+    delete:
+      summary: Revoca una invitación pendiente (solo admin)
+      parameters:
+        - { name: email, in: path, required: true, schema: { type: string, minLength: 1, maxLength: 254 } }
+      responses:
+        "204": { description: Invitación revocada. }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/AccessDenied" }
+        "404":
+          description: No hay invitación pendiente para ese correo (código `not_found`).
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "503": { $ref: "#/components/responses/AuthUnavailable" }
+
+  /api/v1/admin/users/{uid}:
+    delete:
+      summary: Retira el acceso a un usuario; sus tareas se conservan (solo admin)
+      parameters:
+        - { name: uid, in: path, required: true, schema: { type: string, minLength: 1, maxLength: 128 } }
+      responses:
+        "204": { description: Acceso retirado. }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/AccessDenied" }
+        "404":
+          description: La cuenta no existe (código `not_found`).
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "409":
+          description: No se puede retirar el acceso a un administrador (código `admin_protected`).
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "503": { $ref: "#/components/responses/AuthUnavailable" }
+
   /api/v1/tasks:
     get:
       summary: Lista tareas de una vista (tablero, historial o papelera)
@@ -81,6 +187,7 @@ paths:
             application/json:
               schema: { $ref: "#/components/schemas/TaskPage" }
         "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/AccessDenied" }
         "422": { $ref: "#/components/responses/ValidationError" }
         "503": { $ref: "#/components/responses/AuthUnavailable" }
     post:
@@ -98,6 +205,7 @@ paths:
             application/json:
               schema: { $ref: "#/components/schemas/Task" }
         "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/AccessDenied" }
         "409": { $ref: "#/components/responses/TaskLimitReached" }
         "422": { $ref: "#/components/responses/ValidationError" }
         "503": { $ref: "#/components/responses/AuthUnavailable" }
@@ -114,6 +222,7 @@ paths:
             application/json:
               schema: { $ref: "#/components/schemas/Task" }
         "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/AccessDenied" }
         "404": { $ref: "#/components/responses/NotFound" }
         "503": { $ref: "#/components/responses/AuthUnavailable" }
     patch:
@@ -131,6 +240,7 @@ paths:
             application/json:
               schema: { $ref: "#/components/schemas/Task" }
         "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/AccessDenied" }
         "404": { $ref: "#/components/responses/NotFound" }
         "409": { $ref: "#/components/responses/InvalidTransition" }
         "422": { $ref: "#/components/responses/ValidationError" }
@@ -141,6 +251,7 @@ paths:
       responses:
         "204": { description: Borrada para siempre }
         "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/AccessDenied" }
         "404": { $ref: "#/components/responses/NotFound" }
         "409": { $ref: "#/components/responses/InvalidTransition" }
         "503": { $ref: "#/components/responses/AuthUnavailable" }
@@ -153,6 +264,7 @@ paths:
       responses:
         "200": { $ref: "#/components/responses/TaskOk" }
         "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/AccessDenied" }
         "404": { $ref: "#/components/responses/NotFound" }
         "409": { $ref: "#/components/responses/InvalidTransition" }
         "503": { $ref: "#/components/responses/AuthUnavailable" }
@@ -166,6 +278,7 @@ paths:
       responses:
         "200": { $ref: "#/components/responses/TaskOk" }
         "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/AccessDenied" }
         "404": { $ref: "#/components/responses/NotFound" }
         "409": { $ref: "#/components/responses/InvalidTransitionOrLimit" }
         "503": { $ref: "#/components/responses/AuthUnavailable" }
@@ -178,6 +291,7 @@ paths:
       responses:
         "200": { $ref: "#/components/responses/TaskOk" }
         "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/AccessDenied" }
         "404": { $ref: "#/components/responses/NotFound" }
         "409": { $ref: "#/components/responses/InvalidTransition" }
         "503": { $ref: "#/components/responses/AuthUnavailable" }
@@ -193,6 +307,7 @@ paths:
       responses:
         "200": { $ref: "#/components/responses/TaskOk" }
         "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/AccessDenied" }
         "404": { $ref: "#/components/responses/NotFound" }
         "409": { $ref: "#/components/responses/InvalidTransitionOrLimit" }
         "503": { $ref: "#/components/responses/AuthUnavailable" }
@@ -280,13 +395,69 @@ components:
           items: { $ref: "#/components/schemas/Task" }
         next_cursor: { type: [string, "null"] }
 
+    Role: { type: string, enum: [user, admin] }
+    AccountStatus: { type: string, enum: [active, revoked] }
+    InvitationStatus: { type: string, enum: [pending, accepted, revoked] }
+
+    MeOut:
+      type: object
+      required: [uid, email, role]
+      properties:
+        uid: { type: string }
+        email: { type: string }
+        role: { $ref: "#/components/schemas/Role" }
+
+    InvitationIn:
+      type: object
+      required: [email]
+      additionalProperties: false
+      properties:
+        email: { type: string, maxLength: 254 }
+
+    InvitationOut:
+      type: object
+      required: [email, status, created_at, accepted_at]
+      properties:
+        email: { type: string }
+        status: { $ref: "#/components/schemas/InvitationStatus" }
+        created_at: { type: string, format: date-time }
+        accepted_at: { type: [string, "null"], format: date-time }
+
+    AccountOut:
+      type: object
+      required: [uid, email, role, status, created_at]
+      properties:
+        uid: { type: string }
+        email: { type: string }
+        role: { $ref: "#/components/schemas/Role" }
+        status: { $ref: "#/components/schemas/AccountStatus" }
+        created_at: { type: string, format: date-time }
+
+    InviteResultOut:
+      type: object
+      required: [outcome, email]
+      properties:
+        outcome: { type: string, enum: [invited, already_pending, reactivated] }
+        email: { type: string }
+
+    AccessListOut:
+      type: object
+      required: [invitations, accounts]
+      properties:
+        invitations:
+          type: array
+          items: { $ref: "#/components/schemas/InvitationOut" }
+        accounts:
+          type: array
+          items: { $ref: "#/components/schemas/AccountOut" }
+
     Error:
       type: object
       required: [code, message]
       properties:
         code:
           type: string
-          examples: [unauthenticated, auth_unavailable, not_found, invalid_transition, task_limit_reached, validation_error]
+          examples: [unauthenticated, access_denied, auth_unavailable, not_found, invalid_transition, task_limit_reached, validation_error, already_active, invitation_limit_reached, admin_protected]
         message: { type: string, description: "Mensaje legible en español" }
         details: { type: array, items: { type: object } }
 
@@ -301,6 +472,15 @@ components:
       content:
         application/json:
           schema: { $ref: "#/components/schemas/Error" }
+    AccessDenied:
+      description: >-
+        Autenticado pero sin acceso: sin invitación, acceso retirado o, en `/api/v1/admin`, rol
+        insuficiente (código `access_denied`). El mensaje no distingue entre esos casos. Se
+        evalúa después del 401.
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+          example: { code: access_denied, message: No tienes acceso a esta aplicación. }
     AuthUnavailable:
       description: >-
         No se pudo verificar la sesión por un fallo del verificador de tokens (red,
