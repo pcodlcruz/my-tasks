@@ -39,6 +39,9 @@ Comprobados leyendo el código y ejecutando las pruebas (387 de backend, 113 uni
 ## Hallazgos
 
 ### [LOW-001] La caché de datos del cliente no se vacía al cerrar sesión ni al cambiar de usuario
+
+> **Resuelto (2026-10-23):** `app/SessionCacheReset.tsx` llama a `queryClient.clear()` cuando cambia el `uid` o se cierra sesión (no en la primera carga). Prueba: `tests/unit/app/SessionCacheReset.test.tsx`.
+
 | Campo | Valor |
 |---|---|
 | **Severidad** | Baja |

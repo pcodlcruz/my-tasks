@@ -22,9 +22,14 @@ para la feature completa. Fecha: 2026-10-23.
 Resumen de lo que `security-review-final.md` recomienda cerrar antes de promover a `main`:
 
 1. ~~**T057**~~ Hecho: validado en staging por el propietario.
-2. Corregir **LOW-001 de la Fase 3** (vaciar la caché de datos del cliente al cambiar de usuario).
-3. Comprobar en la consola de ambos entornos que Identity Platform tiene **solo el proveedor
-   Google** y la opción de **una cuenta por correo**; y probar una vez en staging la recuperación
-   del administrador descrita en `RUNBOOK.md` §12.
-4. Decidir sobre el bootstrap (Fase 1, LOW-001), la caducidad de invitaciones y el correo guardado
+2. ~~Corregir **LOW-001 de la Fase 3**~~ Hecho: `SessionCacheReset` vacía la caché del cliente al
+   cambiar de usuario o cerrar sesión.
+3. ~~Comprobar en ambos entornos que Firebase Authentication (Identity Platform) tiene **solo el
+   proveedor Google** y la opción de **una cuenta por correo**~~ Hecho: comprobado por el
+   propietario el 2026-10-23.
+4. ~~Probar en staging la recuperación del administrador descrita en `RUNBOOK.md` §12~~ Omitida
+   por decisión del propietario (2026-10-23): por ahora es el único administrador. **Riesgo
+   aceptado**: si pierde el acceso a su cuenta, la recuperación del runbook no está probada.
+   Conviene probarla antes de añadir más administradores o personas con acceso.
+5. Decidir sobre el bootstrap (Fase 1, LOW-001), la caducidad de invitaciones y el correo guardado
    (LOW-002 y LOW-003 de la revisión final); pueden ir al backlog técnico si se aceptan.

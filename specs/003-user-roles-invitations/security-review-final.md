@@ -111,7 +111,7 @@ Decidir una de dos: (a) actualizar el correo guardado cuando el token trae otro 
 Por diseño (R6) la aplicación no revoca a un `admin`. `RUNBOOK.md` §12 documenta cómo retirarlo (poner `status = "revoked"` en `users/{uid}` desde la consola de Firestore, con credenciales del propietario) y cómo recuperar el acceso si se pierde la cuenta (cambiar `BOOTSTRAP_ADMIN_EMAIL` y redesplegar). Ambos procedimientos están marcados como **no probados**, y el relanzado del despliegue también. Conviene probarlos una vez en staging (puede ir junto con T057) y anotar el resultado. *Destinatario*: el propietario (no encaja en una fila de la tabla de `CLAUDE.md`).
 
 ### [INFO-002] La seguridad del bootstrap sigue descansando en configuración que el repositorio no puede comprobar
-Heredada de la Fase 1 (INFO-001 e INFO-002): solo el proveedor Google habilitado, una cuenta por correo, y los Environments `staging` y `production` con revisores obligatorios y control de quién edita sus variables. Se ha dejado escrita como requisito en `RUNBOOK.md` §12; sigue pendiente su comprobación por el propietario en ambos entornos. *Destinatario*: el propietario.
+Heredada de la Fase 1 (INFO-001 e INFO-002): solo el proveedor Google habilitado, una cuenta por correo, y los Environments `staging` y `production` con revisores obligatorios y control de quién edita sus variables. Se ha dejado escrita como requisito en `RUNBOOK.md` §12; **comprobado por el propietario en ambos entornos el 2026-10-23.** *Destinatario*: el propietario (repetir si cambia la configuración).
 
 ---
 
