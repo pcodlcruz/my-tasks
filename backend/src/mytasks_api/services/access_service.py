@@ -25,7 +25,8 @@ logger = logging.getLogger(__name__)
 # The management screen shows the latest of each list; there is no paging in this version.
 ACCESS_LIST_LIMIT = 100
 
-# Bounds the invitations waiting at once, so the pending ones always fit in that list.
+# Bounds the invitations waiting at once. It does not by itself keep them in the list above:
+# that one mixes every status, so older pending ones can still fall out of its newest 100.
 MAX_PENDING_INVITATIONS = 50
 
 
