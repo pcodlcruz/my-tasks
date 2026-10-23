@@ -121,3 +121,31 @@ No se localizó todavía la pantalla resultante; no usar `edit_screens` sobre la
 **Exportación de capturas**: las URL de `screenshot.downloadUrl` (`lh3.googleusercontent.com`) se
 descargan con `curl` desde el sandbox añadiendo ese dominio a `allowed_domains`; los HTML hay que
 traerlos con `download_file`.
+
+## Registro de generaciones (feature 004)
+
+Estado a 2026-10-23, tras la segunda tanda. «Pendiente» = lanzada, aún sin aparecer en
+`list_screens`. El catálogo de 12 avatares (T005) se diseña **dentro** del selector de avatar
+(estado A), en claro y oscuro, en lugar de como pantalla aparte.
+
+| Pantalla | Escritorio | Móvil |
+|---|---|---|
+| S7 Perfil (claro) | `5b4edf53a88f4c5f89c51608ed120c60` (elegida; otras: `96712ae42b4c4ee88f469bd68b921fb2`, `52fa7e5212014ed1bf93978b520e4587`) | `0b97e3e427874566a38fc843734dc918` |
+| S7 Perfil (oscuro) | `912d3dc861c84104af22ceb366a9010a` | pendiente |
+| S7 Selector de avatar y recortador (claro) | pendiente | pendiente |
+| S7 Selector de avatar y recortador (oscuro) | pendiente | pendiente |
+| S3 Tablero v2 (claro) | `a3f141c47d3946ea9c1466f3916df60d` | pendiente |
+| S3 Tablero v2 (oscuro) | pendiente | pendiente |
+| S3 Tablero compacto (claro) | pendiente | pendiente |
+| S5 Historial v2 (claro / oscuro) | pendiente / pendiente | pendiente / pendiente |
+| S4 Formulario v2 (claro / oscuro) | pendiente / pendiente | pendiente / pendiente |
+| S6 Papelera v2 (claro / oscuro) | pendiente / pendiente | pendiente / pendiente |
+| S1 Iniciar sesión (oscuro) | `152e0cebe5114f25acd072fca6b63c84` | pendiente |
+
+**Hallazgo sobre el *design system* oscuro**: tras generar una pantalla con él, Stitch lo pasó a la
+versión 2 y recalculó su `namedColors` (p. ej. fondo `#081425` en lugar de `#0F172A`). El texto de
+`styleGuidelines` y los tokens de `designMd` siguen siendo los nuestros, pero conviene comprobar en
+cada captura oscura que los colores efectivos son los de `DESIGN.md`.
+
+**Desviaciones detectadas en S1 oscuro (escritorio)**: añade una insignia de «conexión cifrada
+OAuth 2.0» y una miniatura de los cuatro cuadrantes que el contrato no pide; quitarlas.
