@@ -48,3 +48,7 @@ export function formatPurgeNotice(iso: string, now: Date = new Date()): string {
   const days = Math.max(1, Math.ceil((new Date(iso).getTime() - now.getTime()) / DAY_MS))
   return `Se eliminará en ${days} ${days === 1 ? 'día' : 'días'}`
 }
+
+export function formatDay(iso: string): string {
+  return DAY_AND_MONTH.format(new Date(iso))
+}

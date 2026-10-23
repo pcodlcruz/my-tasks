@@ -29,8 +29,19 @@ export function isAccessDeniedError(error: unknown): boolean {
   return error instanceof ApiClientError && error.code === 'access_denied'
 }
 
+// The invitation or account being revoked is gone or changed from another window.
+export function isStaleAccessError(error: unknown): boolean {
+  return error instanceof ApiClientError && error.code === 'not_found'
+}
+
 // Errors whose message, already written in Spanish by the server, is shown as is.
-const USER_FACING_ERROR_CODES = ['task_limit_reached', 'auth_unavailable']
+const USER_FACING_ERROR_CODES = [
+  'task_limit_reached',
+  'auth_unavailable',
+  'already_active',
+  'invitation_limit_reached',
+  'admin_protected',
+]
 
 export function isUserFacingError(error: unknown): error is ApiClientError {
   return error instanceof ApiClientError && USER_FACING_ERROR_CODES.includes(error.code)
