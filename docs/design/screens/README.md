@@ -88,3 +88,36 @@ aprobado lo habría convertido en oscuro. Se creó un asset aparte con la paleta
 **Observación**: el `designMd` del sistema claro de Stitch aún lleva `scope-personal: #0D9488`;
 el repositorio ya usa `#0F766E` desde el hallazgo de axe en T105 de la 001. No afecta a esta
 feature; queda como deuda de sincronización.
+
+## Estado de generación (feature 004, 2026-10-23)
+
+El MCP de Stitch devuelve «The operation timed out.» en `generate_screen_from_text`, pero **la
+pantalla se genera igualmente y aparece en `list_screens` pasados unos 20-30 minutos** (no se
+indexa en `get_project`). No hay que reintentar tras un timeout: se espera y se consulta
+`list_screens`. Cada reintento crea una pantalla duplicada.
+
+| Pantalla nueva | Escritorio | Móvil | Estado |
+|---|---|---|---|
+| S7 · Perfil (claro) | `5b4edf53a88f4c5f89c51608ed120c60` (elegida) · duplicada: `96712ae42b4c4ee88f469bd68b921fb2` | lanzada, pendiente de indexar | Generada; ver desviaciones |
+| S7 · Perfil (oscuro) | lanzada, pendiente de indexar | — | Pendiente |
+
+**Desviaciones de S7 escritorio respecto de `contracts/ui-screens.md`** (a corregir con
+`edit_screens` antes del punto de control T013):
+
+- Texto «JPG, PNG o SVG. Tamaño recomendado de 256×256px» bajo el avatar: debe decir «JPEG, PNG o
+  WebP, hasta 2 MB» (o no aparecer en esta pantalla, porque el formato se explica en el selector).
+- Asterisco de obligatorio en «Nombre para mostrar»: el nombre es opcional.
+- Texto inventado «Administrado a través de Google Workspace…» bajo el correo: quitarlo.
+- Insignia «Usuario activo» y «Cuenta Google vinculada»: no están en el contrato; quitar la primera.
+- Pie de página con «Privacidad · Términos · Ayuda»: el resto de pantallas aprobadas lo llevan, así
+  que se deja.
+- Los grupos de opciones usan `role="radiogroup"` y `aria-checked`, y marcan la opción elegida con
+  borde, fondo y un icono de check: cumple el contrato.
+
+**Observación de `generate_variants`**: respondió al instante con operaciones DOM sobre la S3
+aprobada (`79c364a0…`), pero el HTML de esa pantalla sigue intacto (verificado con `download_file`).
+No se localizó todavía la pantalla resultante; no usar `edit_screens` sobre las aprobadas (FR-028).
+
+**Exportación de capturas**: las URL de `screenshot.downloadUrl` (`lh3.googleusercontent.com`) se
+descargan con `curl` desde el sandbox añadiendo ese dominio a `allowed_domains`; los HTML hay que
+traerlos con `download_file`.
