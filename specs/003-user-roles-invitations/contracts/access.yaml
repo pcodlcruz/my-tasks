@@ -57,7 +57,9 @@ paths:
         "401": { $ref: "#/components/responses/Unauthenticated" }
         "403": { $ref: "#/components/responses/AccessDenied" }
         "409":
-          description: El correo ya tiene una cuenta activa.
+          description: >-
+            El correo ya tiene una cuenta activa (`code: already_active`), o ya hay 50 invitaciones
+            pendientes (`code: invitation_limit_reached`).
           content:
             application/json:
               schema: { $ref: "#/components/schemas/ErrorOut" }
