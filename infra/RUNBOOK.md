@@ -540,6 +540,10 @@ Un run de `deploy-staging` en «waiting» bloquea a los siguientes: aprobarlo o 
 
 El arranque (estado, federación, cuentas del pipeline, repositorio) se hizo una vez por el MCP y ahora lo declara `infra/platform/`: sección 8. Los permisos temporales de `mytasks-ai-agent` y su retirada (T060, caducan el 2026-10-30 23:00 UTC) están en la sección 4. Los roles personalizados que concede el propietario, en `infra/iam/roles/` y `guia-propietario-med-001.md`.
 
+### Acceso por invitación y administradores
+
+Quién puede entrar, cómo se designa al administrador de cada entorno y cómo recuperar el acceso si se pierde: sección 12.
+
 ### Proveedor de Google en Identity Platform (R-2)
 
 Terraform no puede inicializar Identity Platform en un proyecto que no es Firebase (sección 9, «Paso previo al primer `apply`»). Staging lo activó el propietario en la consola de Firebase (T068, sección 9). Producción ya lo tenía desde el 2025-12-03 y la raíz lo adopta con `import` (sección 10). Si el inicio de sesión con Google falla tras un `apply`, comprobar primero los **dominios autorizados** y los orígenes de JavaScript del cliente OAuth. Falta confirmar con un inicio de sesión real en producción (T078).
@@ -559,3 +563,62 @@ Rotación cada 90 días: sección 2. Revocación inmediata: sección 3. Comproba
 5. La base de Firestore tiene `deletion_policy = "ABANDON"`: Terraform **la deja sin borrar** aunque destruya el recurso. Borrar los datos es un paso manual aparte, decidido por el propietario tras comprobar que no hace falta ninguna tarea.
 
 `infra/platform/` (bucket de estado, repositorio, pool y proveedor) no se retira con un entorno: lo comparten staging y producción, y un pool borrado bloquea su nombre 30 días.
+
+## 12. Acceso por invitación y administración (feature 003, T053)
+
+Desde la feature 003 **nadie obtiene cuenta por iniciar sesión con Google**: hay que estar invitado, o ser el administrador inicial de ese entorno. Quien no lo está ve la pantalla «Necesitas una invitación» y no obtiene ni cuenta ni datos. Staging y producción tienen cuentas e invitaciones separadas, así que todo lo de esta sección se hace **en cada entorno**. Diseño y decisiones: `specs/003-user-roles-invitations/` (`research.md` R3–R7); contrato en `specs/001-eisenhower-task-manager/contracts/openapi.yaml`.
+
+### Administrador inicial (bootstrap) por entorno
+
+Es el único caso en el que se crea una cuenta sin invitación. Lo decide la variable `BOOTSTRAP_ADMIN_EMAIL`, **no secreta**, del GitHub Environment de cada entorno:
+
+1. En GitHub: *Settings → Environments → `staging` (y `production`) → Variables → `BOOTSTRAP_ADMIN_EMAIL`*, con **una sola** dirección (la del propietario). Se compara sin distinguir mayúsculas.
+2. `deploy.yml` falla en «Check the bootstrap administrator» si la variable falta o no es una dirección única, antes de tocar nada, para que no se despliegue un entorno sin administrador posible. La API la recibe por `--update-env-vars` en cada despliegue (Terraform no puede, porque ignora `env` una vez creado el servicio).
+3. La primera vez que esa dirección inicia sesión con Google (con el correo verificado) y todavía no tiene cuenta, se crea su cuenta con rol `admin`. Si ya tenía tareas de antes, siguen ahí: el `uid` no cambia.
+4. A partir de ahí la variable ya no hace nada por esa persona: no crea ni reemplaza cuentas que existan. **Cambiarla no quita el rol a nadie**; solo permite que otra dirección sea administradora en su primer inicio de sesión.
+
+Estado a 2026-10-23: la variable está creada en ambos entornos por el propietario (T029); la validación real en staging es T057.
+
+### Invitar, revocar y reinvitar
+
+El administrador usa la pantalla **Accesos** (`/admin/access`, solo visible con rol `admin`); no hay que tocar Firestore ni Google Cloud.
+
+| Acción | Efecto |
+|---|---|
+| Invitar un correo | Crea una invitación `pending` y la lista. **La aplicación no envía ningún correo**: hay que avisar a la persona por tu cuenta. Entra con su cuenta de Google y su primera sesión crea la cuenta con rol `user` (la invitación pasa a `accepted`). |
+| Invitar un correo ya pendiente | No duplica (respuesta 200); no consume hueco. |
+| Invitar un correo con cuenta activa | Rechazado (409). |
+| Revocar una invitación pendiente | La persona ya no puede entrar con ella. |
+| Retirar el acceso a un usuario | Su siguiente petición recibe 403 y ve la pantalla «sin acceso». **Sus tareas se conservan.** |
+| Invitar de nuevo a quien perdió el acceso | Reactiva su cuenta con rol `user` y recupera sus tareas; no crea invitación. |
+
+Límites que conviene conocer: **como máximo 50 invitaciones pendientes** a la vez (la 51 da 409 `invitation_limit_reached`; revocar una libera un hueco) y la pantalla muestra **las 100 más recientes** de invitaciones y de cuentas (avisa cuando una lista llega a 100). Los administradores no se pueden revocar ni degradar desde la aplicación, y no hay operación que cambie roles: es deliberado, para no perder nunca al último administrador (R6).
+
+### Recuperar el acceso de administrador si se pierde la cuenta
+
+La aplicación no tiene recuperación de cuentas (fuera de alcance de la feature). Lo que hay, según el caso, **sin credenciales del agente** (Principio V):
+
+| Situación | Qué hacer |
+|---|---|
+| Puedes iniciar sesión con tu cuenta de Google, aunque haya cambiado su correo | Nada: la cuenta de la aplicación está ligada al `uid`, no al correo. El correo guardado **no se actualiza** (se queda el de cuando se creó la cuenta), así que en Accesos seguirá apareciendo el antiguo, y reinvitar el nuevo correo crearía una invitación para otra cuenta. |
+| **No puedes iniciar sesión** con la cuenta administradora (la perdiste o la cerraron) | Poner en la variable `BOOTSTRAP_ADMIN_EMAIL` de ese entorno otra dirección **tuya** y redesplegar por el pipeline (una fusión que cambie `backend/` o `frontend/`, o relanzar el último despliegue desde *Actions*; el relanzado **no está probado**). Al iniciar sesión con esa dirección, que no tiene cuenta, se crea un administrador nuevo. |
+| Quieres retirar el acceso al administrador anterior (por ejemplo, si la cuenta está comprometida) | **La aplicación no puede**: rechaza revocar a un `admin`. Lo hace el propietario con sus propias credenciales, en la consola de Firestore del proyecto del entorno, poniendo `status = "revoked"` en el documento `users/{uid}` de esa cuenta; el siguiente acceso de esa cuenta recibe 403. Procedimiento **no probado** y que el agente no ejecuta. |
+| Borraste y recreaste tu usuario en Firebase Authentication con el mismo correo | El `uid` es nuevo y ya no coincide con la cuenta: si la dirección es la de `BOOTSTRAP_ADMIN_EMAIL`, se crea otra cuenta `admin` y la anterior queda huérfana con sus tareas (no se migran). Revocar la antigua como en la fila anterior. No lo hagas sin necesidad. |
+
+Esto depende de dos requisitos de configuración de Identity Platform que no están en el repositorio y que debe comprobar el propietario en cada entorno (`security-review-fase-1.md`, INFO-001): que **solo está habilitado el proveedor Google** y que está activa la opción de **una cuenta por correo**.
+
+### Qué mirar en los registros
+
+Los eventos de acceso son JSON con una lista cerrada de campos (`action`, `uid`, `actor_uid`, `target`, `reason`); **nunca llevan tokens ni correos en claro**: `target` es una huella SHA-256 truncada del correo, que sirve para correlacionar eventos pero se puede invertir por diccionario si se conoce la dirección.
+
+| Mensaje | Cuándo |
+|---|---|
+| `access_denied` (con `reason`: `no_account`, `no_invitation`, `revoked`, `email_not_verified`, `invalid_email` o `not_admin`) | Se deniega una petición. El cliente siempre ve el mismo 403. |
+| `invitation_created`, `invitation_revoked`, `access_revoked`, `access_reactivated` | Acciones del administrador (`actor_uid`). |
+| `invitation_accepted`, `bootstrap_admin_created` | Primera sesión de una persona invitada / del administrador inicial. |
+
+El correo viaja en la ruta de `DELETE /api/v1/admin/invitations/{email}`, así que **sí** puede aparecer en los registros de petición de Cloud Run (`security-review-fase-2.md`, LOW-003): es un riesgo aceptado mientras la audiencia de los registros sea el propietario.
+
+### Validación en staging (T057, propietario)
+
+Tras desplegar por el pipeline, repetir en staging los escenarios 1–6 de `specs/003-user-roles-invitations/quickstart.md` con cuentas reales de prueba y anotar el resultado en `specs/003-user-roles-invitations/validacion-staging.md`.
