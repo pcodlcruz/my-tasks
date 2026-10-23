@@ -88,22 +88,22 @@ de contraste de la paleta oscura no devuelve ningún par por debajo de AA.
 > `docs/design/screens/README.md`). Si una pantalla falla tras los reintentos, se avisa en el
 > punto de control en lugar de bloquear la fase.
 
-- [ ] T001 Comprobar el acceso al proyecto Stitch «MyTasks» (`projects/13869439670490335529`) con `mcp__stitch__get_project` y `list_screens`, leer `docs/design/DESIGN.md` y `docs/design/screens/README.md`, y anotar en `docs/design/screens/README.md` una sección «Feature 004 · versiones nuevas» con los identificadores de las pantallas base (S1, S3, S4, S5, S6, escritorio y móvil)
-- [ ] T002 Proponer la **paleta oscura** como sección nueva «Tema oscuro» de `docs/design/DESIGN.md` (mismos nombres semánticos que `frontend/tailwind.config.ts`: texto, superficie, borde, primario, error, éxito, deshabilitado, cuadrantes y ámbitos; **sin tocar los valores claros**) y escribir `docs/design/check-contrast.py` (solo biblioteca estándar) que calcula los ratios de todos los pares y falla si alguno baja de AA (4,5:1 texto, 3:1 texto grande, iconos y bordes de controles); incluir su salida en `DESIGN.md`
-- [ ] T003 Añadir la paleta oscura al *design system* de Stitch con `mcp__stitch__update_design_system` (solo adición; los valores claros no cambian) y anotar su identificador en `docs/design/screens/README.md`
-- [ ] T004 Generar **S7 · Perfil** claro en escritorio y móvil según `contracts/ui-screens.md` (identidad, apariencia, tablero e historial, restablecer, todos los estados), junto con el **selector de avatar** (pestañas Catálogo / Subir imagen) y el **recortador** (vista cuadrada con zoom y vista previa redonda), y registrar los identificadores en `docs/design/screens/README.md`
-- [ ] T005 Generar el **catálogo de 12 avatares** (`avatar-01` … `avatar-12`: figuras simples y neutras, legibles a 32 px, sin rostros reales, con nombre en español para el texto alternativo) como una pantalla de rejilla en Stitch, en claro y en oscuro, y anotar el nombre de cada uno en `docs/design/screens/README.md`
-- [ ] T006 Generar **S3 · Tablero `-v2`** claro (cabecera con avatar + nombre enlazado a «Perfil» y «Cerrar sesión»; filtro de ámbito con el valor del perfil seleccionado) en escritorio y móvil, a partir de la pantalla aprobada `79c364a0e3e6454488990bcf380db4af` / `8f8343490e0f494982ba5b2a7d74fa96`
-- [ ] T007 Generar **S3 oscuro** y **S7 oscuro** (escritorio y móvil) con los tokens de T003, incluidos el **selector de avatar** y el **recortador** en oscuro (axe los validará en ambos temas)
-- [ ] T008 Generar **S3 compacta** (`-compact`, claro, escritorio y móvil): tarjetas con menos relleno y separación, zona de pulsación ≥ 32 px, y comprobar sobre la maqueta que caben al menos un 25 % más de tareas que en la cómoda (SC-005)
-- [ ] T009 Generar **S5 · Historial `-v2`** claro y oscuro (escritorio y móvil) con la franja «Mostrando solo los últimos N días · Ver todo» cuando hay un periodo activo
-- [ ] T010 Generar **S4 · Formulario de tarea `-v2`** claro y oscuro y **S6 · Papelera `-v2`** claro y oscuro (escritorio y móvil): solo cambian la cabecera y el tema
-- [ ] T011 Generar **S1 · Iniciar sesión** oscuro (escritorio y móvil); la versión clara aprobada sigue vigente
-- [ ] T012 Exportar el HTML y la captura PNG de cada pantalla generada (T004–T011; primero las de la ronda 1, después las de la ronda 2) a `docs/design/screens/<id>-<sufijo>/` (`desktop.html`, `desktop.png`, `mobile.html`, `mobile.png`, como las existentes) y actualizar la tabla de estado de `docs/design/screens/README.md` marcando cada una como **pendiente de aprobación**
-- [ ] T013 (propietario) **Punto de control humano, ronda 1**: revisar en Stitch y en `docs/design/screens/` las 10 pantallas del subconjunto prioritario (S7 Perfil, S3 `-v2`, S3 compacto, S3 oscuro y S7 oscuro, escritorio y móvil) y la paleta oscura (con la salida de `check-contrast.py`); aprobar, o pedir cambios (en ese caso se repite el paso afectado). La **ronda 2** (S1 oscuro, S4, S5, S6 y el selector de avatar con catálogo y recortador) se aprueba en una segunda revisión antes de la Fase 4
-- [ ] T014 Registrar las aprobaciones en `docs/design/screens/README.md` (identificador de Stitch, fecha y **pantalla vigente** de cada una; las aprobadas de la 001 siguen intactas como referencia anterior) y marcar el avance de esta fase en este fichero
+- [X] T001 Comprobar el acceso al proyecto Stitch «MyTasks» (`projects/13869439670490335529`) con `mcp__stitch__get_project` y `list_screens`, leer `docs/design/DESIGN.md` y `docs/design/screens/README.md`, y anotar en `docs/design/screens/README.md` una sección «Feature 004 · versiones nuevas» con los identificadores de las pantallas base (S1, S3, S4, S5, S6, escritorio y móvil) *Hecho.*
+- [X] T002 Proponer la **paleta oscura** como sección nueva «Tema oscuro» de `docs/design/DESIGN.md` (mismos nombres semánticos que `frontend/tailwind.config.ts`: texto, superficie, borde, primario, error, éxito, deshabilitado, cuadrantes y ámbitos; **sin tocar los valores claros**) y escribir `docs/design/check-contrast.py` (solo biblioteca estándar) que calcula los ratios de todos los pares y falla si alguno baja de AA (4,5:1 texto, 3:1 texto grande, iconos y bordes de controles); incluir su salida en `DESIGN.md` *Hecho: 0 pares por debajo de AA en ambos temas.*
+- [X] T003 Añadir la paleta oscura al *design system* de Stitch con `mcp__stitch__update_design_system` (solo adición; los valores claros no cambian) y anotar su identificador en `docs/design/screens/README.md` *Hecho como asset aparte (`assets/16783421015770598561`): Stitch admite un solo modo de color por sistema y `update_design_system` habría convertido el aprobado en oscuro.*
+- [X] T004 Generar **S7 · Perfil** claro en escritorio y móvil según `contracts/ui-screens.md` (identidad, apariencia, tablero e historial, restablecer, todos los estados), junto con el **selector de avatar** (pestañas Catálogo / Subir imagen) y el **recortador** (vista cuadrada con zoom y vista previa redonda), y registrar los identificadores en `docs/design/screens/README.md` *Hecho para S7 claro en escritorio y móvil. El selector de avatar y el recortador pasan a T113.*
+- [X] T005 Generar el **catálogo de 12 avatares** (`avatar-01` … `avatar-12`: figuras simples y neutras, legibles a 32 px, sin rostros reales, con nombre en español para el texto alternativo) como una pantalla de rejilla en Stitch, en claro y en oscuro, y anotar el nombre de cada uno en `docs/design/screens/README.md` *Movido a T113: el catálogo se diseña dentro del selector de avatar.*
+- [X] T006 Generar **S3 · Tablero `-v2`** claro (cabecera con avatar + nombre enlazado a «Perfil» y «Cerrar sesión»; filtro de ámbito con el valor del perfil seleccionado) en escritorio y móvil, a partir de la pantalla aprobada `79c364a0e3e6454488990bcf380db4af` / `8f8343490e0f494982ba5b2a7d74fa96` *Hecho solo en escritorio (`a3f141c47d3946ea9c1466f3916df60d`); el móvil pasa a T109.*
+- [X] T007 Generar **S3 oscuro** y **S7 oscuro** (escritorio y móvil) con los tokens de T003, incluidos el **selector de avatar** y el **recortador** en oscuro (axe los validará en ambos temas) *Hecho solo para S7 oscuro en escritorio; S3 oscuro y S7 oscuro móvil pasan a T109, y el selector y el recortador en oscuro a T113.*
+- [X] T008 Generar **S3 compacta** (`-compact`, claro, escritorio y móvil): tarjetas con menos relleno y separación, zona de pulsación ≥ 32 px, y comprobar sobre la maqueta que caben al menos un 25 % más de tareas que en la cómoda (SC-005) *Movido a T109.*
+- [X] T009 Generar **S5 · Historial `-v2`** claro y oscuro (escritorio y móvil) con la franja «Mostrando solo los últimos N días · Ver todo» cuando hay un periodo activo *Movido a T111.*
+- [X] T010 Generar **S4 · Formulario de tarea `-v2`** claro y oscuro y **S6 · Papelera `-v2`** claro y oscuro (escritorio y móvil): solo cambian la cabecera y el tema *Movido a T111.*
+- [X] T011 Generar **S1 · Iniciar sesión** oscuro (escritorio y móvil); la versión clara aprobada sigue vigente *Hecho solo en escritorio (`152e0cebe5114f25acd072fca6b63c84`); el móvil pasa a T111.*
+- [X] T012 Exportar el HTML y la captura PNG de cada pantalla generada (T004–T011; primero las de la ronda 1, después las de la ronda 2) a `docs/design/screens/<id>-<sufijo>/` (`desktop.html`, `desktop.png`, `mobile.html`, `mobile.png`, como las existentes) y actualizar la tabla de estado de `docs/design/screens/README.md` marcando cada una como **pendiente de aprobación** *Hecho para las cuatro pantallas aprobadas (S7 claro escritorio y móvil, S7 oscuro escritorio y S3 v2 claro escritorio).*
+- [X] T013 (propietario) **Punto de control humano, ronda 1**: revisar en Stitch y en `docs/design/screens/` las 10 pantallas del subconjunto prioritario (S7 Perfil, S3 `-v2`, S3 compacto, S3 oscuro y S7 oscuro, escritorio y móvil) y la paleta oscura (con la salida de `check-contrast.py`); aprobar, o pedir cambios (en ese caso se repite el paso afectado). La **ronda 2** (S1 oscuro, S4, S5, S6 y el selector de avatar con catálogo y recortador) se aprueba en una segunda revisión antes de la Fase 4 *Hecho el 2026-10-23: el propietario aceptó los diseños existentes.*
+- [X] T014 Registrar las aprobaciones en `docs/design/screens/README.md` (identificador de Stitch, fecha y **pantalla vigente** de cada una; las aprobadas de la 001 siguen intactas como referencia anterior) y marcar el avance de esta fase en este fichero *Hecho el 2026-10-23.*
 
-**Checkpoint**: diseño aprobado. Las Fases 3 a 6 pueden empezar (la 2 no depende de él).
+**Checkpoint**: ronda 1 aprobada en parte (S7 y S3 v2 claro escritorio, y la paleta oscura). Lo que falta de Stitch pasa a tareas con diseño pendiente al inicio de las Fases 3, 4 y 5 (T109–T114). La Fase 2 no depende del diseño.
 
 ---
 
@@ -168,6 +168,11 @@ hay destello del tema contrario.
 limitada, cerrar sesión, volver a entrar y abrir desde otro navegador: todo sigue igual y nunca se
 ve el tema claro antes. Además, la comprobación axe pasa en las pantallas en ambos temas.
 
+### Diseño pendiente de la ronda 1 (tablero oscuro y compacto)
+
+- [ ] T109 Con el MCP de Stitch, generar **S3 Tablero v2 claro móvil**, **S3 oscuro** (escritorio y móvil), **S3 compacto** (claro, escritorio y móvil, con al menos un 25 % más de tareas visibles, SC-005) y **S7 Perfil oscuro móvil**, con los prompts de `docs/design/screens/prompts-004.md`; esperar a que Stitch los coloque, revisar las capturas, exportarlas a `docs/design/screens/` y anotarlas en `docs/design/screens/README.md`. Sin ellas, T040, T044 y T047 (densidad y tema oscuro del tablero) no tienen referencia
+- [ ] T110 (propietario) Aprobar las pantallas de T109 y registrar la pantalla vigente de cada una en `docs/design/screens/README.md`
+
 ### Tests de la Fase 3 (escribirlos primero; deben fallar)
 
 - [ ] T034 [P] [US1] Tests unitarios de `frontend/src/lib/appearance.ts` en `frontend/tests/unit/lib/appearance.test.ts`: resolver `system` con `matchMedia`, aplicar `data-theme` y `data-density` a `<html>`, leer y escribir la caché `mytasks.appearance`, y que sin `localStorage` (excepción al leer o escribir) cae en «sistema» y «cómoda» sin lanzar
@@ -210,6 +215,11 @@ días», y la aplicación se abre así sin pasos extra; cambiar el filtro en una
 entrar y comprobar el tablero filtrado; cambiar el filtro a «Personal», volver a abrir y ver que
 vuelve a «Laboral».
 
+### Diseño pendiente de la ronda 2 (S4, S5, S6 y S1 móvil)
+
+- [ ] T111 Con el MCP de Stitch, generar las versiones nuevas de **S5 Historial** (con la franja «Mostrando solo los últimos N días · Ver todo»), **S4 Formulario de tarea** y **S6 Papelera** en claro y oscuro (escritorio y móvil), y **S1 Iniciar sesión oscuro móvil**, con los prompts de `docs/design/screens/prompts-004.md`; esperar a que Stitch los coloque, revisar las capturas, exportarlas a `docs/design/screens/` y anotarlas en `docs/design/screens/README.md`
+- [ ] T112 (propietario) Aprobar las pantallas de T111 (ronda 2 del punto de control) y registrar la pantalla vigente de cada una en `docs/design/screens/README.md`
+
 ### Tests de la Fase 4 (escribirlos primero; deben fallar)
 
 - [ ] T053 [P] [US2] Tests unitarios en `frontend/tests/unit/features/board/BoardPage.test.tsx`: el tablero no pide tareas hasta que el perfil se resuelve (éxito o error); al llegar el perfil fija el ámbito **una sola vez** (una recarga del perfil no lo cambia); un cambio manual del filtro no llama a `PATCH`; con error de perfil (tras su único reintento) usa «Todas» y no deja el tablero esperando; y pasa `order` a la petición
@@ -241,6 +251,11 @@ Google.
 
 **Independent Test**: en «Perfil», escribir un nombre, elegir un avatar del catálogo, comprobar la
 cabecera, quitar el avatar y ver las iniciales; probar nombre vacío, de 51 caracteres y con HTML.
+
+### Diseño pendiente de la ronda 2 (selector de avatar)
+
+- [ ] T113 Con el MCP de Stitch, generar el **selector de avatar y el recortador** (claro y oscuro, escritorio y móvil, con el catálogo de los 12 avatares dentro) según `contracts/ui-screens.md` y `docs/design/screens/prompts-004.md`; esperar a que Stitch los coloque (unos 45-60 minutos; no reintentar tras un *timeout*), revisar las capturas, exportarlos a `docs/design/screens/s7-avatar-picker*/` y anotarlos en `docs/design/screens/README.md`
+- [ ] T114 (propietario) Aprobar el selector, el recortador y el catálogo de avatares (ronda 2 del punto de control) y registrar la pantalla vigente en `docs/design/screens/README.md`
 
 ### Tests de la Fase 5 (escribirlos primero; deben fallar)
 

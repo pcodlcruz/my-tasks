@@ -167,3 +167,50 @@ control se divide:
 | S3 Tablero v2 (claro) | `a3f141c47d3946ea9c1466f3916df60d` | pendiente |
 | S3 Tablero v2 (oscuro) | pendiente | pendiente |
 | S3 Tablero compacto (claro) | pendiente | pendiente |
+
+## Aprobaciones de la feature 004 · ronda 1 (parcial)
+
+El propietario aceptó el 2026-10-23 los diseños existentes en ese momento. Son la **pantalla
+vigente** de cada una; las aprobadas de la feature 001 siguen intactas como referencia anterior.
+
+| Pantalla | Id de Stitch | Carpeta | Vigente para |
+|---|---|---|---|
+| Paleta oscura | `assets/16783421015770598561` | [`../DESIGN.md`](../DESIGN.md) § Tema oscuro | Tokens del tema oscuro |
+| S7 · Perfil (claro, escritorio) | `5b4edf53a88f4c5f89c51608ed120c60` | `s7-profile/desktop.*` | `/perfil` |
+| S7 · Perfil (claro, móvil) | `0b97e3e427874566a38fc843734dc918` | `s7-profile/mobile.*` | `/perfil` en móvil |
+| S7 · Perfil (oscuro, escritorio) | `912d3dc861c84104af22ceb366a9010a` | `s7-profile-dark/desktop.*` | `/perfil` en oscuro |
+| S3 · Tablero v2 (claro, escritorio) | `a3f141c47d3946ea9c1466f3916df60d` | `s3-board-v2/desktop.*` | Cabecera nueva del tablero (también la de S4, S5 y S6 hasta que tengan versión propia) |
+| S1 · Iniciar sesión (oscuro, escritorio) | `152e0cebe5114f25acd072fca6b63c84` | no exportada todavía | Tema oscuro del login (con las salvedades de abajo) |
+
+El resto de pantallas de la ronda 1 y las de la ronda 2 siguen pendientes (tareas T109 a T114 de
+[`tasks.md`](../../../specs/004-user-profile-settings/tasks.md)). **Hasta que se aprueben, siguen
+vigentes las pantallas de la 001** (por ejemplo, el tablero móvil).
+
+### Elementos de las pantallas aprobadas que la implementación **no** sigue
+
+Stitch añadió elementos que el contrato no pide, y `edit_screens` los quitó en su lienzo pero **no**
+en el HTML ni en la captura exportables (el fichero conserva la versión original). La implementación
+sigue [`contracts/ui-screens.md`](../../../specs/004-user-profile-settings/contracts/ui-screens.md) y no esto:
+
+- **S7 (claro y oscuro)**: el texto «JPG, PNG o SVG. Tamaño recomendado de 256×256px» bajo el avatar
+  (los formatos válidos son JPEG, PNG y WebP hasta 2 MB, y se explican en el selector); el asterisco
+  de obligatorio en «Nombre para mostrar» (es opcional); el párrafo «Administrado a través de Google
+  Workspace…» bajo el correo; y las insignias «Usuario activo», «Cuenta activa» y «Cuenta Google
+  vinculada».
+- **S7 oscuro (escritorio)**: el avatar es un cuadrado redondeado en el HTML; la implementación lo
+  hace **circular**, como el contrato. Los textos secundarios usan `#94A3B8` y los bordes `#334155`:
+  la implementación usa los tokens de [`DESIGN.md`](../DESIGN.md) (`#CBD5E1` y `#475569`).
+- **S7 móvil**: la barra de navegación inferior «Matriz / Hoy / Historial / Ajustes» (heredada de la
+  S3 móvil aprobada, que la implementación tampoco sigue). Se mantiene la cabecera común.
+- **S3 v2**: el HTML pinta el enlace de perfil como `<button>`; la implementación lo hace un enlace
+  a `/perfil`. Las fechas límite y «Delegado a» de las tarjetas son de ejemplo de la 001 y no
+  existen en el modelo de tareas.
+- **S1 oscuro**: la insignia «Sistema seguro • OAuth 2.0», la leyenda de los cuatro cuadrantes y la
+  línea «Autenticación directa sin contraseñas».
+
+### Observaciones sobre las herramientas
+
+- `edit_screens` modifica la pantalla en el lienzo de Stitch pero no actualiza los ficheros que
+  entrega `get_screen`/`download_file`: para corregir una pantalla hay que regenerarla.
+- Las capturas exportadas (`desktop.png`, `mobile.png`) son las de 2560 px (escritorio) y 780 px
+  (móvil) que entrega Stitch.
