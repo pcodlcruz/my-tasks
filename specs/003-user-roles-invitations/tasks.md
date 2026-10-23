@@ -123,21 +123,21 @@ puede hacer nada de esto.
 
 ### Tests (escribir primero y comprobar que fallan)
 
-- [ ] T031 [P] [US2] Tests unitarios del servicio de administración (invitar correo nuevo, ya pendiente → `already_pending`, con cuenta activa → conflicto, con cuenta revocada → `reactivated`, correo inválido, normalización de mayúsculas) en `backend/tests/unit/services/test_access_service_admin.py`
-- [ ] T032 [P] [US2] Test de integración de `POST /api/v1/admin/invitations` (201, 200 sin duplicar, 409, 422, 403 a un `user`, 401 sin token, reactivación conserva las tareas) en `backend/tests/integration/test_admin_invitations.py`
-- [ ] T033 [P] [US3] Test de integración de `GET /api/v1/admin/access`, `DELETE /api/v1/admin/invitations/{email}` y `DELETE /api/v1/admin/users/{uid}` (revocar invitación impide entrar; revocar cuenta → 403 inmediato en la siguiente petición y tareas conservadas; revocar un `admin` → 409; 404; 403 a un `user`; 401 sin token) en `backend/tests/integration/test_admin_users.py`
-- [ ] T034 [P] [US2] Test de integración de la auditoría (cada invitación, aceptación, revocación, reactivación y denegación genera su evento sin correos en claro ni tokens) en `backend/tests/integration/test_access_audit.py`
+- [X] T031 [P] [US2] Tests unitarios del servicio de administración (invitar correo nuevo, ya pendiente → `already_pending`, con cuenta activa → conflicto, con cuenta revocada → `reactivated`, correo inválido, normalización de mayúsculas) en `backend/tests/unit/services/test_access_service_admin.py`
+- [X] T032 [P] [US2] Test de integración de `POST /api/v1/admin/invitations` (201, 200 sin duplicar, 409, 422, 403 a un `user`, 401 sin token, reactivación conserva las tareas) en `backend/tests/integration/test_admin_invitations.py`
+- [X] T033 [P] [US3] Test de integración de `GET /api/v1/admin/access`, `DELETE /api/v1/admin/invitations/{email}` y `DELETE /api/v1/admin/users/{uid}` (revocar invitación impide entrar; revocar cuenta → 403 inmediato en la siguiente petición y tareas conservadas; revocar un `admin` → 409; 404; 403 a un `user`; 401 sin token) en `backend/tests/integration/test_admin_users.py`
+- [X] T034 [P] [US2] Test de integración de la auditoría (cada invitación, aceptación, revocación, reactivación y denegación genera su evento sin correos en claro ni tokens) en `backend/tests/integration/test_access_audit.py`
 
 ### Implementation
 
-- [ ] T035 [US2] Ampliar `backend/src/mytasks_api/repositories/account_repository.py` con crear/revocar invitación, listar (máx. 100), buscar cuenta por correo, revocar y reactivar cuenta (transaccionales)
-- [ ] T036 [US2] Ampliar `backend/src/mytasks_api/services/access_service.py` con `invite`, `list_access`, `revoke_invitation`, `revoke_account` (rechaza `admin`) y los eventos de auditoría R8 (depende de T035)
-- [ ] T037 [P] [US2] Añadir `InvitationIn`, `InvitationOut`, `AccountOut`, `InviteResultOut`, `AccessListOut` a `backend/src/mytasks_api/schemas/access.py` (`additionalProperties: false`, correo ≤ 254 caracteres y sin `/`)
-- [ ] T038 [US2] Añadir la dependencia `require_admin` (rol verificado en servidor, 403 a un `user`) en `backend/src/mytasks_api/auth.py`
-- [ ] T039 [US2] Crear los cinco endpoints de `/api/v1/admin` en `backend/src/mytasks_api/routers/admin.py` y registrarlos en `backend/src/mytasks_api/factory.py` (depende de T036, T037, T038)
-- [ ] T040 [P] [US3] Actualizar `backend/scripts/export_openapi.py` y `backend/tests/unit/test_export_openapi.py` con los endpoints de administración
-- [ ] T041 [US3] Ejecutar la suite completa de `backend/` y corregir regresiones
-- [ ] T042 [US2] Revisión de seguridad con `mytasks-security-auditor` (control de roles, enumeración de correos, concurrencia, auditoría) y registro en `specs/003-user-roles-invitations/security-review-fase-2.md`
+- [X] T035 [US2] Ampliar `backend/src/mytasks_api/repositories/account_repository.py` con crear/revocar invitación, listar (máx. 100), buscar cuenta por correo, revocar y reactivar cuenta (transaccionales)
+- [X] T036 [US2] Ampliar `backend/src/mytasks_api/services/access_service.py` con `invite`, `list_access`, `revoke_invitation`, `revoke_account` (rechaza `admin`) y los eventos de auditoría R8 (depende de T035)
+- [X] T037 [P] [US2] Añadir `InvitationIn`, `InvitationOut`, `AccountOut`, `InviteResultOut`, `AccessListOut` a `backend/src/mytasks_api/schemas/access.py` (`additionalProperties: false`, correo ≤ 254 caracteres y sin `/`)
+- [X] T038 [US2] Añadir la dependencia `require_admin` (rol verificado en servidor, 403 a un `user`) en `backend/src/mytasks_api/auth.py`
+- [X] T039 [US2] Crear los cinco endpoints de `/api/v1/admin` en `backend/src/mytasks_api/routers/admin.py` y registrarlos en `backend/src/mytasks_api/factory.py` (depende de T036, T037, T038)
+- [X] T040 [P] [US3] Actualizar `backend/scripts/export_openapi.py` y `backend/tests/unit/test_export_openapi.py` con los endpoints de administración
+- [X] T041 [US3] Ejecutar la suite completa de `backend/` y corregir regresiones
+- [X] T042 [US2] Revisión de seguridad con `mytasks-security-auditor` (control de roles, enumeración de correos, concurrencia, auditoría) y registro en `specs/003-user-roles-invitations/security-review-fase-2.md`
 
 **Checkpoint**: un administrador gestiona accesos por API y un `user` recibe 403 en todo
 `/api/v1/admin`.
