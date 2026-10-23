@@ -154,21 +154,33 @@ la administración y usa el tablero igual que antes.
 
 **Independent Test**: flujos e2e de los escenarios 3–6 de [quickstart.md](./quickstart.md).
 
+### Tope de invitaciones pendientes (backend; decisión del propietario sobre MED-001)
+
+Como la lista de accesos se trunca a 100, no se pueden acumular invitaciones sin límite: como
+máximo **50 pendientes a la vez**. Superarlo responde 409 `invitation_limit_reached`; reinvitar a
+una dirección ya pendiente (200) y reactivar una cuenta no cuentan; revocar una invitación libera
+un hueco. Agente: `mytasks-backend-developer`. Se hace antes que el frontend.
+
+- [X] T059 [P] [US2] Tests unitarios del tope en `backend/tests/unit/services/test_access_service_admin.py` (la invitación 51 falla; ya pendiente y reactivación no cuentan; revocar libera un hueco; el tope no impide invitar con menos de 50)
+- [X] T060 [P] [US2] Test de integración en `backend/tests/integration/test_admin_invitations.py` (la invitación 51 devuelve 409 `invitation_limit_reached` y no crea nada; reinvitar un pendiente devuelve 200; revocar una y volver a invitar funciona; invitaciones concurrentes en el límite nunca superan 50)
+- [X] T061 [US2] Implementar el tope: `PendingInvitationLimitError` en `backend/src/mytasks_api/domain/account.py`, recuento de pendientes dentro de la transacción de `upsert_pending_invitation` en `repositories/account_repository.py`, constante `MAX_PENDING_INVITATIONS = 50` en `services/access_service.py`, manejador 409 en `factory.py`, y el contrato en `contracts/access.yaml` (409 de `createInvitation`) y `data-model.md`
+- [X] T062 [US2] Ejecutar la suite completa de `backend/` (incluidos `ruff` y `mypy`) y regenerar/verificar el contrato exportado
+
 ### Tests (escribir primero y comprobar que fallan)
 
-- [ ] T043 [P] [US2] Tests Vitest de `AccessPage` (invitar con validación, listado con estados, revocar invitación y cuenta con confirmación, errores 409/422, accesibilidad por teclado) en `frontend/tests/unit/features/admin/AccessPage.test.tsx`
-- [ ] T044 [P] [US4] Tests Vitest de la ruta `/admin/access` y del enlace «Accesos» (un `admin` los ve; un `user` no ve el enlace y es redirigido) en `frontend/tests/unit/app/AdminRoute.test.tsx`
-- [ ] T045 [P] [US2] Test e2e Playwright: el admin invita → la persona invitada entra como `user` con lista vacía; el `user` no ve la administración, en `frontend/tests/e2e/invitations.spec.ts`
-- [ ] T046 [P] [US3] Test e2e Playwright: revocar y reinvitar (pierde y recupera el acceso conservando las tareas) en `frontend/tests/e2e/revoke-access.spec.ts`
+- [X] T043 [P] [US2] Tests Vitest de `AccessPage` (invitar con validación, listado con estados, revocar invitación y cuenta con confirmación, errores 409 —ya tiene acceso y `invitation_limit_reached`— y 422, accesibilidad por teclado) en `frontend/tests/unit/features/admin/AccessPage.test.tsx`
+- [X] T044 [P] [US4] Tests Vitest de la ruta `/admin/access` y del enlace «Accesos» (un `admin` los ve; un `user` no ve el enlace y es redirigido) en `frontend/tests/unit/app/AdminRoute.test.tsx`
+- [X] T045 [P] [US2] Test e2e Playwright: el admin invita → la persona invitada entra como `user` con lista vacía; el `user` no ve la administración, en `frontend/tests/e2e/invitations.spec.ts`
+- [X] T046 [P] [US3] Test e2e Playwright: revocar y reinvitar (pierde y recupera el acceso conservando las tareas) en `frontend/tests/e2e/revoke-access.spec.ts`
 
 ### Implementation
 
-- [ ] T047 [US2] Ampliar `frontend/src/api/types.ts` y `frontend/src/api/access.ts` con las llamadas de administración (`listAccess`, `createInvitation`, `revokeInvitation`, `revokeUserAccess`)
-- [ ] T048 [US2] Añadir la ruta `/admin/access` solo para `admin` (redirige a un `user`) en `frontend/src/app/App.tsx` y `frontend/src/app/ProtectedRoute.tsx` (depende de T047)
-- [ ] T049 [US4] Mostrar en `frontend/src/app/AppHeader.tsx` el enlace «Accesos» solo a un `admin`, sin alterar el resto del encabezado
-- [ ] T050 [US2] Crear `AccessPage` (formulario de invitación, listado de invitaciones y cuentas con estado, revocar con `ConfirmDialog` existente, avisos con `toastStore`) en `frontend/src/features/admin/AccessPage.tsx` (depende de T047, T048)
-- [ ] T051 [US4] Ejecutar `npm test`, `npm run lint`, el chequeo de tipos y `npm run test:e2e` completos; confirmar que los e2e de la feature 001 siguen en verde
-- [ ] T052 [US2] Revisión de seguridad con `mytasks-security-auditor` (rol solo cosmético en la interfaz, sin datos sensibles en el estado cliente, CSP) y registro en `specs/003-user-roles-invitations/security-review-fase-3.md`
+- [X] T047 [US2] Ampliar `frontend/src/api/types.ts` y `frontend/src/api/access.ts` con las llamadas de administración (`listAccess`, `createInvitation`, `revokeInvitation`, `revokeUserAccess`)
+- [X] T048 [US2] Añadir la ruta `/admin/access` solo para `admin` (redirige a un `user`) en `frontend/src/app/App.tsx` y `frontend/src/app/ProtectedRoute.tsx` (depende de T047)
+- [X] T049 [US4] Mostrar en `frontend/src/app/AppHeader.tsx` el enlace «Accesos» solo a un `admin`, sin alterar el resto del encabezado
+- [X] T050 [US2] Crear `AccessPage` (formulario de invitación, listado de invitaciones y cuentas con estado, revocar con `ConfirmDialog` existente, avisos con `toastStore`) en `frontend/src/features/admin/AccessPage.tsx` (depende de T047, T048)
+- [X] T051 [US4] Ejecutar `npm test`, `npm run lint`, el chequeo de tipos y `npm run test:e2e` completos; confirmar que los e2e de la feature 001 siguen en verde
+- [X] T052 [US2] Revisión de seguridad con `mytasks-security-auditor` (rol solo cosmético en la interfaz, sin datos sensibles en el estado cliente, CSP) y registro en `specs/003-user-roles-invitations/security-review-fase-3.md`
 
 **Checkpoint**: el flujo completo de administración funciona en local con los emuladores.
 

@@ -39,6 +39,10 @@ El id del documento es el correo normalizado.
 `pending → revoked` (admin), `revoked → pending` (admin reinvita). `accepted` es final: para
 quitar el acceso se revoca la **cuenta**, no la invitación.
 
+**Límite**: como máximo 50 invitaciones en estado `pending` a la vez (el recuento se hace dentro
+de la transacción que crea la invitación). Reinvitar a una dirección ya pendiente y reactivar una
+cuenta no cuentan.
+
 ## Relaciones
 
 ```text
