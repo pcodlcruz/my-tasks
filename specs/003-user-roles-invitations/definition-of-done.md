@@ -27,7 +27,9 @@ Resumen de lo que `security-review-final.md` recomienda cerrar antes de promover
 3. ~~Comprobar en ambos entornos que Firebase Authentication (Identity Platform) tiene **solo el
    proveedor Google** y la opción de **una cuenta por correo**~~ Hecho: comprobado por el
    propietario el 2026-10-23.
-4. Probar una vez en staging la recuperación del administrador descrita en `RUNBOOK.md` §12
-   (sigue marcada como no probada).
+4. ~~Probar en staging la recuperación del administrador descrita en `RUNBOOK.md` §12~~ Omitida
+   por decisión del propietario (2026-10-23): por ahora es el único administrador. **Riesgo
+   aceptado**: si pierde el acceso a su cuenta, la recuperación del runbook no está probada.
+   Conviene probarla antes de añadir más administradores o personas con acceso.
 5. Decidir sobre el bootstrap (Fase 1, LOW-001), la caducidad de invitaciones y el correo guardado
    (LOW-002 y LOW-003 de la revisión final); pueden ir al backlog técnico si se aceptan.
