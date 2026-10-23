@@ -51,3 +51,40 @@ el 2026-09-29:
 |---|---|---|
 | S5 · Historial (escritorio) | `bc0d3c5e5313419f90a96cb78066804d` | 2026-09-29 |
 | S5 · Historial (móvil) | `1f00b08623af4762bb0da45e91cba6d0` | 2026-09-29 |
+
+---
+
+# Feature 004 · versiones nuevas (perfil, tema oscuro, densidad compacta)
+
+**Fuente**: [specs/004-user-profile-settings/contracts/ui-screens.md](../../../specs/004-user-profile-settings/contracts/ui-screens.md).
+Las pantallas aprobadas de la feature 001 (tabla de arriba) **no se modifican ni se borran**
+(FR-028): cada cambio es una versión nueva, y esta sección registra cuál es la **vigente** una
+vez que el propietario la aprueba (T013, T014).
+
+## Línea base (T001, 2026-10-23)
+
+Proyecto Stitch `projects/13869439670490335529` comprobado con `get_project` y `list_screens`.
+
+| Pantalla aprobada (001) | Escritorio | Móvil |
+|---|---|---|
+| S1 · Iniciar sesión | `167976c9a3f546b69d2392f7efabcc7e` | `a02eb14fbccd412aa4cb7617569c2494` |
+| S3 · Tablero | `79c364a0e3e6454488990bcf380db4af` | `8f8343490e0f494982ba5b2a7d74fa96` |
+| S4 · Formulario de tarea | `792abeed82ac4276ac3a4e03221d5ffa` | `bcc7d94339594c5d823bd574462d2ef5` |
+| S5 · Historial | `bc0d3c5e5313419f90a96cb78066804d` | `1f00b08623af4762bb0da45e91cba6d0` |
+| S6 · Papelera | `3bb586411a0742b0b6e050ecc77eb35d` | `7f8e5aa0f7b64a0c8cb5c1da95c4980a` |
+
+## Design systems (T003)
+
+| Sistema | Asset | Modo | Estado |
+|---|---|---|---|
+| Gestor Personal de Tareas (aprobado en la 001) | `assets/ec957f11ef474eb58336b8af664aaa2e` | Claro | **Sin cambios** (versión 1) |
+| Gestor Personal de Tareas (oscuro) | `assets/16783421015770598561` | Oscuro | Nuevo, 2026-10-23, pendiente de aprobación |
+
+Stitch admite un único modo de color por *design system*, así que `update_design_system` sobre el
+aprobado lo habría convertido en oscuro. Se creó un asset aparte con la paleta de
+[`../DESIGN.md`](../DESIGN.md) (§ Tema oscuro), validada con
+[`../check-contrast.py`](../check-contrast.py): 0 pares por debajo de AA en ambos temas.
+
+**Observación**: el `designMd` del sistema claro de Stitch aún lleva `scope-personal: #0D9488`;
+el repositorio ya usa `#0F766E` desde el hallazgo de axe en T105 de la 001. No afecta a esta
+feature; queda como deuda de sincronización.
