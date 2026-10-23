@@ -1,22 +1,48 @@
 import asyncio
 from collections.abc import Awaitable, Callable
 from datetime import datetime
-from typing import Any
+from typing import Any, Concatenate
 
 from fastapi import Depends
 from google.api_core import exceptions as google_exceptions
 from google.cloud import firestore
+from google.cloud.firestore_v1.base_query import FieldFilter
 
 from mytasks_api.domain.account import (
     Account,
+    AccountNotFoundError,
     AccountStatus,
+    Invitation,
     InvitationStatus,
     Role,
+    reactivate_account,
+    reinvite,
+    revoke_account,
+    revoke_invitation,
 )
 from mytasks_api.repositories.task_repository import get_firestore_client
 
 USERS_COLLECTION = "users"
 INVITATIONS_COLLECTION = "invitations"
+
+
+def _transactional[**P, T](
+    function: Callable[Concatenate[firestore.AsyncTransaction, P], Awaitable[T]],
+) -> Callable[Concatenate[firestore.AsyncTransaction, P], Awaitable[T]]:
+    """`firestore.async_transactional`, but with a new wrapper for every call.
+
+    The library's wrapper keeps the ids of the running transaction on itself. One shared by
+    concurrent requests (a module-level decorator is exactly that) hands the retry of one
+    the id of another's transaction, which then waits on its locks until they time out.
+    """
+
+    async def run(
+        transaction: firestore.AsyncTransaction, /, *args: P.args, **kwargs: P.kwargs
+    ) -> T:
+        return await firestore.async_transactional(function)(transaction, *args, **kwargs)
+
+    return run
+
 
 # Firestore aborts a transaction that loses a lock race (e.g. the same person opening two
 # tabs on their first sign-in); the client library does not retry a read that aborts.
@@ -24,12 +50,20 @@ _MAX_ATTEMPTS = 4
 _RETRY_DELAY_SECONDS = 0.05
 
 
+def _lost_the_lock_race(error: Exception) -> bool:
+    # The client retries a failed commit itself and, when its own attempts run out, raises a
+    # ValueError wrapping the last Aborted: that is the same contention, not a bad request.
+    if isinstance(error, google_exceptions.Aborted):
+        return True
+    return isinstance(error, ValueError) and isinstance(error.__cause__, google_exceptions.Aborted)
+
+
 async def _retry_on_abort[T](operation: Callable[[], Awaitable[T]]) -> T:
     for attempt in range(1, _MAX_ATTEMPTS + 1):
         try:
             return await operation()
-        except google_exceptions.Aborted:
-            if attempt == _MAX_ATTEMPTS:
+        except (google_exceptions.Aborted, ValueError) as error:
+            if not _lost_the_lock_race(error) or attempt == _MAX_ATTEMPTS:
                 raise
             await asyncio.sleep(_RETRY_DELAY_SECONDS * attempt)
     raise AssertionError  # unreachable: the last attempt returns or raises
@@ -56,7 +90,29 @@ def _account_to_document(account: Account) -> dict[str, Any]:
     }
 
 
-@firestore.async_transactional
+def _document_to_invitation(data: dict[str, Any]) -> Invitation:
+    return Invitation(
+        email=data["email"],
+        status=InvitationStatus(data["status"]),
+        invited_by=data["invited_by"],
+        created_at=data["created_at"],
+        accepted_at=data.get("accepted_at"),
+        accepted_uid=data.get("accepted_uid"),
+    )
+
+
+def _invitation_to_document(invitation: Invitation) -> dict[str, Any]:
+    return {
+        "email": invitation.email,
+        "status": invitation.status.value,
+        "invited_by": invitation.invited_by,
+        "created_at": invitation.created_at,
+        "accepted_at": invitation.accepted_at,
+        "accepted_uid": invitation.accepted_uid,
+    }
+
+
+@_transactional
 async def _accept_invitation(
     transaction: firestore.AsyncTransaction,
     user_ref: firestore.AsyncDocumentReference,
@@ -96,7 +152,7 @@ async def _accept_invitation(
     return account, True
 
 
-@firestore.async_transactional
+@_transactional
 async def _create_bootstrap_admin(
     transaction: firestore.AsyncTransaction,
     user_ref: firestore.AsyncDocumentReference,
@@ -119,6 +175,85 @@ async def _create_bootstrap_admin(
     )
     transaction.set(user_ref, _account_to_document(account))
     return account, True
+
+
+@_transactional
+async def _upsert_pending_invitation(
+    transaction: firestore.AsyncTransaction,
+    invitation_ref: firestore.AsyncDocumentReference,
+    email: str,
+    invited_by: str,
+    now: datetime,
+) -> tuple[Invitation, bool]:
+    snapshot = await invitation_ref.get(transaction=transaction)
+    data = snapshot.to_dict() if snapshot.exists else None
+    if data is not None and data.get("status") == InvitationStatus.PENDING.value:
+        # Already waiting: nothing changes, so the original date and author are kept.
+        return _document_to_invitation(data), False
+
+    if data is not None and data.get("status") == InvitationStatus.REVOKED.value:
+        invitation = reinvite(_document_to_invitation(data), invited_by, now)
+    else:
+        # New address, or an accepted invitation whose account no longer exists.
+        invitation = Invitation(
+            email=email,
+            status=InvitationStatus.PENDING,
+            invited_by=invited_by,
+            created_at=now,
+            accepted_at=None,
+            accepted_uid=None,
+        )
+    transaction.set(invitation_ref, _invitation_to_document(invitation))
+    return invitation, True
+
+
+@_transactional
+async def _revoke_pending_invitation(
+    transaction: firestore.AsyncTransaction,
+    invitation_ref: firestore.AsyncDocumentReference,
+) -> bool:
+    snapshot = await invitation_ref.get(transaction=transaction)
+    data = snapshot.to_dict() if snapshot.exists else None
+    if data is None or data.get("status") != InvitationStatus.PENDING.value:
+        return False
+    revoked = revoke_invitation(_document_to_invitation(data))
+    transaction.update(invitation_ref, {"status": revoked.status.value})
+    return True
+
+
+@_transactional
+async def _revoke_account(
+    transaction: firestore.AsyncTransaction,
+    user_ref: firestore.AsyncDocumentReference,
+    uid: str,
+    now: datetime,
+) -> tuple[Account, bool] | None:
+    snapshot = await user_ref.get(transaction=transaction)
+    data = snapshot.to_dict() if snapshot.exists else None
+    if data is None:
+        return None
+    account = _document_to_account(uid, data)
+    if account.status is AccountStatus.REVOKED:
+        return account, False
+    # Raises for an admin: the check lives in the domain, not in the endpoint.
+    revoked = revoke_account(account, now)
+    transaction.update(user_ref, {"status": revoked.status.value, "revoked_at": revoked.revoked_at})
+    return revoked, True
+
+
+@_transactional
+async def _reactivate_account(
+    transaction: firestore.AsyncTransaction,
+    user_ref: firestore.AsyncDocumentReference,
+    uid: str,
+) -> Account:
+    snapshot = await user_ref.get(transaction=transaction)
+    data = snapshot.to_dict() if snapshot.exists else None
+    if data is None:
+        raise AccountNotFoundError(uid)
+    restored = reactivate_account(_document_to_account(uid, data))
+    transaction.update(user_ref, {"status": restored.status.value, "revoked_at": None})
+    return restored
 
 
 class AccountRepository:
@@ -171,6 +306,62 @@ class AccountRepository:
                 self._client.transaction(), self._user_ref(uid), uid, email, now
             )
         )
+
+    async def find_account_by_email(self, email: str) -> Account | None:
+        query = (
+            self._client.collection(USERS_COLLECTION)
+            .where(filter=FieldFilter("email", "==", email))
+            .limit(1)
+        )
+        async for snapshot in query.stream():
+            return _document_to_account(snapshot.id, snapshot.to_dict() or {})
+        return None
+
+    async def upsert_pending_invitation(
+        self, email: str, invited_by: str, now: datetime
+    ) -> tuple[Invitation, bool]:
+        """Leave a pending invitation for `email`. The flag says whether this call made it
+        (False when one was already waiting, which is left untouched)."""
+        return await _retry_on_abort(
+            lambda: _upsert_pending_invitation(
+                self._client.transaction(), self._invitation_ref(email), email, invited_by, now
+            )
+        )
+
+    async def revoke_pending_invitation(self, email: str) -> bool:
+        return await _retry_on_abort(
+            lambda: _revoke_pending_invitation(
+                self._client.transaction(), self._invitation_ref(email)
+            )
+        )
+
+    async def revoke_account(self, uid: str, now: datetime) -> tuple[Account, bool] | None:
+        """Withdraw access, keeping the tasks. None if there is no such account; the flag
+        says whether this call changed anything (revoking twice is a no-op)."""
+        return await _retry_on_abort(
+            lambda: _revoke_account(self._client.transaction(), self._user_ref(uid), uid, now)
+        )
+
+    async def reactivate_account(self, uid: str) -> Account:
+        return await _retry_on_abort(
+            lambda: _reactivate_account(self._client.transaction(), self._user_ref(uid), uid)
+        )
+
+    async def list_invitations(self, limit: int) -> list[Invitation]:
+        query = (
+            self._client.collection(INVITATIONS_COLLECTION)
+            .order_by("created_at", direction=firestore.Query.DESCENDING)
+            .limit(limit)
+        )
+        return [_document_to_invitation(s.to_dict() or {}) async for s in query.stream()]
+
+    async def list_accounts(self, limit: int) -> list[Account]:
+        query = (
+            self._client.collection(USERS_COLLECTION)
+            .order_by("created_at", direction=firestore.Query.DESCENDING)
+            .limit(limit)
+        )
+        return [_document_to_account(s.id, s.to_dict() or {}) async for s in query.stream()]
 
 
 def get_account_repository(

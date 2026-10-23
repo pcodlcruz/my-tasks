@@ -1,4 +1,5 @@
 import logging
+from dataclasses import dataclass
 from datetime import UTC, datetime
 
 from fastapi import Depends
@@ -7,14 +8,28 @@ from mytasks_api.config import Settings, get_settings
 from mytasks_api.domain.account import (
     AccessDeniedError,
     Account,
+    AccountAlreadyActiveError,
+    AccountNotFoundError,
     AccountStatus,
     InvalidEmailError,
+    Invitation,
+    InvitationNotFoundError,
+    InviteOutcome,
     normalize_email,
 )
 from mytasks_api.logging_config import email_fingerprint, log_event
 from mytasks_api.repositories.account_repository import AccountRepository, get_account_repository
 
 logger = logging.getLogger(__name__)
+
+# The management screen shows the latest of each list; there is no paging in this version.
+ACCESS_LIST_LIMIT = 100
+
+
+@dataclass(frozen=True)
+class InviteResult:
+    outcome: InviteOutcome
+    email: str
 
 
 class AccessService:
@@ -83,6 +98,62 @@ class AccessService:
             return admin
 
         raise self._deny(uid, "no_invitation")
+
+    async def invite(self, admin_uid: str, raw_email: str) -> InviteResult:
+        """Let `raw_email` in. An address whose access was withdrawn is reactivated (its tasks
+        were never touched); one already invited is left as it was."""
+        email = normalize_email(raw_email)
+        target = email_fingerprint(email)
+
+        account = await self._repository.find_account_by_email(email)
+        if account is not None:
+            if account.status is AccountStatus.ACTIVE:
+                raise AccountAlreadyActiveError
+            await self._repository.reactivate_account(account.uid)
+            log_event(
+                logger,
+                logging.INFO,
+                "access_reactivated",
+                actor_uid=admin_uid,
+                uid=account.uid,
+                target=target,
+            )
+            return InviteResult(InviteOutcome.REACTIVATED, email)
+
+        _, created_now = await self._repository.upsert_pending_invitation(
+            email, admin_uid, datetime.now(UTC)
+        )
+        if not created_now:
+            return InviteResult(InviteOutcome.ALREADY_PENDING, email)
+        log_event(logger, logging.INFO, "invitation_created", actor_uid=admin_uid, target=target)
+        return InviteResult(InviteOutcome.INVITED, email)
+
+    async def list_access(self) -> tuple[list[Invitation], list[Account]]:
+        invitations = await self._repository.list_invitations(ACCESS_LIST_LIMIT)
+        accounts = await self._repository.list_accounts(ACCESS_LIST_LIMIT)
+        return invitations, accounts
+
+    async def revoke_invitation(self, admin_uid: str, raw_email: str) -> None:
+        email = normalize_email(raw_email)
+        if not await self._repository.revoke_pending_invitation(email):
+            raise InvitationNotFoundError
+        log_event(
+            logger,
+            logging.INFO,
+            "invitation_revoked",
+            actor_uid=admin_uid,
+            target=email_fingerprint(email),
+        )
+
+    async def revoke_account(self, admin_uid: str, uid: str) -> None:
+        """Withdraw access (not delete): the tasks stay and come back if the address is
+        invited again. Administrators cannot be revoked."""
+        result = await self._repository.revoke_account(uid, datetime.now(UTC))
+        if result is None:
+            raise AccountNotFoundError(uid)
+        _, changed = result
+        if changed:
+            log_event(logger, logging.INFO, "access_revoked", actor_uid=admin_uid, uid=uid)
 
 
 def get_access_service(

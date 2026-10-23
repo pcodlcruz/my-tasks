@@ -72,6 +72,7 @@ class GoogleUser:
 
 GoogleUserFactory = Callable[..., Awaitable[GoogleUser]]
 SeedTaskFactory = Callable[..., Awaitable[str]]
+AdminUserFactory = Callable[..., Awaitable[GoogleUser]]
 SeedAccountFactory = Callable[..., Awaitable[None]]
 SeedInvitationFactory = Callable[..., Awaitable[None]]
 
@@ -151,6 +152,18 @@ def seed_invitation(firestore_client: firestore.AsyncClient) -> SeedInvitationFa
         )
 
     return _seed
+
+
+@pytest.fixture
+def admin_user(seed_account: SeedAccountFactory) -> AdminUserFactory:
+    """Sign in with a fake Google account that already has an active `admin` account."""
+
+    async def _factory(email: str = "admin@example.com") -> GoogleUser:
+        user = await _google_user(email)
+        await seed_account(user.uid, email, role="admin")
+        return user
+
+    return _factory
 
 
 @pytest.fixture

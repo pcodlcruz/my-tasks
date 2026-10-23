@@ -46,6 +46,24 @@ class AdminAccountProtectedError(Exception):
     """Administrators cannot be revoked, so the last one can never be lost."""
 
 
+class AccountAlreadyActiveError(Exception):
+    """The address already belongs to an account with access; there is nothing to invite."""
+
+
+class AccountNotFoundError(Exception):
+    pass
+
+
+class InvitationNotFoundError(Exception):
+    """There is no pending invitation for that address (missing, accepted or revoked)."""
+
+
+class InviteOutcome(StrEnum):
+    INVITED = "invited"
+    ALREADY_PENDING = "already_pending"
+    REACTIVATED = "reactivated"
+
+
 @dataclass(frozen=True)
 class Account:
     uid: str
