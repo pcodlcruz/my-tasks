@@ -22,7 +22,8 @@ para la feature completa. Fecha: 2026-10-23.
 Resumen de lo que `security-review-final.md` recomienda cerrar antes de promover a `main`:
 
 1. ~~**T057**~~ Hecho: validado en staging por el propietario.
-2. Corregir **LOW-001 de la Fase 3** (vaciar la caché de datos del cliente al cambiar de usuario).
+2. ~~Corregir **LOW-001 de la Fase 3**~~ Hecho: `SessionCacheReset` vacía la caché del cliente al
+   cambiar de usuario o cerrar sesión.
 3. Comprobar en la consola de ambos entornos que Identity Platform tiene **solo el proveedor
    Google** y la opción de **una cuenta por correo**; y probar una vez en staging la recuperación
    del administrador descrita en `RUNBOOK.md` §12.

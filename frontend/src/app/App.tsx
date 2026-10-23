@@ -8,6 +8,7 @@ import { TrashPage } from '../features/trash/TrashPage'
 import { AdminRoute } from './AdminRoute'
 import { AppHeader } from './AppHeader'
 import { ProtectedRoute } from './ProtectedRoute'
+import { SessionCacheReset } from './SessionCacheReset'
 import { Toaster } from './Toaster'
 
 const queryClient = new QueryClient()
@@ -24,6 +25,7 @@ function ProtectedLayout(): JSX.Element {
 export function App(): JSX.Element {
   return (
     <QueryClientProvider client={queryClient}>
+      <SessionCacheReset />
       <BrowserRouter>
         <Routes>
           <Route path="/login" element={<LoginPage />} />
