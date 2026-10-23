@@ -61,3 +61,46 @@ export interface ApiError {
   message: string
   details?: Record<string, unknown>[]
 }
+
+export type Role = 'user' | 'admin'
+
+// The account behind the signed-in Google user (GET /api/v1/me).
+export interface Account {
+  uid: string
+  email: string
+  role: Role
+}
+
+// Administration (/api/v1/admin). The role is only cosmetic here: the server decides.
+export type AccountStatus = 'active' | 'revoked'
+
+export type InvitationStatus = 'pending' | 'accepted' | 'revoked'
+
+export interface AccountEntry extends Account {
+  status: AccountStatus
+  created_at: string
+}
+
+export interface Invitation {
+  email: string
+  status: InvitationStatus
+  created_at: string
+  accepted_at: string | null
+}
+
+export interface AccessList {
+  invitations: Invitation[]
+  accounts: AccountEntry[]
+}
+
+export type InviteOutcome = 'invited' | 'already_pending' | 'reactivated'
+
+export interface InviteResult {
+  outcome: InviteOutcome
+  email: string
+}
+
+// The server caps both lists at this many items (the newest) and the pending invitations at
+// MAX_PENDING_INVITATIONS. Kept in step with backend/src/mytasks_api/services/access_service.py.
+export const ACCESS_LIST_LIMIT = 100
+export const MAX_PENDING_INVITATIONS = 50

@@ -4,15 +4,31 @@ Terraform de la plataforma y de los entornos de MyTasks en Google Cloud. La oper
 arranque único, la rotación de la clave del agente y la recuperación están en
 [RUNBOOK.md](./RUNBOOK.md); empieza por ahí.
 
+## Visión general
+
+MyTasks vive en dos proyectos de Google Cloud, uno por entorno, sin recursos compartidos entre
+ellos salvo la plataforma del pipeline:
+
+| Entorno | Proyecto | Qué corre | Se despliega |
+|---|---|---|---|
+| Staging | `pdlco-mytasks-stg` | API y web en Cloud Run, Firestore, Identity Platform | al fusionar en `develop` |
+| Producción | `pdlco-mytasks` | Lo mismo, más la plataforma del pipeline | al fusionar en `main` |
+
+La **plataforma** (federación de GitHub Actions, Artifact Registry, bucket de estado y cuentas del
+pipeline) vive en el proyecto de producción y la usan los dos entornos. La infraestructura la
+aplica `infra.yml`; las imágenes las despliega `deploy.yml` (staging) y `deploy-production.yml`
+(producción, que promueve el mismo *digest* ya validado en staging). Ninguna de las dos cosas se
+hace a mano.
+
 ## Estructura
 
-| Ruta | Qué contiene | Estado |
-|---|---|---|
-| `platform/` | Plataforma del proyecto de producción: federación de identidad, Artifact Registry, estado y cuentas del pipeline | esqueleto (T050) |
-| `modules/environment/` | Módulo de entorno reutilizado por staging y producción | implementado (T062–T066) |
-| `envs/staging/` | Instancia el módulo con los valores de staging y adopta sus cuentas del pipeline | implementado (T067) |
-| `envs/production/` | Lo mismo para producción | Fase 5 |
-| `iam/roles/` | Definiciones de los roles personalizados que concede el propietario (no los aplica Terraform) | MED-001 |
+| Ruta | Qué contiene |
+|---|---|
+| `platform/` | Plataforma del proyecto de producción: federación de identidad, Artifact Registry, bucket de estado y cuentas `terraform-*`, `terraform-plan-*` y `deployer-production` |
+| `modules/environment/` | Módulo de entorno reutilizado por staging y producción: Firestore, Identity Platform, servicios de Cloud Run y sus cuentas de ejecución |
+| `envs/staging/` | Instancia el módulo con los valores de staging y adopta sus cuentas del pipeline |
+| `envs/production/` | Lo mismo para producción |
+| `iam/roles/` | Definiciones de los roles personalizados que concede el propietario (no los aplica Terraform) |
 
 ## Cómo se aplica
 
@@ -21,9 +37,26 @@ arranque único, la rotación de la clave del agente y la recuperación están e
 
 - En una PR: `fmt`, `validate` y `plan` de solo lectura con las cuentas `terraform-plan-*`.
 - Al fusionar en `develop` se aplica `staging`; al fusionar en `main`, `production` y `platform`.
+- Antes de cada `apply`, un job `plan-<entorno>` publica el plan completo en el resumen de la
+  ejecución para que el propietario lo lea antes de aprobar; `apply-<entorno>` se niega a aplicar si
+  su plan tiene otra huella.
 
 El estado vive en el bucket `pdlco-mytasks-tfstate`, con un prefijo por raíz (`platform/`,
 `staging/`, `production/`). Los valores no secretos están en el `terraform.tfvars` de cada raíz.
+
+## Protección contra borrado
+
+Lo que no se puede recuperar está protegido dos veces: por Terraform (`prevent_destroy`, que hace
+fallar cualquier plan que lo destruya) y por el propio recurso cuando Google Cloud lo ofrece.
+
+| Recurso | Protección |
+|---|---|
+| Base de datos Firestore de cada entorno (las tareas del propietario) | `prevent_destroy` y `DELETE_PROTECTION_ENABLED` |
+| Servicios de Cloud Run `mytasks-api` y `mytasks-web` | `deletion_protection` |
+| Bucket de estado, repositorio de Artifact Registry, pool y proveedor de federación (`platform/`) | `prevent_destroy` (un nombre de pool borrado no se puede reutilizar en 30 días y el pipeline perdería su acceso) |
+
+Retirar un entorno es una decisión manual y deliberada: hay que levantar **las dos** protecciones
+antes de destruir. El procedimiento está en el [RUNBOOK](./RUNBOOK.md).
 
 ## Versiones
 

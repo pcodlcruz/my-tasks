@@ -1,4 +1,5 @@
 import { NavLink } from 'react-router-dom'
+import { useIsAdmin } from '../features/auth/useIsAdmin'
 import { useSession } from '../features/auth/useSession'
 
 const NAV_ITEMS = [
@@ -7,8 +8,12 @@ const NAV_ITEMS = [
   { to: '/papelera', label: 'Papelera' },
 ]
 
+const ADMIN_NAV_ITEMS = [{ to: '/admin/access', label: 'Accesos' }]
+
 export function AppHeader(): JSX.Element {
   const { user, signOut } = useSession()
+  const isAdmin = useIsAdmin()
+  const navItems = isAdmin ? [...NAV_ITEMS, ...ADMIN_NAV_ITEMS] : NAV_ITEMS
 
   return (
     <header className="sticky top-0 z-40 w-full border-b border-border bg-surface shadow-sm">
@@ -16,7 +21,7 @@ export function AppHeader(): JSX.Element {
         <div className="flex items-center gap-4 sm:gap-8">
           <span className="font-heading text-heading font-bold text-schedule">MyTasks</span>
           <nav aria-label="Navegación principal" className="flex items-center gap-1 sm:gap-4">
-            {NAV_ITEMS.map((item) => (
+            {navItems.map((item) => (
               <NavLink
                 key={item.to}
                 to={item.to}

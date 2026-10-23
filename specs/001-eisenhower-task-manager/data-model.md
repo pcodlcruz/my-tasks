@@ -4,7 +4,14 @@
 
 ## Usuario
 
-No se persiste como documento propio (ver [research.md § R2](./research.md#r2-modelo-de-almacenamiento-en-firestore-y-aislamiento-por-usuario)).
+> **Actualizado por la feature 003** ([data-model](../003-user-roles-invitations/data-model.md)):
+> el usuario **sí** se persiste ahora como documento propio, `users/{uid}`, con su correo, su rol
+> (`user` o `admin`) y su estado (`active` o `revoked`), y existe la colección `invitations/{correo}`.
+> El documento `users/{uid}` es el padre de la subcolección de tareas y solo se crea al aceptar
+> una invitación (o con el administrador inicial): el registro abierto queda sustituido. Lo que
+> sigue describe el modelo original.
+
+No se persistía como documento propio (ver [research.md § R2](./research.md#r2-modelo-de-almacenamiento-en-firestore-y-aislamiento-por-usuario)).
 Su identidad es el `uid` que emite Firebase Authentication al iniciar sesión con Google. El sistema
 no almacena contraseñas: las credenciales las custodia Google.
 

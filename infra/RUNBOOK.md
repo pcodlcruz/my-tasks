@@ -1,8 +1,9 @@
 # Runbook de operación
 
-Procedimientos operativos de la infraestructura y del acceso del agente a Google Cloud. Se irá
-completando por fases (feature `002-cloud-run-cicd`); esta versión cubre la identidad aislada del
-agente (Fase 1, FR-022 a FR-025).
+Procedimientos operativos de la infraestructura y del acceso del agente a Google Cloud (feature
+`002-cloud-run-cicd`). **Si llegas sin contexto, empieza por la [sección 11](#11-guía-operativa-t088-fr-021)**
+(entornos y URL, flujo de despliegue, recuperación de fallos, retirada de un entorno); las
+secciones 1 a 10 son el detalle y el historial de cada decisión.
 
 Contrato de diseño: [`specs/002-cloud-run-cicd/contracts/agent-identity.md`](../specs/002-cloud-run-cicd/contracts/agent-identity.md).
 
@@ -63,7 +64,8 @@ La clave de `mytasks-ai-agent` es la única credencial de larga duración del si
 rotación es un acto del propietario con sus credenciales; el agente no la hace.
 
 **Recordatorio**: crea un evento periódico de 90 días en tu calendario (*"Rotar clave
-mytasks-ai-agent"*). Anota aquí la fecha de la última rotación: `TODO(propietario): fecha`.
+mytasks-ai-agent"*). Última rotación (creación de la clave
+vigente): **2026-09-30**. Próxima rotación: **2026-12-29**.
 
 1. Crea una clave nueva de la cuenta de servicio con tus credenciales (consola de IAM o `gcloud`
    desde tu terminal) y guárdala en `~/.config/mytasks-agent/` con permisos `0600`.
@@ -362,7 +364,7 @@ Decisiones que conviene conocer:
 
 ### Roles personalizados (MED-001 de `security-review-t046.md`)
 
-Definidos en `infra/iam/roles/` y concedidos por el propietario según [guia-propietario-med-001.md](../specs/002-cloud-run-cicd/guia-propietario-med-001.md): `mytasksEnvironmentAdmin` a `terraform-staging`, `mytasksPlanReader` a `terraform-plan-staging` (y, en la Fase 5, los equivalentes de producción más `mytasksPlatformPlanReader`). `roles/viewer` se descartó: incluye `datastore.entities.get` y `firebaseauth.users.get` (comprobado en la documentación de IAM), es decir, leería documentos y cuentas de usuario desde un `plan` que corre en PR de un repositorio público.
+Definidos en `infra/iam/roles/` y concedidos por el propietario según [guia-propietario-med-001.md](../specs/002-cloud-run-cicd/guia-propietario-med-001.md): `mytasksEnvironmentAdmin` a `terraform-staging`, `mytasksPlanReader` a `terraform-plan-staging` (y, en la Fase 5, los equivalentes de producción más `mytasksPlatformPlanReader`). **Desde el 2026-10-16 (T081) `terraform-production` también recibe `mytasksPlanReader` y `mytasksPlatformPlanReader`** (solo lectura): su `apply` planifica `platform` y sin las lecturas del bucket de estado y de la política del proyecto el plan fallaba ([guía](../specs/002-cloud-run-cicd/guia-propietario-t081-platform.md), [revisión](../specs/002-cloud-run-cicd/security-review-t081.md)). `roles/viewer` se descartó: incluye `datastore.entities.get` y `firebaseauth.users.get` (comprobado en la documentación de IAM), es decir, leería documentos y cuentas de usuario desde un `plan` que corre en PR de un repositorio público.
 
 `TODO(propietario)`: crear y conceder los roles en `pdlco-mytasks-stg` antes del primer `apply`. Estado: **sin aplicar**.
 
@@ -493,3 +495,130 @@ Crear y conceder los roles personalizados en `pdlco-mytasks` (`specs/002-cloud-r
 3. `infra`: leer `plan-production` (cubre `platform` y `envs/production`) y aprobar el `apply`. La primera vez ejecuta las importaciones de la plataforma. **En el plan, mirar sobre todo los dominios autorizados de Identity Platform.**
 4. `deploy-production` falla de forma esperada si los servicios aún no existen (como pasó en staging); relanzarlo tras el `apply`. Exige que staging haya validado **exactamente** el mismo contenido: el hash de árbol de `backend/` y de `frontend/` en `main` debe tener su `validated-<hash>`.
 5. Comprobar el escenario 6 del quickstart: mismo *digest* que staging, `/health` con la misma versión, `/config.js` apuntando a la API de producción.
+
+## 11. Guía operativa (T088, FR-021)
+
+Resumen de operación para quien llega sin contexto. El detalle y la historia de cada decisión están en las secciones 1 a 10; esta guía solo las ordena.
+
+### Entornos y URL
+
+| | Staging | Producción |
+|---|---|---|
+| Proyecto | `pdlco-mytasks-stg` (nº 838389521553) | `pdlco-mytasks` (nº 2195266360) |
+| Región | `europe-southwest1` | `europe-southwest1` |
+| Web | `https://mytasks-web-838389521553.europe-southwest1.run.app` | `https://mytasks-web-2195266360.europe-southwest1.run.app` |
+| API | `https://mytasks-api-838389521553.europe-southwest1.run.app` | `https://mytasks-api-2195266360.europe-southwest1.run.app` |
+| Rama que lo despliega | `develop` (también `release/*` y `hotfix/*`) | `main` |
+| Identidad del despliegue | `deployer-staging` | `deployer-production` |
+
+Usa siempre la URL determinista de la tabla, no el `status.url` de Cloud Run (sección 9, punto 4). La versión que sirve cada entorno se lee sin entrar en la infraestructura: `GET /health` de la API (`version`), `APP_VERSION` en `GET /config.js` de la web y la pestaña *Environments* de GitHub.
+
+### Flujo de despliegue
+
+1. Una PR a `develop` pasa los checks requeridos por los *rulesets* (CI y, si toca `infra/`, `fmt`, `validate` y el plan de solo lectura de `infra.yml`).
+2. Al fusionar en `develop`, `deploy-staging` calcula el hash de árbol de `backend/` y `frontend/`, reutiliza la imagen si ya existe o la construye, comprueba su procedencia, crea las revisiones **sin tráfico**, pasa el humo por la URL con etiqueta, mueve el tráfico (primero la API, después la web) y marca las imágenes como `validated-<hash>`. Si cambia `infra/`, `infra` aplica `staging` tras aprobación del propietario.
+3. La release sale de `develop` como rama `release/*` nueva y se abre una PR a `main` (`release/*` no admite `push` directo).
+4. Al fusionar en `main`, `deploy-production` **no construye**: promueve el mismo *digest* que validó staging y falla antes de tocar nada si falta `validated-<hash>` de algún componente. `infra` aplica `production` y `platform` tras aprobación del *environment* `infra-production`.
+5. Cada despliegue deja un resumen en la ejecución con el resultado, las versiones y las URL.
+
+Orden en un entorno nuevo: `apply` de `infra` primero (crea los servicios) y `deploy` después; el primer `deploy` falla de forma esperada si los servicios no existen (sección 9, punto 1).
+
+### Recuperación de un despliegue fallido
+
+| Dónde falla | Qué queda | Qué hacer |
+|---|---|---|
+| Antes de «Deploy the revisions without traffic» (variables, procedencia, imagen) | Nada cambia | Leer el error del paso (nombra el servicio, el componente o el hash), corregir y relanzar |
+| En «Smoke test» | Revisiones nuevas sin tráfico; el tráfico sigue en la anterior | Las etiquetas de revisión se retiran solas. Corregir y volver a fusionar; el hash nuevo reconstruye |
+| En «Move the traffic» de la web | La API vuelve sola a su revisión anterior (el paso lo registra con `::error::`) | Comprobar con `GET /health` que la API sirve la versión previa y relanzar |
+| Despliegue correcto pero defectuoso | La versión mala sirve tráfico | **Revertir el commit** y dejar que el pipeline despliegue el contenido anterior: en staging, PR a `develop`; en producción, el contenido revertido tiene que haber pasado antes por staging (`validated-<hash>`), así que la reversión también viaja `develop` → release → `main`. Un hash que ya se validó una vez se reutiliza sin reconstruir |
+| «Versión no validada en staging» en producción | Producción sin cambios | Es el comportamiento esperado: dejar que staging despliegue y valide ese contenido y relanzar |
+| `infra` falla en el plan | Sin `apply` | El detalle del plan está en el **resumen de la ejecución** (el log solo da `exit code 1`); buscar las líneas `Error:` |
+
+Un run de `deploy-staging` en «waiting» bloquea a los siguientes: aprobarlo o cancelarlo en cuanto aparezca, y no aprobar nunca el de un commit anterior (sección 9, punto 2). **No hay procedimiento de reversión manual del tráfico**: los despliegues los hace solo el pipeline (Principio VI) y el agente no puede crear revisiones (T082).
+
+### Arranque único y permisos temporales
+
+El arranque (estado, federación, cuentas del pipeline, repositorio) se hizo una vez por el MCP y ahora lo declara `infra/platform/`: sección 8. Los permisos temporales de `mytasks-ai-agent` y su retirada (T060, caducan el 2026-10-30 23:00 UTC) están en la sección 4. Los roles personalizados que concede el propietario, en `infra/iam/roles/` y `guia-propietario-med-001.md`.
+
+### Acceso por invitación y administradores
+
+Quién puede entrar, cómo se designa al administrador de cada entorno y cómo recuperar el acceso si se pierde: sección 12.
+
+### Proveedor de Google en Identity Platform (R-2)
+
+Terraform no puede inicializar Identity Platform en un proyecto que no es Firebase (sección 9, «Paso previo al primer `apply`»). Staging lo activó el propietario en la consola de Firebase (T068, sección 9). Producción ya lo tenía desde el 2025-12-03 y la raíz lo adopta con `import` (sección 10). Si el inicio de sesión con Google falla tras un `apply`, comprobar primero los **dominios autorizados** y los orígenes de JavaScript del cliente OAuth. Falta confirmar con un inicio de sesión real en producción (T078).
+
+### Rotación y revocación de la clave del agente
+
+Rotación cada 90 días: sección 2. Revocación inmediata: sección 3. Comprobaciones de la identidad aislada: sección 1.
+
+### Retirar un entorno (levantar la protección contra borrado)
+
+**Procedimiento no probado** (decisión del propietario de 2026-10-19: no se recrea ni retira un entorno en un proyecto desechable, T089 paso 2). Un entorno tiene datos reales, así que retirarlo es siempre una decisión explícita del propietario. Las protecciones están en el código (`infra/README.md`, «Protección contra borrado») y hay que levantarlas **todas, en una PR y con su `apply`**, antes de que un plan pueda destruir nada:
+
+1. Quitar `prevent_destroy` de la base de Firestore del módulo (`infra/modules/environment/main.tf`) y poner `delete_protection_state = "DELETE_PROTECTION_DISABLED"`. Terraform no admite una variable en `lifecycle`, así que es un cambio de código.
+2. Poner `deletion_protection = false` en los dos servicios de Cloud Run (`infra/modules/environment/cloud_run.tf`).
+3. Aplicar esa PR por `infra` y leer el plan: solo debe cambiar las protecciones.
+4. En una segunda PR, retirar la raíz del entorno (`infra/envs/<entorno>/`). `infra.yml` detecta las raíces por la existencia de su `main.tf`, así que puede que haga falta ajustar el workflow y el estado remoto antes de que un plan muestre la destrucción: comprobarlo al preparar la PR y leer ese plan antes de aprobar.
+5. La base de Firestore tiene `deletion_policy = "ABANDON"`: Terraform **la deja sin borrar** aunque destruya el recurso. Borrar los datos es un paso manual aparte, decidido por el propietario tras comprobar que no hace falta ninguna tarea.
+
+`infra/platform/` (bucket de estado, repositorio, pool y proveedor) no se retira con un entorno: lo comparten staging y producción, y un pool borrado bloquea su nombre 30 días.
+
+## 12. Acceso por invitación y administración (feature 003, T053)
+
+Desde la feature 003 **nadie obtiene cuenta por iniciar sesión con Google**: hay que estar invitado, o ser el administrador inicial de ese entorno. Quien no lo está ve la pantalla «Necesitas una invitación» y no obtiene ni cuenta ni datos. Staging y producción tienen cuentas e invitaciones separadas, así que todo lo de esta sección se hace **en cada entorno**. Diseño y decisiones: `specs/003-user-roles-invitations/` (`research.md` R3–R7); contrato en `specs/001-eisenhower-task-manager/contracts/openapi.yaml`.
+
+### Administrador inicial (bootstrap) por entorno
+
+Es el único caso en el que se crea una cuenta sin invitación. Lo decide la variable `BOOTSTRAP_ADMIN_EMAIL`, **no secreta**, del GitHub Environment de cada entorno:
+
+1. En GitHub: *Settings → Environments → `staging` (y `production`) → Variables → `BOOTSTRAP_ADMIN_EMAIL`*, con **una sola** dirección (la del propietario). Se compara sin distinguir mayúsculas.
+2. `deploy.yml` falla en «Check the bootstrap administrator» si la variable falta o no es una dirección única, antes de tocar nada, para que no se despliegue un entorno sin administrador posible. La API la recibe por `--update-env-vars` en cada despliegue (Terraform no puede, porque ignora `env` una vez creado el servicio).
+3. La primera vez que esa dirección inicia sesión con Google (con el correo verificado) y todavía no tiene cuenta, se crea su cuenta con rol `admin`. Si ya tenía tareas de antes, siguen ahí: el `uid` no cambia.
+4. A partir de ahí la variable ya no hace nada por esa persona: no crea ni reemplaza cuentas que existan. **Cambiarla no quita el rol a nadie**; solo permite que otra dirección sea administradora en su primer inicio de sesión.
+
+Estado a 2026-10-23: la variable está creada en ambos entornos por el propietario (T029); la validación real en staging es T057.
+
+### Invitar, revocar y reinvitar
+
+El administrador usa la pantalla **Accesos** (`/admin/access`, solo visible con rol `admin`); no hay que tocar Firestore ni Google Cloud.
+
+| Acción | Efecto |
+|---|---|
+| Invitar un correo | Crea una invitación `pending` y la lista. **La aplicación no envía ningún correo**: hay que avisar a la persona por tu cuenta. Entra con su cuenta de Google y su primera sesión crea la cuenta con rol `user` (la invitación pasa a `accepted`). |
+| Invitar un correo ya pendiente | No duplica (respuesta 200); no consume hueco. |
+| Invitar un correo con cuenta activa | Rechazado (409). |
+| Revocar una invitación pendiente | La persona ya no puede entrar con ella. |
+| Retirar el acceso a un usuario | Su siguiente petición recibe 403 y ve la pantalla «sin acceso». **Sus tareas se conservan.** |
+| Invitar de nuevo a quien perdió el acceso | Reactiva su cuenta con rol `user` y recupera sus tareas; no crea invitación. |
+
+Límites que conviene conocer: **como máximo 50 invitaciones pendientes** a la vez (la 51 da 409 `invitation_limit_reached`; revocar una libera un hueco) y la pantalla muestra **las 100 más recientes** de invitaciones y de cuentas (avisa cuando una lista llega a 100). Los administradores no se pueden revocar ni degradar desde la aplicación, y no hay operación que cambie roles: es deliberado, para no perder nunca al último administrador (R6).
+
+### Recuperar el acceso de administrador si se pierde la cuenta
+
+La aplicación no tiene recuperación de cuentas (fuera de alcance de la feature). Lo que hay, según el caso, **sin credenciales del agente** (Principio V):
+
+| Situación | Qué hacer |
+|---|---|
+| Puedes iniciar sesión con tu cuenta de Google, aunque haya cambiado su correo | Nada: la cuenta de la aplicación está ligada al `uid`, no al correo. El correo guardado **no se actualiza** (se queda el de cuando se creó la cuenta), así que en Accesos seguirá apareciendo el antiguo, y reinvitar el nuevo correo crearía una invitación para otra cuenta. |
+| **No puedes iniciar sesión** con la cuenta administradora (la perdiste o la cerraron) | Poner en la variable `BOOTSTRAP_ADMIN_EMAIL` de ese entorno otra dirección **tuya** y redesplegar por el pipeline (una fusión que cambie `backend/` o `frontend/`, o relanzar el último despliegue desde *Actions*; el relanzado **no está probado**). Al iniciar sesión con esa dirección, que no tiene cuenta, se crea un administrador nuevo. |
+| Quieres retirar el acceso al administrador anterior (por ejemplo, si la cuenta está comprometida) | **La aplicación no puede**: rechaza revocar a un `admin`. Lo hace el propietario con sus propias credenciales, en la consola de Firestore del proyecto del entorno, poniendo `status = "revoked"` en el documento `users/{uid}` de esa cuenta; el siguiente acceso de esa cuenta recibe 403. Procedimiento **no probado** y que el agente no ejecuta. |
+| Borraste y recreaste tu usuario en Firebase Authentication con el mismo correo | El `uid` es nuevo y ya no coincide con la cuenta: si la dirección es la de `BOOTSTRAP_ADMIN_EMAIL`, se crea otra cuenta `admin` y la anterior queda huérfana con sus tareas (no se migran). Revocar la antigua como en la fila anterior. No lo hagas sin necesidad. |
+
+Esto depende de dos requisitos de configuración de Firebase Authentication (el mismo servicio que Identity Platform; se ven en la consola de Firebase, *Authentication*) que no están en el repositorio y que debe comprobar el propietario en cada entorno (`security-review-fase-1.md`, INFO-001): que **solo está habilitado el proveedor Google** y que está activa la opción de **una cuenta por correo**. Comprobado por el propietario en staging y producción el 2026-10-23; si cambia la configuración, hay que repetirlo. La recuperación del administrador de la tabla de arriba **no se ha probado**: el propietario aceptó ese riesgo el 2026-10-23 mientras sea el único administrador.
+
+### Qué mirar en los registros
+
+Los eventos de acceso son JSON con una lista cerrada de campos (`action`, `uid`, `actor_uid`, `target`, `reason`); **nunca llevan tokens ni correos en claro**: `target` es una huella SHA-256 truncada del correo, que sirve para correlacionar eventos pero se puede invertir por diccionario si se conoce la dirección.
+
+| Mensaje | Cuándo |
+|---|---|
+| `access_denied` (con `reason`: `no_account`, `no_invitation`, `revoked`, `email_not_verified`, `invalid_email` o `not_admin`) | Se deniega una petición. El cliente siempre ve el mismo 403. |
+| `invitation_created`, `invitation_revoked`, `access_revoked`, `access_reactivated` | Acciones del administrador (`actor_uid`). |
+| `invitation_accepted`, `bootstrap_admin_created` | Primera sesión de una persona invitada / del administrador inicial. |
+
+El correo viaja en la ruta de `DELETE /api/v1/admin/invitations/{email}`, así que **sí** puede aparecer en los registros de petición de Cloud Run (`security-review-fase-2.md`, LOW-003): es un riesgo aceptado mientras la audiencia de los registros sea el propietario.
+
+### Validación en staging (T057, propietario)
+
+Tras desplegar por el pipeline, repetir en staging los escenarios 1–6 de `specs/003-user-roles-invitations/quickstart.md` con cuentas reales de prueba y anotar el resultado en `specs/003-user-roles-invitations/validacion-staging.md`.

@@ -78,24 +78,33 @@ flowchart TD
    `mytasks-web:<hash>` con etiquetas inmutables. La API se construye con `pack build --publish`
    (builder de Google Cloud fijado por digest o versión, sin `latest`, y leído de `backend/` para que cambiarlo cambie el hash) y la web con su
    Dockerfile; ambas en el runner, sin Cloud Build. Ninguna variable de entorno se incrusta en la
-   imagen.
+   imagen. Cada imagen se construye con una etiqueta temporal `build-<hash>-<run>-<intento>` y
+   `.github/scripts/image-provenance.sh stamp` la republica como `<hash>` con las etiquetas de
+   procedencia `io.mytasks.component`, `io.mytasks.tree-hash`, `io.mytasks.built-by=deploy.yml`,
+   `io.mytasks.pipeline-run` y `org.opencontainers.image.revision` (MED-001 de la fase 4).
 3. **Promoción** (producción): exige `validated-<hash>` de ambos componentes; si falta, el job
    falla antes de tocar nada (mensaje: qué componente y qué hash).
-4. **Revisión sin tráfico**: cada servicio recibe una revisión nueva con etiquetas de
+4. **Comprobación de procedencia** (staging y producción): antes de crear revisiones, el paso
+   «Check the provenance» lee las etiquetas `io.mytasks.*` **por *digest*** (lo mismo que se
+   despliega y se valida) y, si falta alguna o no coincide con el componente y el hash, el
+   despliegue falla sin tocar nada. Límite: quien ya puede escribir en el registro
+   (`deployer-staging`) puede poner cualquier etiqueta; esto frena errores y etiquetas hechas a
+   mano, no a esa identidad (atestación firmada: backlog).
+5. **Revisión sin tráfico**: cada servicio recibe una revisión nueva con etiquetas de
    `commit`, `tree-hash` y `pipeline-run` y las variables del entorno (`APP_VERSION`,
    `APP_ENV`, `CORS_ORIGINS`, URL de la API, configuración pública de Firebase). Si falta una
    variable obligatoria, el job falla aquí con un mensaje que nombra lo que falta (edge case
    de la spec).
-5. **Humo** (todas obligatorias):
+6. **Humo** (todas obligatorias):
    - API `/health` → `200` con `version` = versión esperada (no `/healthz`: el frontal de Google lo
      intercepta en `run.app` y nunca llega al contenedor).
    - API `/readyz` → `200` (Firestore accesible con la identidad de ejecución).
    - API endpoint de datos sin token → `401` (no es anónimo).
    - Web `/` → `200`; `/config.js` contiene la URL de la API del entorno y no la de otro.
-6. **Cambio de tráfico**: 100 % a las revisiones nuevas, primero API y después web. Si falla el
+7. **Cambio de tráfico**: 100 % a las revisiones nuevas, primero API y después web. Si falla el
    de web, la API vuelve a su revisión anterior.
-7. **Validación** (solo staging): añade `validated-<hash>` a ambas imágenes.
-8. **Registro** (FR-017): el despliegue queda en GitHub (commit, rama, resultado, URL) y en las
+8. **Validación** (solo staging): añade `validated-<hash>` a ambas imágenes.
+9. **Registro** (FR-017): el despliegue queda en GitHub (commit, rama, resultado, URL) y en las
    etiquetas de la revisión.
 
 ### Concurrencia (FR-019)

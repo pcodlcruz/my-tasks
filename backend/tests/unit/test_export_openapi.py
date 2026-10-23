@@ -60,3 +60,44 @@ def test_main_writes_the_file_given_on_the_command_line(tmp_path: Path) -> None:
 
     assert exit_code == 0
     assert json.loads(target.read_text(encoding="utf-8"))["openapi"].startswith("3.")
+
+
+def test_export_contains_the_account_endpoint_and_the_403_of_every_task_operation(
+    tmp_path: Path,
+) -> None:
+    target = tmp_path / "openapi.json"
+
+    export_openapi(target)
+    contract = json.loads(target.read_text(encoding="utf-8"))
+
+    assert "get" in contract["paths"]["/api/v1/me"]
+    assert "MeOut" in contract["components"]["schemas"]
+    task_operations = [
+        operation
+        for path, methods in contract["paths"].items()
+        if path.startswith("/api/v1/tasks")
+        for operation in methods.values()
+    ]
+    assert task_operations
+    assert all("403" in operation["responses"] for operation in task_operations)
+
+
+def test_export_contains_the_admin_endpoints_each_with_401_and_403(tmp_path: Path) -> None:
+    target = tmp_path / "openapi.json"
+
+    export_openapi(target)
+    contract = json.loads(target.read_text(encoding="utf-8"))
+
+    admin_paths = {path for path in contract["paths"] if path.startswith("/api/v1/admin")}
+    assert admin_paths == {
+        "/api/v1/admin/access",
+        "/api/v1/admin/invitations",
+        "/api/v1/admin/invitations/{email}",
+        "/api/v1/admin/users/{uid}",
+    }
+    for path in admin_paths:
+        for operation in contract["paths"][path].values():
+            assert {"401", "403"} <= set(operation["responses"])
+    schemas = contract["components"]["schemas"]
+    assert {"InvitationIn", "InviteResultOut", "AccessListOut"} <= set(schemas)
+    assert schemas["InvitationIn"]["additionalProperties"] is False

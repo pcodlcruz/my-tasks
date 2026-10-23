@@ -2,7 +2,7 @@ import os
 from functools import lru_cache
 from typing import Literal, Self
 
-from pydantic import model_validator
+from pydantic import field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 LOCAL_PROJECT_ID = "demo-mytasks"
@@ -19,9 +19,19 @@ class Settings(BaseSettings):
     firestore_emulator_host: str | None = None
     firebase_auth_emulator_host: str | None = None
     cors_origins: str = "http://localhost:5173"
+    # The one address that becomes `admin` on its first sign-in when no account exists yet
+    # (feature 003, research R5). Not a secret; blank or unset means no bootstrap.
+    bootstrap_admin_email: str | None = None
     # Version served by /health and /healthz. The pipeline sets it on deploy (tree hash of
     # backend/).
     app_version: str = "dev"
+
+    @field_validator("bootstrap_admin_email")
+    @classmethod
+    def _normalize_bootstrap_email(cls, value: str | None) -> str | None:
+        if value is None:
+            return None
+        return value.strip().lower() or None
 
     @property
     def cors_origin_list(self) -> list[str]:

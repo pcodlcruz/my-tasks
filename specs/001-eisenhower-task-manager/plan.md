@@ -25,6 +25,12 @@ y el propietario los aprueba antes de implementar el frontend, que usa Tailwind 
 trasladarlos con fidelidad. La feature se entrega funcionando y testeada en local con los
 emuladores de Firebase; la infraestructura en la nube y el CI/CD son una feature aparte.
 
+> **Actualizado por la feature 003** ([plan](../003-user-roles-invitations/plan.md)): el registro
+> abierto de esta feature queda sustituido por el acceso **solo por invitación**. Cada petición
+> exige además una cuenta activa (`users/{uid}`, que ahora existe como documento con rol y
+> estado) y `/api/v1/admin` exige rol `admin`. La subcolección `users/{uid}/tasks` y el
+> aislamiento por usuario no cambian.
+
 ## Technical Context
 
 **Language/Version**: Python 3.12+ (backend); TypeScript 5.x en modo estricto (frontend)
@@ -194,7 +200,7 @@ paso 1. Cada paso se entrega en su propia rama y PR a `develop` (una por fase de
 
 | Adición | Por qué se necesita | Alternativa más simple rechazada porque |
 |---|---|---|
-| Firebase Authentication (Identity Platform) con proveedor Google | La spec exige alta autoservicio y sesiones aisladas por usuario; el propietario no quiere almacenar contraseñas | Guardar contraseñas propias en Firestore exige hashing, protección frente a fuerza bruta y rotación: más código crítico de seguridad (Principio III); OAuth de Google sin Firebase exige sesiones propias y no tiene emulador local |
+| Firebase Authentication (Identity Platform) con proveedor Google | La spec exige alta autoservicio (sustituida después por el acceso por invitación de la feature 003) y sesiones aisladas por usuario; el propietario no quiere almacenar contraseñas | Guardar contraseñas propias en Firestore exige hashing, protección frente a fuerza bruta y rotación: más código crítico de seguridad (Principio III); OAuth de Google sin Firebase exige sesiones propias y no tiene emulador local |
 | `firebase-admin` (backend) | Verificar los ID tokens, también los del emulador de Auth | `google-auth` no acepta los tokens sin firmar del emulador, así que no habría tests de integración locales |
 | Tailwind CSS | Trasladar con fidelidad las pantallas de Stitch, que genera HTML con clases de Tailwind (petición del usuario) | Con CSS Modules habría que reescribir a mano el estilo de cada pantalla, con riesgo de divergir del diseño aprobado |
 | Política TTL de Firestore (en la feature de infraestructura) | Purgar la papelera a los 30 días (FR-014b) | Un job con Cloud Scheduler añade un servicio, permisos y un endpoint interno que proteger |

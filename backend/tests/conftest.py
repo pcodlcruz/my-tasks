@@ -70,13 +70,18 @@ class GoogleUser:
     id_token: str
 
 
-GoogleUserFactory = Callable[[str], Awaitable[GoogleUser]]
+GoogleUserFactory = Callable[..., Awaitable[GoogleUser]]
 SeedTaskFactory = Callable[..., Awaitable[str]]
+AdminUserFactory = Callable[..., Awaitable[GoogleUser]]
+SeedAccountFactory = Callable[..., Awaitable[None]]
+SeedInvitationFactory = Callable[..., Awaitable[None]]
 
 
-async def _google_user(email: str) -> GoogleUser:
+async def _google_user(email: str, *, email_verified: bool = True) -> GoogleUser:
     _require_emulators()
-    fake_id_token = json.dumps({"sub": str(uuid.uuid4()), "email": email, "email_verified": True})
+    fake_id_token = json.dumps(
+        {"sub": str(uuid.uuid4()), "email": email, "email_verified": email_verified}
+    )
     post_body = urlencode({"id_token": fake_id_token, "providerId": "google.com"})
     async with httpx.AsyncClient() as client:
         response = await client.post(
@@ -96,8 +101,85 @@ async def _google_user(email: str) -> GoogleUser:
 
 
 @pytest.fixture
-def google_user() -> Callable[[str], Awaitable[GoogleUser]]:
+def google_user_without_account() -> GoogleUserFactory:
+    """Sign in with a fake Google account that has no application account (a stranger)."""
     return _google_user
+
+
+@pytest.fixture
+def seed_account(firestore_client: firestore.AsyncClient) -> SeedAccountFactory:
+    async def _seed(
+        uid: str,
+        email: str,
+        *,
+        role: str = "user",
+        status: str = "active",
+    ) -> None:
+        now = datetime.now(UTC)
+        await (
+            firestore_client.collection("users")
+            .document(uid)
+            .set(
+                {
+                    "email": email,
+                    "role": role,
+                    "status": status,
+                    "created_at": now,
+                    "revoked_at": now if status == "revoked" else None,
+                }
+            )
+        )
+
+    return _seed
+
+
+@pytest.fixture
+def seed_invitation(firestore_client: firestore.AsyncClient) -> SeedInvitationFactory:
+    async def _seed(email: str, *, status: str = "pending", invited_by: str = "admin-1") -> None:
+        await (
+            firestore_client.collection("invitations")
+            .document(email)
+            .set(
+                {
+                    "email": email,
+                    "status": status,
+                    "invited_by": invited_by,
+                    "created_at": datetime.now(UTC),
+                    "accepted_at": None,
+                    "accepted_uid": None,
+                }
+            )
+        )
+
+    return _seed
+
+
+@pytest.fixture
+def admin_user(seed_account: SeedAccountFactory) -> AdminUserFactory:
+    """Sign in with a fake Google account that already has an active `admin` account."""
+
+    async def _factory(email: str = "admin@example.com") -> GoogleUser:
+        user = await _google_user(email)
+        await seed_account(user.uid, email, role="admin")
+        return user
+
+    return _factory
+
+
+@pytest.fixture
+def google_user(seed_account: SeedAccountFactory) -> GoogleUserFactory:
+    """Sign in with a fake Google account that already has an active `user` account.
+
+    Most tests exercise the task API as an existing user; the ones about access itself use
+    `google_user_without_account` and seed what they need.
+    """
+
+    async def _factory(email: str) -> GoogleUser:
+        user = await _google_user(email)
+        await seed_account(user.uid, email)
+        return user
+
+    return _factory
 
 
 @pytest.fixture
