@@ -197,12 +197,12 @@ staging.
 **Independent Test**: despliegue a staging por el pipeline y escenarios 1–3 de
 [quickstart.md](./quickstart.md) con cuentas reales de prueba.
 
-- [ ] T053 [P] [US1] Documentar el procedimiento (bootstrap por entorno, cómo invitar, cómo recuperar el acceso de administrador si se pierde la cuenta) en `infra/RUNBOOK.md` y `README.md`
-- [ ] T054 [P] [US1] Anotar en `specs/001-eisenhower-task-manager/spec.md` (FR-001, SC-001, historia 1), `data-model.md` y `plan.md` que el registro abierto queda sustituido por la feature 003 y que ahora existe el documento `users/{uid}`
-- [ ] T055 [P] [US2] Integrar los endpoints nuevos en `specs/001-eisenhower-task-manager/contracts/openapi.yaml` a partir de [contracts/access.yaml](./contracts/access.yaml) y verificar que coincide con el contrato exportado por `backend/scripts/export_openapi.py`
-- [ ] T056 [US1] Revisión de seguridad final de la feature (incluido el riesgo residual de identidades Google creadas por desconocidos en Identity Platform sin acceso a datos, y el enlace cuenta↔`uid` frente al correo) y registro en `specs/003-user-roles-invitations/security-review-final.md`
+- [X] T053 [P] [US1] Documentar el procedimiento (bootstrap por entorno, cómo invitar, cómo recuperar el acceso de administrador si se pierde la cuenta) en `infra/RUNBOOK.md` y `README.md`
+- [X] T054 [P] [US1] Anotar en `specs/001-eisenhower-task-manager/spec.md` (FR-001, SC-001, historia 1), `data-model.md` y `plan.md` que el registro abierto queda sustituido por la feature 003 y que ahora existe el documento `users/{uid}`
+- [X] T055 [P] [US2] Integrar los endpoints nuevos en `specs/001-eisenhower-task-manager/contracts/openapi.yaml` a partir de [contracts/access.yaml](./contracts/access.yaml) y verificar que coincide con el contrato exportado por `backend/scripts/export_openapi.py`
+- [X] T056 [US1] Revisión de seguridad final de la feature (incluido el riesgo residual de identidades Google creadas por desconocidos en Identity Platform sin acceso a datos, y el enlace cuenta↔`uid` frente al correo) y registro en `specs/003-user-roles-invitations/security-review-final.md`
 - [ ] T057 [US1] (propietario) Validar en staging, ya desplegado por el pipeline, los escenarios 1–6 del [quickstart.md](./quickstart.md) y anotar el resultado en `specs/003-user-roles-invitations/validacion-staging.md`
-- [ ] T058 [US1] Repasar el checklist *Definition of Done* de la constitución y marcar la feature como lista para release
+- [ ] T058 [US1] Repasar el checklist *Definition of Done* de la constitución y marcar la feature como lista para release. *Repaso hecho en [definition-of-done.md](./definition-of-done.md); se marca `[X]` cuando el propietario complete T057 y fusione esta PR.*
 
 ---
 

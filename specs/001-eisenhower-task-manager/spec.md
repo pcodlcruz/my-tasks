@@ -21,7 +21,7 @@
 ### Session 2026-09-29
 
 - Q: ¿Se limita el número de tareas activas por usuario? → A: Sí, a 500 (revisión de seguridad, hallazgo MED-002, y objetivo de rendimiento del tablero, que no se pagina). Al alcanzarlo no se pueden crear, reabrir ni restaurar tareas activas; las completadas y las de la papelera no cuentan.
-- Q: ¿Hay formulario de registro propio? → A: No. El acceso es solo con cuenta de Google (research R1): la primera vez se crea la cuenta automáticamente y la misma cuenta de Google es siempre el mismo usuario.
+- Q: ¿Hay formulario de registro propio? → A: No. El acceso es solo con cuenta de Google (research R1): la primera vez se crea la cuenta automáticamente y la misma cuenta de Google es siempre el mismo usuario. *(Matizado por la feature 003: la cuenta ya no se crea sola; solo se crea si el administrador ha invitado antes ese correo. Ver [FR-001](#functional-requirements).)*
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -29,13 +29,15 @@
 
 Como usuario, quiero iniciar sesión con mi cuenta de Google (la primera vez se crea mi cuenta automáticamente, sin formulario de registro) y acceder únicamente a mis tareas, para que mi información quede aislada de la de cualquier otro usuario que use la aplicación.
 
+> **Actualizado por la feature 003** ([`specs/003-user-roles-invitations/`](../003-user-roles-invitations/spec.md)): el registro abierto queda sustituido por el acceso **solo por invitación**. Iniciar sesión con Google ya no crea una cuenta por sí solo: la crea la primera sesión de una persona a la que el administrador ha invitado, o la del administrador inicial. Quien no tiene invitación ve la pantalla «Necesitas una invitación» y no obtiene ni datos ni cuenta. El aislamiento por usuario de esta historia no cambia.
+
 **Why this priority**: Es el requisito de acceso previo a cualquier otra funcionalidad: sin cuenta ni aislamiento de datos por usuario no hay tareas que crear ni tablero que ver.
 
 **Independent Test**: Se puede probar de forma aislada iniciando sesión con dos cuentas de Google distintas y comprobando que cada una solo ve sus propias tareas (inicialmente ninguna), sin acceso a las de la otra.
 
 **Acceptance Scenarios**:
 
-1. **Given** que no he usado la aplicación antes, **When** inicio sesión con mi cuenta de Google, **Then** se crea mi cuenta y obtengo acceso a mi propio espacio de tareas, vacío.
+1. **Given** que no he usado la aplicación antes, **When** inicio sesión con mi cuenta de Google, **Then** se crea mi cuenta y obtengo acceso a mi propio espacio de tareas, vacío. *(Desde la feature 003, solo si mi correo ha sido invitado; si no, veo que necesito una invitación.)*
 2. **Given** dos usuarios ya registrados, **When** el usuario A intenta acceder a las tareas del usuario B, **Then** el sistema se lo impide.
 3. **Given** que no he iniciado sesión, **When** intento ver o modificar cualquier tarea, **Then** el sistema me lo impide hasta que me autentique.
 4. **Given** que ya he usado la aplicación, **When** vuelvo a iniciar sesión con la misma cuenta de Google, **Then** accedo al mismo espacio con mis tareas y no se crea una segunda cuenta.
@@ -127,7 +129,7 @@ Como usuario, quiero marcar una tarea como completada y poder consultarla despu�
 
 ### Functional Requirements
 
-- **FR-001**: El sistema DEBE permitir que una persona nueva obtenga su propia cuenta iniciando sesión por primera vez con su cuenta de Google, sin formulario de registro ni intervención de un administrador.
+- **FR-001**: El sistema DEBE permitir que una persona nueva obtenga su propia cuenta iniciando sesión por primera vez con su cuenta de Google, sin formulario de registro ni intervención de un administrador. **Sustituido por la feature 003 (FR-001 de [su spec](../003-user-roles-invitations/spec.md))**: la cuenta solo se crea a partir de una invitación del administrador (o del correo del administrador inicial) y quien no la tiene no obtiene cuenta ni datos.
 - **FR-002**: El sistema DEBE exigir que el usuario esté autenticado antes de ver o modificar cualquier tarea, su historial o su papelera.
 - **FR-003**: El sistema DEBE garantizar que cada usuario solo pueda ver y modificar sus propias tareas, nunca las de otro usuario.
 - **FR-004**: El sistema DEBE permitir crear una tarea con un título obligatorio (máximo 200 caracteres), una descripción obligatoria (máximo 2000 caracteres), un nivel de urgencia (urgente / no urgente) y un nivel de importancia (importante / no importante).
@@ -158,7 +160,7 @@ Como usuario, quiero marcar una tarea como completada y poder consultarla despu�
 
 ### Measurable Outcomes
 
-- **SC-001**: Una persona nueva puede registrarse y crear su primera tarea en menos de 2 minutos, sin intervención de un administrador.
+- **SC-001**: Una persona nueva puede registrarse y crear su primera tarea en menos de 2 minutos, sin intervención de un administrador. *(Sustituido por la feature 003: la persona debe haber sido invitada antes; una vez invitada, el plazo de 2 minutos desde su primer inicio de sesión se mantiene.)*
 - **SC-002**: Ningún usuario puede ver o modificar, en ningún momento, una tarea o historial perteneciente a otro usuario (0 incidentes de fuga de datos entre cuentas).
 - **SC-003**: Un usuario puede crear una tarea y verla clasificada en su cuadrante correcto en menos de 15 segundos desde que abre el formulario de creación.
 - **SC-004**: Un usuario puede identificar, en menos de 5 segundos tras abrir el tablero, qué tareas pertenecen al cuadrante "Hacer ahora" sin necesidad de aplicar filtros adicionales.

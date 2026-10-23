@@ -52,8 +52,9 @@ Resuelve las decisiones que la spec dejó para el plan. No quedan `NEEDS CLARIFI
 - **Alternatives considered**: invitar por `uid` (el administrador no puede conocerlo de
   antemano); código/enlace de un solo uso (descartado por el supuesto "sin envío de correo").
 - **Riesgo residual** (para `mytasks-security-auditor`): si una cuenta Google cambia de correo,
-  la cuenta de la aplicación sigue ligada al `uid`, no al correo; el correo guardado se
-  actualiza solo desde el token en `/me`.
+  la cuenta de la aplicación sigue ligada al `uid`, no al correo. *(Corrección de la Fase 4:
+  este texto decía que el correo guardado se actualizaba desde el token en `/me`; la
+  implementación no lo hace, el correo queda el de la creación de la cuenta.)*
 
 ## R5. Primer administrador
 

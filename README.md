@@ -1,8 +1,10 @@
 # MyTasks · Gestor personal de tareas
 
 Aplicación web para gestionar tareas personales y laborales con la **matriz de Eisenhower**.
-Cada persona inicia sesión con su cuenta de Google, crea tareas (título, descripción, urgente,
-importante y ámbito) y las ve clasificadas automáticamente en uno de los cuatro cuadrantes:
+El acceso es **solo por invitación**: una persona inicia sesión con su cuenta de Google, pero solo
+entra si el administrador ha invitado antes su correo. Una vez dentro, crea tareas (título,
+descripción, urgente, importante y ámbito) y las ve clasificadas automáticamente en uno de los
+cuatro cuadrantes:
 
 | | Urgente | No urgente |
 |---|---|---|
@@ -12,6 +14,12 @@ importante y ámbito) y las ve clasificadas automáticamente en uno de los cuatr
 Además permite filtrar el tablero por ámbito (Laboral / Personal), fijar tareas, editarlas,
 completarlas y reabrirlas, consultar el historial y mover tareas a una papelera que se vacía
 sola a los 30 días. Cada cuenta solo ve y modifica sus propias tareas.
+
+Hay dos roles: `user` y `admin`. El administrador gestiona los accesos desde la pantalla
+**Accesos** (invitar a un correo, revocar una invitación y retirar el acceso a una persona, que
+conserva sus tareas y las recupera si se la vuelve a invitar). Cómo se designa al administrador de
+cada entorno, cómo invitar y cómo recuperar el acceso si se pierde la cuenta está en el
+[runbook](infra/RUNBOOK.md#12-acceso-por-invitación-y-administración-feature-003-t053).
 
 Se desarrolla con [Spec Kit](https://github.com/github/spec-kit) y agentes de IA. La fuente de
 verdad de las reglas del proyecto es la constitución
@@ -23,8 +31,9 @@ especificada en [`specs/001-eisenhower-task-manager/`](specs/001-eisenhower-task
 - **Frontend** (`frontend/`): React 18 + TypeScript estricto, Vite, TanStack Query, Zustand y
   Tailwind CSS. Solo usa Firebase Auth (proveedor Google); nunca accede a Firestore.
 - **Backend** (`backend/`): FastAPI (Python 3.12+) con capas router → servicio → repositorio.
-  Verifica el ID token de Firebase en cada petición y guarda las tareas en Firestore, en
-  `users/{uid}/tasks`.
+  Verifica el ID token de Firebase en cada petición, comprueba que exista una cuenta activa
+  (`users/{uid}`, con rol y estado) y guarda las tareas en Firestore, en `users/{uid}/tasks`. Las
+  invitaciones viven en `invitations/{correo}`; solo la API lee y escribe estas colecciones.
 - **Diseño** (`docs/design/`): design system y pantallas aprobadas en Stitch.
 
 Esta feature se ejecuta y se valida **solo en local**, contra los emuladores de Firebase con el
@@ -44,6 +53,12 @@ exactos están en [`quickstart.md`](specs/001-eisenhower-task-manager/quickstart
 
 Con todo en marcha, `http://localhost:5173` muestra la pantalla de inicio de sesión y
 `http://localhost:8000/health` (o `/healthz`) responde `{"status":"ok"}`.
+
+**Primer acceso en local**: como el acceso es por invitación, define en `backend/.env` el correo
+del administrador inicial, por ejemplo `BOOTSTRAP_ADMIN_EMAIL=admin@example.com` (ver
+`backend/.env.example`), y reinicia el backend. Esa dirección entra como `admin` en su primer
+inicio de sesión (con el emulador de Auth, creando una cuenta de Google ficticia con ese correo);
+desde **Accesos** puede invitar a otras. Los tests e2e ya se encargan de esto por su cuenta.
 
 El backend solo admite los emuladores con `APP_ENV=local` (ya incluido en `backend/.env.example`).
 Sin esa variable arranca como `production` y se niega a iniciar si ve variables de emulador o un
