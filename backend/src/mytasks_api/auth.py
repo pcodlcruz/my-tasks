@@ -7,7 +7,7 @@ from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from firebase_admin import auth
 
 from mytasks_api.config import Settings, get_settings
-from mytasks_api.domain.account import Role
+from mytasks_api.domain.account import AccessDeniedError, Role
 from mytasks_api.logging_config import log_event
 from mytasks_api.services.access_service import AccessService, get_access_service
 
@@ -96,3 +96,14 @@ async def get_active_user(
     """
     account = await service.require_active(current_user.uid)
     return replace(current_user, role=account.role)
+
+
+async def require_admin(current_user: CurrentUser = Depends(get_active_user)) -> CurrentUser:
+    """Only administrators. The role is read from the account, never from the request, and
+    the answer is the same 403 as for someone without access."""
+    if current_user.role is not Role.ADMIN:
+        log_event(
+            logger, logging.WARNING, "access_denied", uid=current_user.uid, reason="not_admin"
+        )
+        raise AccessDeniedError("not_admin")
+    return current_user
