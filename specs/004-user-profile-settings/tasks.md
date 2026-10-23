@@ -74,6 +74,14 @@ tablero y el tema oscuro de las seis pantallas, y `docs/design/` lo refleja. Ver
 tiene identificador de Stitch, fecha de aprobación y HTML y captura versionados; y que el script
 de contraste de la paleta oscura no devuelve ningún par por debajo de AA.
 
+> **Punto de control en dos rondas (decisión del propietario, 2026-10-23)**: el MCP de Stitch
+> tarda unos 45-60 minutos en colocar cada pantalla, y son 28 en total. La **ronda 1** (T013) aprueba
+> solo el subconjunto que desbloquea las Fases 2 a 3: S7 Perfil, S3 `-v2` y S3 compacto en claro, y
+> S3 y S7 en oscuro, en escritorio y móvil (10 pantallas), con la paleta oscura. La **ronda 2** aprueba
+> el resto (S1 oscuro, S4, S5 y S6 en claro y oscuro, y el selector de avatar con recortador) y debe
+> estar hecha **antes de empezar la Fase 4** (necesita S5) y la **Fase 5** (necesita el selector).
+> Cada ronda se registra en `docs/design/screens/README.md`.
+>
 > El MCP de Stitch ha dado timeouts muy irregulares (6 s a 21 min). Se genera por **orden de
 > prioridad**: S7 claro → S3 `-v2` → S3 oscuro → S7 oscuro → S3 compacta → S5 → S4 → S6 → S1.
 > Un timeout no implica que no se generara: antes de reintentar, usar `list_screens` (ver
@@ -91,8 +99,8 @@ de contraste de la paleta oscura no devuelve ningún par por debajo de AA.
 - [ ] T009 Generar **S5 · Historial `-v2`** claro y oscuro (escritorio y móvil) con la franja «Mostrando solo los últimos N días · Ver todo» cuando hay un periodo activo
 - [ ] T010 Generar **S4 · Formulario de tarea `-v2`** claro y oscuro y **S6 · Papelera `-v2`** claro y oscuro (escritorio y móvil): solo cambian la cabecera y el tema
 - [ ] T011 Generar **S1 · Iniciar sesión** oscuro (escritorio y móvil); la versión clara aprobada sigue vigente
-- [ ] T012 Exportar el HTML y la captura PNG de cada pantalla generada (T004–T011) a `docs/design/screens/<id>-<sufijo>/` (`desktop.html`, `desktop.png`, `mobile.html`, `mobile.png`, como las existentes) y actualizar la tabla de estado de `docs/design/screens/README.md` marcando cada una como **pendiente de aprobación**
-- [ ] T013 (propietario) **Punto de control humano**: revisar en Stitch y en `docs/design/screens/` todas las pantallas nuevas, la paleta oscura (con la salida de `check-contrast.py`) y el catálogo de avatares; aprobar, o pedir cambios (en ese caso se repite el paso afectado)
+- [ ] T012 Exportar el HTML y la captura PNG de cada pantalla generada (T004–T011; primero las de la ronda 1, después las de la ronda 2) a `docs/design/screens/<id>-<sufijo>/` (`desktop.html`, `desktop.png`, `mobile.html`, `mobile.png`, como las existentes) y actualizar la tabla de estado de `docs/design/screens/README.md` marcando cada una como **pendiente de aprobación**
+- [ ] T013 (propietario) **Punto de control humano, ronda 1**: revisar en Stitch y en `docs/design/screens/` las 10 pantallas del subconjunto prioritario (S7 Perfil, S3 `-v2`, S3 compacto, S3 oscuro y S7 oscuro, escritorio y móvil) y la paleta oscura (con la salida de `check-contrast.py`); aprobar, o pedir cambios (en ese caso se repite el paso afectado). La **ronda 2** (S1 oscuro, S4, S5, S6 y el selector de avatar con catálogo y recortador) se aprueba en una segunda revisión antes de la Fase 4
 - [ ] T014 Registrar las aprobaciones en `docs/design/screens/README.md` (identificador de Stitch, fecha y **pantalla vigente** de cada una; las aprobadas de la 001 siguen intactas como referencia anterior) y marcar el avance de esta fase en este fichero
 
 **Checkpoint**: diseño aprobado. Las Fases 3 a 6 pueden empezar (la 2 no depende de él).
@@ -341,7 +349,9 @@ día, revisión de seguridad final y *Definition of Done* repasada.
 
 - **Fase 1 (diseño)**: sin dependencias; termina en el punto de control T013.
 - **Fase 2 (backend)**: sin dependencias; **puede ir en paralelo a la Fase 1**.
-- **Fase 3 (US1)**: necesita la Fase 1 aprobada y fusionada y la Fase 2 fusionada. Es el MVP.
+- **Fase 3 (US1)**: necesita la Fase 1 (ronda 1 del punto de control) aprobada y fusionada y la Fase 2
+  fusionada. Es el MVP. La ronda 2 (S4, S5, S6, S1 oscuro y selector de avatar) puede aprobarse
+  después, pero antes de las Fases 4 y 5.
 - **Fase 4 (US2)** y **Fase 5 (US3)**: necesitan la Fase 3 fusionada; son independientes entre sí
   (pueden ir en paralelo si no se tocan los mismos ficheros: ambas modifican `ProfilePage.tsx`, así
   que se fusionan una detrás de otra).

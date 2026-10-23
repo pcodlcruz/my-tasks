@@ -149,3 +149,21 @@ cada captura oscura que los colores efectivos son los de `DESIGN.md`.
 
 **Desviaciones detectadas en S1 oscuro (escritorio)**: añade una insignia de «conexión cifrada
 OAuth 2.0» y una miniatura de los cuatro cuadrantes que el contrato no pide; quitarlas.
+
+## Punto de control en dos rondas (decisión del propietario, 2026-10-23)
+
+Stitch tarda unos 45-60 minutos en colocar cada pantalla (28 en total), así que el punto de
+control se divide:
+
+- **Ronda 1** (desbloquea las Fases 2 y 3): S7 Perfil (claro y oscuro), S3 `-v2` (claro y oscuro) y
+  S3 compacto, en escritorio y móvil: **10 pantallas**, más la paleta oscura.
+- **Ronda 2** (antes de las Fases 4 y 5): S1 oscuro, S4, S5 y S6 en claro y oscuro, y el selector de
+  avatar con recortador (claro y oscuro). Siguen generándose en segundo plano.
+
+| Ronda 1 | Escritorio | Móvil |
+|---|---|---|
+| S7 Perfil (claro) | `5b4edf53a88f4c5f89c51608ed120c60` (corregida) | `0b97e3e427874566a38fc843734dc918` |
+| S7 Perfil (oscuro) | `912d3dc861c84104af22ceb366a9010a` (corregida) | pendiente |
+| S3 Tablero v2 (claro) | `a3f141c47d3946ea9c1466f3916df60d` | pendiente |
+| S3 Tablero v2 (oscuro) | pendiente | pendiente |
+| S3 Tablero compacto (claro) | pendiente | pendiente |
