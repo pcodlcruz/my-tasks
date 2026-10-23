@@ -6,6 +6,8 @@ info:
     Añade a `specs/001-eisenhower-task-manager/contracts/openapi.yaml` los endpoints de
     cuenta y administración, y el error 403 `access_denied` en todos los endpoints de tareas.
     Todos los endpoints exigen `Authorization: Bearer <ID token de Firebase>`.
+    Integrado en ese documento en la Fase 4 (T055); a partir de ahí es el contrato de 001, versión
+    1.2.0, la referencia vigente. Este fichero queda como registro de lo que añadió la feature.
 
 paths:
   /api/v1/me:

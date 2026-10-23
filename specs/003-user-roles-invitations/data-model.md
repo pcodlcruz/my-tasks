@@ -10,7 +10,7 @@ existía como documento; se crea al aceptar una invitación o con el bootstrap.
 
 | Campo | Tipo | Reglas |
 |---|---|---|
-| `email` | string | Normalizado (minúsculas, sin espacios). Se actualiza desde el token en `/me`. |
+| `email` | string | Normalizado (minúsculas, sin espacios). Se fija al crear la cuenta; **no** se actualiza si la persona cambia el correo de su cuenta de Google (la cuenta sigue ligada al `uid`). |
 | `role` | `"user"` \| `"admin"` | Se fija al crear; no hay operación que lo cambie. |
 | `status` | `"active"` \| `"revoked"` | `revoked` deniega el acceso a datos; las tareas se conservan. |
 | `created_at` | timestamp | Alta de la cuenta. |
@@ -19,8 +19,10 @@ existía como documento; se crea al aceptar una invitación o con el bootstrap.
 **Transiciones**: `active → revoked` (admin, solo si `role = user`) y `revoked → active`
 (admin, volviendo a invitar el correo). Un `admin` no puede pasar a `revoked` (R6).
 
-**Unicidad**: un `uid` ↔ una cuenta. El correo es único entre cuentas (se consulta por
-`email` al reinvitar; índice de campo único automático).
+**Unicidad**: un `uid` ↔ una cuenta. El correo **no** se hace cumplir como único en Firestore:
+se consulta por `email` al reinvitar (índice de campo automático) y se espera único porque
+Identity Platform solo tiene el proveedor Google, con «una cuenta por correo» (requisito de
+configuración; ver `security-review-fase-1.md`, LOW-001 e INFO-001).
 
 ## Invitación — `invitations/{correo}`
 
