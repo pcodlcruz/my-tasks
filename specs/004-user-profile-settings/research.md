@@ -108,7 +108,8 @@ Cada decisión indica qué se eligió, por qué y qué alternativas se descartar
   `localStorage` (modo privado), cae en «sistema» y densidad cómoda.
 - **Razón**: la CSP actual (`script-src 'self'`, sin `'unsafe-inline'`) impide un script en línea;
   uno externo del mismo origen es compatible y no obliga a relajarla.
-- **Límites aceptados**: la caché es del navegador, no de la persona. En un ordenador compartido,
+- **Límites aceptados** (reflejados en FR-007, SC-002 y US1 esc. 4 de la spec): la caché es del
+  navegador, no de la persona. En un ordenador compartido,
   quien abre la pantalla de inicio de sesión ve el último tema usado (solo dos cadenas, sin datos
   personales). Al cargar el perfil real, el servidor manda y la caché se corrige. La primera visita
   en un dispositivo nuevo se pinta con el tema del sistema hasta que llega el perfil; es el
@@ -122,8 +123,10 @@ Cada decisión indica qué se eligió, por qué y qué alternativas se descartar
 - **Ámbito por defecto**: el perfil se carga una vez por sesión y, al llegar, fija el filtro del
   tablero (`uiStore.scopeFilter`) **una sola vez**. Las recargas posteriores del perfil no lo
   tocan, y cambiar el filtro a mano nunca escribe en el perfil (FR-011). El tablero espera a que
-  el perfil se resuelva (éxito o error) antes de pedir tareas, para no mostrar un tablero con el
-  ámbito equivocado ni hacer una petición de más.
+  el perfil se resuelva (éxito, o error tras **un único reintento**) antes de pedir tareas, para
+  no mostrar un tablero con el ámbito equivocado ni hacer una petición de más. Se evitan los
+  reintentos por defecto de TanStack Query, que con la API caída retrasarían el tablero varios
+  segundos (FR-026).
 - **Orden**: `GET /api/v1/tasks?view=board` admite `order=oldest|newest` (por defecto `oldest`).
   Lo aplica `sort_board` del dominio, que ya ordena las fijadas primero. El tablero no se pagina
   (límite de 500 de la 001), así que ordenar en el servidor es barato y se prueba como dominio.

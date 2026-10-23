@@ -31,6 +31,9 @@ Decisiones clave (detalle y alternativas en [research.md](research.md)):
 - **Diseño primero en Stitch** (Fase 1): versiones nuevas de las pantallas afectadas, sin tocar las
   aprobadas, con punto de control humano antes de cualquier código de interfaz (R12).
 
+**Glosario**: «tablero por defecto» (texto de la interfaz y de la spec) es el filtro de **ámbito**
+del tablero (`default_scope` en la API y el modelo de datos); no se crean tableros distintos.
+
 ## Technical Context
 
 **Language/Version**: Python 3.13 (backend, como en `pyproject.toml`), TypeScript estricto con

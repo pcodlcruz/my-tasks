@@ -33,7 +33,7 @@ Como persona con cuenta, quiero abrir una sección «Perfil» y elegir el tema (
 1. **Given** una cuenta que nunca ha tocado su perfil, **When** abro la aplicación, **Then** se ve igual que antes de esta feature (tema del sistema, densidad cómoda).
 2. **Given** que estoy en «Perfil», **When** elijo «Oscuro», **Then** toda la aplicación pasa a tema oscuro de inmediato, sin recargar.
 3. **Given** que elegí «Sistema», **When** cambia el tema del sistema operativo, **Then** la aplicación lo sigue.
-4. **Given** que elegí tema oscuro, **When** cierro sesión, vuelvo a entrar o abro la aplicación en otro dispositivo, **Then** sigue en oscuro y al cargar no se ve antes un destello del tema claro.
+4. **Given** que elegí tema oscuro, **When** cierro sesión, vuelvo a entrar o abro la aplicación en otro dispositivo, **Then** sigue en oscuro; en el mismo navegador, al cargar no se ve antes un destello del tema claro. En un navegador o dispositivo donde aún no se ha usado la aplicación se muestra primero el tema del sistema y, en cuanto llega el perfil (normalmente en menos de 1 segundo), pasa al elegido.
 5. **Given** densidad compacta, **When** abro el tablero, **Then** las tarjetas ocupan menos espacio vertical y caben más tareas en pantalla, con el texto legible.
 6. **Given** cualquier combinación de tema y densidad, **When** uso las pantallas de la aplicación, **Then** el texto y los controles mantienen un contraste legible (nivel AA).
 
@@ -123,7 +123,7 @@ Como persona con cuenta, quiero subir una foto o imagen mía como avatar, para q
 **Apariencia**
 
 - **FR-006**: El sistema DEBE permitir elegir el tema entre «Claro», «Oscuro» y «Sistema» (valor inicial), y aplicarlo a todas las pantallas de la aplicación.
-- **FR-007**: El tema DEBE aplicarse al abrir la aplicación sin mostrar antes un destello del tema contrario.
+- **FR-007**: En un navegador donde ya se ha usado la aplicación, el tema elegido DEBE aplicarse al abrirla sin mostrar antes un destello del tema contrario. En un navegador nuevo, donde el sistema aún no conoce la preferencia, se usa el tema del sistema hasta que llega el perfil.
 - **FR-008**: El texto, los controles y los estados (foco, error, deshabilitado, colores de cuadrante) DEBEN mantener un contraste mínimo de nivel AA en ambos temas.
 - **FR-009**: El sistema DEBE permitir elegir la densidad de la vista entre «Cómoda» (valor inicial) y «Compacta»; la compacta DEBE reducir el espacio de las tarjetas del tablero sin perder legibilidad ni zonas de pulsación utilizables.
 
@@ -172,7 +172,7 @@ Como persona con cuenta, quiero subir una foto o imagen mía como avatar, para q
 ### Measurable Outcomes
 
 - **SC-001**: Una persona puede cambiar entre tema claro y oscuro desde el perfil en 2 pasos o menos, y la aplicación entera cambia en menos de 1 segundo, sin recargar.
-- **SC-002**: En el 100 % de las aperturas posteriores a elegir un tema, la aplicación se muestra desde el primer fotograma en ese tema, sin destello del contrario.
+- **SC-002**: En el 100 % de las aperturas posteriores a elegir un tema en el mismo navegador, la aplicación se muestra desde el primer fotograma en ese tema, sin destello del contrario.
 - **SC-003**: Una persona con un tablero por defecto distinto de «Todas» llega a su tablero ya filtrado sin ningún paso adicional en el 100 % de sus sesiones, y los filtros puntuales no alteran su preferencia en ninguna.
 - **SC-004**: Las preferencias elegidas en un dispositivo se ven al abrir la aplicación en otro dispositivo en menos de 5 segundos desde que se inicia sesión.
 - **SC-005**: Con densidad compacta caben al menos un 25 % más de tareas visibles en el tablero que con la cómoda, a la misma altura de pantalla.
@@ -193,5 +193,5 @@ Como persona con cuenta, quiero subir una foto o imagen mía como avatar, para q
 - La subida de imágenes exige revisión de seguridad (son archivos de personas) y por eso la historia 4 es independiente y se entrega la última. Según el plan, no necesita infraestructura nueva: la imagen reducida se guarda junto al resto de datos de la persona.
 - Fuera de alcance por ahora: tamaño de texto, reducción de animaciones, idioma, notificaciones, atajos de teclado, exportación de datos y borrado de la cuenta. Se anotan como candidatas para futuras features.
 - Las pantallas de la feature 003 (administración de accesos y «Necesitas una invitación») no tienen diseño en Stitch. No se diseñan en esta feature: usan el tema oscuro heredado de los tokens del *design system* y se verifican con las comprobaciones de contraste (SC-008). Queda anotado como deuda de diseño para una feature posterior.
-- El diseño en Stitch añade unas 12 generaciones (seis pantallas en oscuro, escritorio y móvil) más las versiones nuevas de las pantallas con cabecera cambiada y la pantalla de Perfil. Dado que el MCP de Stitch ha dado timeouts irregulares en la feature 001, el plan debe prever reintentos y el punto de control humano antes de la historia 1.
+- El diseño en Stitch supone unas 24 generaciones (doce versiones —seis pantallas en oscuro, las versiones claras con la cabecera nueva, la pantalla de Perfil y la densidad compacta— por escritorio y móvil), más el recortador de avatar. Dado que el MCP de Stitch ha dado timeouts irregulares en la feature 001, el plan debe prever reintentos y el punto de control humano antes de la historia 1.
 - Se mantiene el acceso por invitación: solo las cuentas activas tienen perfil.
