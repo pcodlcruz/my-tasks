@@ -51,3 +51,166 @@ el 2026-09-29:
 |---|---|---|
 | S5 · Historial (escritorio) | `bc0d3c5e5313419f90a96cb78066804d` | 2026-09-29 |
 | S5 · Historial (móvil) | `1f00b08623af4762bb0da45e91cba6d0` | 2026-09-29 |
+
+---
+
+# Feature 004 · versiones nuevas (perfil, tema oscuro, densidad compacta)
+
+**Fuente**: [specs/004-user-profile-settings/contracts/ui-screens.md](../../../specs/004-user-profile-settings/contracts/ui-screens.md).
+Las pantallas aprobadas de la feature 001 (tabla de arriba) **no se modifican ni se borran**
+(FR-028): cada cambio es una versión nueva, y esta sección registra cuál es la **vigente** una
+vez que el propietario la aprueba (T013, T014).
+
+## Línea base (T001, 2026-10-23)
+
+Proyecto Stitch `projects/13869439670490335529` comprobado con `get_project` y `list_screens`.
+
+| Pantalla aprobada (001) | Escritorio | Móvil |
+|---|---|---|
+| S1 · Iniciar sesión | `167976c9a3f546b69d2392f7efabcc7e` | `a02eb14fbccd412aa4cb7617569c2494` |
+| S3 · Tablero | `79c364a0e3e6454488990bcf380db4af` | `8f8343490e0f494982ba5b2a7d74fa96` |
+| S4 · Formulario de tarea | `792abeed82ac4276ac3a4e03221d5ffa` | `bcc7d94339594c5d823bd574462d2ef5` |
+| S5 · Historial | `bc0d3c5e5313419f90a96cb78066804d` | `1f00b08623af4762bb0da45e91cba6d0` |
+| S6 · Papelera | `3bb586411a0742b0b6e050ecc77eb35d` | `7f8e5aa0f7b64a0c8cb5c1da95c4980a` |
+
+## Design systems (T003)
+
+| Sistema | Asset | Modo | Estado |
+|---|---|---|---|
+| Gestor Personal de Tareas (aprobado en la 001) | `assets/ec957f11ef474eb58336b8af664aaa2e` | Claro | **Sin cambios** (versión 1) |
+| Gestor Personal de Tareas (oscuro) | `assets/16783421015770598561` | Oscuro | Nuevo, 2026-10-23, pendiente de aprobación |
+
+Stitch admite un único modo de color por *design system*, así que `update_design_system` sobre el
+aprobado lo habría convertido en oscuro. Se creó un asset aparte con la paleta de
+[`../DESIGN.md`](../DESIGN.md) (§ Tema oscuro), validada con
+[`../check-contrast.py`](../check-contrast.py): 0 pares por debajo de AA en ambos temas.
+
+**Observación**: el `designMd` del sistema claro de Stitch aún lleva `scope-personal: #0D9488`;
+el repositorio ya usa `#0F766E` desde el hallazgo de axe en T105 de la 001. No afecta a esta
+feature; queda como deuda de sincronización.
+
+## Estado de generación (feature 004, 2026-10-23)
+
+El MCP de Stitch devuelve «The operation timed out.» en `generate_screen_from_text`, pero **la
+pantalla se genera igualmente y aparece en `list_screens` pasados unos 20-30 minutos** (no se
+indexa en `get_project`). No hay que reintentar tras un timeout: se espera y se consulta
+`list_screens`. Cada reintento crea una pantalla duplicada.
+
+| Pantalla nueva | Escritorio | Móvil | Estado |
+|---|---|---|---|
+| S7 · Perfil (claro) | `5b4edf53a88f4c5f89c51608ed120c60` (elegida) · duplicada: `96712ae42b4c4ee88f469bd68b921fb2` | lanzada, pendiente de indexar | Generada; ver desviaciones |
+| S7 · Perfil (oscuro) | lanzada, pendiente de indexar | — | Pendiente |
+
+**Desviaciones de S7 escritorio respecto de `contracts/ui-screens.md`** (a corregir con
+`edit_screens` antes del punto de control T013):
+
+- Texto «JPG, PNG o SVG. Tamaño recomendado de 256×256px» bajo el avatar: debe decir «JPEG, PNG o
+  WebP, hasta 2 MB» (o no aparecer en esta pantalla, porque el formato se explica en el selector).
+- Asterisco de obligatorio en «Nombre para mostrar»: el nombre es opcional.
+- Texto inventado «Administrado a través de Google Workspace…» bajo el correo: quitarlo.
+- Insignia «Usuario activo» y «Cuenta Google vinculada»: no están en el contrato; quitar la primera.
+- Pie de página con «Privacidad · Términos · Ayuda»: el resto de pantallas aprobadas lo llevan, así
+  que se deja.
+- Los grupos de opciones usan `role="radiogroup"` y `aria-checked`, y marcan la opción elegida con
+  borde, fondo y un icono de check: cumple el contrato.
+
+**Observación de `generate_variants`**: respondió al instante con operaciones DOM sobre la S3
+aprobada (`79c364a0…`), pero el HTML de esa pantalla sigue intacto (verificado con `download_file`).
+No se localizó todavía la pantalla resultante; no usar `edit_screens` sobre las aprobadas (FR-028).
+
+**Exportación de capturas**: las URL de `screenshot.downloadUrl` (`lh3.googleusercontent.com`) se
+descargan con `curl` desde el sandbox añadiendo ese dominio a `allowed_domains`; los HTML hay que
+traerlos con `download_file`.
+
+## Registro de generaciones (feature 004)
+
+Estado a 2026-10-23, tras la segunda tanda. «Pendiente» = lanzada, aún sin aparecer en
+`list_screens`. El catálogo de 12 avatares (T005) se diseña **dentro** del selector de avatar
+(estado A), en claro y oscuro, en lugar de como pantalla aparte.
+
+| Pantalla | Escritorio | Móvil |
+|---|---|---|
+| S7 Perfil (claro) | `5b4edf53a88f4c5f89c51608ed120c60` (elegida; otras: `96712ae42b4c4ee88f469bd68b921fb2`, `52fa7e5212014ed1bf93978b520e4587`) | `0b97e3e427874566a38fc843734dc918` |
+| S7 Perfil (oscuro) | `912d3dc861c84104af22ceb366a9010a` | pendiente |
+| S7 Selector de avatar y recortador (claro) | pendiente | pendiente |
+| S7 Selector de avatar y recortador (oscuro) | pendiente | pendiente |
+| S3 Tablero v2 (claro) | `a3f141c47d3946ea9c1466f3916df60d` | pendiente |
+| S3 Tablero v2 (oscuro) | pendiente | pendiente |
+| S3 Tablero compacto (claro) | pendiente | pendiente |
+| S5 Historial v2 (claro / oscuro) | pendiente / pendiente | pendiente / pendiente |
+| S4 Formulario v2 (claro / oscuro) | pendiente / pendiente | pendiente / pendiente |
+| S6 Papelera v2 (claro / oscuro) | pendiente / pendiente | pendiente / pendiente |
+| S1 Iniciar sesión (oscuro) | `152e0cebe5114f25acd072fca6b63c84` | pendiente |
+
+**Hallazgo sobre el *design system* oscuro**: tras generar una pantalla con él, Stitch lo pasó a la
+versión 2 y recalculó su `namedColors` (p. ej. fondo `#081425` en lugar de `#0F172A`). El texto de
+`styleGuidelines` y los tokens de `designMd` siguen siendo los nuestros, pero conviene comprobar en
+cada captura oscura que los colores efectivos son los de `DESIGN.md`.
+
+**Desviaciones detectadas en S1 oscuro (escritorio)**: añade una insignia de «conexión cifrada
+OAuth 2.0» y una miniatura de los cuatro cuadrantes que el contrato no pide; quitarlas.
+
+## Punto de control en dos rondas (decisión del propietario, 2026-10-23)
+
+Stitch tarda unos 45-60 minutos en colocar cada pantalla (28 en total), así que el punto de
+control se divide:
+
+- **Ronda 1** (desbloquea las Fases 2 y 3): S7 Perfil (claro y oscuro), S3 `-v2` (claro y oscuro) y
+  S3 compacto, en escritorio y móvil: **10 pantallas**, más la paleta oscura.
+- **Ronda 2** (antes de las Fases 4 y 5): S1 oscuro, S4, S5 y S6 en claro y oscuro, y el selector de
+  avatar con recortador (claro y oscuro). Siguen generándose en segundo plano.
+
+| Ronda 1 | Escritorio | Móvil |
+|---|---|---|
+| S7 Perfil (claro) | `5b4edf53a88f4c5f89c51608ed120c60` (corregida) | `0b97e3e427874566a38fc843734dc918` |
+| S7 Perfil (oscuro) | `912d3dc861c84104af22ceb366a9010a` (corregida) | pendiente |
+| S3 Tablero v2 (claro) | `a3f141c47d3946ea9c1466f3916df60d` | pendiente |
+| S3 Tablero v2 (oscuro) | pendiente | pendiente |
+| S3 Tablero compacto (claro) | pendiente | pendiente |
+
+## Aprobaciones de la feature 004 · ronda 1 (parcial)
+
+El propietario aceptó el 2026-10-23 los diseños existentes en ese momento. Son la **pantalla
+vigente** de cada una; las aprobadas de la feature 001 siguen intactas como referencia anterior.
+
+| Pantalla | Id de Stitch | Carpeta | Vigente para |
+|---|---|---|---|
+| Paleta oscura | `assets/16783421015770598561` | [`../DESIGN.md`](../DESIGN.md) § Tema oscuro | Tokens del tema oscuro |
+| S7 · Perfil (claro, escritorio) | `5b4edf53a88f4c5f89c51608ed120c60` | `s7-profile/desktop.*` | `/perfil` |
+| S7 · Perfil (claro, móvil) | `0b97e3e427874566a38fc843734dc918` | `s7-profile/mobile.*` | `/perfil` en móvil |
+| S7 · Perfil (oscuro, escritorio) | `912d3dc861c84104af22ceb366a9010a` | `s7-profile-dark/desktop.*` | `/perfil` en oscuro |
+| S3 · Tablero v2 (claro, escritorio) | `a3f141c47d3946ea9c1466f3916df60d` | `s3-board-v2/desktop.*` | Cabecera nueva del tablero (también la de S4, S5 y S6 hasta que tengan versión propia) |
+| S1 · Iniciar sesión (oscuro, escritorio) | `152e0cebe5114f25acd072fca6b63c84` | no exportada todavía | Tema oscuro del login (con las salvedades de abajo) |
+
+El resto de pantallas de la ronda 1 y las de la ronda 2 siguen pendientes (tareas T109 a T114 de
+[`tasks.md`](../../../specs/004-user-profile-settings/tasks.md)). **Hasta que se aprueben, siguen
+vigentes las pantallas de la 001** (por ejemplo, el tablero móvil).
+
+### Elementos de las pantallas aprobadas que la implementación **no** sigue
+
+Stitch añadió elementos que el contrato no pide, y `edit_screens` los quitó en su lienzo pero **no**
+en el HTML ni en la captura exportables (el fichero conserva la versión original). La implementación
+sigue [`contracts/ui-screens.md`](../../../specs/004-user-profile-settings/contracts/ui-screens.md) y no esto:
+
+- **S7 (claro y oscuro)**: el texto «JPG, PNG o SVG. Tamaño recomendado de 256×256px» bajo el avatar
+  (los formatos válidos son JPEG, PNG y WebP hasta 2 MB, y se explican en el selector); el asterisco
+  de obligatorio en «Nombre para mostrar» (es opcional); el párrafo «Administrado a través de Google
+  Workspace…» bajo el correo; y las insignias «Usuario activo», «Cuenta activa» y «Cuenta Google
+  vinculada».
+- **S7 oscuro (escritorio)**: el avatar es un cuadrado redondeado en el HTML; la implementación lo
+  hace **circular**, como el contrato. Los textos secundarios usan `#94A3B8` y los bordes `#334155`:
+  la implementación usa los tokens de [`DESIGN.md`](../DESIGN.md) (`#CBD5E1` y `#475569`).
+- **S7 móvil**: la barra de navegación inferior «Matriz / Hoy / Historial / Ajustes» (heredada de la
+  S3 móvil aprobada, que la implementación tampoco sigue). Se mantiene la cabecera común.
+- **S3 v2**: el HTML pinta el enlace de perfil como `<button>`; la implementación lo hace un enlace
+  a `/perfil`. Las fechas límite y «Delegado a» de las tarjetas son de ejemplo de la 001 y no
+  existen en el modelo de tareas.
+- **S1 oscuro**: la insignia «Sistema seguro • OAuth 2.0», la leyenda de los cuatro cuadrantes y la
+  línea «Autenticación directa sin contraseñas».
+
+### Observaciones sobre las herramientas
+
+- `edit_screens` modifica la pantalla en el lienzo de Stitch pero no actualiza los ficheros que
+  entrega `get_screen`/`download_file`: para corregir una pantalla hay que regenerarla.
+- Las capturas exportadas (`desktop.png`, `mobile.png`) son las de 2560 px (escritorio) y 780 px
+  (móvil) que entrega Stitch.
