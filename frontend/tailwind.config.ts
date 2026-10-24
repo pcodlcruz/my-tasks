@@ -1,46 +1,82 @@
 import type { Config } from 'tailwindcss'
+import plugin from 'tailwindcss/plugin'
 
 // Tokens of the design system approved in Stitch — docs/design/DESIGN.md (T011,
 // approved in T018). Keys follow that document's semantic names, not Tailwind's
-// default numeric scale.
+// default numeric scale. Every color is a CSS variable (src/index.css) so the dark theme is
+// a second set of values, not a second set of classes; `<alpha-value>` keeps `bg-error/10`.
+function color(name: string): string {
+  return `rgb(var(--color-${name}) / <alpha-value>)`
+}
+
 export default {
   content: ['./index.html', './src/**/*.{ts,tsx}'],
   theme: {
     extend: {
       colors: {
         quadrant: {
-          'do-now': { accent: '#B91C1C', surface: '#FEF2F2' },
-          schedule: { accent: '#1D4ED8', surface: '#EFF6FF' },
-          delegate: { accent: '#B45309', surface: '#FFFBEB' },
-          eliminate: { accent: '#475569', surface: '#F8FAFC' },
+          'do-now': {
+            accent: color('do-now-accent'),
+            surface: color('do-now-surface'),
+            border: color('do-now-border'),
+          },
+          schedule: {
+            accent: color('schedule-accent'),
+            surface: color('schedule-surface'),
+            border: color('schedule-border'),
+          },
+          delegate: {
+            accent: color('delegate-accent'),
+            surface: color('delegate-surface'),
+            border: color('delegate-border'),
+          },
+          eliminate: {
+            accent: color('eliminate-accent'),
+            surface: color('eliminate-surface'),
+            border: color('eliminate-border'),
+          },
         },
         scope: {
-          work: '#7C3AED',
-          personal: '#0F766E',
+          work: {
+            DEFAULT: color('scope-work'),
+            surface: color('scope-work-surface'),
+            border: color('scope-work-border'),
+          },
+          personal: {
+            DEFAULT: color('scope-personal'),
+            surface: color('scope-personal-surface'),
+            border: color('scope-personal-border'),
+          },
         },
         text: {
-          DEFAULT: '#0F172A',
-          muted: '#475569',
+          DEFAULT: color('text'),
+          muted: color('text-muted'),
         },
         surface: {
-          DEFAULT: '#FFFFFF',
-          alt: '#F8FAFC',
+          DEFAULT: color('surface'),
+          alt: color('surface-alt'),
         },
         border: {
-          DEFAULT: '#CBD5E1',
+          DEFAULT: color('border'),
         },
         primary: {
-          DEFAULT: '#1D4ED8',
-          hover: '#1E40AF',
+          DEFAULT: color('primary'),
+          hover: color('primary-hover'),
+        },
+        // Text on a filled primary button / on a quadrant accent: white on the light
+        // palette, dark on the dark one (whose accents are light).
+        on: {
+          primary: color('on-primary'),
+          accent: color('on-accent'),
         },
         error: {
-          DEFAULT: '#B91C1C',
-          surface: '#FEF2F2',
+          DEFAULT: color('error'),
+          surface: color('error-surface'),
         },
-        success: '#15803D',
+        success: color('success'),
         disabled: {
-          bg: '#E2E8F0',
-          text: '#94A3B8',
+          bg: color('disabled-bg'),
+          text: color('disabled-text'),
         },
       },
       fontFamily: {
@@ -67,5 +103,10 @@ export default {
       },
     },
   },
-  plugins: [],
+  plugins: [
+    // `compact:` styles apply only with the compact density (`data-density` on <html>).
+    plugin(({ addVariant }) => {
+      addVariant('compact', ":root[data-density='compact'] &")
+    }),
+  ],
 } satisfies Config

@@ -41,7 +41,7 @@ export function BoardPage(): JSX.Element {
         <button
           type="button"
           onClick={() => setIsCreating(true)}
-          className="rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-white hover:bg-primary-hover"
+          className="rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-on-primary hover:bg-primary-hover"
         >
           + Nueva tarea
         </button>
@@ -89,7 +89,7 @@ export function BoardPage(): JSX.Element {
             {CANONICAL_QUADRANTS.map((quadrant) => (
               <Quadrant key={quadrant} quadrant={quadrant} count={groups[quadrant].length}>
                 {groups[quadrant].length > 0 && (
-                  <div className="flex flex-1 flex-col gap-3">
+                  <div className="flex flex-1 flex-col gap-[var(--card-gap)]">
                     {groups[quadrant].map((task) => (
                       <TaskCard key={task.id} task={task} onEdit={setEditingTask} />
                     ))}

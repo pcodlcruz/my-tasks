@@ -43,6 +43,17 @@ export function AppHeader(): JSX.Element {
               {user.displayName ?? user.email}
             </span>
           )}
+          {/* Provisional: the identity phase replaces it with the avatar and the name. */}
+          <NavLink
+            to="/perfil"
+            className={({ isActive }) =>
+              isActive
+                ? 'border-b-2 border-primary px-2 py-1 font-semibold text-primary'
+                : 'px-2 py-1 text-text-muted hover:text-primary'
+            }
+          >
+            Perfil
+          </NavLink>
           <button
             type="button"
             onClick={() => void signOut()}

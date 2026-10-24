@@ -34,6 +34,14 @@ async function renderProtected(initialEntry = '/historial'): Promise<void> {
             </ProtectedRoute>
           }
         />
+        <Route
+          path="/perfil"
+          element={
+            <ProtectedRoute>
+              <div>Contenido del perfil</div>
+            </ProtectedRoute>
+          }
+        />
       </Routes>
     </MemoryRouter>,
   )
@@ -109,5 +117,38 @@ describe('<ProtectedRoute>', () => {
     expect(screen.getByRole('alert')).toHaveTextContent('No se pudo comprobar tu acceso.')
     expect(screen.queryByText('Contenido protegido')).not.toBeInTheDocument()
     expect(retry).toHaveBeenCalledTimes(1)
+  })
+
+  describe('/perfil', () => {
+    it('muestra el perfil solo con sesión y cuenta activa', async () => {
+      useSessionMock.mockReturnValue(SIGNED_IN)
+      useAccountMock.mockReturnValue({
+        status: 'active',
+        account: { uid: 'user-1', email: 'ana@example.com', role: 'user' },
+      })
+
+      await renderProtected('/perfil')
+
+      expect(screen.getByText('Contenido del perfil')).toBeInTheDocument()
+    })
+
+    it('redirige al login sin sesión, conservando /perfil como origen', async () => {
+      useSessionMock.mockReturnValue({ user: null, loading: false })
+
+      await renderProtected('/perfil')
+
+      expect(screen.getByText('Página de login (origen: /perfil)')).toBeInTheDocument()
+      expect(screen.queryByText('Contenido del perfil')).not.toBeInTheDocument()
+    })
+
+    it('no muestra el perfil a una cuenta sin acceso', async () => {
+      useSessionMock.mockReturnValue({ ...SIGNED_IN, signOut: vi.fn() })
+      useAccountMock.mockReturnValue({ status: 'denied' })
+
+      await renderProtected('/perfil')
+
+      expect(screen.queryByText('Contenido del perfil')).not.toBeInTheDocument()
+      expect(screen.getByRole('heading', { name: 'Necesitas una invitación' })).toBeInTheDocument()
+    })
   })
 })

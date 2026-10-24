@@ -20,25 +20,25 @@ const QUADRANT_STYLES: Record<
     surfaceBg: 'bg-quadrant-do-now-surface',
     accentBg: 'bg-quadrant-do-now-accent',
     accentText: 'text-quadrant-do-now-accent',
-    border: 'border-red-200',
+    border: 'border-quadrant-do-now-border',
   },
   schedule: {
     surfaceBg: 'bg-quadrant-schedule-surface',
     accentBg: 'bg-quadrant-schedule-accent',
     accentText: 'text-quadrant-schedule-accent',
-    border: 'border-blue-200',
+    border: 'border-quadrant-schedule-border',
   },
   delegate: {
     surfaceBg: 'bg-quadrant-delegate-surface',
     accentBg: 'bg-quadrant-delegate-accent',
     accentText: 'text-quadrant-delegate-accent',
-    border: 'border-amber-200',
+    border: 'border-quadrant-delegate-border',
   },
   eliminate: {
     surfaceBg: 'bg-quadrant-eliminate-surface',
     accentBg: 'bg-quadrant-eliminate-accent',
     accentText: 'text-quadrant-eliminate-accent',
-    border: 'border-slate-200',
+    border: 'border-quadrant-eliminate-border',
   },
 }
 
@@ -76,7 +76,7 @@ export function Quadrant({ quadrant, count, children }: QuadrantProps): JSX.Elem
           </div>
         </div>
       </div>
-      <div className="flex-1 p-4">
+      <div className="flex-1 p-[var(--quadrant-padding)]">
         {count === 0 && !children ? (
           <p className="py-6 text-center text-caption text-text-muted">
             No hay tareas en este cuadrante.
