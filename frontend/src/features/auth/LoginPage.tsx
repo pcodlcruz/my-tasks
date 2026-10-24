@@ -67,6 +67,7 @@ export function LoginPage(): JSX.Element {
         )}
 
         <div className="mt-8">
+          {/* Google's brand guidelines fix this button's colors (neutral, light): they do not follow the theme. */}
           <button
             type="button"
             aria-label={status === 'loading' ? 'Cargando' : 'Iniciar sesión con Google'}

@@ -4,15 +4,18 @@ import { QUADRANT_LABELS, SCOPE_LABELS } from '../../api/types'
 // Full literal class names on purpose (see Quadrant.tsx): Tailwind's scanner
 // does not generate utilities built from templates.
 const SCOPE_BADGE_STYLE: Record<Scope, string> = {
-  work: 'bg-purple-50 text-scope-work border-purple-200',
-  personal: 'bg-teal-50 text-scope-personal border-teal-200',
+  work: 'bg-scope-work-surface text-scope-work border-scope-work-border',
+  personal: 'bg-scope-personal-surface text-scope-personal border-scope-personal-border',
 }
 
 const QUADRANT_BADGE_STYLE: Record<Quadrant, string> = {
-  do_now: 'bg-quadrant-do-now-surface text-quadrant-do-now-accent border-red-200',
-  schedule: 'bg-quadrant-schedule-surface text-quadrant-schedule-accent border-blue-200',
-  delegate: 'bg-quadrant-delegate-surface text-quadrant-delegate-accent border-amber-200',
-  eliminate: 'bg-quadrant-eliminate-surface text-quadrant-eliminate-accent border-slate-200',
+  do_now: 'bg-quadrant-do-now-surface text-quadrant-do-now-accent border-quadrant-do-now-border',
+  schedule:
+    'bg-quadrant-schedule-surface text-quadrant-schedule-accent border-quadrant-schedule-border',
+  delegate:
+    'bg-quadrant-delegate-surface text-quadrant-delegate-accent border-quadrant-delegate-border',
+  eliminate:
+    'bg-quadrant-eliminate-surface text-quadrant-eliminate-accent border-quadrant-eliminate-border',
 }
 
 const BADGE_BASE =

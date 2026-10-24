@@ -154,3 +154,26 @@ tokens (`bg-white`, `text-white`, `bg-text`, `border-blue-200`, `border-slate-20
 `border-red-200`, `border-amber-200`, `border-purple-200`, `border-teal-200` y `bg-teal-50`)
 **no cambiarían de color en oscuro**. Hay que sustituirlas por tokens (`on-primary`, `on-accent`,
 `surface`, `border`…) al convertir la paleta a variables CSS.
+
+### Tokens añadidos en la implementación (Fase 3, 2026-10-24)
+
+Al pasar la paleta a variables CSS hubo que dar nombre a colores que el código escribía como
+clases literales de Tailwind (`border-red-200`, `bg-purple-50`…). Los valores **claros** son los
+literales de siempre (no cambia ningún píxel); los oscuros son decorativos (bordes y tintes), sin
+requisito de contraste propio, y su texto sigue las parejas ya validadas.
+
+| Token | Claro | Oscuro | Sustituye a |
+|---|---|---|---|
+| `do-now-border` | `#FECACA` | `#5C2B2E` | `border-red-200` |
+| `schedule-border` | `#BFDBFE` | `#2B4A7A` | `border-blue-200` |
+| `delegate-border` | `#FDE68A` | `#6B5420` | `border-amber-200` |
+| `eliminate-border` | `#E2E8F0` | `#3B475C` | `border-slate-200` |
+| `scope-work-surface` / `-border` | `#FAF5FF` / `#E9D5FF` | `#2E2650` / `#4C3D8F` | `bg-purple-50` / `border-purple-200` |
+| `scope-personal-surface` / `-border` | `#F0FDFA` / `#99F6E4` | `#12302E` / `#1F6B63` | `bg-teal-50` / `border-teal-200` |
+| `page` | `#FFFFFF` | `#0F172A` | Fondo del lienzo (era el del navegador) |
+| `ink` | `#000000` | `#F1F5F9` | Tinta base del texto sin clase (era la del navegador) |
+
+El tablero toma su relleno de variables de densidad (`--card-padding`, `--card-gap`,
+`--card-inner-gap`, `--card-footer-gap`, `--quadrant-padding`; cómoda 1 / 0,75 / 0,75 / 0,5 / 1 rem,
+compacta 0,5 / 0,375 / 0,375 / 0,25 / 0,5 rem) y, en compacta, la tarjeta se maqueta en una fila
+(título y acciones, luego ámbito y «Completar»).

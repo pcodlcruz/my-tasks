@@ -26,7 +26,7 @@ export function TrashPage(): JSX.Element {
         <h1 className="text-display font-display text-text">Papelera</h1>
       </div>
 
-      <div className="mb-6 flex items-center gap-2 rounded-xl border border-blue-200 bg-quadrant-schedule-surface p-3">
+      <div className="mb-6 flex items-center gap-2 rounded-xl border border-quadrant-schedule-border bg-quadrant-schedule-surface p-3">
         <span aria-hidden="true">ℹ️</span>
         <p className="text-caption text-text">
           Las tareas se eliminan automáticamente a los 30 días.

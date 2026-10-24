@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+
+<html class="h-full bg-surface-alt" lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>S3 Tablero v2 - MyTasks (Móvil)</title>
+<!-- Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Inter Font -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS CDN -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Tailwind Theme Configuration -->
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "on-primary-container": "#cad3ff",
+            "text-muted": "#475569",
+            "secondary-fixed-dim": "#6bd8cb",
+            "on-surface-variant": "#434655",
+            "surface-container-highest": "#e2e1ed",
+            "scope-work": "#7C3AED",
+            "outline-variant": "#c4c5d7",
+            "tertiary": "#7f2500",
+            "eliminate": "#475569",
+            "primary": "#0037b0",
+            "on-surface": "#1a1b23",
+            "error": "#B91C1C",
+            "on-background": "#1a1b23",
+            "surface-container-high": "#e8e7f3",
+            "inverse-primary": "#b7c4ff",
+            "surface-alt": "#F8FAFC",
+            "secondary-fixed": "#89f5e7",
+            "scope-personal": "#0D9488",
+            "surface-bright": "#faf8ff",
+            "on-secondary-fixed": "#00201d",
+            "on-secondary": "#ffffff",
+            "on-error-container": "#93000a",
+            "secondary": "#006a61",
+            "on-tertiary-container": "#ffc9b7",
+            "border": "#CBD5E1",
+            "on-primary-fixed-variant": "#0039b5",
+            "schedule": "#1D4ED8",
+            "text": "#0F172A",
+            "inverse-surface": "#2e3039",
+            "surface-container-lowest": "#ffffff",
+            "tertiary-container": "#a73400",
+            "surface-tint": "#2151da",
+            "secondary-container": "#86f2e4",
+            "surface": "#FFFFFF",
+            "primary-container": "#1d4ed8",
+            "primary-fixed-dim": "#b7c4ff",
+            "outline": "#747686",
+            "tertiary-fixed": "#ffdbcf",
+            "surface-container-low": "#f3f2fe",
+            "tertiary-fixed-dim": "#ffb59c",
+            "on-tertiary-fixed": "#390c00",
+            "background": "#faf8ff",
+            "on-secondary-fixed-variant": "#005049",
+            "surface-container": "#ededf9",
+            "surface-variant": "#e2e1ed",
+            "on-primary-fixed": "#001551",
+            "on-error": "#ffffff",
+            "on-tertiary-fixed-variant": "#832700",
+            "on-secondary-container": "#006f66",
+            "inverse-on-surface": "#f0f0fb",
+            "error-container": "#ffdad6",
+            "on-tertiary": "#ffffff",
+            "on-primary": "#ffffff",
+            "primary-fixed": "#dce1ff",
+            "delegate": "#B45309",
+            "do-now": "#B91C1C",
+            "surface-dim": "#d9d9e5",
+            "success": "#15803D"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.125rem",
+            "lg": "0.25rem",
+            "xl": "0.5rem",
+            "full": "0.75rem"
+          },
+          "spacing": {
+            "gutter": "24px",
+            "space-sm": "8px",
+            "space-xl": "32px",
+            "space-lg": "16px",
+            "margin": "24px",
+            "space-2xl": "48px",
+            "space-xs": "4px",
+            "space-md": "12px"
+          },
+          "fontFamily": {
+            "display": ["Inter", "sans-serif"],
+            "heading": ["Inter", "sans-serif"],
+            "caption": ["Inter", "sans-serif"],
+            "body-strong": ["Inter", "sans-serif"],
+            "body": ["Inter", "sans-serif"]
+          },
+          "fontSize": {
+            "display": ["28px", { "lineHeight": "36px", "fontWeight": "700" }],
+            "heading": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+            "caption": ["13px", { "lineHeight": "18px", "fontWeight": "400" }],
+            "body-strong": ["16px", { "lineHeight": "24px", "fontWeight": "600" }],
+            "body": ["16px", { "lineHeight": "24px", "fontWeight": "400" }]
+          }
+        },
+      },
+    }
+  </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="h-full flex flex-col font-body text-body text-text bg-surface-alt antialiased selection:bg-primary selection:text-on-primary pb-28">
+<!-- Cabecera Superior Móvil -->
+<header class="sticky top-0 z-40 w-full bg-surface shadow-sm">
+<div class="w-full flex items-center justify-between px-space-lg py-space-sm h-16 max-w-md mx-auto">
+<!-- Logo Brand -->
+<div class="flex items-center gap-space-xs text-primary">
+<span aria-hidden="true" class="material-symbols-outlined text-[28px]">grid_view</span>
+<span class="font-heading text-heading text-primary tracking-tight">MyTasks</span>
+</div>
+<!-- Acciones de Usuario -->
+<div class="flex items-center gap-space-md">
+<!-- Avatar Ana Cruz -->
+<div aria-label="Perfil de Ana Cruz" class="w-8 h-8 rounded-full bg-schedule flex items-center justify-center text-on-primary font-body-strong text-caption shadow-sm" role="img" title="Perfil de Ana Cruz">
+          AC
+        </div>
+<!-- Botón Cerrar Sesión -->
+<button aria-label="Cerrar sesión de la cuenta" class="flex items-center gap-1 text-text-muted hover:text-text px-2 py-1.5 rounded-lg text-caption font-body-strong hover:bg-surface-container transition-colors duration-150 min-h-[44px] min-w-[44px] focus:outline-none focus:ring-2 focus:ring-primary" type="button">
+<span aria-hidden="true" class="material-symbols-outlined text-[18px]">logout</span>
+<span class="hidden sm:inline">Salir</span>
+</button>
+</div>
+</div>
+</header>
+<!-- Contenedor Principal (Vista Móvil) -->
+<main class="flex-1 w-full max-w-md mx-auto px-space-lg pt-space-lg">
+<!-- Título y Acción Primaria -->
+<section class="flex items-center justify-between gap-space-sm mb-space-md">
+<div>
+<h1 class="font-heading text-[22px] leading-7 font-bold text-text">Matriz de prioridades</h1>
+<p class="font-caption text-caption text-text-muted">Cuadrantes de Eisenhower</p>
+</div>
+<!-- Botón + Nueva tarea (Min 44px táctil) -->
+<button class="flex items-center justify-center gap-space-xs px-space-lg py-2.5 bg-schedule hover:bg-primary text-on-primary font-body-strong text-caption rounded-xl shadow-sm min-h-[44px] min-w-[120px] transition-all duration-150 active:scale-95 focus:outline-none focus:ring-2 focus:ring-schedule focus:ring-offset-2" type="button">
+<span aria-hidden="true" class="material-symbols-outlined text-[20px]">add</span>
+<span>Nueva tarea</span>
+</button>
+</section>
+<!-- Filtro Segmentado Horizontal -->
+<nav aria-label="Filtrar tareas por ámbito" class="mb-space-lg">
+<div class="flex items-center gap-space-xs overflow-x-auto pb-1 scrollbar-none" role="tablist">
+<!-- Todas (Activo) -->
+<button aria-selected="true" class="flex items-center gap-1.5 px-3 py-2 bg-schedule text-on-primary rounded-xl font-body-strong text-caption shadow-sm min-h-[44px] shrink-0" role="tab" type="button">
+<span>Todas (7)</span>
+</button>
+<!-- Laboral -->
+<button aria-selected="false" class="flex items-center gap-1.5 px-3 py-2 bg-surface hover:bg-surface-container border border-border text-text font-body text-caption rounded-xl transition-colors duration-150 min-h-[44px] shrink-0" role="tab" type="button">
+<span aria-hidden="true" class="w-2.5 h-2.5 rounded-full bg-scope-work shrink-0"></span>
+<span>Laboral (4)</span>
+</button>
+<!-- Personal -->
+<button aria-selected="false" class="flex items-center gap-1.5 px-3 py-2 bg-surface hover:bg-surface-container border border-border text-text font-body text-caption rounded-xl transition-colors duration-150 min-h-[44px] shrink-0" role="tab" type="button">
+<span aria-hidden="true" class="w-2.5 h-2.5 rounded-full bg-scope-personal shrink-0"></span>
+<span>Personal (3)</span>
+</button>
+</div>
+</nav>
+<!-- Cuadrantes de Tareas (Apilados) -->
+<div class="flex flex-col gap-space-lg">
+<!-- Cuadrante 1: Hacer ahora -->
+<section aria-labelledby="q1-heading" class="rounded-xl bg-[#FEF2F2] p-space-md border border-[#FCA5A5]/40 shadow-sm">
+<!-- Cabecera Cuadrante -->
+<div class="flex items-center justify-between pb-space-sm border-b border-[#FCA5A5]/30">
+<div class="flex items-center gap-2">
+<span class="w-2.5 h-2.5 rounded-full bg-do-now"></span>
+<div>
+<div class="flex items-center gap-1.5">
+<h2 class="font-body-strong text-body text-[#991B1B]" id="q1-heading">Hacer ahora</h2>
+<span class="px-2 py-0.5 rounded-full text-caption font-body-strong bg-[#FEE2E2] text-[#991B1B] border border-[#FECACA]">
+                  3
+                </span>
+</div>
+<p class="font-caption text-[11px] text-[#B91C1C] font-medium tracking-tight">Urgente e Importante</p>
+</div>
+</div>
+<button aria-label="Añadir tarea a Hacer ahora" class="w-11 h-11 flex items-center justify-center rounded-lg text-[#B91C1C] hover:bg-[#FEE2E2] transition-colors focus:outline-none focus:ring-2 focus:ring-do-now" type="button">
+<span aria-hidden="true" class="material-symbols-outlined text-[20px]">add</span>
+</button>
+</div>
+<!-- Lista de tareas Cuadrante 1 -->
+<ul class="flex flex-col gap-space-sm pt-space-sm" role="list">
+<!-- Tarea 1 -->
+<li class="flex items-start gap-space-sm p-3 bg-surface rounded-xl border border-border shadow-sm border-l-4 border-l-do-now">
+<label class="relative flex items-center justify-center w-11 h-11 shrink-0 cursor-pointer -mt-1 -ml-1">
+<input class="w-5 h-5 text-do-now border-border rounded focus:ring-do-now focus:ring-2" type="checkbox"/>
+<span class="sr-only">Completar tarea: Resolver incidencia crítica en pasarela de pagos</span>
+</label>
+<div class="flex-1 min-w-0 pr-1">
+<p class="font-body-strong text-body text-text leading-snug">Resolver incidencia crítica en pasarela de pagos</p>
+<div class="flex flex-wrap items-center gap-2 mt-1.5">
+<span class="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-body-strong bg-[#F3E8FF] text-scope-work border border-scope-work/20">
+                  Laboral
+                </span>
+<span class="inline-flex items-center gap-1 text-caption text-do-now font-body-strong">
+<span aria-hidden="true" class="material-symbols-outlined text-[14px]">schedule</span>
+<span>Vence hoy 17:00</span>
+</span>
+</div>
+</div>
+</li>
+<!-- Tarea 2 -->
+<li class="flex items-start gap-space-sm p-3 bg-surface rounded-xl border border-border shadow-sm border-l-4 border-l-do-now">
+<label class="relative flex items-center justify-center w-11 h-11 shrink-0 cursor-pointer -mt-1 -ml-1">
+<input class="w-5 h-5 text-do-now border-border rounded focus:ring-do-now focus:ring-2" type="checkbox"/>
+<span class="sr-only">Completar tarea: Enviar reporte financiero mensual a dirección</span>
+</label>
+<div class="flex-1 min-w-0 pr-1">
+<p class="font-body-strong text-body text-text leading-snug">Enviar reporte financiero mensual a dirección</p>
+<div class="flex flex-wrap items-center gap-2 mt-1.5">
+<span class="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-body-strong bg-[#F3E8FF] text-scope-work border border-scope-work/20">
+                  Laboral
+                </span>
+<span class="inline-flex items-center gap-1 text-caption text-text-muted">
+<span aria-hidden="true" class="material-symbols-outlined text-[14px]">schedule</span>
+<span>Hoy 19:30</span>
+</span>
+</div>
+</div>
+</li>
+<!-- Tarea 3 -->
+<li class="flex items-start gap-space-sm p-3 bg-surface rounded-xl border border-border shadow-sm border-l-4 border-l-do-now">
+<label class="relative flex items-center justify-center w-11 h-11 shrink-0 cursor-pointer -mt-1 -ml-1">
+<input class="w-5 h-5 text-do-now border-border rounded focus:ring-do-now focus:ring-2" type="checkbox"/>
+<span class="sr-only">Completar tarea: Comprar receta médica en farmacia de turno</span>
+</label>
+<div class="flex-1 min-w-0 pr-1">
+<p class="font-body-strong text-body text-text leading-snug">Comprar receta médica en farmacia de turno</p>
+<div class="flex flex-wrap items-center gap-2 mt-1.5">
+<span class="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-body-strong bg-[#CCFBF1] text-scope-personal border border-scope-personal/20">
+                  Personal
+                </span>
+<span class="inline-flex items-center gap-1 text-caption text-text-muted">
+<span aria-hidden="true" class="material-symbols-outlined text-[14px]">schedule</span>
+<span>Antes de 21:00</span>
+</span>
+</div>
+</div>
+</li>
+</ul>
+</section>
+<!-- Cuadrante 2: Planificar -->
+<section aria-labelledby="q2-heading" class="rounded-xl bg-[#EFF6FF] p-space-md border border-[#BFDBFE]/50 shadow-sm">
+<!-- Cabecera Cuadrante -->
+<div class="flex items-center justify-between pb-space-sm border-b border-[#BFDBFE]/40">
+<div class="flex items-center gap-2">
+<span class="w-2.5 h-2.5 rounded-full bg-schedule"></span>
+<div>
+<div class="flex items-center gap-1.5">
+<h2 class="font-body-strong text-body text-[#1E40AF]" id="q2-heading">Planificar</h2>
+<span class="px-2 py-0.5 rounded-full text-caption font-body-strong bg-[#DBEAFE] text-[#1E40AF] border border-[#BFDBFE]">
+                  2
+                </span>
+</div>
+<p class="font-caption text-[11px] text-schedule font-medium tracking-tight">No urgente, pero Importante</p>
+</div>
+</div>
+<button aria-label="Añadir tarea a Planificar" class="w-11 h-11 flex items-center justify-center rounded-lg text-schedule hover:bg-[#DBEAFE] transition-colors focus:outline-none focus:ring-2 focus:ring-schedule" type="button">
+<span aria-hidden="true" class="material-symbols-outlined text-[20px]">add</span>
+</button>
+</div>
+<!-- Lista de tareas Cuadrante 2 -->
+<ul class="flex flex-col gap-space-sm pt-space-sm" role="list">
+<!-- Tarea 1 -->
+<li class="flex items-start gap-space-sm p-3 bg-surface rounded-xl border border-border shadow-sm border-l-4 border-l-schedule">
+<label class="relative flex items-center justify-center w-11 h-11 shrink-0 cursor-pointer -mt-1 -ml-1">
+<input class="w-5 h-5 text-schedule border-border rounded focus:ring-schedule focus:ring-2" type="checkbox"/>
+<span class="sr-only">Completar tarea: Definir arquitectura v2 para microservicios de inventario</span>
+</label>
+<div class="flex-1 min-w-0 pr-1">
+<p class="font-body-strong text-body text-text leading-snug">Definir arquitectura v2 para microservicios de inventario</p>
+<div class="flex flex-wrap items-center gap-2 mt-1.5">
+<span class="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-body-strong bg-[#F3E8FF] text-scope-work border border-scope-work/20">
+                  Laboral
+                </span>
+<span class="inline-flex items-center gap-1 text-caption text-text-muted">
+<span aria-hidden="true" class="material-symbols-outlined text-[14px]">event</span>
+<span>Jueves 16, 10:00</span>
+</span>
+</div>
+</div>
+</li>
+<!-- Tarea 2 -->
+<li class="flex items-start gap-space-sm p-3 bg-surface rounded-xl border border-border shadow-sm border-l-4 border-l-schedule">
+<label class="relative flex items-center justify-center w-11 h-11 shrink-0 cursor-pointer -mt-1 -ml-1">
+<input class="w-5 h-5 text-schedule border-border rounded focus:ring-schedule focus:ring-2" type="checkbox"/>
+<span class="sr-only">Completar tarea: Sesión de entrenamiento de fuerza y cardio</span>
+</label>
+<div class="flex-1 min-w-0 pr-1">
+<p class="font-body-strong text-body text-text leading-snug">Sesión de entrenamiento de fuerza y cardio</p>
+<div class="flex flex-wrap items-center gap-2 mt-1.5">
+<span class="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-body-strong bg-[#CCFBF1] text-scope-personal border border-scope-personal/20">
+                  Personal
+                </span>
+<span class="inline-flex items-center gap-1 text-caption text-text-muted">
+<span aria-hidden="true" class="material-symbols-outlined text-[14px]">schedule</span>
+<span>Mañana 07:30</span>
+</span>
+</div>
+</div>
+</li>
+</ul>
+</section>
+<!-- Cuadrante 3: Delegar -->
+<section aria-labelledby="q3-heading" class="rounded-xl bg-[#FFFBEB] p-space-md border border-[#FDE68A]/60 shadow-sm">
+<!-- Cabecera Cuadrante -->
+<div class="flex items-center justify-between pb-space-sm border-b border-[#FDE68A]/50">
+<div class="flex items-center gap-2">
+<span class="w-2.5 h-2.5 rounded-full bg-delegate"></span>
+<div>
+<div class="flex items-center gap-1.5">
+<h2 class="font-body-strong text-body text-[#92400E]" id="q3-heading">Delegar</h2>
+<span class="px-2 py-0.5 rounded-full text-caption font-body-strong bg-[#FEF3C7] text-[#92400E] border border-[#FDE68A]">
+                  2
+                </span>
+</div>
+<p class="font-caption text-[11px] text-delegate font-medium tracking-tight">Urgente, pero No importante</p>
+</div>
+</div>
+<button aria-label="Añadir tarea a Delegar" class="w-11 h-11 flex items-center justify-center rounded-lg text-delegate hover:bg-[#FEF3C7] transition-colors focus:outline-none focus:ring-2 focus:ring-delegate" type="button">
+<span aria-hidden="true" class="material-symbols-outlined text-[20px]">add</span>
+</button>
+</div>
+<!-- Lista de tareas Cuadrante 3 -->
+<ul class="flex flex-col gap-space-sm pt-space-sm" role="list">
+<!-- Tarea 1 -->
+<li class="flex items-start gap-space-sm p-3 bg-surface rounded-xl border border-border shadow-sm border-l-4 border-l-delegate">
+<label class="relative flex items-center justify-center w-11 h-11 shrink-0 cursor-pointer -mt-1 -ml-1">
+<input class="w-5 h-5 text-delegate border-border rounded focus:ring-delegate focus:ring-2" type="checkbox"/>
+<span class="sr-only">Completar tarea: Coordinar logística y catering para evento de innovación</span>
+</label>
+<div class="flex-1 min-w-0 pr-1">
+<p class="font-body-strong text-body text-text leading-snug">Coordinar logística y catering para evento de innovación</p>
+<div class="flex flex-wrap items-center gap-2 mt-1.5">
+<span class="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-body-strong bg-[#F3E8FF] text-scope-work border border-scope-work/20">
+                  Laboral
+                </span>
+<span class="inline-flex items-center gap-1 text-caption text-[#92400E] font-medium bg-[#FEF3C7] px-2 py-0.5 rounded">
+<span aria-hidden="true" class="material-symbols-outlined text-[14px]">person</span>
+<span>Delegado a: Lucía Torres</span>
+</span>
+</div>
+</div>
+</li>
+<!-- Tarea 2 -->
+<li class="flex items-start gap-space-sm p-3 bg-surface rounded-xl border border-border shadow-sm border-l-4 border-l-delegate">
+<label class="relative flex items-center justify-center w-11 h-11 shrink-0 cursor-pointer -mt-1 -ml-1">
+<input class="w-5 h-5 text-delegate border-border rounded focus:ring-delegate focus:ring-2" type="checkbox"/>
+<span class="sr-only">Completar tarea: Revisar presupuesto de mantenimiento doméstico</span>
+</label>
+<div class="flex-1 min-w-0 pr-1">
+<p class="font-body-strong text-body text-text leading-snug">Revisar presupuesto de mantenimiento doméstico</p>
+<div class="flex flex-wrap items-center gap-2 mt-1.5">
+<span class="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-body-strong bg-[#CCFBF1] text-scope-personal border border-scope-personal/20">
+                  Personal
+                </span>
+<span class="inline-flex items-center gap-1 text-caption text-[#92400E] font-medium bg-[#FEF3C7] px-2 py-0.5 rounded">
+<span aria-hidden="true" class="material-symbols-outlined text-[14px]">person</span>
+<span>Delegado a: Roberto M.</span>
+</span>
+</div>
+</div>
+</li>
+</ul>
+</section>
+<!-- Cuadrante 4: Eliminar (Estado Vacío) -->
+<section aria-labelledby="q4-heading" class="rounded-xl bg-surface-alt p-space-md border border-border shadow-sm">
+<!-- Cabecera Cuadrante -->
+<div class="flex items-center justify-between pb-space-sm border-b border-border">
+<div class="flex items-center gap-2">
+<span class="w-2.5 h-2.5 rounded-full bg-eliminate"></span>
+<div>
+<div class="flex items-center gap-1.5">
+<h2 class="font-body-strong text-body text-text-muted" id="q4-heading">Eliminar</h2>
+<span class="px-2 py-0.5 rounded-full text-caption font-body-strong bg-surface border border-border text-text-muted">
+                  0
+                </span>
+</div>
+<p class="font-caption text-[11px] text-text-muted font-medium tracking-tight">Ni urgente, ni Importante</p>
+</div>
+</div>
+<button aria-label="Añadir tarea a Eliminar" class="w-11 h-11 flex items-center justify-center rounded-lg text-text-muted hover:bg-surface transition-colors focus:outline-none focus:ring-2 focus:ring-outline" type="button">
+<span aria-hidden="true" class="material-symbols-outlined text-[20px]">add</span>
+</button>
+</div>
+<!-- Empty State Card -->
+<div class="mt-space-sm p-6 bg-surface rounded-xl border border-border border-l-4 border-l-eliminate flex flex-col items-center text-center shadow-sm">
+<div aria-hidden="true" class="w-12 h-12 rounded-full bg-[#DCFCE7] flex items-center justify-center text-success mb-3">
+<span class="material-symbols-outlined text-[28px]" data-weight="fill" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+<h3 class="font-body-strong text-body text-text mb-1">¡Buen trabajo!</h3>
+<p class="font-caption text-caption text-text-muted max-w-xs">
+            No hay tareas aquí. Las distracciones y tareas innecesarias han sido descartadas eficazmente.
+          </p>
+</div>
+</section>
+</div>
+</main>
+<!-- Navegación Inferior Fija (Bottom Navigation Bar) -->
+<nav aria-label="Navegación principal" class="fixed bottom-0 left-0 w-full z-50 bg-surface shadow-sm safe-area-bottom">
+<div class="flex justify-around items-center py-space-sm px-space-md max-w-md mx-auto">
+<!-- Pestaña 1: Tablero (Activo) -->
+<a aria-current="page" class="flex flex-col items-center justify-center text-primary font-body-strong min-w-[64px] min-h-[44px] rounded-lg transition-all duration-150 active:scale-95" href="#tablero">
+<span aria-hidden="true" class="material-symbols-outlined text-[24px]" data-weight="fill" style="font-variation-settings: 'FILL' 1;">grid_view</span>
+<span class="text-caption font-body-strong mt-0.5">Tablero</span>
+</a>
+<!-- Pestaña 2: Historial -->
+<a class="flex flex-col items-center justify-center text-text-muted hover:text-primary font-caption min-w-[64px] min-h-[44px] rounded-lg transition-colors duration-150 active:scale-95" href="#historial">
+<span aria-hidden="true" class="material-symbols-outlined text-[24px]">history</span>
+<span class="text-caption font-caption mt-0.5">Historial</span>
+</a>
+<!-- Pestaña 3: Papelera -->
+<a class="flex flex-col items-center justify-center text-text-muted hover:text-primary font-caption min-w-[64px] min-h-[44px] rounded-lg transition-colors duration-150 active:scale-95" href="#papelera">
+<span aria-hidden="true" class="material-symbols-outlined text-[24px]">delete</span>
+<span class="text-caption font-caption mt-0.5">Papelera</span>
+</a>
+</div>
+</nav>
+</body></html>

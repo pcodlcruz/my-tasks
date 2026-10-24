@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>S3 Tablero v2 oscuro - MyTasks</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "primary-fixed-dim": "#a4c9ff",
+            "on-tertiary-fixed-variant": "#4f319c",
+            "surface-container": "#152031",
+            "tertiary-fixed": "#e8ddff",
+            "on-background": "#d8e3fb",
+            "inverse-on-surface": "#263143",
+            "on-secondary-fixed": "#00201c",
+            "secondary-fixed-dim": "#3cddc7",
+            "on-tertiary-fixed": "#21005e",
+            "error-container": "#93000a",
+            "secondary-fixed": "#62fae3",
+            "primary-container": "#60a5fa",
+            "surface-tint": "#a4c9ff",
+            "on-primary-container": "#003a6b",
+            "on-primary-fixed": "#001c39",
+            "tertiary": "#cebdff",
+            "surface-container-lowest": "#040e1f",
+            "on-secondary-fixed-variant": "#005047",
+            "surface-container-highest": "#2a3548",
+            "on-surface-variant": "#c1c7d3",
+            "outline": "#8b919d",
+            "on-tertiary-container": "#40208d",
+            "surface-container-high": "#1f2a3c",
+            "surface": "#081425",
+            "on-secondary": "#003731",
+            "surface-bright": "#2f3a4c",
+            "on-tertiary": "#381385",
+            "on-error": "#690005",
+            "surface-container-low": "#111c2d",
+            "on-primary": "#00315d",
+            "inverse-surface": "#d8e3fb",
+            "error": "#ffb4ab",
+            "tertiary-fixed-dim": "#cebdff",
+            "surface-variant": "#2a3548",
+            "tertiary-container": "#ad91ff",
+            "primary-fixed": "#d4e3ff",
+            "inverse-primary": "#0060ac",
+            "on-primary-fixed-variant": "#004883",
+            "surface-dim": "#081425",
+            "on-error-container": "#ffdad6",
+            "background": "#081425",
+            "on-secondary-container": "#004d44",
+            "outline-variant": "#414751",
+            "primary": "#a4c9ff",
+            "on-surface": "#d8e3fb",
+            "secondary-container": "#03c6b2",
+            "secondary": "#44e2cd",
+            // Dark Mode Specific Palette Tokens
+            "slate-canvas": "#0F172A",
+            "slate-card": "#1E293B",
+            "slate-border": "#334155",
+            "slate-text": "#F1F5F9",
+            "slate-muted": "#94A3B8",
+            "brand-action": "#60A5FA",
+            "brand-action-hover": "#93C5FD",
+            "quad-urgent": "#F87171",
+            "quad-plan": "#60A5FA",
+            "quad-delegate": "#FBBF24",
+            "quad-delete": "#94A3B8"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.125rem",
+            "lg": "0.25rem",
+            "xl": "0.5rem",
+            "full": "0.75rem"
+          },
+          "spacing": {
+            "space-xs": "0.25rem",
+            "space-sm": "0.5rem",
+            "space-md": "0.75rem",
+            "space-lg": "1rem",
+            "space-xl": "2rem",
+            "space-2xl": "3rem",
+            "gutter": "1.5rem",
+            "margin": "1.5rem"
+          },
+          "fontFamily": {
+            "display": ["Inter", "sans-serif"],
+            "caption": ["Inter", "sans-serif"],
+            "heading": ["Inter", "sans-serif"],
+            "body": ["Inter", "sans-serif"],
+            "body-strong": ["Inter", "sans-serif"]
+          },
+          "fontSize": {
+            "display": ["28px", { "lineHeight": "36px", "fontWeight": "700" }],
+            "caption": ["13px", { "lineHeight": "18px", "fontWeight": "400" }],
+            "heading": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+            "body": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+            "body-strong": ["16px", { "lineHeight": "24px", "fontWeight": "600" }]
+          }
+        }
+      }
+    };
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      display: inline-block;
+      vertical-align: middle;
+      line-height: 1;
+    }
+    .custom-scroll::-webkit-scrollbar {
+      width: 4px;
+    }
+    .custom-scroll::-webkit-scrollbar-track {
+      background: #0F172A;
+    }
+    .custom-scroll::-webkit-scrollbar-thumb {
+      background: #334155;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body class="bg-[#0F172A] text-[#F1F5F9] font-body text-body antialiased min-h-screen flex flex-col selection:bg-[#60A5FA] selection:text-[#0F172A]">
+<!-- TopNavBar (Shared Component) -->
+<header class="w-full border-b border-[#334155] bg-[#0F172A] px-margin sticky top-0 z-50 flex items-center justify-between h-16 shadow-sm">
+<div class="flex items-center gap-8">
+<!-- Brand Logo / Product Name -->
+<a class="flex items-center gap-2.5 text-[#F1F5F9] font-display text-heading focus:outline-none focus:ring-2 focus:ring-[#60A5FA] rounded-DEFAULT" href="#">
+<div class="w-8 h-8 rounded-DEFAULT bg-[#60A5FA] flex items-center justify-center text-[#0F172A]">
+<span class="material-symbols-outlined text-[20px]" data-icon="grid_view" style="font-variation-settings: 'FILL' 1;">grid_view</span>
+</div>
+<span class="font-bold tracking-tight text-[20px]">MyTasks</span>
+</a>
+<!-- Primary Navigation Links -->
+<nav aria-label="Navegación principal" class="hidden md:flex items-center space-x-6">
+<a aria-current="page" class="text-[#60A5FA] font-body-strong text-body-strong border-b-2 border-[#60A5FA] pb-1 transition-colors duration-150" href="#">Tablero</a>
+<a class="text-[#94A3B8] font-body text-body hover:text-[#F1F5F9] transition-colors duration-150" href="#">Historial</a>
+<a class="text-[#94A3B8] font-body text-body hover:text-[#F1F5F9] transition-colors duration-150" href="#">Papelera</a>
+</nav>
+</div>
+<!-- User Profile & Trailing Action -->
+<div class="flex items-center space-x-4">
+<a aria-label="Perfil de Ana Cruz" class="flex items-center gap-3 p-1 rounded-DEFAULT hover:bg-[#1E293B] transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-[#60A5FA]" href="#">
+<div class="w-8 h-8 rounded-full bg-[#2563EB] text-white flex items-center justify-center font-semibold text-[13px] tracking-wider ring-1 ring-white/20">
+          AC
+        </div>
+<span class="text-[#F1F5F9] font-body text-[14px] font-medium hidden sm:inline">Ana Cruz</span>
+</a>
+<div aria-hidden="true" class="h-5 w-[1px] bg-[#334155]"></div>
+<button class="flex items-center gap-1.5 text-[#94A3B8] hover:text-[#F1F5F9] text-[14px] font-medium transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-[#60A5FA] rounded-DEFAULT py-1 px-2" type="button">
+<span class="material-symbols-outlined text-[18px]" data-icon="logout">logout</span>
+<span>Cerrar sesión</span>
+</button>
+</div>
+</header>
+<!-- Main Canvas -->
+<main class="flex-1 max-w-[1440px] w-full mx-auto px-margin py-8 flex flex-col gap-6">
+<!-- Board Header & Interactive Filtering -->
+<section class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-2 border-b border-[#334155]/60">
+<div>
+<h1 class="text-[28px] leading-[36px] font-bold text-[#F1F5F9] tracking-tight">Matriz de prioridades</h1>
+<p class="text-[#94A3B8] text-[14px] mt-1 font-normal">
+          Enfoque estructurado con la matriz de Eisenhower para máxima productividad ejecutiva.
+        </p>
+</div>
+<div class="flex flex-wrap items-center gap-4">
+<!-- Segmented Filter Control -->
+<div aria-label="Filtro de tareas por ámbito" class="flex items-center bg-[#1E293B] p-1 rounded-lg border border-[#334155]" role="group">
+<button class="px-3 py-1.5 rounded-DEFAULT text-[13px] font-medium bg-[#334155] text-[#F1F5F9] transition shadow-sm focus:outline-none focus:ring-1 focus:ring-[#60A5FA]" type="button">
+            Todas <span class="ml-1 text-[11px] opacity-80">(7)</span>
+</button>
+<button class="flex items-center gap-1.5 px-3 py-1.5 rounded-DEFAULT text-[13px] font-medium text-[#94A3B8] hover:text-[#F1F5F9] transition focus:outline-none focus:ring-1 focus:ring-[#60A5FA]" type="button">
+<span class="w-2 h-2 rounded-full bg-[#A78BFA]"></span>
+            Laboral <span class="text-[11px] opacity-75">(4)</span>
+</button>
+<button class="flex items-center gap-1.5 px-3 py-1.5 rounded-DEFAULT text-[13px] font-medium text-[#94A3B8] hover:text-[#F1F5F9] transition focus:outline-none focus:ring-1 focus:ring-[#60A5FA]" type="button">
+<span class="w-2 h-2 rounded-full bg-[#2DD4BF]"></span>
+            Personal <span class="text-[11px] opacity-75">(3)</span>
+</button>
+</div>
+<!-- Primary Action Button -->
+<button class="inline-flex items-center justify-center gap-1.5 bg-[#60A5FA] text-[#0F172A] font-semibold text-[14px] px-4 py-2 rounded-DEFAULT hover:bg-[#93C5FD] transition duration-150 focus:outline-none focus:ring-2 focus:ring-[#60A5FA] focus:ring-offset-2 focus:ring-offset-[#0F172A] shadow-sm" type="button">
+<span class="material-symbols-outlined text-[20px]" data-icon="add">add</span>
+<span>+ Nueva tarea</span>
+</button>
+</div>
+</section>
+<!-- 2x2 Matrix Desktop Grid -->
+<section aria-label="Cuadrantes de Eisenhower" class="grid grid-cols-1 md:grid-cols-2 gap-6 flex-1 items-start">
+<!-- Cuadrante 1: Hacer ahora -->
+<article class="bg-[#1E293B] border border-[#334155] border-l-4 border-l-[#F87171] rounded-DEFAULT shadow-[0_1px_2px_rgba(0,0,0,0.4)] flex flex-col h-full overflow-hidden">
+<!-- Header -->
+<div class="bg-[#2E1A1D]/60 px-5 py-4 border-b border-[#334155] flex items-center justify-between">
+<div class="flex items-start gap-2.5">
+<span aria-hidden="true" class="w-2.5 h-2.5 rounded-full bg-[#F87171] mt-1.5 flex-shrink-0"></span>
+<div>
+<div class="flex items-center gap-2">
+<h2 class="text-[#F1F5F9] font-heading text-[17px] font-semibold">Hacer ahora</h2>
+<span class="bg-[#2E1A1D] text-[#F87171] border border-[#F87171]/30 text-[11px] font-semibold px-2 py-0.5 rounded-full">
+                  3 tareas
+                </span>
+</div>
+<p class="text-[#94A3B8] text-[12px] mt-0.5">Urgente e Importante · Resolver de inmediato</p>
+</div>
+</div>
+<button aria-label="Añadir tarea a Hacer ahora" class="w-7 h-7 rounded-DEFAULT flex items-center justify-center text-[#94A3B8] hover:text-[#F87171] hover:bg-[#2E1A1D] transition focus:outline-none focus:ring-2 focus:ring-[#F87171]" type="button">
+<span class="material-symbols-outlined text-[18px]" data-icon="add">add</span>
+</button>
+</div>
+<!-- Task List -->
+<div class="p-4 flex flex-col gap-3 flex-1">
+<!-- Task 1 -->
+<div class="group bg-[#0F172A] border border-[#334155] hover:border-[#F87171]/40 rounded-DEFAULT p-3.5 flex items-start gap-3 transition shadow-sm">
+<input aria-label="Marcar como completada: Resolver incidencia crítica en pasarela de pagos" class="mt-1 w-[18px] h-[18px] rounded-sm bg-[#0F172A] border-[#475569] text-[#60A5FA] focus:ring-[#60A5FA] focus:ring-offset-0 cursor-pointer" type="checkbox"/>
+<div class="flex-1 min-w-0">
+<p class="text-[#F1F5F9] text-[14px] font-medium leading-snug">Resolver incidencia crítica en pasarela de pagos</p>
+<div class="mt-2.5 flex flex-wrap items-center gap-2">
+<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-[#A78BFA]/15 text-[#C4B5FD] border border-[#A78BFA]/20">
+                  Laboral
+                </span>
+<span class="inline-flex items-center gap-1 text-[#F87171] text-[12px] font-medium">
+<span class="material-symbols-outlined text-[14px]" data-icon="schedule">schedule</span>
+                  Vence hoy 17:00
+                </span>
+</div>
+</div>
+<button aria-label="Opciones de tarea" class="opacity-70 group-hover:opacity-100 text-[#94A3B8] hover:text-[#F1F5F9] p-1 rounded focus:outline-none focus:ring-1 focus:ring-[#60A5FA]" type="button">
+<span class="material-symbols-outlined text-[18px]" data-icon="more_vert">more_vert</span>
+</button>
+</div>
+<!-- Task 2 -->
+<div class="group bg-[#0F172A] border border-[#334155] hover:border-[#F87171]/40 rounded-DEFAULT p-3.5 flex items-start gap-3 transition shadow-sm">
+<input aria-label="Marcar como completada: Enviar reporte financiero mensual a dirección" class="mt-1 w-[18px] h-[18px] rounded-sm bg-[#0F172A] border-[#475569] text-[#60A5FA] focus:ring-[#60A5FA] focus:ring-offset-0 cursor-pointer" type="checkbox"/>
+<div class="flex-1 min-w-0">
+<p class="text-[#F1F5F9] text-[14px] font-medium leading-snug">Enviar reporte financiero mensual a dirección</p>
+<div class="mt-2.5 flex flex-wrap items-center gap-2">
+<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-[#A78BFA]/15 text-[#C4B5FD] border border-[#A78BFA]/20">
+                  Laboral
+                </span>
+<span class="inline-flex items-center gap-1 text-[#94A3B8] text-[12px]">
+<span class="material-symbols-outlined text-[14px]" data-icon="schedule">schedule</span>
+                  Hoy 19:30
+                </span>
+</div>
+</div>
+<button aria-label="Opciones de tarea" class="opacity-70 group-hover:opacity-100 text-[#94A3B8] hover:text-[#F1F5F9] p-1 rounded focus:outline-none focus:ring-1 focus:ring-[#60A5FA]" type="button">
+<span class="material-symbols-outlined text-[18px]" data-icon="more_vert">more_vert</span>
+</button>
+</div>
+<!-- Task 3 -->
+<div class="group bg-[#0F172A] border border-[#334155] hover:border-[#F87171]/40 rounded-DEFAULT p-3.5 flex items-start gap-3 transition shadow-sm">
+<input aria-label="Marcar como completada: Comprar receta médica en farmacia de turno" class="mt-1 w-[18px] h-[18px] rounded-sm bg-[#0F172A] border-[#475569] text-[#60A5FA] focus:ring-[#60A5FA] focus:ring-offset-0 cursor-pointer" type="checkbox"/>
+<div class="flex-1 min-w-0">
+<p class="text-[#F1F5F9] text-[14px] font-medium leading-snug">Comprar receta médica en farmacia de turno</p>
+<div class="mt-2.5 flex flex-wrap items-center gap-2">
+<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-[#2DD4BF]/15 text-[#5EEAD4] border border-[#2DD4BF]/20">
+                  Personal
+                </span>
+<span class="inline-flex items-center gap-1 text-[#94A3B8] text-[12px]">
+<span class="material-symbols-outlined text-[14px]" data-icon="schedule">schedule</span>
+                  Antes de 21:00
+                </span>
+</div>
+</div>
+<button aria-label="Opciones de tarea" class="opacity-70 group-hover:opacity-100 text-[#94A3B8] hover:text-[#F1F5F9] p-1 rounded focus:outline-none focus:ring-1 focus:ring-[#60A5FA]" type="button">
+<span class="material-symbols-outlined text-[18px]" data-icon="more_vert">more_vert</span>
+</button>
+</div>
+</div>
+</article>
+<!-- Cuadrante 2: Planificar -->
+<article class="bg-[#1E293B] border border-[#334155] border-l-4 border-l-[#60A5FA] rounded-DEFAULT shadow-[0_1px_2px_rgba(0,0,0,0.4)] flex flex-col h-full overflow-hidden">
+<!-- Header -->
+<div class="bg-[#172237]/60 px-5 py-4 border-b border-[#334155] flex items-center justify-between">
+<div class="flex items-start gap-2.5">
+<span aria-hidden="true" class="w-2.5 h-2.5 rounded-full bg-[#60A5FA] mt-1.5 flex-shrink-0"></span>
+<div>
+<div class="flex items-center gap-2">
+<h2 class="text-[#F1F5F9] font-heading text-[17px] font-semibold">Planificar</h2>
+<span class="bg-[#172237] text-[#60A5FA] border border-[#60A5FA]/30 text-[11px] font-semibold px-2 py-0.5 rounded-full">
+                  2 tareas
+                </span>
+</div>
+<p class="text-[#94A3B8] text-[12px] mt-0.5">No urgente, pero Importante · Asignar tiempo en agenda</p>
+</div>
+</div>
+<button aria-label="Añadir tarea a Planificar" class="w-7 h-7 rounded-DEFAULT flex items-center justify-center text-[#94A3B8] hover:text-[#60A5FA] hover:bg-[#172237] transition focus:outline-none focus:ring-2 focus:ring-[#60A5FA]" type="button">
+<span class="material-symbols-outlined text-[18px]" data-icon="add">add</span>
+</button>
+</div>
+<!-- Task List -->
+<div class="p-4 flex flex-col gap-3 flex-1">
+<!-- Task 1 -->
+<div class="group bg-[#0F172A] border border-[#334155] hover:border-[#60A5FA]/40 rounded-DEFAULT p-3.5 flex items-start gap-3 transition shadow-sm">
+<input aria-label="Marcar como completada: Definir arquitectura v2 para microservicios de inventario" class="mt-1 w-[18px] h-[18px] rounded-sm bg-[#0F172A] border-[#475569] text-[#60A5FA] focus:ring-[#60A5FA] focus:ring-offset-0 cursor-pointer" type="checkbox"/>
+<div class="flex-1 min-w-0">
+<p class="text-[#F1F5F9] text-[14px] font-medium leading-snug">Definir arquitectura v2 para microservicios de inventario</p>
+<div class="mt-2.5 flex flex-wrap items-center gap-2">
+<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-[#A78BFA]/15 text-[#C4B5FD] border border-[#A78BFA]/20">
+                  Laboral
+                </span>
+<span class="inline-flex items-center gap-1 text-[#94A3B8] text-[12px]">
+<span class="material-symbols-outlined text-[14px]" data-icon="calendar_today">calendar_today</span>
+                  Jueves 16, 10:00
+                </span>
+</div>
+</div>
+<button aria-label="Opciones de tarea" class="opacity-70 group-hover:opacity-100 text-[#94A3B8] hover:text-[#F1F5F9] p-1 rounded focus:outline-none focus:ring-1 focus:ring-[#60A5FA]" type="button">
+<span class="material-symbols-outlined text-[18px]" data-icon="more_vert">more_vert</span>
+</button>
+</div>
+<!-- Task 2 -->
+<div class="group bg-[#0F172A] border border-[#334155] hover:border-[#60A5FA]/40 rounded-DEFAULT p-3.5 flex items-start gap-3 transition shadow-sm">
+<input aria-label="Marcar como completada: Sesión de entrenamiento de fuerza y cardio" class="mt-1 w-[18px] h-[18px] rounded-sm bg-[#0F172A] border-[#475569] text-[#60A5FA] focus:ring-[#60A5FA] focus:ring-offset-0 cursor-pointer" type="checkbox"/>
+<div class="flex-1 min-w-0">
+<p class="text-[#F1F5F9] text-[14px] font-medium leading-snug">Sesión de entrenamiento de fuerza y cardio</p>
+<div class="mt-2.5 flex flex-wrap items-center gap-2">
+<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-[#2DD4BF]/15 text-[#5EEAD4] border border-[#2DD4BF]/20">
+                  Personal
+                </span>
+<span class="inline-flex items-center gap-1 text-[#94A3B8] text-[12px]">
+<span class="material-symbols-outlined text-[14px]" data-icon="calendar_today">calendar_today</span>
+                  Mañana 07:30
+                </span>
+</div>
+</div>
+<button aria-label="Opciones de tarea" class="opacity-70 group-hover:opacity-100 text-[#94A3B8] hover:text-[#F1F5F9] p-1 rounded focus:outline-none focus:ring-1 focus:ring-[#60A5FA]" type="button">
+<span class="material-symbols-outlined text-[18px]" data-icon="more_vert">more_vert</span>
+</button>
+</div>
+</div>
+</article>
+<!-- Cuadrante 3: Delegar -->
+<article class="bg-[#1E293B] border border-[#334155] border-l-4 border-l-[#FBBF24] rounded-DEFAULT shadow-[0_1px_2px_rgba(0,0,0,0.4)] flex flex-col h-full overflow-hidden">
+<!-- Header -->
+<div class="bg-[#2B2315]/60 px-5 py-4 border-b border-[#334155] flex items-center justify-between">
+<div class="flex items-start gap-2.5">
+<span aria-hidden="true" class="w-2.5 h-2.5 rounded-full bg-[#FBBF24] mt-1.5 flex-shrink-0"></span>
+<div>
+<div class="flex items-center gap-2">
+<h2 class="text-[#F1F5F9] font-heading text-[17px] font-semibold">Delegar</h2>
+<span class="bg-[#2B2315] text-[#FBBF24] border border-[#FBBF24]/30 text-[11px] font-semibold px-2 py-0.5 rounded-full">
+                  2 tareas
+                </span>
+</div>
+<p class="text-[#94A3B8] text-[12px] mt-0.5">Urgente, pero No importante · Asignar a otra persona</p>
+</div>
+</div>
+<button aria-label="Añadir tarea a Delegar" class="w-7 h-7 rounded-DEFAULT flex items-center justify-center text-[#94A3B8] hover:text-[#FBBF24] hover:bg-[#2B2315] transition focus:outline-none focus:ring-2 focus:ring-[#FBBF24]" type="button">
+<span class="material-symbols-outlined text-[18px]" data-icon="add">add</span>
+</button>
+</div>
+<!-- Task List -->
+<div class="p-4 flex flex-col gap-3 flex-1">
+<!-- Task 1 -->
+<div class="group bg-[#0F172A] border border-[#334155] hover:border-[#FBBF24]/40 rounded-DEFAULT p-3.5 flex items-start gap-3 transition shadow-sm">
+<input aria-label="Marcar como completada: Coordinar logística y catering para evento de innovación" class="mt-1 w-[18px] h-[18px] rounded-sm bg-[#0F172A] border-[#475569] text-[#60A5FA] focus:ring-[#60A5FA] focus:ring-offset-0 cursor-pointer" type="checkbox"/>
+<div class="flex-1 min-w-0">
+<p class="text-[#F1F5F9] text-[14px] font-medium leading-snug">Coordinar logística y catering para evento de innovación</p>
+<div class="mt-2.5 flex flex-wrap items-center gap-2">
+<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-[#A78BFA]/15 text-[#C4B5FD] border border-[#A78BFA]/20">
+                  Laboral
+                </span>
+<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-DEFAULT bg-[#1E293B] border border-[#334155] text-[#FBBF24] text-[11px] font-medium">
+<span class="material-symbols-outlined text-[13px]" data-icon="person">person</span>
+                  Delegado a: Lucía Torres
+                </span>
+</div>
+</div>
+<button aria-label="Opciones de tarea" class="opacity-70 group-hover:opacity-100 text-[#94A3B8] hover:text-[#F1F5F9] p-1 rounded focus:outline-none focus:ring-1 focus:ring-[#60A5FA]" type="button">
+<span class="material-symbols-outlined text-[18px]" data-icon="more_vert">more_vert</span>
+</button>
+</div>
+<!-- Task 2 -->
+<div class="group bg-[#0F172A] border border-[#334155] hover:border-[#FBBF24]/40 rounded-DEFAULT p-3.5 flex items-start gap-3 transition shadow-sm">
+<input aria-label="Marcar como completada: Revisar presupuesto de mantenimiento doméstico" class="mt-1 w-[18px] h-[18px] rounded-sm bg-[#0F172A] border-[#475569] text-[#60A5FA] focus:ring-[#60A5FA] focus:ring-offset-0 cursor-pointer" type="checkbox"/>
+<div class="flex-1 min-w-0">
+<p class="text-[#F1F5F9] text-[14px] font-medium leading-snug">Revisar presupuesto de mantenimiento doméstico</p>
+<div class="mt-2.5 flex flex-wrap items-center gap-2">
+<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-[#2DD4BF]/15 text-[#5EEAD4] border border-[#2DD4BF]/20">
+                  Personal
+                </span>
+<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-DEFAULT bg-[#1E293B] border border-[#334155] text-[#FBBF24] text-[11px] font-medium">
+<span class="material-symbols-outlined text-[13px]" data-icon="person">person</span>
+                  Delegado a: Roberto M.
+                </span>
+</div>
+</div>
+<button aria-label="Opciones de tarea" class="opacity-70 group-hover:opacity-100 text-[#94A3B8] hover:text-[#F1F5F9] p-1 rounded focus:outline-none focus:ring-1 focus:ring-[#60A5FA]" type="button">
+<span class="material-symbols-outlined text-[18px]" data-icon="more_vert">more_vert</span>
+</button>
+</div>
+</div>
+</article>
+<!-- Cuadrante 4: Eliminar -->
+<article class="bg-[#1E293B] border border-[#334155] border-l-4 border-l-[#94A3B8] rounded-DEFAULT shadow-[0_1px_2px_rgba(0,0,0,0.4)] flex flex-col h-full overflow-hidden">
+<!-- Header -->
+<div class="bg-[#1C2536]/60 px-5 py-4 border-b border-[#334155] flex items-center justify-between">
+<div class="flex items-start gap-2.5">
+<span aria-hidden="true" class="w-2.5 h-2.5 rounded-full bg-[#94A3B8] mt-1.5 flex-shrink-0"></span>
+<div>
+<div class="flex items-center gap-2">
+<h2 class="text-[#F1F5F9] font-heading text-[17px] font-semibold">Eliminar</h2>
+<span class="bg-[#1C2536] text-[#94A3B8] border border-[#94A3B8]/30 text-[11px] font-semibold px-2 py-0.5 rounded-full">
+                  0 tareas
+                </span>
+</div>
+<p class="text-[#94A3B8] text-[12px] mt-0.5">Ni urgente, ni Importante · Descartar distracciones</p>
+</div>
+</div>
+<button aria-label="Añadir tarea a Eliminar" class="w-7 h-7 rounded-DEFAULT flex items-center justify-center text-[#94A3B8] hover:text-[#F1F5F9] hover:bg-[#1C2536] transition focus:outline-none focus:ring-2 focus:ring-[#94A3B8]" type="button">
+<span class="material-symbols-outlined text-[18px]" data-icon="add">add</span>
+</button>
+</div>
+<!-- Empty State Container -->
+<div class="p-8 flex flex-col items-center justify-center text-center flex-1 my-auto">
+<div class="w-12 h-12 rounded-full bg-[#2DD4BF]/10 border border-[#2DD4BF]/25 flex items-center justify-center text-[#2DD4BF] mb-3.5 shadow-sm">
+<span class="material-symbols-outlined text-[24px]" data-icon="check_circle" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+<h3 class="text-[#F1F5F9] text-[16px] font-semibold mb-1">¡Buen trabajo!</h3>
+<p class="text-[#94A3B8] text-[13px] leading-relaxed max-w-xs">
+            No hay tareas aquí. Las distracciones y tareas innecesarias han sido descartadas eficazmente.
+          </p>
+</div>
+</article>
+</section>
+</main>
+<!-- Technical Footer -->
+<footer class="w-full border-t border-[#334155] bg-[#0F172A] px-margin py-5 mt-auto">
+<div class="max-w-[1440px] mx-auto flex flex-col sm:flex-row items-center justify-between gap-3 text-[13px] text-[#64748B]">
+<p class="font-normal">
+        © 2025 MyTasks · Enfoque estructurado con la matriz de Dwight D. Eisenhower
+      </p>
+<div class="flex items-center space-x-6">
+<a class="hover:text-[#94A3B8] transition-colors duration-150" href="#">Privacidad</a>
+<span aria-hidden="true" class="text-[#334155]">·</span>
+<a class="hover:text-[#94A3B8] transition-colors duration-150" href="#">Términos</a>
+<span aria-hidden="true" class="text-[#334155]">·</span>
+<a class="hover:text-[#94A3B8] transition-colors duration-150" href="#">Ayuda</a>
+</div>
+</div>
+</footer>
+</body></html>

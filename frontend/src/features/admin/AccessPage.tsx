@@ -42,7 +42,7 @@ const BADGE =
   'inline-flex items-center rounded-full border border-border bg-surface-alt px-2 py-0.5 text-caption font-semibold text-text'
 
 const PRIMARY_BUTTON =
-  'rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-white hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60'
+  'rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-on-primary hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60'
 
 const DANGER_BUTTON =
   'rounded-lg border border-error/40 bg-surface px-3 py-1.5 text-caption font-semibold text-error hover:bg-error/10 disabled:cursor-not-allowed disabled:opacity-60'

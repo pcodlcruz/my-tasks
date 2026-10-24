@@ -1,3 +1,111 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/*
+ * Design tokens as "r g b" channels so Tailwind can still apply opacity (`bg-error/10`).
+ * Light values are the original palette and must not change (docs/design/DESIGN.md,
+ * guarded by tests/unit/styles/tokens.test.ts); dark values are the palette approved in
+ * phase 1 of feature 004. The effective theme is the `data-theme` attribute of <html>, set
+ * before the first paint by public/theme-init.js and afterwards by useAppearance.
+ */
+:root {
+  color-scheme: light;
+
+  --color-text: 15 23 42;
+  --color-text-muted: 71 85 105;
+  --color-surface: 255 255 255;
+  --color-surface-alt: 248 250 252;
+  --color-border: 203 213 225;
+  --color-primary: 29 78 216;
+  --color-primary-hover: 30 64 175;
+  --color-on-primary: 255 255 255;
+  --color-error: 185 28 28;
+  --color-error-surface: 254 242 242;
+  --color-success: 21 128 61;
+  --color-disabled-bg: 226 232 240;
+  --color-disabled-text: 148 163 184;
+  --color-scope-work: 124 58 237;
+  --color-scope-work-surface: 250 245 255;
+  --color-scope-work-border: 233 213 255;
+  --color-scope-personal: 15 118 110;
+  --color-scope-personal-surface: 240 253 250;
+  --color-scope-personal-border: 153 246 228;
+  --color-on-accent: 255 255 255;
+  --color-do-now-accent: 185 28 28;
+  --color-do-now-surface: 254 242 242;
+  --color-do-now-border: 254 202 202;
+  --color-schedule-accent: 29 78 216;
+  --color-schedule-surface: 239 246 255;
+  --color-schedule-border: 191 219 254;
+  --color-delegate-accent: 180 83 9;
+  --color-delegate-surface: 255 251 235;
+  --color-delegate-border: 253 230 138;
+  --color-eliminate-accent: 71 85 105;
+  --color-eliminate-surface: 248 250 252;
+  --color-eliminate-border: 226 232 240;
+
+  /* Page canvas and base ink: what the browser used before there were themes. */
+  --color-page: 255 255 255;
+  --color-ink: 0 0 0;
+
+  /* Spacing of the cards and quadrants of the board (comfortable density). */
+  --card-padding: 1rem;
+  --card-gap: 0.75rem;
+  --card-inner-gap: 0.75rem;
+  --card-footer-gap: 0.5rem;
+  --quadrant-padding: 1rem;
+}
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
+
+  --color-text: 241 245 249;
+  --color-text-muted: 203 213 225;
+  --color-surface: 30 41 59;
+  --color-surface-alt: 15 23 42;
+  --color-border: 71 85 105;
+  --color-primary: 96 165 250;
+  --color-primary-hover: 147 197 253;
+  --color-on-primary: 15 23 42;
+  --color-error: 248 113 113;
+  --color-error-surface: 59 29 29;
+  --color-success: 74 222 128;
+  --color-disabled-bg: 51 65 85;
+  --color-disabled-text: 100 116 139;
+  --color-scope-work: 167 139 250;
+  --color-scope-work-surface: 46 38 80;
+  --color-scope-work-border: 76 61 143;
+  --color-scope-personal: 45 212 191;
+  --color-scope-personal-surface: 18 48 46;
+  --color-scope-personal-border: 31 107 99;
+  --color-on-accent: 15 23 42;
+  --color-do-now-accent: 248 113 113;
+  --color-do-now-surface: 46 26 29;
+  --color-do-now-border: 92 43 46;
+  --color-schedule-accent: 96 165 250;
+  --color-schedule-surface: 23 34 55;
+  --color-schedule-border: 43 74 122;
+  --color-delegate-accent: 251 191 36;
+  --color-delegate-surface: 43 35 21;
+  --color-delegate-border: 107 84 32;
+  --color-eliminate-accent: 148 163 184;
+  --color-eliminate-surface: 28 37 54;
+  --color-eliminate-border: 59 71 92;
+
+  --color-page: 15 23 42;
+  --color-ink: 241 245 249;
+}
+
+:root[data-density='compact'] {
+  --card-padding: 0.5rem;
+  --card-gap: 0.375rem;
+  --card-inner-gap: 0.375rem;
+  --card-footer-gap: 0.25rem;
+  --quadrant-padding: 0.5rem;
+}
+
+body {
+  background-color: rgb(var(--color-page));
+  color: rgb(var(--color-ink));
+}

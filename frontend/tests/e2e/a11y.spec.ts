@@ -1,6 +1,6 @@
 import AxeBuilder from '@axe-core/playwright'
 import type { Page } from '@playwright/test'
-import { expect, test } from './fixtures/auth'
+import { ADMIN_E2E_EMAIL, expect, test } from './fixtures/auth'
 
 const WCAG_TAGS = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']
 
@@ -45,6 +45,13 @@ async function goTo(page: Page, link: 'Tablero' | 'Historial' | 'Papelera'): Pro
   await page
     .getByRole('navigation', { name: 'Navegación principal' })
     .getByRole('link', { name: link })
+    .click()
+}
+
+async function goToAdmin(page: Page): Promise<void> {
+  await page
+    .getByRole('navigation', { name: 'Navegación principal' })
+    .getByRole('link', { name: 'Accesos' })
     .click()
 }
 
@@ -246,4 +253,84 @@ test.describe('Accesibilidad WCAG 2.1 AA', () => {
     const hasRing = outline.boxShadow !== 'none'
     expect(hasOutline || hasRing).toBe(true)
   })
+
+  for (const colorScheme of ['light', 'dark'] as const) {
+    test(`las pantallas de la aplicación no tienen violaciones en tema ${colorScheme === 'light' ? 'claro' : 'oscuro'}`, async ({
+      page,
+      loginAsGoogleUser,
+    }) => {
+      // The profile is left on "Sistema", so the theme follows the emulated browser scheme.
+      await page.emulateMedia({ colorScheme })
+      await loginAsGoogleUser(`a11y-tema-${colorScheme}-${crypto.randomUUID()}@example.com`)
+      await expect(page.locator('html')).toHaveAttribute('data-theme', colorScheme)
+
+      await expect(page.getByRole('heading', { name: 'Hacer ahora' })).toBeVisible()
+      await expectNoViolations(page, `S3 · Tablero (${colorScheme})`)
+
+      await goTo(page, 'Historial')
+      await expect(page.getByText('Aún no has completado ninguna tarea')).toBeVisible()
+      await expectNoViolations(page, `S5 · Historial (${colorScheme})`)
+
+      await goTo(page, 'Papelera')
+      await expect(page.getByText('La papelera está vacía')).toBeVisible()
+      await expectNoViolations(page, `S6 · Papelera (${colorScheme})`)
+
+      await page.getByRole('link', { name: 'Perfil' }).click()
+      await expect(page.getByRole('radiogroup', { name: 'Tema' })).toBeVisible()
+      await expectNoViolations(page, `S7 · Perfil (${colorScheme})`)
+    })
+
+    test(`el formulario y la confirmación no tienen violaciones en tema ${colorScheme === 'light' ? 'claro' : 'oscuro'}`, async ({
+      page,
+      loginAsGoogleUser,
+    }) => {
+      await page.emulateMedia({ colorScheme })
+      await loginAsGoogleUser(`a11y-dialogos-${colorScheme}-${crypto.randomUUID()}@example.com`)
+      await page.getByRole('button', { name: '+ Nueva tarea' }).click()
+      await expect(page.getByRole('dialog')).toBeVisible()
+      await expectNoViolations(page, `S4 · Formulario (${colorScheme})`)
+      await page.getByRole('button', { name: 'Cancelar' }).click()
+
+      await page.getByRole('link', { name: 'Perfil' }).click()
+      await page.getByRole('button', { name: 'Restablecer valores por defecto' }).click()
+      await expect(page.getByRole('alertdialog')).toBeVisible()
+      await expectNoViolations(page, `S7 · Confirmación de restablecer (${colorScheme})`)
+    })
+
+    test(`la administración de accesos no tiene violaciones en tema ${colorScheme === 'light' ? 'claro' : 'oscuro'}`, async ({
+      page,
+      loginAsAdmin,
+    }) => {
+      await page.emulateMedia({ colorScheme })
+      await loginAsAdmin()
+      await expect(page.getByRole('heading', { name: 'Hacer ahora' })).toBeVisible()
+      await goToAdmin(page)
+      await expect(page.getByRole('heading', { name: 'Accesos', level: 1 })).toBeVisible()
+
+      await expectNoViolations(page, `/admin/access (${colorScheme}, ${ADMIN_E2E_EMAIL})`)
+    })
+
+    test(`"Necesitas una invitación" no tiene violaciones en tema ${colorScheme === 'light' ? 'claro' : 'oscuro'}`, async ({
+      page,
+      loginAsGoogleUser,
+    }) => {
+      await page.emulateMedia({ colorScheme })
+      await loginAsGoogleUser(`a11y-extrana-${colorScheme}-${crypto.randomUUID()}@example.com`, {
+        invited: false,
+      })
+      await expect(page.getByRole('heading', { name: 'Necesitas una invitación' })).toBeVisible()
+
+      await expectNoViolations(page, `Necesitas una invitación (${colorScheme})`)
+    })
+
+    test(`el inicio de sesión no tiene violaciones en tema ${colorScheme === 'light' ? 'claro' : 'oscuro'}`, async ({
+      page,
+    }) => {
+      await page.emulateMedia({ colorScheme })
+      await page.goto('/login')
+      await expect(page.getByRole('button', { name: /iniciar sesión con google/i })).toBeVisible()
+
+      await expectNoViolations(page, `S1 · Iniciar sesión (${colorScheme})`)
+    })
+  }
 })
