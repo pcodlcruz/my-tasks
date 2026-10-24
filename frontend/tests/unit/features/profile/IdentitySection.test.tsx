@@ -48,10 +48,11 @@ const PROFILE: Profile = {
 
 const onChange = vi.fn()
 const onChooseAvatar = vi.fn()
+const onRemoveAvatar = vi.fn()
 
 async function renderSection(
   profile: Partial<Profile> = {},
-  props: { googleName?: string | null; email?: string } = {},
+  props: { googleName?: string | null; email?: string; avatarUrl?: string } = {},
 ): Promise<ReturnType<typeof render>> {
   const { IdentitySection } = await import('../../../../src/features/profile/IdentitySection')
   return render(
@@ -60,8 +61,10 @@ async function renderSection(
       uid="uid-1"
       googleName={props.googleName === undefined ? 'Ana Cruz López' : props.googleName}
       email={props.email ?? 'ana@example.com'}
+      avatarUrl={props.avatarUrl}
       onChange={onChange}
       onChooseAvatar={onChooseAvatar}
+      onRemoveAvatar={onRemoveAvatar}
     />,
   )
 }
@@ -74,6 +77,7 @@ describe('<IdentitySection>', () => {
   beforeEach(() => {
     onChange.mockReset()
     onChooseAvatar.mockReset()
+    onRemoveAvatar.mockReset()
   })
 
   it('muestra el nombre guardado, el contador y el correo en solo lectura', async () => {
@@ -183,6 +187,7 @@ describe('<IdentitySection>', () => {
         email="ana@example.com"
         onChange={onChange}
         onChooseAvatar={onChooseAvatar}
+        onRemoveAvatar={onRemoveAvatar}
       />,
     )
 
@@ -202,6 +207,7 @@ describe('<IdentitySection>', () => {
         email="ana@example.com"
         onChange={onChange}
         onChooseAvatar={onChooseAvatar}
+        onRemoveAvatar={onRemoveAvatar}
       />,
     )
 
@@ -257,7 +263,23 @@ describe('<IdentitySection>', () => {
     await renderSection({ avatar: { kind: 'preset', preset: 'avatar-03', version: 1 } })
 
     await userEvent.click(screen.getByRole('button', { name: 'Quitar avatar' }))
-    expect(onChange).toHaveBeenCalledExactlyOnceWith({ avatar: { kind: 'initials' } })
+    expect(onRemoveAvatar).toHaveBeenCalledOnce()
+    expect(onChange).not.toHaveBeenCalled()
+  })
+
+  it('«Quitar avatar» también aparece con una imagen subida', async () => {
+    await renderSection({ avatar: { kind: 'upload', preset: null, version: 2 } })
+
+    expect(screen.getByRole('button', { name: 'Quitar avatar' })).toBeInTheDocument()
+  })
+
+  it('muestra la imagen subida como avatar grande', async () => {
+    const { container } = await renderSection(
+      { avatar: { kind: 'upload', preset: null, version: 2 } },
+      { avatarUrl: 'blob:mi-imagen' },
+    )
+
+    expect(container.querySelector('img')?.getAttribute('src')).toBe('blob:mi-imagen')
   })
 
   it('«Elegir avatar» abre el selector', async () => {

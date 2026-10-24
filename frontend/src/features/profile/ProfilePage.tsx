@@ -1,5 +1,12 @@
 import { useState } from 'react'
-import { useProfile, useResetProfile, useUpdateProfile } from '../../api/profile'
+import {
+  useAvatarUrl,
+  useProfile,
+  useRemoveAvatar,
+  useResetProfile,
+  useUpdateProfile,
+  useUploadAvatar,
+} from '../../api/profile'
 import type { ProfileUpdate } from '../../api/types'
 import { ConfirmDialog } from '../../app/ConfirmDialog'
 import { useSession } from '../auth/useSession'
@@ -11,22 +18,37 @@ import { IdentitySection } from './IdentitySection'
 // One fixed message for any failure to save: the server's own text is never shown.
 const SAVE_ERROR_MESSAGE = 'No se pudo guardar el cambio. Inténtalo de nuevo.'
 
-type LastAction = { type: 'update'; change: ProfileUpdate } | { type: 'reset' }
+type LastAction =
+  | { type: 'update'; change: ProfileUpdate }
+  | { type: 'reset' }
+  | { type: 'remove-avatar' }
+  // The picker explains upload errors itself, next to the picture being sent.
+  | { type: 'upload-avatar' }
 
 export function ProfilePage(): JSX.Element {
   const profileQuery = useProfile()
   const update = useUpdateProfile()
   const reset = useResetProfile()
+  const removeAvatar = useRemoveAvatar()
+  const uploadAvatar = useUploadAvatar()
   const [lastAction, setLastAction] = useState<LastAction | null>(null)
   const [isConfirmingReset, setIsConfirmingReset] = useState(false)
   const [isPickingAvatar, setIsPickingAvatar] = useState(false)
   const { user } = useSession()
   const profile = profileQuery.data
 
-  // Status of the last thing the person did (a change or a reset).
-  const operation = lastAction?.type === 'reset' ? reset : update
+  const avatarUrl = useAvatarUrl(profile?.avatar)
+
+  // Status of the last thing the person did (a change, a reset, or an avatar operation).
+  const operation = {
+    update,
+    reset,
+    'remove-avatar': removeAvatar,
+    'upload-avatar': uploadAvatar,
+  }[lastAction?.type ?? 'update']
   const isSaving = lastAction !== null && operation.isPending
-  const failed = lastAction !== null && operation.isError
+  // A failed upload is explained by the picker, not by this page's generic notice.
+  const failed = lastAction !== null && lastAction.type !== 'upload-avatar' && operation.isError
   const saved = lastAction !== null && operation.isSuccess
 
   function save(change: ProfileUpdate): void {
@@ -36,7 +58,19 @@ export function ProfilePage(): JSX.Element {
 
   function retry(): void {
     if (lastAction?.type === 'reset') reset.mutate()
+    else if (lastAction?.type === 'remove-avatar') removeAvatar.mutate()
     else if (lastAction?.type === 'update') update.mutate(lastAction.change)
+  }
+
+  function removeCurrentAvatar(): void {
+    setLastAction({ type: 'remove-avatar' })
+    removeAvatar.mutate()
+  }
+
+  // Rejects on failure so the picker, which stays open, can explain it.
+  async function uploadPicture(picture: Blob): Promise<void> {
+    setLastAction({ type: 'upload-avatar' })
+    await uploadAvatar.mutateAsync(picture)
   }
 
   function chooseAvatar(presetId: string): void {
@@ -85,8 +119,10 @@ export function ProfilePage(): JSX.Element {
             uid={user?.uid ?? ''}
             googleName={user?.displayName ?? null}
             email={user?.email ?? ''}
+            avatarUrl={avatarUrl}
             onChange={save}
             onChooseAvatar={() => setIsPickingAvatar(true)}
+            onRemoveAvatar={removeCurrentAvatar}
           />
           <AppearanceSection profile={profile} onChange={save} />
           <BoardPreferences profile={profile} onChange={save} />
@@ -135,6 +171,7 @@ export function ProfilePage(): JSX.Element {
         <AvatarPicker
           currentPreset={profile.avatar.kind === 'preset' ? profile.avatar.preset : null}
           onSelect={chooseAvatar}
+          onUpload={uploadPicture}
           onClose={() => setIsPickingAvatar(false)}
         />
       )}

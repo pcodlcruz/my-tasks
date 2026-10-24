@@ -267,6 +267,9 @@ class TestSizeLimits:
     def test_the_limits_are_the_documented_ones(self) -> None:
         assert MAX_INPUT_BYTES == 2 * 1024 * 1024
         assert MAX_OUTPUT_BYTES == 200 * 1024
+        # About a 12-megapixel photo: far more than any avatar needs (it ends at 256x256), and
+        # small enough that decoding it is bounded in memory.
+        assert MAX_PIXELS == 12_000_000
 
     def test_a_decompression_bomb_is_rejected_before_decoding(
         self, monkeypatch: pytest.MonkeyPatch

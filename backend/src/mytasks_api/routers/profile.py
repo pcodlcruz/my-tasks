@@ -100,7 +100,10 @@ async def get_avatar(
     return Response(
         content=image,
         media_type="image/webp",
-        headers={"Cache-Control": _AVATAR_CACHE_CONTROL},
+        # `Vary: Authorization`: the URL (`?v=1`) is the same for every person, so the browser
+        # must only reuse a cached image for requests made with the same credentials; otherwise
+        # one person could be shown the picture another cached on a shared browser.
+        headers={"Cache-Control": _AVATAR_CACHE_CONTROL, "Vary": "Authorization"},
     )
 
 

@@ -13,6 +13,9 @@ interface AvatarProps {
   // The surrounding link or heading already says who it is: nothing to announce.
   decorative?: boolean
   isLoading?: boolean
+  // The `blob:` URL of an uploaded image. Without it (still downloading, or it failed) an
+  // uploaded avatar shows the initials like any other.
+  imageUrl?: string
 }
 
 const SIZE_CLASSES = { sm: 'h-8 w-8 text-caption', lg: 'h-24 w-24 text-display' } as const
@@ -28,6 +31,7 @@ export function Avatar({
   size = 'sm',
   decorative = false,
   isLoading = false,
+  imageUrl,
 }: AvatarProps): JSX.Element {
   const hidden = decorative ? ('true' as const) : undefined
   const catalogAvatar = avatar?.kind === 'preset' ? findAvatar(avatar.preset) : undefined
@@ -49,7 +53,22 @@ export function Avatar({
     )
   }
 
-  // Without a catalog image (initials, a stale identifier, or an upload until phase 6).
+  if (avatar?.kind === 'upload' && imageUrl !== undefined) {
+    return (
+      <span
+        aria-hidden={hidden}
+        className={`${BASE_CLASSES} ${SIZE_CLASSES[size]} bg-white ring-1 ring-border`}
+      >
+        <img
+          src={imageUrl}
+          alt={decorative ? '' : 'Tu imagen de avatar'}
+          className="h-full w-full object-cover"
+        />
+      </span>
+    )
+  }
+
+  // Without an image (initials, a stale identifier, or an upload not downloaded yet).
   const initials = initialsOf(name, email)
   return (
     <span

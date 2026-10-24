@@ -7,8 +7,9 @@ from PIL import Image, ImageFile, ImageOps, UnidentifiedImageError
 MAX_INPUT_BYTES = 2 * 1024 * 1024
 MAX_OUTPUT_BYTES = 200 * 1024
 # Pixels allowed before decoding. A decompression bomb is a tiny file that announces billions of
-# pixels; ~25 megapixels is a generous photo and still bounded in memory (~100 MB as RGBA).
-MAX_PIXELS = 25_000_000
+# pixels. 12 megapixels is a full phone photo (and the client sends at most 512x512): decoding it
+# takes around 50 MB, a few copies of it around 150 MB, which a small instance can afford.
+MAX_PIXELS = 12_000_000
 AVATAR_SIZE = 256
 
 # Identified by content (Pillow reads the header), never by extension or declared type.

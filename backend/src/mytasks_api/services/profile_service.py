@@ -15,6 +15,10 @@ from mytasks_api.schemas.profile import ProfileUpdateIn
 
 logger = logging.getLogger(__name__)
 
+# Decoding a large picture takes tens of megabytes: only this many are processed at a time in an
+# instance, so a burst of uploads queues instead of exhausting its memory.
+_PROCESSING_SLOTS = asyncio.Semaphore(2)
+
 
 def _field_names(names: set[str] | tuple[str, ...]) -> str:
     # Only names, never values: the display name is personal data and stays out of the log.
@@ -40,7 +44,8 @@ class ProfileService:
         # Decoding can take a moment for a large picture: off the event loop. A file that is
         # rejected never reaches the database, so it neither counts for the limit nor touches
         # the current avatar.
-        image = await asyncio.to_thread(process_avatar, data)
+        async with _PROCESSING_SLOTS:
+            image = await asyncio.to_thread(process_avatar, data)
         profile = await self._repository.upload_avatar(uid, image, datetime.now(UTC))
         # The final size only: never the content, the file name or its metadata.
         log_event(logger, logging.INFO, "avatar_uploaded", uid=uid, size=str(len(image)))

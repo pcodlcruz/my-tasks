@@ -8,8 +8,11 @@ interface IdentitySectionProps {
   // The name and e-mail of the Google account: what is used while no name is chosen.
   googleName: string | null
   email: string
+  // The `blob:` URL of the uploaded image, if the avatar is one.
+  avatarUrl?: string
   onChange: (update: ProfileUpdate) => void
   onChooseAvatar: () => void
+  onRemoveAvatar: () => void
 }
 
 const NAME_MAX_LENGTH = 50
@@ -44,8 +47,10 @@ export function IdentitySection({
   uid,
   googleName,
   email,
+  avatarUrl,
   onChange,
   onChooseAvatar,
+  onRemoveAvatar,
 }: IdentitySectionProps): JSX.Element {
   const [value, setValue] = useState(profile.display_name ?? '')
   const [error, setError] = useState<string | null>(null)
@@ -84,17 +89,20 @@ export function IdentitySection({
 
       <div className="flex flex-col gap-6 sm:flex-row sm:items-start">
         <div className="flex flex-col items-start gap-3">
-          <Avatar avatar={profile.avatar} name={shownName} email={email} seed={uid} size="lg" />
+          <Avatar
+            avatar={profile.avatar}
+            name={shownName}
+            email={email}
+            seed={uid}
+            size="lg"
+            imageUrl={avatarUrl}
+          />
           <div className="flex flex-wrap gap-2">
             <button type="button" onClick={onChooseAvatar} className={SECONDARY_BUTTON}>
               Elegir avatar
             </button>
             {profile.avatar.kind !== 'initials' && (
-              <button
-                type="button"
-                onClick={() => onChange({ avatar: { kind: 'initials' } })}
-                className={SECONDARY_BUTTON}
-              >
+              <button type="button" onClick={onRemoveAvatar} className={SECONDARY_BUTTON}>
                 Quitar avatar
               </button>
             )}

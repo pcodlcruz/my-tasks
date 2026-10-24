@@ -40,6 +40,7 @@ interface Backend {
   patchStatus: number
   patchBodies: unknown[]
   deleteCalls: number
+  avatarDeleteCalls: number
 }
 
 let backend: Backend
@@ -51,10 +52,19 @@ function installBackend(overrides: Partial<Backend> = {}): void {
     patchStatus: 200,
     patchBodies: [],
     deleteCalls: 0,
+    avatarDeleteCalls: 0,
     ...overrides,
   }
-  vi.mocked(fetch).mockImplementation((_url, init) => {
+  vi.mocked(fetch).mockImplementation((url, init) => {
     const method = init?.method ?? 'GET'
+    if (String(url).includes('/api/v1/me/avatar') && method === 'DELETE') {
+      backend.avatarDeleteCalls += 1
+      backend.profile = {
+        ...backend.profile,
+        avatar: { kind: 'initials', preset: null, version: backend.profile.avatar.version + 1 },
+      }
+      return Promise.resolve(jsonResponse(backend.profile))
+    }
     if (method === 'PATCH') {
       backend.patchBodies.push(JSON.parse(String(init?.body)))
       if (backend.patchStatus !== 200) {
@@ -328,7 +338,7 @@ describe('<ProfilePage>', () => {
       await waitFor(() => expect(screen.getByRole('status')).toHaveTextContent('Guardado'))
     })
 
-    it('«Quitar avatar» vuelve a las iniciales', async () => {
+    it('«Quitar avatar» llama a DELETE /me/avatar y vuelve a las iniciales', async () => {
       installBackend({
         profile: { ...PROFILE, avatar: { kind: 'preset', preset: 'avatar-02', version: 1 } },
       })
@@ -336,7 +346,30 @@ describe('<ProfilePage>', () => {
 
       await userEvent.click(await screen.findByRole('button', { name: 'Quitar avatar' }))
 
-      await waitFor(() => expect(backend.patchBodies).toEqual([{ avatar: { kind: 'initials' } }]))
+      await waitFor(() => expect(backend.avatarDeleteCalls).toBe(1))
+      expect(backend.patchBodies).toEqual([])
+      await waitFor(() => expect(screen.getByRole('status')).toHaveTextContent('Guardado'))
+      expect(screen.queryByRole('button', { name: 'Quitar avatar' })).not.toBeInTheDocument()
+    })
+
+    it('si falla al quitar el avatar, avisa con «Reintentar» y lo mantiene', async () => {
+      installBackend({
+        profile: { ...PROFILE, avatar: { kind: 'preset', preset: 'avatar-02', version: 1 } },
+      })
+      await renderPage()
+      const savedProfile = backend.profile
+      vi.mocked(fetch).mockImplementation((url, init) =>
+        Promise.resolve(
+          String(url).includes('/me/avatar') && init?.method === 'DELETE'
+            ? jsonResponse({}, 500)
+            : jsonResponse(savedProfile),
+        ),
+      )
+
+      await userEvent.click(await screen.findByRole('button', { name: 'Quitar avatar' }))
+
+      expect(await screen.findByRole('alert')).toHaveTextContent(SAVE_ERROR)
+      expect(screen.getByRole('button', { name: 'Quitar avatar' })).toBeInTheDocument()
     })
 
     it('si falla al guardar el avatar, avisa y mantiene el anterior', async () => {

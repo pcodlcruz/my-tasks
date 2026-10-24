@@ -323,43 +323,53 @@ las lleva); y comprobar con el token de otra cuenta que nunca se sirve la imagen
 
 ### Tests de la Fase 6 (escribirlos primero; deben fallar)
 
-- [ ] T076 [P] [US4] Tests unitarios del procesado de imagen en `backend/tests/unit/domain/test_avatar_image.py` con imágenes generadas en el propio test: JPEG, PNG y WebP válidos ⇒ WebP 256×256 sin metadatos; no cuadrada ⇒ recorte centrado; orientación EXIF aplicada y datos EXIF eliminados; PNG con transparencia y paleta; texto, HTML y SVG renombrados a `.png` ⇒ rechazo; archivo corrupto o truncado ⇒ rechazo; GIF y TIFF ⇒ rechazo; **bomba de descompresión** (PNG de dimensiones enormes y pocos bytes) ⇒ rechazo antes de decodificar; entrada > 2 MB ⇒ rechazo; salida ≤ 200 KB
-- [ ] T077 [P] [US4] Tests unitarios del límite de subidas en `backend/tests/unit/domain/test_profile_domain.py`: 10 por ventana de 1 hora, la número 11 se rechaza con los segundos restantes, la ventana se reinicia al expirar, y quitar el avatar no cuenta
-- [ ] T078 [P] [US4] Tests del repositorio en `backend/tests/unit/repositories/test_profile_repository_retry.py`: la subida (documento `avatar` + `profile` + contador) es atómica y reintenta ante `Aborted` como el resto de transacciones del proyecto
-- [ ] T079 [US4] Tests de integración de `PUT/GET/DELETE /api/v1/me/avatar` en `backend/tests/integration/test_avatar.py`: 401, 403 (sin cuenta y revocada), 200 con cada formato, 413 por tamaño (por `Content-Length` y por lectura sin ella), 415 por tipo o contenido inválido, 429 con `Retry-After` en la subida 11, sustituir deja **un solo** documento `avatar`, `avatar_version` sube en cada cambio, `GET` devuelve `image/webp` con `X-Content-Type-Options: nosniff` y `Cache-Control: private, max-age=31536000, immutable`, 404 sin imagen, `DELETE` idempotente que no cuenta para el límite, y elegir `preset` o `initials` borra la imagen
-- [ ] T080 [P] [US4] Tests de aislamiento del avatar en `backend/tests/integration/test_profile_isolation.py`: cada cuenta obtiene solo su imagen, no existe ninguna ruta o parámetro que acepte un `uid`, y una cuenta revocada recibe 403 pero conserva su imagen
-- [ ] T081 [P] [US4] Test de los eventos `avatar_uploaded` y `avatar_removed` en `backend/tests/integration/test_audit_logging.py`: solo `uid` y tamaño final, nunca contenido, nombre de archivo ni metadatos
+- [X] T076 [P] [US4] Tests unitarios del procesado de imagen en `backend/tests/unit/domain/test_avatar_image.py` con imágenes generadas en el propio test: JPEG, PNG y WebP válidos ⇒ WebP 256×256 sin metadatos; no cuadrada ⇒ recorte centrado; orientación EXIF aplicada y datos EXIF eliminados; PNG con transparencia y paleta; texto, HTML y SVG renombrados a `.png` ⇒ rechazo; archivo corrupto o truncado ⇒ rechazo; GIF y TIFF ⇒ rechazo; **bomba de descompresión** (PNG de dimensiones enormes y pocos bytes) ⇒ rechazo antes de decodificar; entrada > 2 MB ⇒ rechazo; salida ≤ 200 KB
+- [X] T077 [P] [US4] Tests unitarios del límite de subidas en `backend/tests/unit/domain/test_profile_domain.py`: 10 por ventana de 1 hora, la número 11 se rechaza con los segundos restantes, la ventana se reinicia al expirar, y quitar el avatar no cuenta
+- [X] T078 [P] [US4] Tests del repositorio en `backend/tests/unit/repositories/test_profile_repository_retry.py`: la subida (documento `avatar` + `profile` + contador) es atómica y reintenta ante `Aborted` como el resto de transacciones del proyecto
+- [X] T079 [US4] Tests de integración de `PUT/GET/DELETE /api/v1/me/avatar` en `backend/tests/integration/test_avatar.py`: 401, 403 (sin cuenta y revocada), 200 con cada formato, 413 por tamaño (por `Content-Length` y por lectura sin ella), 415 por tipo o contenido inválido, 429 con `Retry-After` en la subida 11, sustituir deja **un solo** documento `avatar`, `avatar_version` sube en cada cambio, `GET` devuelve `image/webp` con `X-Content-Type-Options: nosniff` y `Cache-Control: private, max-age=31536000, immutable`, 404 sin imagen, `DELETE` idempotente que no cuenta para el límite, y elegir `preset` o `initials` borra la imagen
+- [X] T080 [P] [US4] Tests de aislamiento del avatar en `backend/tests/integration/test_profile_isolation.py`: cada cuenta obtiene solo su imagen, no existe ninguna ruta o parámetro que acepte un `uid`, y una cuenta revocada recibe 403 pero conserva su imagen
+- [X] T081 [P] [US4] Test de los eventos `avatar_uploaded` y `avatar_removed` en `backend/tests/integration/test_audit_logging.py`: solo `uid` y tamaño final, nunca contenido, nombre de archivo ni metadatos
 
 ### Implementación del backend de la Fase 6
 
-- [ ] T082 [US4] Añadir `pillow` a `backend/pyproject.toml` y regenerar `backend/uv.lock` (versión fijada), y comprobar que la imagen del backend se construye con `pack` según `dev-env-sandbox-notes` (Principio III: dependencias fijadas)
-- [ ] T083 [US4] Implementar `backend/src/mytasks_api/domain/avatar_image.py` (identificación por contenido, tope de píxeles previo a decodificar, orientación, recorte, 256×256, WebP, sin metadatos) y el límite de subidas en `backend/src/mytasks_api/domain/profile.py`, hasta que pasen T076 y T077
-- [ ] T084 [US4] Ampliar `backend/src/mytasks_api/repositories/profile_repository.py` con la subida, lectura y borrado del avatar en transacción, hasta que pase T078
-- [ ] T085 [US4] Ampliar `backend/src/mytasks_api/services/profile_service.py` y `routers/profile.py` con `GET/PUT/DELETE /api/v1/me/avatar`: cuerpo binario leído con tope duro de 2 MB (`Content-Length` y corte de la lectura), cabeceras de la respuesta del `GET`, y `Depends(get_active_user)` en todos
-- [ ] T086 [US4] Registrar en `backend/src/mytasks_api/factory.py` los errores `avatar_too_large` (413), `avatar_unsupported` (415) y `avatar_rate_limited` (429 con `Retry-After`) y emitir `avatar_uploaded` y `avatar_removed` desde `logging_config.py`, hasta que pasen T079, T080 y T081
-- [ ] T087 [US4] Ampliar `backend/tests/unit/test_export_openapi.py` para que `GET /openapi.json` coincida también con los endpoints de avatar de `contracts/profile.yaml`
-- [ ] T088 [US4] Ejecutar `ruff check`, `ruff format --check`, `mypy` y la suite de backend completa, y dejarlos en verde
+- [X] T082 [US4] Añadir `pillow` a `backend/pyproject.toml` y regenerar `backend/uv.lock` (versión fijada), y comprobar que la imagen del backend se construye con `pack` según `dev-env-sandbox-notes` (Principio III: dependencias fijadas)
+- [X] T083 [US4] Implementar `backend/src/mytasks_api/domain/avatar_image.py` (identificación por contenido, tope de píxeles previo a decodificar, orientación, recorte, 256×256, WebP, sin metadatos) y el límite de subidas en `backend/src/mytasks_api/domain/profile.py`, hasta que pasen T076 y T077
+- [X] T084 [US4] Ampliar `backend/src/mytasks_api/repositories/profile_repository.py` con la subida, lectura y borrado del avatar en transacción, hasta que pase T078
+- [X] T085 [US4] Ampliar `backend/src/mytasks_api/services/profile_service.py` y `routers/profile.py` con `GET/PUT/DELETE /api/v1/me/avatar`: cuerpo binario leído con tope duro de 2 MB (`Content-Length` y corte de la lectura), cabeceras de la respuesta del `GET`, y `Depends(get_active_user)` en todos
+- [X] T086 [US4] Registrar en `backend/src/mytasks_api/factory.py` los errores `avatar_too_large` (413), `avatar_unsupported` (415) y `avatar_rate_limited` (429 con `Retry-After`) y emitir `avatar_uploaded` y `avatar_removed` desde `logging_config.py`, hasta que pasen T079, T080 y T081
+- [X] T087 [US4] Ampliar `backend/tests/unit/test_export_openapi.py` para que `GET /openapi.json` coincida también con los endpoints de avatar de `contracts/profile.yaml`
+- [X] T088 [US4] Ejecutar `ruff check`, `ruff format --check`, `mypy` y la suite de backend completa, y dejarlos en verde
 
 ### Tests del frontend de la Fase 6 (escribirlos primero; deben fallar)
 
-- [ ] T089 [P] [US4] Tests unitarios de `AvatarCropper` en `frontend/tests/unit/features/profile/AvatarCropper.test.tsx`: arrastre y zoom con ratón, táctil y **teclado**, vista previa redonda, resultado cuadrado exportado como `Blob` de tipo imagen, y cancelar sin subir nada
-- [ ] T090 [P] [US4] Tests unitarios de `useAvatarUrl` y las mutaciones en `frontend/tests/unit/api/profile.test.tsx`: descarga con `Authorization`, crea un `blob:` URL, lo revoca al cambiar la versión o desmontar, y usa `?v=<version>`
-- [ ] T091 [P] [US4] Tests unitarios del selector en `frontend/tests/unit/features/profile/AvatarPicker.test.tsx` (pestaña «Subir imagen»): rechazo en el cliente de tipo y de tamaño antes de enviar, mensajes de 413/415/429 («Espera unos minutos») y del fallo de red, estado «subiendo», y que el avatar anterior se conserva ante cualquier error
-- [ ] T092 [P] Test de la CSP en `frontend/nginx/tests/test-runtime-config.sh`: `img-src 'self' data: blob:` y que el resto de directivas queda igual
-- [ ] T093 [US4] Tests e2e en `frontend/tests/e2e/profile-avatar.spec.ts` (escenarios 9–13 de la quickstart): subir, encuadrar, sustituir y quitar; archivos inválidos; la imagen sigue tras recargar (sin errores de CSP en la consola); y el límite de subidas
+- [X] T089 [P] [US4] Tests unitarios de `AvatarCropper` en `frontend/tests/unit/features/profile/AvatarCropper.test.tsx`: arrastre y zoom con ratón, táctil y **teclado**, vista previa redonda, resultado cuadrado exportado como `Blob` de tipo imagen, y cancelar sin subir nada
+- [X] T090 [P] [US4] Tests unitarios de `useAvatarUrl` y las mutaciones en `frontend/tests/unit/api/profile.test.tsx`: descarga con `Authorization`, crea un `blob:` URL, lo revoca al cambiar la versión o desmontar, y usa `?v=<version>`
+- [X] T091 [P] [US4] Tests unitarios del selector en `frontend/tests/unit/features/profile/AvatarPicker.test.tsx` (pestaña «Subir imagen»): rechazo en el cliente de tipo y de tamaño antes de enviar, mensajes de 413/415/429 («Espera unos minutos») y del fallo de red, estado «subiendo», y que el avatar anterior se conserva ante cualquier error
+- [X] T092 [P] Test de la CSP en `frontend/nginx/tests/test-runtime-config.sh`: `img-src 'self' data: blob:` y que el resto de directivas queda igual
+- [X] T093 [US4] Tests e2e en `frontend/tests/e2e/profile-avatar.spec.ts` (escenarios 9–13 de la quickstart): subir, encuadrar, sustituir y quitar; archivos inválidos; la imagen sigue tras recargar (sin errores de CSP en la consola); y el límite de subidas
 
 ### Implementación del frontend de la Fase 6
 
-- [ ] T094 [US4] Ampliar `frontend/src/api/profile.ts` con `uploadAvatar` (cuerpo binario con su `Content-Type`), `removeAvatar` y `useAvatarUrl`, y permitir cuerpos no JSON en `frontend/src/lib/apiClient.ts` sin cambiar el comportamiento actual, hasta que pase T090
-- [ ] T095 [US4] Crear `frontend/src/features/profile/AvatarCropper.tsx` con `<canvas>` (sin librerías), accesible por teclado, que exporta un cuadrado de hasta 512 px, hasta que pase T089
-- [ ] T096 [US4] Añadir la pestaña «Subir imagen» a `AvatarPicker.tsx` y el estado `upload` a `Avatar.tsx`, con los mensajes de error en `apiClient.ts` (`avatar_too_large`, `avatar_unsupported`, `avatar_rate_limited`), hasta que pasen T091 y T093
-- [ ] T097 [US4] Añadir `blob:` a `img-src` en `frontend/nginx/docker-entrypoint.d/40-runtime-config.sh`, hasta que pase T092
-- [ ] T098 [US4] Vaciar y revocar los `blob:` URL del avatar al cambiar de usuario o cerrar sesión (extendiendo `frontend/src/app/SessionCacheReset.tsx`) y probarlo en `frontend/tests/unit/app/SessionCacheReset.test.tsx`
-- [ ] T099 [US4] Ejecutar `npm run lint`, `tsc`, `prettier --check`, `npm test` y `npm run test:e2e` (con axe en ambos temas) y dejarlos en verde
-- [ ] T100 Revisión de seguridad de la Fase 6 con `mytasks-security-auditor` (bombas de descompresión, *polyglots*, EXIF, tamaños, límite, caché y `nosniff`, cambio de `img-src`, aislamiento entre cuentas, `blob:` URL) y registrar el informe en `specs/004-user-profile-settings/security-review-fase-6.md`; corregir lo que marque como medio o superior en esta misma PR
-- [ ] T101 Marcar T076–T100 como hechas en este fichero y anotar el avance de la fase
+- [X] T094 [US4] Ampliar `frontend/src/api/profile.ts` con `uploadAvatar` (cuerpo binario con su `Content-Type`), `removeAvatar` y `useAvatarUrl`, y permitir cuerpos no JSON en `frontend/src/lib/apiClient.ts` sin cambiar el comportamiento actual, hasta que pase T090
+- [X] T095 [US4] Crear `frontend/src/features/profile/AvatarCropper.tsx` con `<canvas>` (sin librerías), accesible por teclado, que exporta un cuadrado de hasta 512 px, hasta que pase T089
+- [X] T096 [US4] Añadir la pestaña «Subir imagen» a `AvatarPicker.tsx` y el estado `upload` a `Avatar.tsx`, con los mensajes de error en `apiClient.ts` (`avatar_too_large`, `avatar_unsupported`, `avatar_rate_limited`), hasta que pasen T091 y T093
+- [X] T097 [US4] Añadir `blob:` a `img-src` en `frontend/nginx/docker-entrypoint.d/40-runtime-config.sh`, hasta que pase T092
+- [X] T098 [US4] Vaciar y revocar los `blob:` URL del avatar al cambiar de usuario o cerrar sesión (extendiendo `frontend/src/app/SessionCacheReset.tsx`) y probarlo en `frontend/tests/unit/app/SessionCacheReset.test.tsx`
+- [X] T099 [US4] Ejecutar `npm run lint`, `tsc`, `prettier --check`, `npm test` y `npm run test:e2e` (con axe en ambos temas) y dejarlos en verde
+- [X] T100 Revisión de seguridad de la Fase 6 con `mytasks-security-auditor` (bombas de descompresión, *polyglots*, EXIF, tamaños, límite, caché y `nosniff`, cambio de `img-src`, aislamiento entre cuentas, `blob:` URL) y registrar el informe en `specs/004-user-profile-settings/security-review-fase-6.md`; corregir lo que marque como medio o superior en esta misma PR
+- [X] T101 Marcar T076–T100 como hechas en este fichero y anotar el avance de la fase
 
 **Checkpoint**: las cuatro historias funcionan; subir una imagen no necesita ningún cambio de infraestructura.
+
+**Avance (2026-10-24)**: Fase 6 completa. Backend: 636 tests (incluido el umbral de rendimiento de la
+001), `ruff` y `mypy` limpios. Frontend: 358 unitarios y 69 e2e, lint (verificado en una instalación
+limpia), formato y tipos limpios, y el test de la CSP de nginx. Informe en
+[security-review-fase-6.md](./security-review-fase-6.md): sin críticos ni altos; **dos medios
+corregidos en la PR** (caché de la imagen compartida entre cuentas → `Vary: Authorization`; memoria
+al decodificar → 12 megapíxeles y 2 procesados a la vez) y dos bajos al backlog. Pendiente de
+comprobar en el CI: la construcción de la imagen del backend con `pillow` (`images-build`), que no
+se pudo hacer en local por no estar el *daemon* de Docker en marcha. Además: `refreshAccess` de la
+lista de accesos (003) cancela la petición en vuelo antes de invalidar, para no quedar desfasada.
 
 ---
 

@@ -41,8 +41,13 @@ export function useAccessList() {
   return useQuery({ queryKey: ACCESS_QUERY_KEY, queryFn: listAccess })
 }
 
+// A list request that is still in flight (the first load, on a slow connection) would swallow a
+// plain invalidation: with no data yet, TanStack Query lets the new refetch join it, and its
+// answer was computed before this change. So that request is dropped first and asked again.
 function refreshAccess(queryClient: QueryClient): void {
-  void queryClient.invalidateQueries({ queryKey: ACCESS_QUERY_KEY })
+  void queryClient
+    .cancelQueries({ queryKey: ACCESS_QUERY_KEY })
+    .then(() => queryClient.invalidateQueries({ queryKey: ACCESS_QUERY_KEY }))
 }
 
 function inviteMessage(result: InviteResult): string {

@@ -26,13 +26,17 @@ async function chooseDensity(page: Page, label: 'Cómoda' | 'Compacta'): Promise
 
 async function createTask(page: Page, title: string): Promise<void> {
   await page.getByRole('button', { name: '+ Nueva tarea' }).click()
+  // The dialog focuses the title when it opens; filling before that happens lets a late focus
+  // move the typing into the wrong field.
+  await expect(page.getByLabel('Título')).toBeFocused()
   await page.getByLabel('Título').fill(title)
   await page.getByLabel('Descripción').fill('Detalle de la tarea')
   await page.getByRole('checkbox', { name: 'Marcar como urgente' }).check()
   await page.getByRole('checkbox', { name: 'Marcar como importante' }).check()
   await page.getByRole('dialog').getByRole('radio', { name: 'Laboral' }).check()
   await page.getByRole('button', { name: 'Guardar' }).click()
-  await expect(page.getByRole('dialog')).toHaveCount(0)
+  // Generous: under the load of a full run the API can take a few seconds to answer.
+  await expect(page.getByRole('dialog')).toHaveCount(0, { timeout: 15_000 })
 }
 
 function theme(page: Page): Promise<string | null> {
@@ -159,10 +163,12 @@ test.describe('Perfil · apariencia', () => {
       await route.continue()
     })
 
+    // `click`, not `check`: the control goes back to the saved value as soon as the save fails,
+    // which is exactly what `check` would report as "did not change its state".
     await page
       .getByRole('radiogroup', { name: 'Tema' })
       .getByRole('radio', { name: 'Oscuro' })
-      .check()
+      .click()
 
     const alert = page.getByRole('alert')
     await expect(alert).toContainText('No se pudo guardar el cambio. Inténtalo de nuevo.')

@@ -390,6 +390,19 @@ class TestRead:
         assert response.headers["x-content-type-options"] == "nosniff"
         assert response.headers["cache-control"] == "private, max-age=31536000, immutable"
 
+    async def test_the_cached_image_is_only_reused_for_the_same_credentials(
+        self, client: httpx.AsyncClient, google_user: GoogleUserFactory
+    ) -> None:
+        # The URL is the same for everyone (`?v=1` is the first version of every person), so
+        # without `Vary` a browser shared by two people could show one the other's picture.
+        user = await google_user("owner@example.com")
+        await _upload(client, user, _image("PNG"))
+
+        response = await client.get(AVATAR_URL, params={"v": 1}, headers=_auth(user.id_token))
+
+        varied = {name.strip().lower() for name in response.headers["vary"].split(",")}
+        assert "authorization" in varied
+
     async def test_the_version_in_the_url_is_ignored_by_the_server(
         self, client: httpx.AsyncClient, google_user: GoogleUserFactory
     ) -> None:

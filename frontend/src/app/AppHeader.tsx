@@ -1,6 +1,7 @@
 import { NavLink } from 'react-router-dom'
 import { useIsAdmin } from '../features/auth/useIsAdmin'
 import { useSession } from '../features/auth/useSession'
+import { useAvatarUrl } from '../api/profile'
 import { Avatar } from '../features/profile/Avatar'
 import { useSettledProfile } from '../features/profile/useSettledProfile'
 
@@ -16,6 +17,7 @@ export function AppHeader(): JSX.Element {
   const { user, signOut } = useSession()
   const isAdmin = useIsAdmin()
   const { profile, settled } = useSettledProfile()
+  const avatarUrl = useAvatarUrl(profile?.avatar)
   // The name shown: the one chosen in the profile, else the Google account's, else the e-mail.
   const shownName = profile?.display_name ?? user?.displayName ?? user?.email ?? ''
   const navItems = isAdmin ? [...NAV_ITEMS, ...ADMIN_NAV_ITEMS] : NAV_ITEMS
@@ -65,6 +67,7 @@ export function AppHeader(): JSX.Element {
                 size="sm"
                 decorative
                 isLoading={!settled}
+                imageUrl={avatarUrl}
               />
               <span className="hidden max-w-[10rem] truncate text-caption sm:inline">
                 {shownName}

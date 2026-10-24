@@ -61,7 +61,9 @@ async function handleUnauthorized(): Promise<void> {
   window.location.assign('/login?reason=expired')
 }
 
-export async function apiFetch<T>(path: string, init: RequestInit = {}): Promise<T> {
+// The authenticated request shared by the JSON and the binary calls. A body that already has its
+// own `Content-Type` (an image) is sent as it is; any other body is JSON.
+async function authorizedFetch(path: string, init: RequestInit): Promise<Response> {
   const headers = new Headers(init.headers)
   const user = auth.currentUser
   if (user) {
@@ -81,8 +83,19 @@ export async function apiFetch<T>(path: string, init: RequestInit = {}): Promise
   if (!response.ok) {
     throw await toApiError(response)
   }
+  return response
+}
+
+export async function apiFetch<T>(path: string, init: RequestInit = {}): Promise<T> {
+  const response = await authorizedFetch(path, init)
   if (response.status === 204) {
     return undefined as T
   }
   return (await response.json()) as T
+}
+
+// For endpoints that answer with a file (the avatar image) instead of JSON.
+export async function apiFetchBlob(path: string): Promise<Blob> {
+  const response = await authorizedFetch(path, {})
+  return response.blob()
 }

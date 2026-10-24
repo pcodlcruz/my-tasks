@@ -1,5 +1,6 @@
 import { useQueryClient } from '@tanstack/react-query'
 import { useEffect, useRef } from 'react'
+import { ensureAvatarUrlRevoker } from '../api/profile'
 import { useSession } from '../features/auth/useSession'
 import { useUiStore } from '../stores/uiStore'
 
@@ -9,6 +10,10 @@ import { useUiStore } from '../stores/uiStore'
  */
 export function SessionCacheReset(): null {
   const queryClient = useQueryClient()
+  // So that clearing the cache also releases the avatar images held as blob: URLs.
+  useEffect(() => {
+    ensureAvatarUrlRevoker(queryClient)
+  }, [queryClient])
   const { user, loading } = useSession()
   const uid = user?.uid ?? null
   // `undefined` until the first session check ends: that first load is not a change.

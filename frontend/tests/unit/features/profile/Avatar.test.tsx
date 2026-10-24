@@ -67,8 +67,45 @@ describe('<Avatar>', () => {
     expect(screen.getByRole('img', { name: /iniciales A/i })).toBeInTheDocument()
   })
 
-  it('la imagen subida (Fase 6) cae por ahora en las iniciales', () => {
+  it('una imagen subida se muestra con su blob: URL', () => {
+    render(
+      <Avatar
+        avatar={{ kind: 'upload', preset: null, version: 3 }}
+        name="Ana"
+        seed="u"
+        imageUrl="blob:imagen"
+      />,
+    )
+
+    const image = screen.getByRole('img', { name: 'Tu imagen de avatar' })
+    expect(image.tagName).toBe('IMG')
+    expect(image).toHaveAttribute('src', 'blob:imagen')
+  })
+
+  it('una imagen subida decorativa no se anuncia', () => {
+    const { container } = render(
+      <Avatar
+        avatar={{ kind: 'upload', preset: null, version: 3 }}
+        name="Ana"
+        seed="u"
+        imageUrl="blob:imagen"
+        decorative
+      />,
+    )
+
+    expect(screen.queryByRole('img')).not.toBeInTheDocument()
+    expect(container.querySelector('img')?.getAttribute('alt')).toBe('')
+    expect(container.firstElementChild).toHaveAttribute('aria-hidden', 'true')
+  })
+
+  it('una imagen subida que aún no se ha descargado muestra las iniciales', () => {
     render(<Avatar avatar={{ kind: 'upload', preset: null, version: 3 }} name="Ana" seed="u" />)
+
+    expect(screen.getByRole('img', { name: /iniciales A/i })).toBeInTheDocument()
+  })
+
+  it('la URL de una imagen solo se usa si el avatar es una imagen subida', () => {
+    render(<Avatar avatar={INITIALS} name="Ana" seed="u" imageUrl="blob:imagen" />)
 
     expect(screen.getByRole('img', { name: /iniciales A/i })).toBeInTheDocument()
   })
