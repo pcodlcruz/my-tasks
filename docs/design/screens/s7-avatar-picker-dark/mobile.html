@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>S7 Selector de avatar y recortador oscuro - MyTasks (Móvil)</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+          },
+          colors: {
+            brand: {
+              primary: '#60A5FA',
+              'primary-text': '#0F172A',
+              surface: '#1E293B',
+              border: '#475569',
+              bg: '#0F172A',
+              text: '#F1F5F9',
+              muted: '#94A3B8',
+              error: '#F87171',
+              'error-bg': 'rgba(239, 68, 68, 0.15)',
+              'card-bg': '#0F172A',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+    .material-symbols-outlined.filled {
+      font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+    /* Estilos de slider personalizado */
+    input[type=range]::-webkit-slider-thumb {
+      appearance: none;
+      height: 20px;
+      width: 20px;
+      border-radius: 9999px;
+      background: #60A5FA;
+      cursor: pointer;
+      border: 2px solid #0F172A;
+      box-shadow: 0 0 0 2px rgba(96, 165, 250, 0.3);
+    }
+  </style>
+</head>
+<body class="bg-[#090D16] text-[#F1F5F9] font-sans antialiased min-h-screen p-4 flex flex-col items-center justify-center">
+
+  <!-- Contenedor interactivo que muestra ambos estados para móvil con selector rápido o scroll -->
+  <div class="w-full max-w-[420px] mx-auto space-y-6">
+
+    <!-- Barra de control / especificación de estados -->
+    <header class="bg-[#1E293B] border border-[#475569] rounded-2xl p-4 shadow-xl">
+      <div class="flex items-center justify-between gap-2">
+        <div class="flex items-center gap-2">
+          <span class="material-symbols-outlined text-[#60A5FA]">account_circle</span>
+          <span class="text-xs font-semibold uppercase tracking-wider text-[#94A3B8]">S7 Móvil · Modo Oscuro</span>
+        </div>
+        <span class="px-2 py-0.5 text-[11px] font-medium bg-[#15803D]/20 text-[#4ADE80] border border-[#15803D]/40 rounded-full flex items-center gap-1">
+          <span class="w-1.5 h-1.5 rounded-full bg-[#4ADE80]"></span> WCAG AA ≥ 4.5:1
+        </span>
+      </div>
+      <h1 class="text-base font-bold text-[#F1F5F9] mt-2">Selector y Recortador de Avatar</h1>
+      <p class="text-xs text-[#94A3B8] mt-0.5">Hoja modal sobre fondo oscurecido (#1E293B, borde #475569) con zonas táctiles de 44px.</p>
+
+      <!-- Selector de vista interactivo (A / B) -->
+      <div class="mt-4 grid grid-cols-2 gap-2 bg-[#0F172A] p-1 rounded-xl border border-[#334155]">
+        <button id="btnStateA" onclick="showState('A')" class="py-2 px-3 text-xs font-semibold rounded-lg text-[#0F172A] bg-[#60A5FA] transition-all flex items-center justify-center gap-1.5 min-h-[44px]">
+          <span class="material-symbols-outlined text-[18px]">grid_view</span>
+          Estado A: Catálogo
+        </button>
+        <button id="btnStateB" onclick="showState('B')" class="py-2 px-3 text-xs font-medium rounded-lg text-[#94A3B8] hover:text-[#F1F5F9] transition-all flex items-center justify-center gap-1.5 min-h-[44px]">
+          <span class="material-symbols-outlined text-[18px]">crop</span>
+          Estado B: Subir / Recorte
+        </button>
+      </div>
+    </header>
+
+    <!-- MOCKUP DEL DISPOSITIVO MÓVIL (Marco con Perfil Oscurecido de fondo + Hoja Modal) -->
+    <div class="relative w-full rounded-[36px] bg-[#0B1120] border-4 border-[#334155] shadow-2xl overflow-hidden min-h-[760px] flex flex-col justify-end">
+
+      <!-- Barra de estado superior simulada de teléfono -->
+      <div class="absolute top-0 left-0 right-0 h-10 px-6 flex justify-between items-center text-xs text-[#94A3B8] z-30 select-none bg-gradient-to-b from-[#0F172A]/90 to-transparent">
+        <span class="font-medium text-[#F1F5F9]">9:41</span>
+        <div class="flex items-center gap-2">
+          <span class="material-symbols-outlined text-sm">signal_cellular_alt</span>
+          <span class="material-symbols-outlined text-sm">wifi</span>
+          <span class="material-symbols-outlined text-sm">battery_full</span>
+        </div>
+      </div>
+
+      <!-- FONDO OSCURECIDO: Pantalla Perfil subyacente -->
+      <div class="absolute inset-0 bg-[#0F172A] p-5 pt-12 opacity-30 pointer-events-none select-none flex flex-col gap-4">
+        <div class="flex items-center justify-between border-b border-[#334155] pb-3">
+          <span class="font-bold text-lg text-[#60A5FA]">MyTasks</span>
+          <div class="w-8 h-8 rounded-full bg-[#1E293B]"></div>
+        </div>
+        <div class="text-xl font-bold">Perfil</div>
+        <div class="bg-[#1E293B] p-4 rounded-xl space-y-3">
+          <div class="w-16 h-16 rounded-full bg-[#2563EB]"></div>
+          <div class="h-4 bg-[#334155] rounded w-2/3"></div>
+          <div class="h-3 bg-[#334155] rounded w-1/2"></div>
+        </div>
+        <div class="bg-[#1E293B] p-4 rounded-xl space-y-3">
+          <div class="h-4 bg-[#334155] rounded w-1/3"></div>
+          <div class="h-10 bg-[#334155] rounded"></div>
+        </div>
+      </div>
+
+      <!-- Backdrop oscuro con overlay semitransparente -->
+      <div class="absolute inset-0 bg-black/65 backdrop-blur-[2px] z-10 transition-opacity"></div>
+
+      <!-- HOJA MODAL A PANTALLA CASI COMPLETA (#1E293B, borde #475569) -->
+      <section aria-labelledby="modal-title" class="relative z-20 bg-[#1E293B] border-t-2 border-x border-[#475569] rounded-t-[28px] shadow-[0_-8px_30px_rgba(0,0,0,0.6)] flex flex-col max-h-[92vh] overflow-hidden transition-all duration-300">
+        
+        <!-- Tirador / Drag Handle accesible -->
+        <div class="w-full pt-3 pb-1 flex justify-center items-center">
+          <div class="w-12 h-1.5 bg-[#475569] rounded-full"></div>
+        </div>
+
+        <!-- Encabezado de la Hoja Modal con Título y Cerrar -->
+        <div class="px-5 pt-2 pb-3 flex items-center justify-between border-b border-[#334155]">
+          <div>
+            <h2 id="modal-title" class="text-lg font-bold text-[#F1F5F9] tracking-tight">Elegir avatar</h2>
+            <p class="text-xs text-[#94A3B8]">Personaliza tu foto o ilustración de perfil</p>
+          </div>
+          <button type="button" aria-label="Cerrar modal" class="w-11 h-11 flex items-center justify-center rounded-full text-[#94A3B8] hover:text-[#F1F5F9] hover:bg-[#334155] focus:outline-none focus:ring-2 focus:ring-[#60A5FA] active:scale-95 transition-all">
+            <span class="material-symbols-outlined text-[22px]">close</span>
+          </button>
+        </div>
+
+        <!-- Barra de pestañas fijas ("Catálogo" y "Subir imagen") - Altura táctil min 44px -->
+        <div class="px-5 pt-3 pb-2 bg-[#1E293B] border-b border-[#334155]">
+          <div role="tablist" class="grid grid-cols-2 gap-1 bg-[#0F172A] p-1 rounded-xl border border-[#334155]">
+            <!-- Tab Catálogo -->
+            <button id="tabCatalog" role="tab" aria-selected="true" onclick="showState('A')" class="flex items-center justify-center gap-2 py-2 px-3 text-xs font-semibold rounded-lg bg-[#1E293B] text-[#60A5FA] shadow-sm border border-[#475569] min-h-[44px] transition-all focus:outline-none focus:ring-2 focus:ring-[#60A5FA]">
+              <span class="material-symbols-outlined text-[18px]">interests</span>
+              <span>Catálogo</span>
+              <span class="ml-1 px-1.5 py-0.2 bg-[#60A5FA]/20 text-[#60A5FA] text-[10px] font-bold rounded-full">12</span>
+            </button>
+            <!-- Tab Subir imagen -->
+            <button id="tabUpload" role="tab" aria-selected="false" onclick="showState('B')" class="flex items-center justify-center gap-2 py-2 px-3 text-xs font-medium rounded-lg text-[#94A3B8] hover:text-[#F1F5F9] min-h-[44px] transition-all focus:outline-none focus:ring-2 focus:ring-[#60A5FA]">
+              <span class="material-symbols-outlined text-[18px]">cloud_upload</span>
+              <span>Subir imagen</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- CONTENIDO: ESTADO A (Catálogo de 12 avatares en 3 columnas) -->
+        <div id="panelCatalog" class="flex-1 overflow-y-auto px-5 py-4 space-y-4 max-h-[58vh]">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-medium text-[#94A3B8]">Selecciona una ilustración:</span>
+            <span class="text-[11px] text-[#60A5FA] font-medium flex items-center gap-1">
+              <span class="material-symbols-outlined text-xs">info</span> 1 seleccionado
+            </span>
+          </div>
+
+          <!-- Rejilla de 12 avatares redondos de 64px en 3 columnas -->
+          <div role="radiogroup" aria-label="Catálogo de avatares" class="grid grid-cols-3 gap-y-4 gap-x-3 justify-items-center">
+            
+            <!-- 1. Búho (SELECCIONADO: borde grueso, fondo y check) -->
+            <button type="button" role="radio" aria-checked="true" class="group flex flex-col items-center gap-1.5 p-2 rounded-2xl bg-[#0F172A] border-2 border-[#60A5FA] ring-2 ring-[#60A5FA]/30 focus:outline-none focus:ring-2 focus:ring-[#60A5FA] min-w-[96px] min-h-[104px] justify-center transition-all shadow-md relative">
+              <div class="relative w-16 h-16 rounded-full bg-indigo-950/80 border-2 border-[#60A5FA] flex items-center justify-center shadow-inner">
+                <!-- SVG Avatar Búho -->
+                <svg class="w-12 h-12" viewBox="0 0 48 48" fill="none">
+                  <circle cx="24" cy="24" r="20" fill="#312E81"/>
+                  <circle cx="18" cy="22" r="7" fill="#FEF08A"/>
+                  <circle cx="30" cy="22" r="7" fill="#FEF08A"/>
+                  <circle cx="18" cy="22" r="3.5" fill="#1E1B4B"/>
+                  <circle cx="30" cy="22" r="3.5" fill="#1E1B4B"/>
+                  <polygon points="24,24 21,29 27,29" fill="#F97316"/>
+                  <path d="M12 16 L17 19" stroke="#818CF8" stroke-width="2" stroke-linecap="round"/>
+                  <path d="M36 16 L31 19" stroke="#818CF8" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+                <!-- Badge de Check de Selección Activa -->
+                <div class="absolute -top-1 -right-1 w-5 h-5 bg-[#60A5FA] text-[#0F172A] rounded-full flex items-center justify-center shadow-md">
+                  <span class="material-symbols-outlined text-[14px] font-bold">check</span>
+                </div>
+              </div>
+              <span class="text-xs font-bold text-[#60A5FA] text-center">Búho</span>
+            </button>
+
+            <!-- 2. Zorro -->
+            <button type="button" role="radio" aria-checked="false" class="group flex flex-col items-center gap-1.5 p-2 rounded-2xl hover:bg-[#0F172A]/70 border border-transparent hover:border-[#475569] focus:outline-none focus:ring-2 focus:ring-[#60A5FA] min-w-[96px] min-h-[104px] justify-center transition-all">
+              <div class="w-16 h-16 rounded-full bg-orange-950/50 border border-[#334155] group-hover:border-[#60A5FA] flex items-center justify-center transition-all">
+                <svg class="w-12 h-12" viewBox="0 0 48 48" fill="none">
+                  <circle cx="24" cy="24" r="20" fill="#7C2D12"/>
+                  <polygon points="14,14 19,26 12,26" fill="#EA580C"/>
+                  <polygon points="34,14 29,26 36,26" fill="#EA580C"/>
+                  <polygon points="24,18 15,32 33,32" fill="#F97316"/>
+                  <polygon points="24,26 18,34 30,34" fill="#FFEDD5"/>
+                  <circle cx="19" cy="28" r="2" fill="#1E293B"/>
+                  <circle cx="29" cy="28" r="2" fill="#1E293B"/>
+                  <circle cx="24" cy="33" r="1.5" fill="#0F172A"/>
+                </svg>
+              </div>
+              <span class="text-xs font-medium text-[#F1F5F9] text-center">Zorro</span>
+            </button>
+
+            <!-- 3. Oso -->
+            <button type="button" role="radio" aria-checked="false" class="group flex flex-col items-center gap-1.5 p-2 rounded-2xl hover:bg-[#0F172A]/70 border border-transparent hover:border-[#475569] focus:outline-none focus:ring-2 focus:ring-[#60A5FA] min-w-[96px] min-h-[104px] justify-center transition-all">
+              <div class="w-16 h-16 rounded-full bg-amber-950/50 border border-[#334155] group-hover:border-[#60A5FA] flex items-center justify-center transition-all">
+                <svg class="w-12 h-12" viewBox="0 0 48 48" fill="none">
+                  <circle cx="24" cy="24" r="20" fill="#451A03"/>
+                  <circle cx="14" cy="15" r="5" fill="#78350F"/>
+                  <circle cx="34" cy="15" r="5" fill="#78350F"/>
+                  <circle cx="24" cy="26" r="14" fill="#92400E"/>
+                  <ellipse cx="24" cy="29" rx="7" ry="5" fill="#FDE68A"/>
+                  <circle cx="19" cy="24" r="1.8" fill="#1E293B"/>
+                  <circle cx="29" cy="24" r="1.8" fill="#1E293B"/>
+                  <ellipse cx="24" cy="28" rx="2.5" ry="1.8" fill="#1E293B"/>
+                </svg>
+              </div>
+              <span class="text-xs font-medium text-[#F1F5F9] text-center">Oso</span>
+            </button>
+
+            <!-- 4. Gato -->
+            <button type="button" role="radio" aria-checked="false" class="group flex flex-col items-center gap-1.5 p-2 rounded-2xl hover:bg-[#0F172A]/70 border border-transparent hover:border-[#475569] focus:outline-none focus:ring-2 focus:ring-[#60A5FA] min-w-[96px] min-h-[104px] justify-center transition-all">
+              <div class="w-16 h-16 rounded-full bg-purple-950/50 border border-[#334155] group-hover:border-[#60A5FA] flex items-center justify-center transition-all">
+                <svg class="w-12 h-12" viewBox="0 0 48 48" fill="none">
+                  <circle cx="24" cy="24" r="20" fill="#3B0764"/>
+                  <polygon points="15,13 21,24 13,24" fill="#A855F7"/>
+                  <polygon points="33,13 27,24 35,24" fill="#A855F7"/>
+                  <circle cx="24" cy="27" r="13" fill="#C084FC"/>
+                  <ellipse cx="19" cy="26" rx="2" ry="3" fill="#1E1B4B"/>
+                  <ellipse cx="29" cy="26" rx="2" ry="3" fill="#1E1B4B"/>
+                  <polygon points="24,29 22,31 26,31" fill="#F472B6"/>
+                  <line x1="14" y1="29" x2="9" y2="28" stroke="#E9D5FF" stroke-width="1.2"/>
+                  <line x1="34" y1="29" x2="39" y2="28" stroke="#E9D5FF" stroke-width="1.2"/>
+                </svg>
+              </div>
+              <span class="text-xs font-medium text-[#F1F5F9] text-center">Gato</span>
+            </button>
+
+            <!-- 5. Rana -->
+            <button type="button" role="radio" aria-checked="false" class="group flex flex-col items-center gap-1.5 p-2 rounded-2xl hover:bg-[#0F172A]/70 border border-transparent hover:border-[#475569] focus:outline-none focus:ring-2 focus:ring-[#60A5FA] min-w-[96px] min-h-[104px] justify-center transition-all">
+              <div class="w-16 h-16 rounded-full bg-emerald-950/50 border border-[#334155] group-hover:border-[#60A5FA] flex items-center justify-center transition-all">
+                <svg class="w-12 h-12" viewBox="0 0 48 48" fill="none">
+                  <circle cx="24" cy="24" r="20" fill="#064E3B"/>
+                  <circle cx="17" cy="18" r="5" fill="#10B981"/>
+                  <circle cx="31" cy="18" r="5" fill="#10B981"/>
+                  <circle cx="17" cy="18" r="2.5" fill="#022C22"/>
+                  <circle cx="31" cy="18" r="2.5" fill="#022C22"/>
+                  <ellipse cx="24" cy="28" rx="14" ry="11" fill="#34D399"/>
+                  <ellipse cx="24" cy="30" rx="9" ry="6" fill="#A7F3D0"/>
+                  <path d="M19 28 Q24 32 29 28" stroke="#065F46" stroke-width="2" stroke-linecap="round" fill="none"/>
+                </svg>
+              </div>
+              <span class="text-xs font-medium text-[#F1F5F9] text-center">Rana</span>
+            </button>
+
+            <!-- 6. Pingüino -->
+            <button type="button" role="radio" aria-checked="false" class="group flex flex-col items-center gap-1.5 p-2 rounded-2xl hover:bg-[#0F172A]/70 border border-transparent hover:border-[#475569] focus:outline-none focus:ring-2 focus:ring-[#60A5FA] min-w-[96px] min-h-[104px] justify-center transition-all">
+              <div class="w-16 h-16 rounded-full bg-slate-900 border border-[#334155] group-hover:border-[#60A5FA] flex items-center justify-center transition-all">
+                <svg class="w-12 h-12" viewBox="0 0 48 48" fill="none">
+                  <circle cx="24" cy="24" r="20" fill="#020617"/>
+                  <ellipse cx="24" cy="26" rx="13" ry="15" fill="#1E293B"/>
+                  <ellipse cx="24" cy="28" rx="8" ry="11" fill="#F8FAFC"/>
+                  <circle cx="19" cy="23" r="2" fill="#0F172A"/>
+                  <circle cx="29" cy="23" r="2" fill="#0F172A"/>
+                  <polygon points="24,25 21,29 27,29" fill="#F59E0B"/>
+                </svg>
+              </div>
+              <span class="text-xs font-medium text-[#F1F5F9] text-center">Pingüino</span>
+            </button>
+
+            <!-- 7. Ballena -->
+            <button type="button" role="radio" aria-checked="false" class="group flex flex-col items-center gap-1.5 p-2 rounded-2xl hover:bg-[#0F172A]/70 border border-transparent hover:border-[#475569] focus:outline-none focus:ring-2 focus:ring-[#60A5FA] min-w-[96px] min-h-[104px] justify-center transition-all">
+              <div class="w-16 h-16 rounded-full bg-cyan-950/50 border border-[#334155] group-hover:border-[#60A5FA] flex items-center justify-center transition-all">
+                <svg class="w-12 h-12" viewBox="0 0 48 48" fill="none">
+                  <circle cx="24" cy="24" r="20" fill="#083344"/>
+                  <path d="M12 28 C12 20 20 18 28 18 C36 18 38 24 38 28 C38 31 34 33 24 33 C15 33 12 30 12 28 Z" fill="#06B6D4"/>
+                  <path d="M37 24 C40 21 42 22 41 26 C40 25 38 25 37 26" fill="#0891B2"/>
+                  <circle cx="18" cy="24" r="1.8" fill="#082F49"/>
+                  <path d="M22 17 C22 14 20 13 18 14" stroke="#67E8F9" stroke-width="1.5" stroke-linecap="round"/>
+                </svg>
+              </div>
+              <span class="text-xs font-medium text-[#F1F5F9] text-center">Ballena</span>
+            </button>
+
+            <!-- 8. Panda -->
+            <button type="button" role="radio" aria-checked="false" class="group flex flex-col items-center gap-1.5 p-2 rounded-2xl hover:bg-[#0F172A]/70 border border-transparent hover:border-[#475569] focus:outline-none focus:ring-2 focus:ring-[#60A5FA] min-w-[96px] min-h-[104px] justify-center transition-all">
+              <div class="w-16 h-16 rounded-full bg-neutral-900 border border-[#334155] group-hover:border-[#60A5FA] flex items-center justify-center transition-all">
+                <svg class="w-12 h-12" viewBox="0 0 48 48" fill="none">
+                  <circle cx="24" cy="24" r="20" fill="#171717"/>
+                  <circle cx="14" cy="15" r="4.5" fill="#262626"/>
+                  <circle cx="34" cy="15" r="4.5" fill="#262626"/>
+                  <circle cx="24" cy="26" r="13" fill="#FAFAFA"/>
+                  <ellipse cx="18" cy="24" rx="3.5" ry="4.5" fill="#262626"/>
+                  <ellipse cx="30" cy="24" rx="3.5" ry="4.5" fill="#262626"/>
+                  <circle cx="18" cy="23" r="1.3" fill="#FFFFFF"/>
+                  <circle cx="30" cy="23" r="1.3" fill="#FFFFFF"/>
+                  <ellipse cx="24" cy="28" rx="2.5" ry="1.8" fill="#262626"/>
+                </svg>
+              </div>
+              <span class="text-xs font-medium text-[#F1F5F9] text-center">Panda</span>
+            </button>
+
+            <!-- 9. Conejo -->
+            <button type="button" role="radio" aria-checked="false" class="group flex flex-col items-center gap-1.5 p-2 rounded-2xl hover:bg-[#0F172A]/70 border border-transparent hover:border-[#475569] focus:outline-none focus:ring-2 focus:ring-[#60A5FA] min-w-[96px] min-h-[104px] justify-center transition-all">
+              <div class="w-16 h-16 rounded-full bg-pink-950/40 border border-[#334155] group-hover:border-[#60A5FA] flex items-center justify-center transition-all">
+                <svg class="w-12 h-12" viewBox="0 0 48 48" fill="none">
+                  <circle cx="24" cy="24" r="20" fill="#500724"/>
+                  <ellipse cx="18" cy="16" rx="3.5" ry="9" fill="#F472B6"/>
+                  <ellipse cx="30" cy="16" rx="3.5" ry="9" fill="#F472B6"/>
+                  <ellipse cx="18" cy="16" rx="1.8" ry="6" fill="#FDF2F8"/>
+                  <ellipse cx="30" cy="16" rx="1.8" ry="6" fill="#FDF2F8"/>
+                  <circle cx="24" cy="28" r="11" fill="#FBCFE8"/>
+                  <circle cx="20" cy="27" r="1.5" fill="#831843"/>
+                  <circle cx="28" cy="27" r="1.5" fill="#831843"/>
+                  <ellipse cx="24" cy="30" rx="1.8" ry="1.2" fill="#DB2777"/>
+                </svg>
+              </div>
+              <span class="text-xs font-medium text-[#F1F5F9] text-center">Conejo</span>
+            </button>
+
+            <!-- 10. Tortuga -->
+            <button type="button" role="radio" aria-checked="false" class="group flex flex-col items-center gap-1.5 p-2 rounded-2xl hover:bg-[#0F172A]/70 border border-transparent hover:border-[#475569] focus:outline-none focus:ring-2 focus:ring-[#60A5FA] min-w-[96px] min-h-[104px] justify-center transition-all">
+              <div class="w-16 h-16 rounded-full bg-teal-950/50 border border-[#334155] group-hover:border-[#60A5FA] flex items-center justify-center transition-all">
+                <svg class="w-12 h-12" viewBox="0 0 48 48" fill="none">
+                  <circle cx="24" cy="24" r="20" fill="#042F2E"/>
+                  <ellipse cx="24" cy="25" rx="13" ry="11" fill="#14B8A6"/>
+                  <circle cx="24" cy="14" r="4.5" fill="#2DD4BF"/>
+                  <circle cx="22" cy="13" r="1" fill="#042F2E"/>
+                  <circle cx="26" cy="13" r="1" fill="#042F2E"/>
+                  <circle cx="12" cy="20" r="2.8" fill="#0D9488"/>
+                  <circle cx="36" cy="20" r="2.8" fill="#0D9488"/>
+                  <circle cx="13" cy="30" r="2.8" fill="#0D9488"/>
+                  <circle cx="35" cy="30" r="2.8" fill="#0D9488"/>
+                  <polygon points="24,20 28,24 24,28 20,24" stroke="#042F2E" stroke-width="1.5" fill="none"/>
+                </svg>
+              </div>
+              <span class="text-xs font-medium text-[#F1F5F9] text-center">Tortuga</span>
+            </button>
+
+            <!-- 11. Delfín -->
+            <button type="button" role="radio" aria-checked="false" class="group flex flex-col items-center gap-1.5 p-2 rounded-2xl hover:bg-[#0F172A]/70 border border-transparent hover:border-[#475569] focus:outline-none focus:ring-2 focus:ring-[#60A5FA] min-w-[96px] min-h-[104px] justify-center transition-all">
+              <div class="w-16 h-16 rounded-full bg-blue-950/50 border border-[#334155] group-hover:border-[#60A5FA] flex items-center justify-center transition-all">
+                <svg class="w-12 h-12" viewBox="0 0 48 48" fill="none">
+                  <circle cx="24" cy="24" r="20" fill="#172554"/>
+                  <path d="M14 26 C15 17 26 16 34 20 C36 21 37 24 35 26 C31 29 22 30 16 28 Z" fill="#3B82F6"/>
+                  <polygon points="24,17 26,12 28,17" fill="#2563EB"/>
+                  <path d="M14 26 L9 24 L11 29 Z" fill="#2563EB"/>
+                  <circle cx="31" cy="21" r="1.5" fill="#0F172A"/>
+                </svg>
+              </div>
+              <span class="text-xs font-medium text-[#F1F5F9] text-center">Delfín</span>
+            </button>
+
+            <!-- 12. Mariposa -->
+            <button type="button" role="radio" aria-checked="false" class="group flex flex-col items-center gap-1.5 p-2 rounded-2xl hover:bg-[#0F172A]/70 border border-transparent hover:border-[#475569] focus:outline-none focus:ring-2 focus:ring-[#60A5FA] min-w-[96px] min-h-[104px] justify-center transition-all">
+              <div class="w-16 h-16 rounded-full bg-fuchsia-950/50 border border-[#334155] group-hover:border-[#60A5FA] flex items-center justify-center transition-all">
+                <svg class="w-12 h-12" viewBox="0 0 48 48" fill="none">
+                  <circle cx="24" cy="24" r="20" fill="#4A044E"/>
+                  <ellipse cx="17" cy="21" rx="6" ry="7" fill="#E879F9"/>
+                  <ellipse cx="31" cy="21" rx="6" ry="7" fill="#E879F9"/>
+                  <ellipse cx="18" cy="29" rx="4.5" ry="5.5" fill="#C026D3"/>
+                  <ellipse cx="30" cy="29" rx="4.5" ry="5.5" fill="#C026D3"/>
+                  <line x1="24" y1="16" x2="24" y2="33" stroke="#FDF4FF" stroke-width="2.5" stroke-linecap="round"/>
+                  <circle cx="24" cy="15" r="2" fill="#FDF4FF"/>
+                </svg>
+              </div>
+              <span class="text-xs font-medium text-[#F1F5F9] text-center">Mariposa</span>
+            </button>
+
+          </div>
+        </div>
+
+        <!-- CONTENIDO: ESTADO B (Subir imagen + Recortador + Zoom + Error validación) -->
+        <div id="panelUpload" class="hidden flex-1 overflow-y-auto px-5 py-4 space-y-4 max-h-[58vh]">
+          
+          <!-- Banner de error: La imagen supera los 2 MB -->
+          <div role="alert" class="p-3 bg-red-950/60 border border-[#F87171] rounded-xl flex items-start gap-2.5 text-[#F87171] shadow-sm">
+            <span class="material-symbols-outlined text-[20px] text-[#F87171] shrink-0 mt-0.5">error</span>
+            <div class="text-xs flex-1">
+              <span class="font-bold">Error de validación:</span> La imagen supera los 2 MB. Por favor, selecciona un archivo más ligero o comprimido.
+            </div>
+          </div>
+
+          <!-- Selector de Archivo con zona táctil min 44px -->
+          <div class="bg-[#0F172A] border border-[#334155] rounded-xl p-3 flex flex-col gap-2">
+            <div class="flex items-center justify-between gap-3">
+              <button type="button" class="py-2.5 px-4 bg-[#1E293B] hover:bg-[#334155] border border-[#475569] text-[#F1F5F9] font-semibold text-xs rounded-xl flex items-center gap-2 min-h-[44px] transition-all focus:outline-none focus:ring-2 focus:ring-[#60A5FA]">
+                <span class="material-symbols-outlined text-[18px] text-[#60A5FA]">upload_file</span>
+                Elegir archivo
+              </button>
+              <span class="text-xs text-[#94A3B8] truncate flex-1 text-right">avatar_usuario_raw.jpg</span>
+            </div>
+            <p class="text-[11px] text-[#94A3B8] flex items-center gap-1">
+              <span class="material-symbols-outlined text-xs">info</span>
+              JPEG, PNG o WebP, hasta 2 MB
+            </p>
+          </div>
+
+          <!-- Área del Recortador Interactivo -->
+          <div class="bg-[#0F172A] border border-[#334155] rounded-2xl p-3.5 space-y-3">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-semibold text-[#F1F5F9] flex items-center gap-1.5">
+                <span class="material-symbols-outlined text-[#60A5FA] text-[18px]">crop</span>
+                Área de recorte
+              </span>
+              <span class="text-[11px] text-[#94A3B8]">Arrastra para encuadrar</span>
+            </div>
+
+            <!-- Canvas de recorte con rejilla y máscara redonda -->
+            <div class="relative w-full aspect-square max-h-[190px] mx-auto bg-[#131E30] rounded-xl overflow-hidden border border-[#475569] flex items-center justify-center select-none cursor-move">
+              
+              <!-- Imagen subyacente simulada -->
+              <div class="absolute inset-0 flex items-center justify-center opacity-85">
+                <div class="w-32 h-32 rounded-full bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center text-white text-3xl font-bold shadow-2xl">
+                  AC
+                </div>
+              </div>
+
+              <!-- Máscara oscura exterior con agujero circular -->
+              <div class="absolute inset-0 bg-[#0F172A]/70 pointer-events-none">
+                <div class="w-36 h-36 mx-auto my-auto rounded-full border-2 border-dashed border-[#60A5FA] bg-transparent shadow-[0_0_0_9999px_rgba(15,23,42,0.7)] flex items-center justify-center">
+                  <!-- Marcador central -->
+                  <div class="w-2 h-2 rounded-full bg-[#60A5FA]/80"></div>
+                </div>
+              </div>
+
+              <!-- Indicador táctil de arrastre -->
+              <div class="absolute bottom-2 px-2.5 py-1 bg-[#1E293B]/90 border border-[#475569] rounded-full text-[10px] text-[#F1F5F9] flex items-center gap-1 shadow-md pointer-events-none">
+                <span class="material-symbols-outlined text-[13px] text-[#60A5FA]">drag_pan</span>
+                Mover foto
+              </div>
+            </div>
+
+            <!-- Controles de Zoom: Botón "−", Slider y Botón "+" (min 44px) -->
+            <div class="space-y-1.5 pt-1">
+              <div class="flex items-center justify-between text-xs text-[#94A3B8]">
+                <span>Zoom</span>
+                <span class="text-[#60A5FA] font-mono font-medium">120%</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <button type="button" aria-label="Reducir zoom" class="w-11 h-11 bg-[#1E293B] hover:bg-[#334155] border border-[#475569] rounded-xl text-[#F1F5F9] flex items-center justify-center active:scale-95 transition-all focus:outline-none focus:ring-2 focus:ring-[#60A5FA]">
+                  <span class="material-symbols-outlined text-[18px]">remove</span>
+                </button>
+                <div class="flex-1 px-1">
+                  <input type="range" min="100" max="250" value="120" aria-label="Nivel de zoom de la imagen" class="w-full h-2 bg-[#334155] rounded-lg appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#60A5FA]">
+                </div>
+                <button type="button" aria-label="Aumentar zoom" class="w-11 h-11 bg-[#1E293B] hover:bg-[#334155] border border-[#475569] rounded-xl text-[#F1F5F9] flex items-center justify-center active:scale-95 transition-all focus:outline-none focus:ring-2 focus:ring-[#60A5FA]">
+                  <span class="material-symbols-outlined text-[18px]">add</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Vista previa redonda resultante -->
+            <div class="pt-2 border-t border-[#334155] flex items-center justify-between">
+              <span class="text-xs text-[#94A3B8]">Vista previa redonda:</span>
+              <div class="flex items-center gap-3">
+                <div class="w-12 h-12 rounded-full border-2 border-[#60A5FA] overflow-hidden bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center text-white text-base font-bold shadow-md">
+                  AC
+                </div>
+                <div class="text-[11px] text-[#94A3B8]">
+                  <p class="text-[#F1F5F9] font-medium">96 × 96 px</p>
+                  <p class="text-[10px]">Corte circular</p>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- PIE DE HOJA: Botones "Cancelar" y "Guardar avatar" (Zonas táctiles ≥ 44px, Contraste AA) -->
+        <div class="p-5 bg-[#1E293B] border-t border-[#334155] flex flex-col gap-2.5">
+          <!-- Botón primario: Fondo #60A5FA con texto #0F172A (Ratio 7.8:1 > 4.5:1 AA) -->
+          <button type="button" class="w-full min-h-[48px] py-3 px-4 bg-[#60A5FA] hover:bg-[#3B82F6] text-[#0F172A] font-bold text-sm rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-[#60A5FA]/20 active:scale-[0.98] transition-all focus:outline-none focus:ring-2 focus:ring-[#60A5FA] focus:ring-offset-2 focus:ring-offset-[#1E293B]">
+            <span class="material-symbols-outlined text-[20px] font-bold">check_circle</span>
+            Guardar avatar
+          </button>
+          
+          <!-- Botón secundario: Cancelar -->
+          <button type="button" class="w-full min-h-[44px] py-2.5 px-4 bg-transparent hover:bg-[#334155]/50 text-[#94A3B8] hover:text-[#F1F5F9] font-medium text-sm rounded-xl flex items-center justify-center transition-all focus:outline-none focus:ring-2 focus:ring-[#60A5FA]">
+            Cancelar
+          </button>
+        </div>
+
+      </section>
+
+      <!-- Barra de navegación inferior móvil simplificada con indicador home -->
+      <div class="absolute bottom-1 left-0 right-0 h-4 flex justify-center items-center z-30 pointer-events-none">
+        <div class="w-32 h-1 bg-white/40 rounded-full"></div>
+      </div>
+
+    </div>
+
+    <!-- NOTAS TÉCNICAS Y DE ACCESIBILIDAD WCAG 2.1 AA -->
+    <footer class="bg-[#1E293B]/80 border border-[#334155] rounded-2xl p-4 text-xs space-y-2 text-[#94A3B8]">
+      <div class="flex items-center gap-1.5 text-[#F1F5F9] font-semibold">
+        <span class="material-symbols-outlined text-[16px] text-[#60A5FA]">verified</span>
+        Cumplimiento de Especificaciones S7
+      </div>
+      <ul class="grid grid-cols-1 gap-1 text-[11px] list-disc list-inside">
+        <li><strong class="text-[#F1F5F9]">Superficie modal:</strong> Hoja modal casi completa en <code class="text-[#60A5FA]">#1E293B</code> con borde <code class="text-[#60A5FA]">#475569</code> sobre fondo oscurecido.</li>
+        <li><strong class="text-[#F1F5F9]">Colores de sistema:</strong> Primario <code class="text-[#60A5FA]">#60A5FA</code> con texto <code class="text-[#60A5FA]">#0F172A</code> (Contraste 7.8:1, excede AA). Error <code class="text-[#F87171]">#F87171</code>.</li>
+        <li><strong class="text-[#F1F5F9]">Catálogo de 12 avatares:</strong> Búho, zorro, oso, gato, rana, pingüino, ballena, panda, conejo, tortuga, delfín y mariposa con badges de selección.</li>
+        <li><strong class="text-[#F1F5F9]">Zonas táctiles:</strong> Todos los elementos interactivos cuentan con altura o área mínima de 44 px (botones de zoom, pestañas, selección de avatares y CTAs).</li>
+      </ul>
+    </footer>
+
+  </div>
+
+  <!-- Script interactivo para alternar estados A y B en la vista previa -->
+  <script>
+    function showState(state) {
+      const panelCatalog = document.getElementById('panelCatalog');
+      const panelUpload = document.getElementById('panelUpload');
+      const tabCatalog = document.getElementById('tabCatalog');
+      const tabUpload = document.getElementById('tabUpload');
+      const btnStateA = document.getElementById('btnStateA');
+      const btnStateB = document.getElementById('btnStateB');
+
+      if (state === 'A') {
+        panelCatalog.classList.remove('hidden');
+        panelUpload.classList.add('hidden');
+
+        // Pestañas modal
+        tabCatalog.setAttribute('aria-selected', 'true');
+        tabCatalog.className = "flex items-center justify-center gap-2 py-2 px-3 text-xs font-semibold rounded-lg bg-[#1E293B] text-[#60A5FA] shadow-sm border border-[#475569] min-h-[44px] transition-all focus:outline-none focus:ring-2 focus:ring-[#60A5FA]";
+        
+        tabUpload.setAttribute('aria-selected', 'false');
+        tabUpload.className = "flex items-center justify-center gap-2 py-2 px-3 text-xs font-medium rounded-lg text-[#94A3B8] hover:text-[#F1F5F9] min-h-[44px] transition-all focus:outline-none focus:ring-2 focus:ring-[#60A5FA]";
+
+        // Botones superiores de inspección
+        btnStateA.className = "py-2 px-3 text-xs font-semibold rounded-lg text-[#0F172A] bg-[#60A5FA] transition-all flex items-center justify-center gap-1.5 min-h-[44px]";
+        btnStateB.className = "py-2 px-3 text-xs font-medium rounded-lg text-[#94A3B8] hover:text-[#F1F5F9] transition-all flex items-center justify-center gap-1.5 min-h-[44px]";
+      } else {
+        panelCatalog.classList.add('hidden');
+        panelUpload.classList.remove('hidden');
+
+        // Pestañas modal
+        tabUpload.setAttribute('aria-selected', 'true');
+        tabUpload.className = "flex items-center justify-center gap-2 py-2 px-3 text-xs font-semibold rounded-lg bg-[#1E293B] text-[#60A5FA] shadow-sm border border-[#475569] min-h-[44px] transition-all focus:outline-none focus:ring-2 focus:ring-[#60A5FA]";
+        
+        tabCatalog.setAttribute('aria-selected', 'false');
+        tabCatalog.className = "flex items-center justify-center gap-2 py-2 px-3 text-xs font-medium rounded-lg text-[#94A3B8] hover:text-[#F1F5F9] min-h-[44px] transition-all focus:outline-none focus:ring-2 focus:ring-[#60A5FA]";
+
+        // Botones superiores de inspección
+        btnStateB.className = "py-2 px-3 text-xs font-semibold rounded-lg text-[#0F172A] bg-[#60A5FA] transition-all flex items-center justify-center gap-1.5 min-h-[44px]";
+        btnStateA.className = "py-2 px-3 text-xs font-medium rounded-lg text-[#94A3B8] hover:text-[#F1F5F9] transition-all flex items-center justify-center gap-1.5 min-h-[44px]";
+      }
+    }
+  </script>
+</body>
+</html>

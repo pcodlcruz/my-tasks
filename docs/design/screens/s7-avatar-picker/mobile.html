@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="es" class="h-full bg-slate-900/60 font-sans antialiased">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>S7 Selector de avatar y recortador - MyTasks (Móvil)</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+          },
+          colors: {
+            primary: {
+              DEFAULT: '#1D4ED8',
+              hover: '#1E40AF',
+              light: '#EFF6FF',
+            },
+            surface: '#FFFFFF',
+            'surface-alt': '#F8FAFC',
+            border: '#CBD5E1',
+            text: '#0F172A',
+            'text-muted': '#475569',
+            error: '#B91C1C',
+            'error-surface': '#FEF2F2',
+            success: '#15803D',
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 500, 'GRAD' 0, 'opsz' 24;
+    }
+    .material-symbols-outlined.filled {
+      font-variation-settings: 'FILL' 1, 'wght' 600, 'GRAD' 0, 'opsz' 24;
+    }
+    /* Touch target guarantee */
+    .touch-target {
+      min-height: 44px;
+      min-width: 44px;
+    }
+  </style>
+</head>
+<body class="h-full overflow-hidden text-text flex flex-col justify-end relative">
+
+  <!-- FONDO DE PANTALLA PERFIL (OSCURECIDO / BACKDROP) -->
+  <div class="absolute inset-0 bg-slate-900/70 backdrop-blur-sm z-0 pointer-events-none flex flex-col items-center pt-8 px-4 opacity-40">
+    <div class="w-full max-w-sm bg-white rounded-2xl p-5 shadow-2xl border border-slate-200">
+      <div class="flex items-center gap-4 mb-4">
+        <div class="w-16 h-16 rounded-full bg-blue-700 text-white font-bold text-2xl flex items-center justify-center">AC</div>
+        <div>
+          <h2 class="text-xl font-bold text-slate-900">Ana Cruz</h2>
+          <p class="text-xs text-slate-500">ana@example.com</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- HOJA MODAL A PANTALLA CASI COMPLETA (BOTTOM SHEET) -->
+  <main class="relative z-10 w-full max-w-md mx-auto bg-surface rounded-t-[28px] shadow-2xl flex flex-col h-[94vh] max-h-[850px] border-t border-x border-slate-200/80 overflow-hidden">
+    
+    <!-- HEADER MODAL & TIRADOR DRAGGABLE -->
+    <header class="pt-3 px-5 pb-3 border-b border-border bg-surface shrink-0">
+      <!-- Tirador visual -->
+      <div class="w-12 h-1.5 bg-slate-300 rounded-full mx-auto mb-3" aria-hidden="true"></div>
+      
+      <div class="flex items-center justify-between">
+        <div>
+          <h1 class="text-xl font-bold text-slate-900 tracking-tight" id="modal-title">Elegir avatar</h1>
+          <p class="text-xs text-text-muted mt-0.5">Personaliza tu imagen en el tablero y tareas</p>
+        </div>
+        <button type="button" class="touch-target flex items-center justify-center rounded-full text-text-muted hover:text-slate-900 hover:bg-slate-100 transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2" aria-label="Cerrar selector de avatar">
+          <span class="material-symbols-outlined text-2xl">close</span>
+        </button>
+      </div>
+
+      <!-- PESTAÑAS (CATÁLOGO / SUBIR IMAGEN) -->
+      <div class="flex p-1 mt-3 bg-slate-100 rounded-xl" role="tablist" aria-label="Opciones de avatar">
+        <button id="tab-catalogo" role="tab" aria-selected="true" aria-controls="panel-catalogo" onclick="switchTab('catalogo')" class="touch-target flex-1 flex items-center justify-center gap-2 py-2 px-3 text-sm font-semibold rounded-lg bg-surface text-primary shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-primary">
+          <span class="material-symbols-outlined text-[18px]">grid_view</span>
+          <span>Catálogo</span>
+        </button>
+        <button id="tab-subir" role="tab" aria-selected="false" aria-controls="panel-subir" onclick="switchTab('subir')" class="touch-target flex-1 flex items-center justify-center gap-2 py-2 px-3 text-sm font-medium rounded-lg text-text-muted hover:text-slate-900 transition-all focus:outline-none focus:ring-2 focus:ring-primary">
+          <span class="material-symbols-outlined text-[18px]">upload</span>
+          <span>Subir imagen</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- CONTENIDO CON SCROLL -->
+    <div class="flex-1 overflow-y-auto px-5 py-4">
+      
+      <!-- ============================================== -->
+      <!-- ESTADO (A): CATÁLOGO DE 12 AVATARES EN 3 COLUMNAS -->
+      <!-- ============================================== -->
+      <section id="panel-catalogo" role="tabpanel" aria-labelledby="tab-catalogo" class="block space-y-4">
+        <div class="flex items-center justify-between">
+          <p class="text-xs font-semibold uppercase tracking-wider text-text-muted">Ilustraciones disponibles (12)</p>
+          <span class="text-xs text-primary font-medium bg-primary-light px-2.5 py-0.5 rounded-full border border-blue-200">Seleccionado: Zorro</span>
+        </div>
+
+        <!-- Rejilla de 12 avatares de 64px en 3 columnas -->
+        <fieldset class="grid grid-cols-3 gap-y-4 gap-x-3 pt-1 pb-2">
+          <legend class="sr-only">Selecciona un avatar de animal o naturaleza</legend>
+
+          <!-- 1. Búho -->
+          <label class="group cursor-pointer flex flex-col items-center text-center p-2 rounded-2xl hover:bg-slate-50 transition-colors">
+            <input type="radio" name="avatar_choice" value="buho" class="sr-only peer">
+            <div class="relative w-16 h-16 rounded-full bg-slate-100 border-2 border-slate-200 flex items-center justify-center transition-all peer-checked:border-primary peer-checked:ring-4 peer-checked:ring-primary/20 peer-checked:bg-blue-50 group-focus-within:ring-2 group-focus-within:ring-primary">
+              <!-- Avatar SVG Búho -->
+              <svg viewBox="0 0 64 64" class="w-11 h-11" fill="none">
+                <circle cx="32" cy="32" r="28" fill="#F1F5F9"/>
+                <path d="M22 18L26 24H38L42 18V28C42 37 37.5 45 32 45C26.5 45 22 37 22 28V18Z" fill="#64748B"/>
+                <circle cx="26" cy="30" r="6" fill="#FFFFFF"/>
+                <circle cx="38" cy="30" r="6" fill="#FFFFFF"/>
+                <circle cx="26" cy="30" r="2.5" fill="#0F172A"/>
+                <circle cx="38" cy="30" r="2.5" fill="#0F172A"/>
+                <path d="M30 35L32 38L34 35H30Z" fill="#F59E0B"/>
+                <path d="M26 40C28 42 36 42 38 40" stroke="#475569" stroke-width="2" stroke-linecap="round"/>
+              </svg>
+              <div class="hidden peer-checked:flex absolute -top-1 -right-1 w-6 h-6 bg-primary text-white rounded-full items-center justify-center shadow-md">
+                <span class="material-symbols-outlined text-[16px] font-bold">check</span>
+              </div>
+            </div>
+            <span class="mt-2 text-xs font-medium text-slate-700 peer-checked:text-primary peer-checked:font-bold">Búho</span>
+          </label>
+
+          <!-- 2. Zorro (SELECCIONADO POR DEFECTO) -->
+          <label class="group cursor-pointer flex flex-col items-center text-center p-2 rounded-2xl hover:bg-slate-50 transition-colors">
+            <input type="radio" name="avatar_choice" value="zorro" checked class="sr-only peer">
+            <div class="relative w-16 h-16 rounded-full bg-blue-50 border-[3px] border-primary flex items-center justify-center shadow-sm transition-all peer-checked:border-primary peer-checked:ring-4 peer-checked:ring-primary/20 peer-checked:bg-blue-50 group-focus-within:ring-2 group-focus-within:ring-primary">
+              <!-- Avatar SVG Zorro -->
+              <svg viewBox="0 0 64 64" class="w-11 h-11" fill="none">
+                <circle cx="32" cy="32" r="28" fill="#FFF7ED"/>
+                <!-- Orejas -->
+                <polygon points="16,14 26,28 14,28" fill="#EA580C"/>
+                <polygon points="48,14 50,28 38,28" fill="#EA580C"/>
+                <polygon points="19,19 24,26 17,26" fill="#FED7AA"/>
+                <polygon points="45,19 47,26 40,26" fill="#FED7AA"/>
+                <!-- Cabeza -->
+                <polygon points="14,26 50,26 32,50" fill="#EA580C"/>
+                <!-- Máscara blanca -->
+                <polygon points="14,26 26,38 32,32 38,38 50,26 32,50" fill="#FFFFFF"/>
+                <!-- Ojos y Nariz -->
+                <circle cx="25" cy="31" r="2.5" fill="#0F172A"/>
+                <circle cx="39" cy="31" r="2.5" fill="#0F172A"/>
+                <polygon points="30,47 34,47 32,50" fill="#0F172A"/>
+              </svg>
+              <!-- Check badge -->
+              <div class="flex absolute -top-1 -right-1 w-6 h-6 bg-primary text-white rounded-full items-center justify-center shadow-md border-2 border-white">
+                <span class="material-symbols-outlined text-[16px] font-bold">check</span>
+              </div>
+            </div>
+            <span class="mt-2 text-xs font-bold text-primary">Zorro</span>
+          </label>
+
+          <!-- 3. Oso -->
+          <label class="group cursor-pointer flex flex-col items-center text-center p-2 rounded-2xl hover:bg-slate-50 transition-colors">
+            <input type="radio" name="avatar_choice" value="oso" class="sr-only peer">
+            <div class="relative w-16 h-16 rounded-full bg-slate-100 border-2 border-slate-200 flex items-center justify-center transition-all peer-checked:border-primary peer-checked:ring-4 peer-checked:ring-primary/20 peer-checked:bg-blue-50 group-focus-within:ring-2 group-focus-within:ring-primary">
+              <!-- Avatar SVG Oso -->
+              <svg viewBox="0 0 64 64" class="w-11 h-11" fill="none">
+                <circle cx="32" cy="32" r="28" fill="#FEF3C7"/>
+                <circle cx="19" cy="20" r="7" fill="#78350F"/>
+                <circle cx="45" cy="20" r="7" fill="#78350F"/>
+                <circle cx="19" cy="20" r="4" fill="#B45309"/>
+                <circle cx="45" cy="20" r="4" fill="#B45309"/>
+                <circle cx="32" cy="35" r="18" fill="#92400E"/>
+                <ellipse cx="32" cy="39" rx="9" ry="7" fill="#FDE68A"/>
+                <circle cx="26" cy="31" r="2" fill="#FFFFFF"/>
+                <circle cx="38" cy="31" r="2" fill="#FFFFFF"/>
+                <ellipse cx="32" cy="37" rx="3.5" ry="2.5" fill="#451A03"/>
+              </svg>
+              <div class="hidden peer-checked:flex absolute -top-1 -right-1 w-6 h-6 bg-primary text-white rounded-full items-center justify-center shadow-md">
+                <span class="material-symbols-outlined text-[16px] font-bold">check</span>
+              </div>
+            </div>
+            <span class="mt-2 text-xs font-medium text-slate-700 peer-checked:text-primary peer-checked:font-bold">Oso</span>
+          </label>
+
+          <!-- 4. Gato -->
+          <label class="group cursor-pointer flex flex-col items-center text-center p-2 rounded-2xl hover:bg-slate-50 transition-colors">
+            <input type="radio" name="avatar_choice" value="gato" class="sr-only peer">
+            <div class="relative w-16 h-16 rounded-full bg-slate-100 border-2 border-slate-200 flex items-center justify-center transition-all peer-checked:border-primary peer-checked:ring-4 peer-checked:ring-primary/20 peer-checked:bg-blue-50 group-focus-within:ring-2 group-focus-within:ring-primary">
+              <!-- Avatar SVG Gato -->
+              <svg viewBox="0 0 64 64" class="w-11 h-11" fill="none">
+                <circle cx="32" cy="32" r="28" fill="#F8FAFC"/>
+                <polygon points="18,17 28,29 17,31" fill="#475569"/>
+                <polygon points="46,17 47,31 36,29" fill="#475569"/>
+                <polygon points="20,21 26,28 19,29" fill="#F472B6"/>
+                <polygon points="44,21 45,29 38,28" fill="#F472B6"/>
+                <circle cx="32" cy="36" r="16" fill="#64748B"/>
+                <circle cx="26" cy="34" r="2.5" fill="#FDE047"/>
+                <circle cx="38" cy="34" r="2.5" fill="#FDE047"/>
+                <polygon points="30,40 34,40 32,42" fill="#F43F5E"/>
+              </svg>
+              <div class="hidden peer-checked:flex absolute -top-1 -right-1 w-6 h-6 bg-primary text-white rounded-full items-center justify-center shadow-md">
+                <span class="material-symbols-outlined text-[16px] font-bold">check</span>
+              </div>
+            </div>
+            <span class="mt-2 text-xs font-medium text-slate-700 peer-checked:text-primary peer-checked:font-bold">Gato</span>
+          </label>
+
+          <!-- 5. Rana -->
+          <label class="group cursor-pointer flex flex-col items-center text-center p-2 rounded-2xl hover:bg-slate-50 transition-colors">
+            <input type="radio" name="avatar_choice" value="rana" class="sr-only peer">
+            <div class="relative w-16 h-16 rounded-full bg-slate-100 border-2 border-slate-200 flex items-center justify-center transition-all peer-checked:border-primary peer-checked:ring-4 peer-checked:ring-primary/20 peer-checked:bg-blue-50 group-focus-within:ring-2 group-focus-within:ring-primary">
+              <!-- Avatar SVG Rana -->
+              <svg viewBox="0 0 64 64" class="w-11 h-11" fill="none">
+                <circle cx="32" cy="32" r="28" fill="#F0FDF4"/>
+                <circle cx="21" cy="22" r="7" fill="#16A34A"/>
+                <circle cx="43" cy="22" r="7" fill="#16A34A"/>
+                <circle cx="21" cy="21" r="4" fill="#FFFFFF"/>
+                <circle cx="43" cy="21" r="4" fill="#FFFFFF"/>
+                <circle cx="21" cy="21" r="2" fill="#0F172A"/>
+                <circle cx="43" cy="21" r="2" fill="#0F172A"/>
+                <ellipse cx="32" cy="36" rx="19" ry="14" fill="#22C55E"/>
+                <path d="M25 40Q32 46 39 40" stroke="#14532D" stroke-width="2" stroke-linecap="round"/>
+              </svg>
+              <div class="hidden peer-checked:flex absolute -top-1 -right-1 w-6 h-6 bg-primary text-white rounded-full items-center justify-center shadow-md">
+                <span class="material-symbols-outlined text-[16px] font-bold">check</span>
+              </div>
+            </div>
+            <span class="mt-2 text-xs font-medium text-slate-700 peer-checked:text-primary peer-checked:font-bold">Rana</span>
+          </label>
+
+          <!-- 6. Pingüino -->
+          <label class="group cursor-pointer flex flex-col items-center text-center p-2 rounded-2xl hover:bg-slate-50 transition-colors">
+            <input type="radio" name="avatar_choice" value="pinguino" class="sr-only peer">
+            <div class="relative w-16 h-16 rounded-full bg-slate-100 border-2 border-slate-200 flex items-center justify-center transition-all peer-checked:border-primary peer-checked:ring-4 peer-checked:ring-primary/20 peer-checked:bg-blue-50 group-focus-within:ring-2 group-focus-within:ring-primary">
+              <!-- Avatar SVG Pingüino -->
+              <svg viewBox="0 0 64 64" class="w-11 h-11" fill="none">
+                <circle cx="32" cy="32" r="28" fill="#EFF6FF"/>
+                <ellipse cx="32" cy="34" rx="16" ry="19" fill="#0F172A"/>
+                <ellipse cx="32" cy="36" rx="11" ry="14" fill="#FFFFFF"/>
+                <circle cx="27" cy="28" r="2" fill="#0F172A"/>
+                <circle cx="37" cy="28" r="2" fill="#0F172A"/>
+                <polygon points="29,32 35,32 32,37" fill="#F97316"/>
+              </svg>
+              <div class="hidden peer-checked:flex absolute -top-1 -right-1 w-6 h-6 bg-primary text-white rounded-full items-center justify-center shadow-md">
+                <span class="material-symbols-outlined text-[16px] font-bold">check</span>
+              </div>
+            </div>
+            <span class="mt-2 text-xs font-medium text-slate-700 peer-checked:text-primary peer-checked:font-bold">Pingüino</span>
+          </label>
+
+          <!-- 7. Ballena -->
+          <label class="group cursor-pointer flex flex-col items-center text-center p-2 rounded-2xl hover:bg-slate-50 transition-colors">
+            <input type="radio" name="avatar_choice" value="ballena" class="sr-only peer">
+            <div class="relative w-16 h-16 rounded-full bg-slate-100 border-2 border-slate-200 flex items-center justify-center transition-all peer-checked:border-primary peer-checked:ring-4 peer-checked:ring-primary/20 peer-checked:bg-blue-50 group-focus-within:ring-2 group-focus-within:ring-primary">
+              <!-- Avatar SVG Ballena -->
+              <svg viewBox="0 0 64 64" class="w-11 h-11" fill="none">
+                <circle cx="32" cy="32" r="28" fill="#E0F2FE"/>
+                <path d="M30 16Q30 11 26 12M32 15V9M34 16Q34 11 38 12" stroke="#0284C7" stroke-width="2" stroke-linecap="round"/>
+                <path d="M16 34C16 26 23 20 34 20C44 20 48 27 48 34C48 40 40 43 32 43C22 43 16 38 16 34Z" fill="#0284C7"/>
+                <path d="M18 35C18 41 24 43 32 43C40 43 46 39 46 35H18Z" fill="#BAE6FD"/>
+                <circle cx="24" cy="30" r="2" fill="#0F172A"/>
+                <path d="M48 30L53 25V35L48 30Z" fill="#0284C7"/>
+              </svg>
+              <div class="hidden peer-checked:flex absolute -top-1 -right-1 w-6 h-6 bg-primary text-white rounded-full items-center justify-center shadow-md">
+                <span class="material-symbols-outlined text-[16px] font-bold">check</span>
+              </div>
+            </div>
+            <span class="mt-2 text-xs font-medium text-slate-700 peer-checked:text-primary peer-checked:font-bold">Ballena</span>
+          </label>
+
+          <!-- 8. Panda -->
+          <label class="group cursor-pointer flex flex-col items-center text-center p-2 rounded-2xl hover:bg-slate-50 transition-colors">
+            <input type="radio" name="avatar_choice" value="panda" class="sr-only peer">
+            <div class="relative w-16 h-16 rounded-full bg-slate-100 border-2 border-slate-200 flex items-center justify-center transition-all peer-checked:border-primary peer-checked:ring-4 peer-checked:ring-primary/20 peer-checked:bg-blue-50 group-focus-within:ring-2 group-focus-within:ring-primary">
+              <!-- Avatar SVG Panda -->
+              <svg viewBox="0 0 64 64" class="w-11 h-11" fill="none">
+                <circle cx="32" cy="32" r="28" fill="#F1F5F9"/>
+                <circle cx="19" cy="19" r="6" fill="#0F172A"/>
+                <circle cx="45" cy="19" r="6" fill="#0F172A"/>
+                <circle cx="32" cy="34" r="17" fill="#FFFFFF" stroke="#E2E8F0" stroke-width="1.5"/>
+                <ellipse cx="25" cy="31" rx="4.5" ry="3.5" transform="rotate(-20 25 31)" fill="#0F172A"/>
+                <ellipse cx="39" cy="31" rx="4.5" ry="3.5" transform="rotate(20 39 31)" fill="#0F172A"/>
+                <circle cx="26" cy="31" r="1.5" fill="#FFFFFF"/>
+                <circle cx="38" cy="31" r="1.5" fill="#FFFFFF"/>
+                <ellipse cx="32" cy="38" rx="3" ry="2" fill="#0F172A"/>
+              </svg>
+              <div class="hidden peer-checked:flex absolute -top-1 -right-1 w-6 h-6 bg-primary text-white rounded-full items-center justify-center shadow-md">
+                <span class="material-symbols-outlined text-[16px] font-bold">check</span>
+              </div>
+            </div>
+            <span class="mt-2 text-xs font-medium text-slate-700 peer-checked:text-primary peer-checked:font-bold">Panda</span>
+          </label>
+
+          <!-- 9. Conejo -->
+          <label class="group cursor-pointer flex flex-col items-center text-center p-2 rounded-2xl hover:bg-slate-50 transition-colors">
+            <input type="radio" name="avatar_choice" value="conejo" class="sr-only peer">
+            <div class="relative w-16 h-16 rounded-full bg-slate-100 border-2 border-slate-200 flex items-center justify-center transition-all peer-checked:border-primary peer-checked:ring-4 peer-checked:ring-primary/20 peer-checked:bg-blue-50 group-focus-within:ring-2 group-focus-within:ring-primary">
+              <!-- Avatar SVG Conejo -->
+              <svg viewBox="0 0 64 64" class="w-11 h-11" fill="none">
+                <circle cx="32" cy="32" r="28" fill="#FDF2F8"/>
+                <ellipse cx="26" cy="19" rx="4" ry="11" fill="#E2E8F0"/>
+                <ellipse cx="38" cy="19" rx="4" ry="11" fill="#E2E8F0"/>
+                <ellipse cx="26" cy="19" rx="2" ry="7" fill="#F472B6"/>
+                <ellipse cx="38" cy="19" rx="2" ry="7" fill="#F472B6"/>
+                <circle cx="32" cy="37" r="14" fill="#FFFFFF" stroke="#E2E8F0" stroke-width="1.5"/>
+                <circle cx="27" cy="34" r="2" fill="#0F172A"/>
+                <circle cx="37" cy="34" r="2" fill="#0F172A"/>
+                <polygon points="30,39 34,39 32,41" fill="#FB7185"/>
+              </svg>
+              <div class="hidden peer-checked:flex absolute -top-1 -right-1 w-6 h-6 bg-primary text-white rounded-full items-center justify-center shadow-md">
+                <span class="material-symbols-outlined text-[16px] font-bold">check</span>
+              </div>
+            </div>
+            <span class="mt-2 text-xs font-medium text-slate-700 peer-checked:text-primary peer-checked:font-bold">Conejo</span>
+          </label>
+
+          <!-- 10. Tortuga -->
+          <label class="group cursor-pointer flex flex-col items-center text-center p-2 rounded-2xl hover:bg-slate-50 transition-colors">
+            <input type="radio" name="avatar_choice" value="tortuga" class="sr-only peer">
+            <div class="relative w-16 h-16 rounded-full bg-slate-100 border-2 border-slate-200 flex items-center justify-center transition-all peer-checked:border-primary peer-checked:ring-4 peer-checked:ring-primary/20 peer-checked:bg-blue-50 group-focus-within:ring-2 group-focus-within:ring-primary">
+              <!-- Avatar SVG Tortuga -->
+              <svg viewBox="0 0 64 64" class="w-11 h-11" fill="none">
+                <circle cx="32" cy="32" r="28" fill="#ECFDF5"/>
+                <circle cx="32" cy="18" r="6" fill="#10B981"/>
+                <circle cx="17" cy="27" r="4.5" fill="#10B981"/>
+                <circle cx="47" cy="27" r="4.5" fill="#10B981"/>
+                <circle cx="20" cy="42" r="4" fill="#10B981"/>
+                <circle cx="44" cy="42" r="4" fill="#10B981"/>
+                <circle cx="32" cy="34" r="14" fill="#047857"/>
+                <circle cx="32" cy="34" r="8" fill="#059669" stroke="#A7F3D0" stroke-width="1.5"/>
+                <circle cx="30" cy="17" r="1.5" fill="#064E3B"/>
+                <circle cx="34" cy="17" r="1.5" fill="#064E3B"/>
+              </svg>
+              <div class="hidden peer-checked:flex absolute -top-1 -right-1 w-6 h-6 bg-primary text-white rounded-full items-center justify-center shadow-md">
+                <span class="material-symbols-outlined text-[16px] font-bold">check</span>
+              </div>
+            </div>
+            <span class="mt-2 text-xs font-medium text-slate-700 peer-checked:text-primary peer-checked:font-bold">Tortuga</span>
+          </label>
+
+          <!-- 11. Delfín -->
+          <label class="group cursor-pointer flex flex-col items-center text-center p-2 rounded-2xl hover:bg-slate-50 transition-colors">
+            <input type="radio" name="avatar_choice" value="delfin" class="sr-only peer">
+            <div class="relative w-16 h-16 rounded-full bg-slate-100 border-2 border-slate-200 flex items-center justify-center transition-all peer-checked:border-primary peer-checked:ring-4 peer-checked:ring-primary/20 peer-checked:bg-blue-50 group-focus-within:ring-2 group-focus-within:ring-primary">
+              <!-- Avatar SVG Delfín -->
+              <svg viewBox="0 0 64 64" class="w-11 h-11" fill="none">
+                <circle cx="32" cy="32" r="28" fill="#F0F9FF"/>
+                <path d="M18 36C18 24 30 18 42 22C46 23 48 26 44 28C38 31 34 32 30 42C24 44 19 41 18 36Z" fill="#0284C7"/>
+                <path d="M34 21L37 16L39 21H34Z" fill="#0369A1"/>
+                <circle cx="26" cy="27" r="2" fill="#FFFFFF"/>
+                <circle cx="26" cy="27" r="1" fill="#0C4A6E"/>
+                <path d="M18 38Q24 38 28 34" stroke="#E0F2FE" stroke-width="2" stroke-linecap="round"/>
+              </svg>
+              <div class="hidden peer-checked:flex absolute -top-1 -right-1 w-6 h-6 bg-primary text-white rounded-full items-center justify-center shadow-md">
+                <span class="material-symbols-outlined text-[16px] font-bold">check</span>
+              </div>
+            </div>
+            <span class="mt-2 text-xs font-medium text-slate-700 peer-checked:text-primary peer-checked:font-bold">Delfín</span>
+          </label>
+
+          <!-- 12. Mariposa -->
+          <label class="group cursor-pointer flex flex-col items-center text-center p-2 rounded-2xl hover:bg-slate-50 transition-colors">
+            <input type="radio" name="avatar_choice" value="mariposa" class="sr-only peer">
+            <div class="relative w-16 h-16 rounded-full bg-slate-100 border-2 border-slate-200 flex items-center justify-center transition-all peer-checked:border-primary peer-checked:ring-4 peer-checked:ring-primary/20 peer-checked:bg-blue-50 group-focus-within:ring-2 group-focus-within:ring-primary">
+              <!-- Avatar SVG Mariposa -->
+              <svg viewBox="0 0 64 64" class="w-11 h-11" fill="none">
+                <circle cx="32" cy="32" r="28" fill="#FAF5FF"/>
+                <ellipse cx="23" cy="25" rx="9" ry="8" fill="#A855F7"/>
+                <ellipse cx="41" cy="25" rx="9" ry="8" fill="#A855F7"/>
+                <ellipse cx="25" cy="38" rx="7" ry="6" fill="#C084FC"/>
+                <ellipse cx="39" cy="38" rx="7" ry="6" fill="#C084FC"/>
+                <circle cx="23" cy="25" r="3" fill="#F3E8FF"/>
+                <circle cx="41" cy="25" r="3" fill="#F3E8FF"/>
+                <ellipse cx="32" cy="32" rx="2.5" ry="12" fill="#581C87"/>
+                <path d="M31 20Q28 16 26 17M33 20Q36 16 38 17" stroke="#581C87" stroke-width="1.5" stroke-linecap="round"/>
+              </svg>
+              <div class="hidden peer-checked:flex absolute -top-1 -right-1 w-6 h-6 bg-primary text-white rounded-full items-center justify-center shadow-md">
+                <span class="material-symbols-outlined text-[16px] font-bold">check</span>
+              </div>
+            </div>
+            <span class="mt-2 text-xs font-medium text-slate-700 peer-checked:text-primary peer-checked:font-bold">Mariposa</span>
+          </label>
+        </fieldset>
+      </section>
+
+      <!-- ============================================== -->
+      <!-- ESTADO (B): SUBIR IMAGEN & RECORTADOR          -->
+      <!-- ============================================== -->
+      <section id="panel-subir" role="tabpanel" aria-labelledby="tab-subir" class="hidden space-y-4">
+        
+        <!-- Selector de archivo -->
+        <div class="border-2 border-dashed border-border hover:border-primary rounded-2xl p-4 bg-slate-50/70 text-center transition-colors">
+          <input type="file" id="file-upload" class="sr-only" accept="image/jpeg,image/png,image/webp">
+          <label for="file-upload" class="cursor-pointer flex flex-col items-center">
+            <div class="w-11 h-11 rounded-full bg-blue-100 text-primary flex items-center justify-center mb-2">
+              <span class="material-symbols-outlined text-2xl">add_photo_alternate</span>
+            </div>
+            <span class="touch-target inline-flex items-center justify-center px-4 py-2 rounded-lg bg-surface border border-border text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-100 hover:text-slate-900 transition-colors">
+              Elegir archivo
+            </span>
+            <p class="mt-2 text-xs text-text-muted">JPEG, PNG o WebP, hasta 2 MB</p>
+          </label>
+        </div>
+
+        <!-- Banner de Error accesible (supera 2 MB) -->
+        <div class="flex items-start gap-2.5 p-3 rounded-xl bg-error-surface border border-red-200 text-error" role="alert">
+          <span class="material-symbols-outlined text-lg shrink-0 text-error mt-0.5" aria-hidden="true">error</span>
+          <div class="text-xs">
+            <span class="font-bold">La imagen supera los 2 MB.</span>
+            <span class="block text-slate-600 mt-0.5">El tamaño máximo permitido es 2 MB. Por favor elige otro archivo o redúcelo.</span>
+          </div>
+        </div>
+
+        <!-- RECORTADOR INTERACTIVO CON CUADRÍCULA (SVG VECTORIAL PURO) -->
+        <div class="space-y-3 bg-slate-50 p-3.5 rounded-2xl border border-slate-200">
+          <div class="flex items-center justify-between">
+            <label class="text-xs font-bold text-slate-800 uppercase tracking-wide flex items-center gap-1.5">
+              <span class="material-symbols-outlined text-base text-primary">crop</span>
+              Área de recorte
+            </label>
+            <span class="text-[11px] text-text-muted">Arrastra o haz zoom</span>
+          </div>
+
+          <!-- Lienzo de recorte con visor cuadrado y máscara circular -->
+          <div class="relative w-full aspect-square max-w-[240px] mx-auto bg-slate-900 rounded-xl overflow-hidden shadow-inner flex items-center justify-center select-none cursor-move group touch-none" style="touch-action: none;" aria-label="Vista interactiva de recorte">
+            <!-- Gráfico ilustrado de composición neutro (montaña geométrica abstracta SVG) -->
+            <svg viewBox="0 0 300 300" class="w-full h-full object-cover scale-110">
+              <defs>
+                <linearGradient id="skyGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#38BDF8"/>
+                  <stop offset="60%" stop-color="#BAE6FD"/>
+                  <stop offset="100%" stop-color="#FEF08A"/>
+                </linearGradient>
+                <linearGradient id="m1" x1="0" y1="0" x2="1" y2="1">
+                  <stop offset="0%" stop-color="#4F46E5"/>
+                  <stop offset="100%" stop-color="#312E81"/>
+                </linearGradient>
+                <linearGradient id="m2" x1="0" y1="0" x2="1" y2="1">
+                  <stop offset="0%" stop-color="#2563EB"/>
+                  <stop offset="100%" stop-color="#1E3A8A"/>
+                </linearGradient>
+              </defs>
+              <rect width="300" height="300" fill="url(#skyGrad)"/>
+              <circle cx="210" cy="90" r="34" fill="#FDE047" opacity="0.9"/>
+              <!-- Montañas -->
+              <polygon points="40,260 140,110 240,260" fill="url(#m1)"/>
+              <polygon points="120,260 210,140 290,260" fill="url(#m2)"/>
+              <polygon points="0,270 90,170 180,270" fill="#4338CA"/>
+              <!-- Base verde bosque -->
+              <rect y="250" width="300" height="50" fill="#065F46"/>
+            </svg>
+            
+            <!-- Cuadrícula y guía del recorte circular con máscara oscura -->
+            <div class="absolute inset-4 border-2 border-white/90 rounded-full shadow-[0_0_0_9999px_rgba(15,23,42,0.65)] pointer-events-none">
+              <!-- Guías de tercio sutiles -->
+              <div class="w-full h-full grid grid-cols-3 grid-rows-3 opacity-40">
+                <div class="border-r border-b border-white"></div>
+                <div class="border-r border-b border-white"></div>
+                <div class="border-b border-white"></div>
+                <div class="border-r border-b border-white"></div>
+                <div class="border-r border-b border-white"></div>
+                <div class="border-b border-white"></div>
+                <div class="border-r border-white"></div>
+                <div class="border-r border-white"></div>
+                <div></div>
+              </div>
+            </div>
+
+            <!-- Manillas de control táctil de esquinas -->
+            <div class="absolute top-4 left-4 w-3.5 h-3.5 border-t-2 border-l-2 border-primary bg-white shadow-sm pointer-events-none"></div>
+            <div class="absolute top-4 right-4 w-3.5 h-3.5 border-t-2 border-r-2 border-primary bg-white shadow-sm pointer-events-none"></div>
+            <div class="absolute bottom-4 left-4 w-3.5 h-3.5 border-b-2 border-l-2 border-primary bg-white shadow-sm pointer-events-none"></div>
+            <div class="absolute bottom-4 right-4 w-3.5 h-3.5 border-b-2 border-r-2 border-primary bg-white shadow-sm pointer-events-none"></div>
+
+            <div class="absolute bottom-2 left-2 bg-black/60 backdrop-blur-sm text-white px-2 py-0.5 rounded text-[10px] font-mono pointer-events-none">
+              1:1 • Cuadrado
+            </div>
+          </div>
+
+          <!-- CONTROLES DE ZOOM ACCESIBLE ("−" y "+") -->
+          <div class="pt-1 flex items-center justify-between gap-3">
+            <button type="button" class="touch-target w-11 h-11 rounded-xl bg-surface border border-border flex items-center justify-center text-slate-700 hover:bg-slate-100 hover:text-slate-900 active:scale-95 transition-all focus:outline-none focus:ring-2 focus:ring-primary shadow-sm" aria-label="Reducir zoom (menos)">
+              <span class="text-xl font-bold leading-none select-none">−</span>
+            </button>
+
+            <!-- Slider de zoom -->
+            <div class="flex-1 flex flex-col gap-1">
+              <div class="flex justify-between text-[11px] font-medium text-text-muted">
+                <span>Zoom</span>
+                <span class="font-mono text-slate-800">125%</span>
+              </div>
+              <input type="range" min="100" max="250" value="125" class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-primary" aria-label="Nivel de aumento de zoom">
+            </div>
+
+            <button type="button" class="touch-target w-11 h-11 rounded-xl bg-surface border border-border flex items-center justify-center text-slate-700 hover:bg-slate-100 hover:text-slate-900 active:scale-95 transition-all focus:outline-none focus:ring-2 focus:ring-primary shadow-sm" aria-label="Aumentar zoom (más)">
+              <span class="text-xl font-bold leading-none select-none">+</span>
+            </button>
+          </div>
+
+          <!-- VISTA PREVIA REDONDA DE 96 PX (RESULTADO EXACTO) -->
+          <div class="pt-3 border-t border-slate-200 flex items-center justify-between bg-surface p-3 rounded-xl border">
+            <div>
+              <p class="text-xs font-bold text-slate-900">Vista previa redonda</p>
+              <p class="text-[11px] text-text-muted">Resultado final (96 px)</p>
+              <div class="mt-1 flex items-center gap-1.5 text-[11px] text-success font-medium">
+                <span class="material-symbols-outlined text-[14px]">check_circle</span>
+                <span>Proporción válida 1:1</span>
+              </div>
+            </div>
+
+            <!-- Avatar circular 96px x 96px exacto -->
+            <div class="w-24 h-24 rounded-full border-2 border-primary p-0.5 bg-surface shadow-md shrink-0">
+              <div class="w-full h-full rounded-full overflow-hidden bg-slate-100 flex items-center justify-center">
+                <svg viewBox="0 0 200 200" class="w-full h-full object-cover scale-125">
+                  <defs>
+                    <linearGradient id="skyGradPrev" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stop-color="#38BDF8"/>
+                      <stop offset="60%" stop-color="#BAE6FD"/>
+                      <stop offset="100%" stop-color="#FEF08A"/>
+                    </linearGradient>
+                  </defs>
+                  <rect width="200" height="200" fill="url(#skyGradPrev)"/>
+                  <circle cx="140" cy="60" r="24" fill="#FDE047"/>
+                  <polygon points="20,180 90,70 170,180" fill="#4F46E5"/>
+                  <polygon points="80,180 150,90 200,180" fill="#2563EB"/>
+                  <rect y="170" width="200" height="30" fill="#065F46"/>
+                </svg>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </section>
+
+    </div>
+
+    <!-- FOOTER FIJO CON BOTONES ACCESIBLES (≥44px TOUCH TARGETS) -->
+    <footer class="p-4 border-t border-border bg-surface shrink-0 flex items-center gap-3">
+      <button type="button" class="touch-target flex-1 py-3 px-4 rounded-xl border border-border bg-surface text-sm font-semibold text-slate-700 hover:bg-slate-100 hover:text-slate-900 active:scale-[0.98] transition-all focus:outline-none focus:ring-2 focus:ring-slate-400">
+        Cancelar
+      </button>
+      <button type="button" class="touch-target flex-1 py-3 px-4 rounded-xl bg-primary text-sm font-semibold text-white shadow-sm hover:bg-primary-hover active:scale-[0.98] transition-all focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 flex items-center justify-center gap-1.5">
+        <span class="material-symbols-outlined text-[18px]">check</span>
+        <span>Guardar avatar</span>
+      </button>
+    </footer>
+
+  </main>
+
+  <!-- INTERACCIÓN SIMPLE ENTRE PESTAÑAS -->
+  <script>
+    function switchTab(tab) {
+      const panelCat = document.getElementById('panel-catalogo');
+      const panelSub = document.getElementById('panel-subir');
+      const tabCat = document.getElementById('tab-catalogo');
+      const tabSub = document.getElementById('tab-subir');
+      const modalTitle = document.getElementById('modal-title');
+
+      if (tab === 'catalogo') {
+        panelCat.classList.remove('hidden');
+        panelSub.classList.add('hidden');
+        
+        tabCat.classList.add('bg-surface', 'text-primary', 'shadow-sm', 'font-semibold');
+        tabCat.classList.remove('text-text-muted', 'font-medium');
+        tabCat.setAttribute('aria-selected', 'true');
+
+        tabSub.classList.remove('bg-surface', 'text-primary', 'shadow-sm', 'font-semibold');
+        tabSub.classList.add('text-text-muted', 'font-medium');
+        tabSub.setAttribute('aria-selected', 'false');
+
+        modalTitle.textContent = 'Elegir avatar';
+      } else {
+        panelCat.classList.add('hidden');
+        panelSub.classList.remove('hidden');
+
+        tabSub.classList.add('bg-surface', 'text-primary', 'shadow-sm', 'font-semibold');
+        tabSub.classList.remove('text-text-muted', 'font-medium');
+        tabSub.setAttribute('aria-selected', 'true');
+
+        tabCat.classList.remove('bg-surface', 'text-primary', 'shadow-sm', 'font-semibold');
+        tabCat.classList.add('text-text-muted', 'font-medium');
+        tabCat.setAttribute('aria-selected', 'false');
+
+        modalTitle.textContent = 'Subir y recortar';
+      }
+    }
+  </script>
+</body>
+</html>

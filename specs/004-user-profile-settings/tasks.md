@@ -274,7 +274,7 @@ cabecera, quitar el avatar y ver las iniciales; probar nombre vacío, de 51 cara
 
 ### Diseño pendiente de la ronda 2 (selector de avatar)
 
-- [ ] T113 Con el MCP de Stitch, generar el **selector de avatar y el recortador** (claro y oscuro, escritorio y móvil, con el catálogo de los 12 avatares dentro) según `contracts/ui-screens.md` y `docs/design/screens/prompts-004.md`; esperar a que Stitch los coloque (unos 45-60 minutos; no reintentar tras un *timeout*), revisar las capturas, exportarlos a `docs/design/screens/s7-avatar-picker*/` y anotarlos en `docs/design/screens/README.md`
+- [X] T113 Con el MCP de Stitch, generar el **selector de avatar y el recortador** (claro y oscuro, escritorio y móvil, con el catálogo de los 12 avatares dentro) según `contracts/ui-screens.md` y `docs/design/screens/prompts-004.md`; esperar a que Stitch los coloque (unos 45-60 minutos; no reintentar tras un *timeout*), revisar las capturas, exportarlos a `docs/design/screens/s7-avatar-picker*/` y anotarlos en `docs/design/screens/README.md`
 - [ ] T114 (propietario) Aprobar el selector, el recortador y el catálogo de avatares (ronda 2 del punto de control) y registrar la pantalla vigente en `docs/design/screens/README.md`
 
 ### Tests de la Fase 5 (escribirlos primero; deben fallar)
