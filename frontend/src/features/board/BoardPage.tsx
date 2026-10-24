@@ -1,7 +1,8 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useBoardTasks } from '../../api/tasks'
 import type { Quadrant as QuadrantKey, Task } from '../../api/types'
 import { useUiStore } from '../../stores/uiStore'
+import { useSettledProfile } from '../profile/useSettledProfile'
 import { TaskForm } from '../task-form/TaskForm'
 import { Quadrant } from './Quadrant'
 import { ScopeFilter } from './ScopeFilter'
@@ -24,8 +25,22 @@ function groupByQuadrant(tasks: Task[]): Record<QuadrantKey, Task[]> {
 
 export function BoardPage(): JSX.Element {
   const scopeFilter = useUiStore((state) => state.scopeFilter)
+  const scopeInitialized = useUiStore((state) => state.scopeInitialized)
+  const initializeScope = useUiStore((state) => state.initializeScope)
+  const { profile, settled } = useSettledProfile()
+
+  // The profile's default scope sets the filter once; a manual change never writes back to it.
+  useEffect(() => {
+    if (settled) initializeScope(profile?.default_scope ?? 'all')
+  }, [settled, profile?.default_scope, initializeScope])
+
+  // Wait for the profile (and the filter it sets) before asking for tasks, so the board never
+  // shows the wrong scope nor makes a request that is thrown away.
+  const ready = settled && scopeInitialized
   const { data, isLoading, isError, refetch } = useBoardTasks(
     scopeFilter === 'all' ? undefined : scopeFilter,
+    profile?.board_order ?? 'oldest',
+    ready,
   )
   const [isCreating, setIsCreating] = useState(false)
   const [editingTask, setEditingTask] = useState<Task | null>(null)
@@ -47,7 +62,7 @@ export function BoardPage(): JSX.Element {
         </button>
       </div>
 
-      {isLoading && (
+      {(!ready || isLoading) && (
         <div
           role="status"
           aria-label="Cargando tablero"
@@ -59,7 +74,7 @@ export function BoardPage(): JSX.Element {
         </div>
       )}
 
-      {isError && !isLoading && (
+      {ready && isError && !isLoading && (
         <div
           role="alert"
           className="flex items-center justify-between gap-2 rounded-xl border border-error/30 bg-error/10 p-4 text-error"
@@ -75,7 +90,7 @@ export function BoardPage(): JSX.Element {
         </div>
       )}
 
-      {!isLoading && !isError && (
+      {ready && !isLoading && !isError && (
         <>
           {hasNoTasks && scopeFilter === 'all' && (
             <div className="mb-6 rounded-xl border border-border bg-surface-alt p-6 text-center">

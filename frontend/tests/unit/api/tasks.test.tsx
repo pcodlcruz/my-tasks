@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { act, renderHook } from '@testing-library/react'
+import { act, renderHook, waitFor } from '@testing-library/react'
 import type { ReactNode } from 'react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { useToastStore } from '../../../src/stores/toastStore'
@@ -188,5 +188,82 @@ describe('task lifecycle hooks', () => {
     expect(useToastStore.getState().toasts.map((toast) => toast.message)).toEqual([
       'No se pudo completar la acción. Inténtalo de nuevo.',
     ])
+  })
+})
+
+describe('task list requests', () => {
+  beforeEach(() => {
+    vi.stubEnv('VITE_API_BASE_URL', 'http://localhost:8000')
+    vi.stubGlobal('fetch', vi.fn())
+    vi.mocked(fetch).mockImplementation(() =>
+      Promise.resolve(jsonResponse({ items: [], next_cursor: null })),
+    )
+  })
+
+  function requestedPaths(): string[] {
+    return vi
+      .mocked(fetch)
+      .mock.calls.map(([url]) => String(url).replace('http://localhost:8000', ''))
+  }
+
+  it('el tablero pide `order` solo cuando no es el orden por defecto', async () => {
+    const { useBoardTasks } = await import('../../../src/api/tasks')
+    const queryClient = new QueryClient()
+
+    renderHook(() => useBoardTasks(undefined, 'newest'), { wrapper: createWrapper(queryClient) })
+    await waitFor(() => expect(fetch).toHaveBeenCalledTimes(1))
+    renderHook(() => useBoardTasks('work', 'oldest'), { wrapper: createWrapper(queryClient) })
+    await waitFor(() => expect(fetch).toHaveBeenCalledTimes(2))
+
+    expect(requestedPaths()).toEqual([
+      '/api/v1/tasks?view=board&order=newest',
+      '/api/v1/tasks?view=board&scope=work',
+    ])
+  })
+
+  it('el tablero no pide nada mientras `enabled` es falso y pide al activarse', async () => {
+    const { useBoardTasks } = await import('../../../src/api/tasks')
+    const queryClient = new QueryClient()
+
+    const { rerender } = renderHook(({ enabled }) => useBoardTasks(undefined, 'oldest', enabled), {
+      wrapper: createWrapper(queryClient),
+      initialProps: { enabled: false },
+    })
+    expect(fetch).not.toHaveBeenCalled()
+    rerender({ enabled: true })
+
+    await waitFor(() => expect(fetch).toHaveBeenCalledTimes(1))
+  })
+
+  it('cada orden y ámbito tiene su propia clave de caché', async () => {
+    const { boardQueryKey } = await import('../../../src/api/tasks')
+
+    expect(boardQueryKey(undefined, 'oldest')).toEqual(['tasks', 'board', 'all', 'oldest'])
+    expect(boardQueryKey('work', 'newest')).toEqual(['tasks', 'board', 'work', 'newest'])
+    expect(boardQueryKey()).toEqual(['tasks', 'board', 'all', 'oldest'])
+  })
+
+  it('el historial pide `within_days` solo con un periodo', async () => {
+    const { useHistory } = await import('../../../src/api/tasks')
+    const queryClient = new QueryClient()
+
+    renderHook(() => useHistory(30), { wrapper: createWrapper(queryClient) })
+    await waitFor(() => expect(fetch).toHaveBeenCalledTimes(1))
+    renderHook(() => useHistory(null), { wrapper: createWrapper(queryClient) })
+    await waitFor(() => expect(fetch).toHaveBeenCalledTimes(2))
+
+    expect(requestedPaths()).toEqual([
+      '/api/v1/tasks?view=history&limit=20&within_days=30',
+      '/api/v1/tasks?view=history&limit=20',
+    ])
+  })
+
+  it('el historial no pide nada mientras `enabled` es falso', async () => {
+    const { useHistory } = await import('../../../src/api/tasks')
+    const queryClient = new QueryClient()
+
+    renderHook(() => useHistory(30, false), { wrapper: createWrapper(queryClient) })
+
+    expect(fetch).not.toHaveBeenCalled()
   })
 })

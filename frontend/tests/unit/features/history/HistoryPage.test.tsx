@@ -1,14 +1,19 @@
 import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import type { Task } from '../../../../src/api/types'
+import type { Profile, Task } from '../../../../src/api/types'
 
 const useHistoryMock = vi.fn()
+const useProfileMock = vi.fn()
 const reopenMutate = vi.fn()
 const trashMutate = vi.fn()
 
+vi.mock('../../../../src/api/profile', () => ({
+  useProfile: () => useProfileMock(),
+}))
+
 vi.mock('../../../../src/api/tasks', () => ({
-  useHistory: () => useHistoryMock(),
+  useHistory: (...args: unknown[]) => useHistoryMock(...args),
   useReopenTask: () => ({ mutate: reopenMutate, isPending: false }),
   useTrashTask: () => ({ mutate: trashMutate, isPending: false }),
 }))
@@ -47,9 +52,29 @@ function historyResult(overrides: Record<string, unknown> = {}): Record<string, 
   }
 }
 
-async function renderHistoryPage(): Promise<void> {
+const PROFILE: Profile = {
+  theme: 'system',
+  density: 'comfortable',
+  default_scope: 'all',
+  board_order: 'oldest',
+  history_days: null,
+  display_name: null,
+  avatar: { kind: 'initials', preset: null, version: 0 },
+}
+
+function profileResult(profile: Partial<Profile> = {}): Record<string, unknown> {
+  return { data: { ...PROFILE, ...profile }, isPending: false, isError: false }
+}
+
+async function renderHistoryPage(): Promise<ReturnType<typeof render>> {
   const { HistoryPage } = await import('../../../../src/features/history/HistoryPage')
-  render(<HistoryPage />)
+  return render(<HistoryPage />)
+}
+
+// The arguments of the last call to `useHistory(withinDays, enabled)`.
+function lastHistoryRequest(): { withinDays: unknown; enabled: unknown } {
+  const [withinDays, enabled] = useHistoryMock.mock.lastCall ?? []
+  return { withinDays, enabled }
 }
 
 describe('<HistoryPage>', () => {
@@ -57,6 +82,8 @@ describe('<HistoryPage>', () => {
     vi.useFakeTimers({ toFake: ['Date'] })
     vi.setSystemTime(new Date(2026, 8, 29, 12, 0))
     useHistoryMock.mockReset()
+    useProfileMock.mockReset()
+    useProfileMock.mockReturnValue(profileResult())
     reopenMutate.mockReset()
     trashMutate.mockReset()
   })
@@ -191,5 +218,101 @@ describe('<HistoryPage>', () => {
     expect(screen.getByRole('alert')).toHaveTextContent(/no se pudo cargar/i)
     await user.click(screen.getByRole('button', { name: 'Reintentar' }))
     expect(refetch).toHaveBeenCalledOnce()
+  })
+
+  describe('periodo del perfil', () => {
+    it('con 30 días pide solo ese periodo y muestra la franja con "Ver todo"', async () => {
+      useProfileMock.mockReturnValue(profileResult({ history_days: 30 }))
+      useHistoryMock.mockReturnValue(historyResult())
+
+      await renderHistoryPage()
+
+      expect(lastHistoryRequest()).toEqual({ withinDays: 30, enabled: true })
+      expect(screen.getByText('Mostrando solo los últimos 30 días')).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: 'Ver todo' })).toBeInTheDocument()
+    })
+
+    it('con 90 días lo dice en la franja', async () => {
+      useProfileMock.mockReturnValue(profileResult({ history_days: 90 }))
+      useHistoryMock.mockReturnValue(historyResult())
+
+      await renderHistoryPage()
+
+      expect(lastHistoryRequest().withinDays).toBe(90)
+      expect(screen.getByText('Mostrando solo los últimos 90 días')).toBeInTheDocument()
+    })
+
+    it('"Ver todo" vuelve a pedir el historial sin periodo y quita la franja', async () => {
+      useProfileMock.mockReturnValue(profileResult({ history_days: 30 }))
+      useHistoryMock.mockReturnValue(historyResult())
+      await renderHistoryPage()
+
+      await userEvent.click(screen.getByRole('button', { name: 'Ver todo' }))
+
+      expect(lastHistoryRequest()).toEqual({ withinDays: null, enabled: true })
+      expect(screen.queryByText(/Mostrando solo los últimos/)).not.toBeInTheDocument()
+      expect(screen.queryByRole('button', { name: 'Ver todo' })).not.toBeInTheDocument()
+    })
+
+    it('"Ver todo" vale solo para esa visita: al volver a abrir la pantalla se aplica el periodo otra vez', async () => {
+      useProfileMock.mockReturnValue(profileResult({ history_days: 30 }))
+      useHistoryMock.mockReturnValue(historyResult())
+      const first = await renderHistoryPage()
+      await userEvent.click(screen.getByRole('button', { name: 'Ver todo' }))
+      first.unmount()
+
+      await renderHistoryPage()
+
+      expect(lastHistoryRequest().withinDays).toBe(30)
+      expect(screen.getByText('Mostrando solo los últimos 30 días')).toBeInTheDocument()
+    })
+
+    it('sin periodo (todo el historial) pide sin parámetro y no hay franja', async () => {
+      useHistoryMock.mockReturnValue(historyResult())
+
+      await renderHistoryPage()
+
+      expect(lastHistoryRequest()).toEqual({ withinDays: null, enabled: true })
+      expect(screen.queryByText(/Mostrando solo los últimos/)).not.toBeInTheDocument()
+    })
+
+    it('un periodo que deja el historial vacío muestra la franja y un aviso, no una pantalla en blanco', async () => {
+      useProfileMock.mockReturnValue(profileResult({ history_days: 30 }))
+      useHistoryMock.mockReturnValue(
+        historyResult({
+          data: { pages: [{ items: [], next_cursor: null }], pageParams: [undefined] },
+        }),
+      )
+
+      await renderHistoryPage()
+
+      expect(screen.getByText('Mostrando solo los últimos 30 días')).toBeInTheDocument()
+      expect(
+        screen.getByText('No has completado ninguna tarea en los últimos 30 días.'),
+      ).toBeInTheDocument()
+      expect(screen.queryByText('Aún no has completado ninguna tarea')).not.toBeInTheDocument()
+      expect(screen.getByRole('button', { name: 'Ver todo' })).toBeInTheDocument()
+    })
+
+    it('no pide el historial hasta que el perfil se resuelve y mientras tanto muestra el esqueleto', async () => {
+      useProfileMock.mockReturnValue({ data: undefined, isPending: true, isError: false })
+      useHistoryMock.mockReturnValue(historyResult({ data: undefined }))
+
+      await renderHistoryPage()
+
+      expect(useHistoryMock.mock.calls.every(([, enabled]) => enabled === false)).toBe(true)
+      expect(screen.getByRole('status', { name: 'Cargando historial' })).toBeInTheDocument()
+      expect(screen.queryByText('Aún no has completado ninguna tarea')).not.toBeInTheDocument()
+    })
+
+    it('si el perfil falla, pide todo el historial y no se queda esperando', async () => {
+      useProfileMock.mockReturnValue({ data: undefined, isPending: false, isError: true })
+      useHistoryMock.mockReturnValue(historyResult())
+
+      await renderHistoryPage()
+
+      expect(lastHistoryRequest()).toEqual({ withinDays: null, enabled: true })
+      expect(screen.queryByText(/Mostrando solo los últimos/)).not.toBeInTheDocument()
+    })
   })
 })

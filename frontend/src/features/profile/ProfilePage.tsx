@@ -3,6 +3,7 @@ import { useProfile, useResetProfile, useUpdateProfile } from '../../api/profile
 import type { ProfileUpdate } from '../../api/types'
 import { ConfirmDialog } from '../../app/ConfirmDialog'
 import { AppearanceSection } from './AppearanceSection'
+import { BoardPreferences } from './BoardPreferences'
 
 // One fixed message for any failure to save: the server's own text is never shown.
 const SAVE_ERROR_MESSAGE = 'No se pudo guardar el cambio. Inténtalo de nuevo.'
@@ -70,6 +71,7 @@ export function ProfilePage(): JSX.Element {
       {profile !== undefined && (
         <div className="flex flex-col gap-6">
           <AppearanceSection profile={profile} onChange={save} />
+          <BoardPreferences profile={profile} onChange={save} />
 
           <div className="min-h-6">
             <p role="status" className="text-caption text-success">
