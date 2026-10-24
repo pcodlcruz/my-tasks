@@ -31,6 +31,7 @@ from mytasks_api.readiness import ReadinessProbe
 from mytasks_api.repositories.task_repository import get_firestore_client
 from mytasks_api.routers.admin import router as admin_router
 from mytasks_api.routers.me import router as me_router
+from mytasks_api.routers.profile import router as profile_router
 from mytasks_api.routers.tasks import router as tasks_router
 from mytasks_api.schemas.task import ErrorOut, ReadinessOut
 from mytasks_api.services.access_service import MAX_PENDING_INVITATIONS
@@ -98,6 +99,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         return response
 
     app.include_router(me_router)
+    app.include_router(profile_router)
     app.include_router(admin_router)
     app.include_router(tasks_router)
 

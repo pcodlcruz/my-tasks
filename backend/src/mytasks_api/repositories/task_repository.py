@@ -2,7 +2,7 @@ import base64
 import json
 import os
 from collections.abc import Callable
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from functools import lru_cache
 from typing import Any
 
@@ -12,6 +12,7 @@ from google.cloud.firestore_v1.base_query import FieldFilter
 
 from mytasks_api.config import get_settings
 from mytasks_api.domain.task import (
+    HistoryDays,
     InvalidCursorError,
     Scope,
     Status,
@@ -213,13 +214,21 @@ class TaskRepository:
         await _delete_trashed(transaction, doc_ref)
 
     async def list_history(
-        self, uid: str, cursor: str | None, limit: int
+        self,
+        uid: str,
+        cursor: str | None,
+        limit: int,
+        within_days: HistoryDays | None = None,
     ) -> tuple[list[Task], str | None]:
         query = (
             self._tasks_collection(uid)
             .where(filter=FieldFilter("status", "==", Status.COMPLETED.value))
             .where(filter=FieldFilter("in_trash", "==", False))
         )
+        if within_days is not None:
+            # A range on the field the page is already ordered by, so the existing index serves it.
+            since = datetime.now(UTC) - timedelta(days=within_days.value)
+            query = query.where(filter=FieldFilter("completed_at", ">=", since))
         return await self._list_page(
             query, "completed_at", lambda task: task.completed_at, cursor, limit
         )

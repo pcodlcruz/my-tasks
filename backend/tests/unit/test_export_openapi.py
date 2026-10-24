@@ -101,3 +101,60 @@ def test_export_contains_the_admin_endpoints_each_with_401_and_403(tmp_path: Pat
     schemas = contract["components"]["schemas"]
     assert {"InvitationIn", "InviteResultOut", "AccessListOut"} <= set(schemas)
     assert schemas["InvitationIn"]["additionalProperties"] is False
+
+
+def test_export_matches_the_profile_contract_of_feature_004(tmp_path: Path) -> None:
+    target = tmp_path / "openapi.json"
+
+    export_openapi(target)
+    contract = json.loads(target.read_text(encoding="utf-8"))
+
+    profile = contract["paths"]["/api/v1/me/profile"]
+    assert set(profile) == {"get", "patch", "delete"}
+    for operation in profile.values():
+        assert {"200", "401", "403"} <= set(operation["responses"])
+    assert "422" in profile["patch"]["responses"]
+    schemas = contract["components"]["schemas"]
+    assert {"ProfileOut", "AvatarOut", "ProfileUpdateIn", "AvatarChoiceIn"} <= set(schemas)
+    assert set(schemas["ProfileOut"]["required"]) == {
+        "theme",
+        "density",
+        "default_scope",
+        "board_order",
+        "history_days",
+        "display_name",
+        "avatar",
+    }
+    assert schemas["ProfileUpdateIn"]["additionalProperties"] is False
+    assert schemas["AvatarChoiceIn"]["additionalProperties"] is False
+    assert schemas["AvatarOut"]["required"] == ["kind", "preset", "version"]
+
+
+def test_export_profile_enums_match_the_contract(tmp_path: Path) -> None:
+    target = tmp_path / "openapi.json"
+
+    export_openapi(target)
+    schemas = json.loads(target.read_text(encoding="utf-8"))["components"]["schemas"]
+
+    assert set(schemas["Theme"]["enum"]) == {"light", "dark", "system"}
+    assert set(schemas["Density"]["enum"]) == {"comfortable", "compact"}
+    assert set(schemas["DefaultScope"]["enum"]) == {"all", "work", "personal"}
+    assert set(schemas["BoardOrder"]["enum"]) == {"oldest", "newest"}
+    assert set(schemas["HistoryDays"]["enum"]) == {30, 90}
+    avatar_kind = schemas["AvatarChoiceIn"]["properties"]["kind"]
+    assert set(avatar_kind["enum"]) == {"initials", "preset"}
+    preset = schemas["AvatarChoiceIn"]["properties"]["preset"]
+    assert "avatar-" in json.dumps(preset)
+
+
+def test_export_lists_the_two_new_task_list_parameters(tmp_path: Path) -> None:
+    target = tmp_path / "openapi.json"
+
+    export_openapi(target)
+    contract = json.loads(target.read_text(encoding="utf-8"))
+
+    parameters = {p["name"]: p for p in contract["paths"]["/api/v1/tasks"]["get"]["parameters"]}
+    assert {"order", "within_days"} <= set(parameters)
+    assert parameters["order"]["required"] is False
+    assert parameters["within_days"]["required"] is False
+    assert "422" in contract["paths"]["/api/v1/tasks"]["get"]["responses"]
