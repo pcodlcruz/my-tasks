@@ -1,4 +1,4 @@
-import { type FormEvent, useEffect, useId, useState } from 'react'
+import { type FormEvent, useId, useState } from 'react'
 import type { Profile, ProfileUpdate } from '../../api/types'
 import { Avatar } from './Avatar'
 
@@ -55,10 +55,14 @@ export function IdentitySection({
   const shownName = profile.display_name ?? googleName ?? email
 
   // The saved name is the source of truth: after a save (or a reset) the field follows it.
-  useEffect(() => {
+  // Adjusted while rendering, not in an effect: the field is re-synchronised in the same render
+  // that sees the new saved name instead of painting a stale value first.
+  const [savedName, setSavedName] = useState(profile.display_name)
+  if (profile.display_name !== savedName) {
+    setSavedName(profile.display_name)
     setValue(profile.display_name ?? '')
     setError(null)
-  }, [profile.display_name])
+  }
 
   function submit(event: FormEvent): void {
     event.preventDefault()
