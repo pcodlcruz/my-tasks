@@ -231,7 +231,7 @@ vuelve a «Laboral».
 
 - [X] T111 Con el MCP de Stitch, generar las versiones nuevas de **S5 Historial** (con la franja «Mostrando solo los últimos N días · Ver todo»), **S4 Formulario de tarea** y **S6 Papelera** en claro y oscuro (escritorio y móvil), y **S1 Iniciar sesión oscuro móvil**, con los prompts de `docs/design/screens/prompts-004.md`; esperar a que Stitch los coloque, revisar las capturas, exportarlas a `docs/design/screens/` y anotarlas en `docs/design/screens/README.md`
   - Avance (2026-10-24): las pantallas ya estaban en el lienzo (no se generó nada). Exportadas y revisadas 11 de 14 (S5, S4, S6 y S1 en escritorio; S6 y S4/S1 oscuras); **faltan por exportar a mano desde Stitch** S5 v2 móvil, S5 oscuro móvil y S4 v2 móvil, cuyas URLs exigen credenciales (ver `docs/design/screens/README.md`, § Ronda 2). El propietario decidió seguir sin ellas (2026-10-24): T111 se da por hecha con esa salvedad.
-- [ ] T112 (propietario) Aprobar las pantallas de T111 (ronda 2 del punto de control) y registrar la pantalla vigente de cada una en `docs/design/screens/README.md`
+- [X] T112 (propietario) Aprobar las pantallas de T111 (ronda 2 del punto de control) y registrar la pantalla vigente de cada una en `docs/design/screens/README.md`
 
 ### Tests de la Fase 4 (escribirlos primero; deben fallar)
 
@@ -251,9 +251,9 @@ vuelve a «Laboral».
 
 **Checkpoint**: US1 y US2 funcionan juntas y por separado.
 
-**Avance (2026-10-24)**: Fase 4 completa salvo **T112 (propietario)**: aprobar las pantallas de la
-ronda 2 (`docs/design/screens/README.md`, § Ronda 2; faltan por exportar a mano S5 v2 móvil, S5
-oscuro móvil y S4 v2 móvil, y el propietario decidió seguir sin ellas). Código y tests: 212
+**Avance (2026-10-24)**: Fase 4 completa. El propietario aprobó las pantallas de la ronda 2 (T112;
+`docs/design/screens/README.md`, § Aprobaciones · ronda 2; S5 v2 móvil, S5 oscuro móvil y S4 v2 móvil
+quedaron sin exportar por decisión suya). Código y tests: 212
 unitarios, 57 e2e, lint, formato y tipos en verde. El tablero espera al perfil (éxito, o error tras
 su único reintento) y fija el ámbito una sola vez; el historial aplica el periodo con la franja y
 «Ver todo» solo por visita; el estado de la interfaz se reinicia al cambiar de persona.

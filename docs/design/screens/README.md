@@ -202,6 +202,26 @@ y S6 el contrato solo cambia la cabecera, el tema y, en S5, la franja de periodo
 - **S1 oscuro**: la insignia «Sistema seguro • OAuth 2.0», la leyenda de los cuatro cuadrantes y la
   línea «Autenticación directa sin contraseñas» (ya anotado en la ronda 1).
 
+### Aprobaciones de la feature 004 · ronda 2 (2026-10-24)
+
+El propietario aprobó la ronda 2 el 2026-10-24 (T112), al pedir abrir la PR de la Fase 4 tras la
+pregunta expresa de si las aprobaba. Son la **pantalla vigente** de cada una; las de la feature 001
+siguen intactas como referencia anterior. S5 v2 móvil, S5 oscuro móvil y S4 v2 móvil **no están
+exportadas**: el propietario decidió seguir sin ellas, y su maquetación móvil se toma de la versión
+clara equivalente y de la S6 móvil exportada.
+
+| Pantalla | Id de Stitch | Carpeta | Vigente para |
+|---|---|---|---|
+| S5 · Historial v2 (claro, escritorio) | `43b27f2bb78e4982b39910dca9f46903` | `s5-history-v2/desktop.*` | `/historial` |
+| S5 · Historial (oscuro, escritorio) | `56afd9bd0c69426e9b47084b1c0dc0c6` | `s5-history-v2-dark/desktop.*` | `/historial` en oscuro |
+| S4 · Formulario v2 (claro, escritorio) | `2dcd890bf4f84f87b0f23e4f01315b39` | `s4-task-form-v2/desktop.*` | Formulario de tarea (solo cabecera) |
+| S4 · Formulario (oscuro, escritorio) | `5c3ddf048d35439c92ef053db11fbf42` | `s4-task-form-v2-dark/desktop.*` | Formulario en oscuro |
+| S4 · Formulario (oscuro, «móvil») | `9036112ceed343cfbc60c7ec2f4bc8dc` | `s4-task-form-v2-dark/mobile.*` | **Solo color** (es un lienzo de escritorio) |
+| S6 · Papelera v2 (claro, escritorio y móvil) | `57f85560…` / `5703de30…` | `s6-trash-v2/*` | `/papelera` |
+| S6 · Papelera (oscuro, escritorio y móvil) | `32ae6af5…` / `29740550…` | `s6-trash-v2-dark/*` | `/papelera` en oscuro |
+| S1 · Iniciar sesión (oscuro, escritorio) | `152e0cebe5114f25acd072fca6b63c84` | `s1-login-dark/desktop.*` | Login en oscuro (con las salvedades de la ronda 1) |
+| S1 · Iniciar sesión (oscuro, «móvil») | `50c57f5653944fc8a95276eedf76b4f8` | `s1-login-dark/mobile.*` | **Solo color** (es un lienzo de escritorio) |
+
 ## Punto de control en dos rondas (decisión del propietario, 2026-10-23)
 
 Stitch tarda unos 45-60 minutos en colocar cada pantalla (28 en total), así que el punto de
