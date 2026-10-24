@@ -251,3 +251,20 @@ propietario (T110)**: hasta entonces siguen vigentes las pantallas de la 001 par
 - Las fechas límite, «Delegado a» y el texto «Vista compacta» / la insignia «Compacto» de S3
   compacto: no existen en el modelo de tareas; el modo compacto no muestra ninguna insignia.
 - El enlace de perfil pintado como botón: es un enlace a `/perfil`.
+
+### Aprobaciones de la feature 004 · ronda 1b (2026-10-24)
+
+El propietario aprobó el 2026-10-24 las seis pantallas de la ronda 1b (T110). Son la **pantalla
+vigente** de cada una; las de la feature 001 siguen intactas como referencia anterior.
+
+| Pantalla | Id de Stitch | Carpeta | Vigente para |
+|---|---|---|---|
+| S3 · Tablero v2 (claro, móvil) | `27a7b42bf13c4592a5d665c889b6aebf` | `s3-board-v2/mobile.*` | Tablero en móvil |
+| S3 · Tablero v2 (oscuro, escritorio) | `6229bf994c8446378757eddc823322df` | `s3-board-v2-dark/desktop.*` | Tablero en oscuro |
+| S3 · Tablero v2 (oscuro, «móvil») | `76ec68dd342142b5bc86c2c30ea03ddd` | `s3-board-v2-dark/mobile.*` | **Solo color**: Stitch la devolvió como `DESKTOP`; la maquetación móvil oscura es la de S3 v2 móvil con los tokens oscuros |
+| S3 · Tablero compacto (claro, escritorio) | `963cfc7d68c9445b86f32918d2babb02` | `s3-board-compact/desktop.*` | Densidad compacta |
+| S3 · Tablero compacto (claro, móvil) | `1ae725edfe09482e94c92d2082c9b04e` | `s3-board-compact/mobile.*` | Densidad compacta en móvil |
+| S7 · Perfil (oscuro, «móvil») | `2d33b97724904379828180049debbfe6` | `s7-profile-dark/mobile.*` | **Solo color**: misma salvedad; la maquetación es la de S7 móvil claro |
+
+Los elementos que la implementación no sigue (barra inferior, fechas y «Delegado a» de ejemplo,
+insignia «Compacto», enlace de perfil como botón) son los de la sección anterior.

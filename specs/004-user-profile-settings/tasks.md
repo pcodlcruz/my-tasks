@@ -176,7 +176,7 @@ ve el tema claro antes. Además, la comprobación axe pasa en las pantallas en a
 ### Diseño pendiente de la ronda 1 (tablero oscuro y compacto)
 
 - [X] T109 Con el MCP de Stitch, generar **S3 Tablero v2 claro móvil**, **S3 oscuro** (escritorio y móvil), **S3 compacto** (claro, escritorio y móvil, con al menos un 25 % más de tareas visibles, SC-005) y **S7 Perfil oscuro móvil**, con los prompts de `docs/design/screens/prompts-004.md`; esperar a que Stitch los coloque, revisar las capturas, exportarlas a `docs/design/screens/` y anotarlas en `docs/design/screens/README.md`. Sin ellas, T040, T044 y T047 (densidad y tema oscuro del tablero) no tienen referencia
-- [ ] T110 (propietario) Aprobar las pantallas de T109 y registrar la pantalla vigente de cada una en `docs/design/screens/README.md`
+- [X] T110 (propietario) Aprobar las pantallas de T109 y registrar la pantalla vigente de cada una en `docs/design/screens/README.md`
 
 ### Tests de la Fase 3 (escribirlos primero; deben fallar)
 
@@ -205,9 +205,8 @@ ve el tema claro antes. Además, la comprobación axe pasa en las pantallas en a
 
 **Checkpoint**: US1 completa y desplegable; es el **MVP** de la feature.
 
-**Avance (2026-10-24)**: Fase 3 completa salvo **T110 (propietario)**: aprobar las seis pantallas
-de la ronda 1b exportadas en T109 (ver `docs/design/screens/README.md`, § Ronda 1b). Código y tests
-hechos: 181 unitarios, 53 e2e (incluido axe en claro y oscuro de todas las pantallas), lint, formato
+**Avance (2026-10-24)**: Fase 3 completa. El propietario aprobó las seis pantallas de la ronda 1b
+(T110; ver `docs/design/screens/README.md`, § Aprobaciones · ronda 1b). Código y tests: 181 unitarios, 53 e2e (incluido axe en claro y oscuro de todas las pantallas), lint, formato
 y tipos en verde. Informe de seguridad en
 [security-review-fase-3.md](./security-review-fase-3.md): sin críticos, altos ni medios; LOW-001 y
 LOW-002 al backlog. Si el propietario pide cambios al tablero oscuro o compacto, se ajustan
