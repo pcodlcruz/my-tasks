@@ -279,24 +279,31 @@ cabecera, quitar el avatar y ver las iniciales; probar nombre vacío, de 51 cara
 
 ### Tests de la Fase 5 (escribirlos primero; deben fallar)
 
-- [ ] T063 [P] [US3] Tests unitarios de `frontend/src/features/profile/avatars.ts` y `initials.ts` en `frontend/tests/unit/features/profile/avatars.test.ts`: exactamente 12 identificadores `avatar-01…12` con nombre accesible no vacío (y que coinciden con los del contrato), e iniciales de uno o varios nombres, con acentos, con emojis y signos, de un correo, y color determinista por `uid`
-- [ ] T064 [P] [US3] Tests unitarios de `Avatar` en `frontend/tests/unit/features/profile/Avatar.test.tsx`: iniciales, catálogo (con texto alternativo) y estado de carga; nunca un hueco vacío
-- [ ] T065 [P] [US3] Tests unitarios de `IdentitySection` en `frontend/tests/unit/features/profile/IdentitySection.test.tsx`: validación de 1–50 caracteres tras recortar con el contador, mensaje claro y valor anterior conservado, «Usar el de Google» (con el nombre que se usará), texto plano ante `<img onerror>`, «Quitar avatar» solo si hay uno, y que la pantalla de administración de accesos sigue mostrando el correo y no el nombre elegido (FR-017)
-- [ ] T066 [P] [US3] Tests unitarios de `AvatarPicker` (solo catálogo) en `frontend/tests/unit/features/profile/AvatarPicker.test.tsx`: rejilla accesible por teclado, seleccionado visible más allá del color, y foco devuelto al cerrar
-- [ ] T067 [P] [US3] Test de la cabecera en `frontend/tests/unit/app/AppHeader.test.tsx`: avatar + nombre efectivo (perfil → Google → correo) como un único enlace «Perfil de <nombre>», nombre largo recortado, y en móvil solo el avatar
-- [ ] T068 [US3] Tests e2e en `frontend/tests/e2e/profile-identity.spec.ts` (escenarios 7 y 8 de la quickstart): nombre en la cabecera, validaciones, HTML como texto literal, elegir y quitar avatar y que persiste entre sesiones
+- [X] T063 [P] [US3] Tests unitarios de `frontend/src/features/profile/avatars.ts` y `initials.ts` en `frontend/tests/unit/features/profile/avatars.test.ts`: exactamente 12 identificadores `avatar-01…12` con nombre accesible no vacío (y que coinciden con los del contrato), e iniciales de uno o varios nombres, con acentos, con emojis y signos, de un correo, y color determinista por `uid`
+- [X] T064 [P] [US3] Tests unitarios de `Avatar` en `frontend/tests/unit/features/profile/Avatar.test.tsx`: iniciales, catálogo (con texto alternativo) y estado de carga; nunca un hueco vacío
+- [X] T065 [P] [US3] Tests unitarios de `IdentitySection` en `frontend/tests/unit/features/profile/IdentitySection.test.tsx`: validación de 1–50 caracteres tras recortar con el contador, mensaje claro y valor anterior conservado, «Usar el de Google» (con el nombre que se usará), texto plano ante `<img onerror>`, «Quitar avatar» solo si hay uno, y que la pantalla de administración de accesos sigue mostrando el correo y no el nombre elegido (FR-017)
+- [X] T066 [P] [US3] Tests unitarios de `AvatarPicker` (solo catálogo) en `frontend/tests/unit/features/profile/AvatarPicker.test.tsx`: rejilla accesible por teclado, seleccionado visible más allá del color, y foco devuelto al cerrar
+- [X] T067 [P] [US3] Test de la cabecera en `frontend/tests/unit/app/AppHeader.test.tsx`: avatar + nombre efectivo (perfil → Google → correo) como un único enlace «Perfil de <nombre>», nombre largo recortado, y en móvil solo el avatar
+- [X] T068 [US3] Tests e2e en `frontend/tests/e2e/profile-identity.spec.ts` (escenarios 7 y 8 de la quickstart): nombre en la cabecera, validaciones, HTML como texto literal, elegir y quitar avatar y que persiste entre sesiones
 
 ### Implementación de la Fase 5
 
-- [ ] T069 [P] [US3] Crear los 12 SVG del catálogo en `frontend/src/assets/avatars/avatar-01.svg … avatar-12.svg` a partir del diseño aprobado en la Fase 1 (legibles a 32 px, válidos en ambos temas)
-- [ ] T070 [US3] Crear `frontend/src/features/profile/avatars.ts` (catálogo con nombres en español) y `initials.ts`, hasta que pase T063
-- [ ] T071 [US3] Crear `frontend/src/features/profile/Avatar.tsx` (iniciales, catálogo; la imagen subida llega en la Fase 6), hasta que pase T064
-- [ ] T072 [US3] Crear `frontend/src/features/profile/IdentitySection.tsx` y `AvatarPicker.tsx` (solo pestaña «Catálogo» por ahora) y montarlos en `ProfilePage.tsx`, hasta que pasen T065, T066 y T068
-- [ ] T073 [US3] Sustituir el enlace provisional de `frontend/src/app/AppHeader.tsx` por avatar + nombre enlazados a `/perfil` según la cabecera aprobada, hasta que pase T067
-- [ ] T074 [US3] Ejecutar `npm run lint`, `tsc`, `prettier --check`, `npm test` y `npm run test:e2e` (incluido axe en ambos temas con los avatares) y dejarlos en verde
-- [ ] T075 Marcar T063–T074 como hechas en este fichero y anotar el avance de la fase
+- [X] T069 [P] [US3] Crear los 12 SVG del catálogo en `frontend/src/assets/avatars/avatar-01.svg … avatar-12.svg` a partir del diseño aprobado en la Fase 1 (legibles a 32 px, válidos en ambos temas)
+- [X] T070 [US3] Crear `frontend/src/features/profile/avatars.ts` (catálogo con nombres en español) y `initials.ts`, hasta que pase T063
+- [X] T071 [US3] Crear `frontend/src/features/profile/Avatar.tsx` (iniciales, catálogo; la imagen subida llega en la Fase 6), hasta que pase T064
+- [X] T072 [US3] Crear `frontend/src/features/profile/IdentitySection.tsx` y `AvatarPicker.tsx` (solo pestaña «Catálogo» por ahora) y montarlos en `ProfilePage.tsx`, hasta que pasen T065, T066 y T068
+- [X] T073 [US3] Sustituir el enlace provisional de `frontend/src/app/AppHeader.tsx` por avatar + nombre enlazados a `/perfil` según la cabecera aprobada, hasta que pase T067
+- [X] T074 [US3] Ejecutar `npm run lint`, `tsc`, `prettier --check`, `npm test` y `npm run test:e2e` (incluido axe en ambos temas con los avatares) y dejarlos en verde
+- [X] T075 Marcar T063–T074 como hechas en este fichero y anotar el avance de la fase
 
 **Checkpoint**: US1, US2 y US3 funcionan; la aplicación ya ofrece un perfil completo sin subir archivos.
+
+**Avance (2026-10-24)**: Fase 5 completa salvo **T114 (propietario)**: aprobar el selector, el
+recortador y el catálogo de avatares (`docs/design/screens/README.md`, § Ronda 2 · selector de
+avatar). Código y tests: 292 unitarios, 64 e2e (con axe en ambos temas y los avatares), lint, formato
+y tipos en verde. El nombre se pinta siempre como texto (cierra LOW-002 de la Fase 2: lo comprueban
+tests unitarios y un e2e con `<img onerror>`). Los 12 SVG del catálogo salen del HTML claro del
+diseño y se usan sobre un círculo claro fijo en ambos temas.
 
 ---
 
