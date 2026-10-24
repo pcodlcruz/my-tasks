@@ -1,6 +1,8 @@
+import { useState } from 'react'
 import { useHistory, useReopenTask, useTrashTask } from '../../api/tasks'
 import type { Task } from '../../api/types'
 import { dayKey, formatCompletedAt, formatDayHeading } from '../../lib/dates'
+import { useSettledProfile } from '../profile/useSettledProfile'
 import { QuadrantBadge, ScopeBadge } from '../shared/TaskBadges'
 import { TaskRow } from '../shared/TaskRow'
 
@@ -31,8 +33,20 @@ const ACTION_BUTTON =
   'rounded-lg border border-border bg-surface px-3 py-1.5 text-caption font-semibold text-text hover:bg-surface-alt disabled:cursor-not-allowed disabled:opacity-60'
 
 export function HistoryPage(): JSX.Element {
-  const { data, isLoading, isError, refetch, hasNextPage, isFetchingNextPage, fetchNextPage } =
-    useHistory()
+  const { profile, settled } = useSettledProfile()
+  // "Ver todo" lifts the profile's period for this visit only: the state dies with the page.
+  const [showAll, setShowAll] = useState(false)
+  const withinDays = showAll ? null : (profile?.history_days ?? null)
+  const {
+    data,
+    isLoading: isLoadingTasks,
+    isError,
+    refetch,
+    hasNextPage,
+    isFetchingNextPage,
+    fetchNextPage,
+  } = useHistory(withinDays, settled)
+  const isLoading = !settled || isLoadingTasks
   const reopen = useReopenTask()
   const trash = useTrashTask()
   const tasks = data?.pages.flatMap((page) => page.items) ?? []
@@ -46,6 +60,19 @@ export function HistoryPage(): JSX.Element {
           Tareas completadas, las más recientes primero.
         </p>
       </div>
+
+      {settled && withinDays !== null && (
+        <div className="mb-4 flex items-center justify-between gap-2 rounded-xl border border-quadrant-schedule-border bg-quadrant-schedule-surface p-3">
+          <p className="text-caption text-text">Mostrando solo los últimos {withinDays} días</p>
+          <button
+            type="button"
+            onClick={() => setShowAll(true)}
+            className="rounded px-1 text-caption font-semibold text-primary underline hover:text-primary-hover"
+          >
+            Ver todo
+          </button>
+        </div>
+      )}
 
       {isLoading && (
         <div role="status" aria-label="Cargando historial" className="flex flex-col gap-3">
@@ -73,10 +100,25 @@ export function HistoryPage(): JSX.Element {
 
       {!isLoading && !isError && tasks.length === 0 && (
         <div className="rounded-xl border border-border bg-surface-alt p-8 text-center">
-          <p className="text-body font-semibold text-text">Aún no has completado ninguna tarea</p>
-          <p className="mt-1 text-caption text-text-muted">
-            Cuando completes una desde el tablero, aparecerá aquí.
-          </p>
+          {withinDays === null ? (
+            <>
+              <p className="text-body font-semibold text-text">
+                Aún no has completado ninguna tarea
+              </p>
+              <p className="mt-1 text-caption text-text-muted">
+                Cuando completes una desde el tablero, aparecerá aquí.
+              </p>
+            </>
+          ) : (
+            <>
+              <p className="text-body font-semibold text-text">
+                No has completado ninguna tarea en los últimos {withinDays} días.
+              </p>
+              <p className="mt-1 text-caption text-text-muted">
+                Las anteriores siguen en tu historial: pulsa «Ver todo» para verlas.
+              </p>
+            </>
+          )}
         </div>
       )}
 

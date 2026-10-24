@@ -150,6 +150,78 @@ cada captura oscura que los colores efectivos son los de `DESIGN.md`.
 **Desviaciones detectadas en S1 oscuro (escritorio)**: añade una insignia de «conexión cifrada
 OAuth 2.0» y una miniatura de los cuatro cuadrantes que el contrato no pide; quitarlas.
 
+## Ronda 2 · pantallas pendientes de la Fase 4 (T111, 2026-10-24)
+
+Todas estaban ya en el lienzo de Stitch (se lanzaron el 2026-10-23 y aparecieron después), así que no se
+generó nada nuevo y no hay duplicados. Se exportaron HTML y PNG de las que `curl` puede descargar y se
+revisaron las capturas. **Pendiente de aprobación del propietario (T112)**.
+
+| Pantalla | Id de Stitch | Carpeta | Medidas que devuelve Stitch |
+|---|---|---|---|
+| S5 · Historial v2 (claro, escritorio) | `43b27f2bb78e4982b39910dca9f46903` | `s5-history-v2/desktop.*` | `DESKTOP`, 2560 px |
+| S5 · Historial v2 (claro, móvil) | `02b65e7b138e4cc1beea18e01993292c` | **sin exportar** (ver abajo) | `MOBILE`, 780 px |
+| S5 · Historial (oscuro, escritorio) | `56afd9bd0c69426e9b47084b1c0dc0c6` | `s5-history-v2-dark/desktop.*` | `DESKTOP`, 2560 px |
+| S5 · Historial (oscuro, móvil) | `a8412c73843f4eb189a2efa521777f07` | **sin exportar** (ver abajo) | `MOBILE`, 780 px |
+| S4 · Formulario v2 (claro, escritorio) | `2dcd890bf4f84f87b0f23e4f01315b39` | `s4-task-form-v2/desktop.*` | `DESKTOP`, 2560 px |
+| S4 · Formulario v2 (claro, móvil) | `b53dd6d79bd44274ab064dbfa48d17f9` | **sin exportar** (ver abajo) | `MOBILE`, 780 px |
+| S4 · Formulario (oscuro, escritorio) | `5c3ddf048d35439c92ef053db11fbf42` | `s4-task-form-v2-dark/desktop.*` | `DESKTOP`, 2560 px |
+| S4 · Formulario (oscuro, «móvil») | `9036112ceed343cfbc60c7ec2f4bc8dc` | `s4-task-form-v2-dark/mobile.*` | `DESKTOP`, 2560 px ⚠ |
+| S6 · Papelera v2 (claro, escritorio) | `57f85560a02442e6857f5bdce6805933` | `s6-trash-v2/desktop.*` | `DESKTOP`, 2560 px |
+| S6 · Papelera v2 (claro, móvil) | `5703de30316e416c99da070be4efc6bb` | `s6-trash-v2/mobile.*` | `MOBILE`, 780 px |
+| S6 · Papelera (oscuro, escritorio) | `32ae6af59a9948eeb3136b041eac7e04` | `s6-trash-v2-dark/desktop.*` | `DESKTOP`, 2560 px |
+| S6 · Papelera (oscuro, móvil) | `297405506fc44ed7b64c2dd4467f15a0` | `s6-trash-v2-dark/mobile.*` | `MOBILE`, 780 px |
+| S1 · Iniciar sesión (oscuro, escritorio) | `152e0cebe5114f25acd072fca6b63c84` | `s1-login-dark/desktop.*` | `DESKTOP`, 2560 px |
+| S1 · Iniciar sesión (oscuro, «móvil») | `50c57f5653944fc8a95276eedf76b4f8` | `s1-login-dark/mobile.*` | `DESKTOP`, 2560 px ⚠ |
+
+**No exportadas**: S5 v2 móvil, S5 oscuro móvil y S4 v2 móvil. Para esas tres `get_screen` devuelve
+URLs de `stitch.googleapis.com` que exigen credenciales (401), y `download_file` entrega la imagen
+dentro de la conversación (más de 300 000 caracteres), sin poder guardarla como fichero. **Hay que
+exportarlas a mano desde Stitch** (HTML y PNG) a `s5-history-v2/mobile.*`, `s5-history-v2-dark/mobile.*`
+y `s4-task-form-v2/mobile.*`, y tampoco se han podido revisar visualmente.
+
+**Revisión de las capturas exportadas**
+
+- **S5 (escritorio, claro y oscuro)**: lleva la franja «Mostrando solo los últimos 30 días · Ver todo»
+  bajo el título, como pide el contrato. El oscuro respeta la paleta de [`../DESIGN.md`](../DESIGN.md).
+- **S4 (escritorio, claro y oscuro)**: diálogo «Nueva tarea» sobre el tablero con la cabecera nueva
+  detrás; los dos temas son legibles y el error «Elige un ámbito» no se distingue solo por color.
+- **S6 y S1**: cabecera nueva y tema oscuro correctos.
+- ⚠ **Las «móvil» oscuras de S4 y S1 no son móviles**: Stitch las devuelve como `DESKTOP` a 2560 px (la
+  misma rareza de la ronda 1b). Sirven solo como referencia de color; la maquetación móvil es la de la
+  versión clara con los tokens oscuros. S5 oscuro móvil y S6 oscuro móvil sí son móviles reales.
+
+**Elementos que la implementación no sigue** (Stitch los añade y el contrato no los pide; en S4, S5
+y S6 el contrato solo cambia la cabecera, el tema y, en S5, la franja de periodo):
+
+- **S5**: búsqueda, filtro de ámbito, ordenación, «Exportar CSV», contadores, el bloque «Vista previa
+  del estado vacío (Empty State)» con la etiqueta «Referencia visual», y la barra inferior móvil.
+- **S6**: búsqueda, filtro de ámbito, «Ordenar por: Tiempo restante», «Vaciar papelera», las insignias
+  «Cuadrante …», «Activa»/«Completada» y la barra inferior móvil.
+- **S4**: la presentación de urgente/importante como interruptores, el recuadro «Destino previsto» y
+  los textos de ayuda nuevos; el formulario conserva el contenido y los controles actuales.
+- **S1 oscuro**: la insignia «Sistema seguro • OAuth 2.0», la leyenda de los cuatro cuadrantes y la
+  línea «Autenticación directa sin contraseñas» (ya anotado en la ronda 1).
+
+### Aprobaciones de la feature 004 · ronda 2 (2026-10-24)
+
+El propietario aprobó la ronda 2 el 2026-10-24 (T112), al pedir abrir la PR de la Fase 4 tras la
+pregunta expresa de si las aprobaba. Son la **pantalla vigente** de cada una; las de la feature 001
+siguen intactas como referencia anterior. S5 v2 móvil, S5 oscuro móvil y S4 v2 móvil **no están
+exportadas**: el propietario decidió seguir sin ellas, y su maquetación móvil se toma de la versión
+clara equivalente y de la S6 móvil exportada.
+
+| Pantalla | Id de Stitch | Carpeta | Vigente para |
+|---|---|---|---|
+| S5 · Historial v2 (claro, escritorio) | `43b27f2bb78e4982b39910dca9f46903` | `s5-history-v2/desktop.*` | `/historial` |
+| S5 · Historial (oscuro, escritorio) | `56afd9bd0c69426e9b47084b1c0dc0c6` | `s5-history-v2-dark/desktop.*` | `/historial` en oscuro |
+| S4 · Formulario v2 (claro, escritorio) | `2dcd890bf4f84f87b0f23e4f01315b39` | `s4-task-form-v2/desktop.*` | Formulario de tarea (solo cabecera) |
+| S4 · Formulario (oscuro, escritorio) | `5c3ddf048d35439c92ef053db11fbf42` | `s4-task-form-v2-dark/desktop.*` | Formulario en oscuro |
+| S4 · Formulario (oscuro, «móvil») | `9036112ceed343cfbc60c7ec2f4bc8dc` | `s4-task-form-v2-dark/mobile.*` | **Solo color** (es un lienzo de escritorio) |
+| S6 · Papelera v2 (claro, escritorio y móvil) | `57f85560…` / `5703de30…` | `s6-trash-v2/*` | `/papelera` |
+| S6 · Papelera (oscuro, escritorio y móvil) | `32ae6af5…` / `29740550…` | `s6-trash-v2-dark/*` | `/papelera` en oscuro |
+| S1 · Iniciar sesión (oscuro, escritorio) | `152e0cebe5114f25acd072fca6b63c84` | `s1-login-dark/desktop.*` | Login en oscuro (con las salvedades de la ronda 1) |
+| S1 · Iniciar sesión (oscuro, «móvil») | `50c57f5653944fc8a95276eedf76b4f8` | `s1-login-dark/mobile.*` | **Solo color** (es un lienzo de escritorio) |
+
 ## Punto de control en dos rondas (decisión del propietario, 2026-10-23)
 
 Stitch tarda unos 45-60 minutos en colocar cada pantalla (28 en total), así que el punto de

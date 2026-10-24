@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+
+<html class="h-full bg-background text-text" lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Historial - MyTasks</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "text": "#0F172A",
+            "text-muted": "#475569",
+            "surface-bright": "#faf8ff",
+            "secondary-fixed": "#89f5e7",
+            "on-primary-fixed-variant": "#0039b5",
+            "on-tertiary-fixed": "#390c00",
+            "on-error": "#ffffff",
+            "surface-dim": "#d9d9e5",
+            "on-secondary-fixed": "#00201d",
+            "surface-variant": "#e2e1ed",
+            "on-tertiary-fixed-variant": "#832700",
+            "on-primary": "#ffffff",
+            "surface-container-lowest": "#ffffff",
+            "on-tertiary": "#ffffff",
+            "inverse-primary": "#b7c4ff",
+            "on-surface": "#1a1b23",
+            "success": "#15803D",
+            "inverse-surface": "#2e3039",
+            "tertiary-container": "#a73400",
+            "surface-alt": "#F8FAFC",
+            "tertiary": "#7f2500",
+            "tertiary-fixed-dim": "#ffb59c",
+            "on-background": "#1a1b23",
+            "surface-tint": "#2151da",
+            "on-secondary-fixed-variant": "#005049",
+            "secondary-container": "#86f2e4",
+            "primary-fixed": "#dce1ff",
+            "outline-variant": "#c4c5d7",
+            "inverse-on-surface": "#f0f0fb",
+            "primary-fixed-dim": "#b7c4ff",
+            "on-secondary-container": "#006f66",
+            "surface-container-high": "#e8e7f3",
+            "secondary": "#006a61",
+            "delegate": "#B45309",
+            "on-primary-container": "#cad3ff",
+            "outline": "#747686",
+            "primary-container": "#1d4ed8",
+            "on-surface-variant": "#434655",
+            "schedule": "#1D4ED8",
+            "scope-work": "#7C3AED",
+            "surface-container-low": "#f3f2fe",
+            "on-tertiary-container": "#ffc9b7",
+            "border": "#CBD5E1",
+            "secondary-fixed-dim": "#6bd8cb",
+            "surface-container": "#ededf9",
+            "error": "#B91C1C",
+            "surface": "#FFFFFF",
+            "surface-container-highest": "#e2e1ed",
+            "tertiary-fixed": "#ffdbcf",
+            "on-secondary": "#ffffff",
+            "on-error-container": "#93000a",
+            "scope-personal": "#0D9488",
+            "background": "#faf8ff",
+            "on-primary-fixed": "#001551",
+            "eliminate": "#475569",
+            "do-now": "#B91C1C",
+            "primary": "#0037b0",
+            "error-container": "#ffdad6"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.125rem",
+            "lg": "0.25rem",
+            "xl": "0.5rem",
+            "full": "0.75rem"
+          },
+          "spacing": {
+            "space-sm": "8px",
+            "space-md": "12px",
+            "gutter": "24px",
+            "space-xl": "32px",
+            "space-lg": "16px",
+            "space-2xl": "48px",
+            "space-xs": "4px",
+            "margin": "24px"
+          },
+          "fontFamily": {
+            "body": ["Inter", "sans-serif"],
+            "display": ["Inter", "sans-serif"],
+            "body-strong": ["Inter", "sans-serif"],
+            "heading": ["Inter", "sans-serif"],
+            "caption": ["Inter", "sans-serif"]
+          },
+          "fontSize": {
+            "body": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+            "display": ["28px", { "lineHeight": "36px", "fontWeight": "700" }],
+            "body-strong": ["16px", { "lineHeight": "24px", "fontWeight": "600" }],
+            "heading": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+            "caption": ["13px", { "lineHeight": "18px", "fontWeight": "400" }]
+          }
+        }
+      }
+    };
+  </script>
+</head>
+<body class="min-h-full flex flex-col font-body text-body bg-background text-text antialiased">
+<!-- Cabecera de Navegación Escritorio -->
+<header class="w-full flex items-center justify-between px-space-lg py-space-sm border-b border-border bg-surface sticky top-0 z-40 shadow-sm">
+<div class="flex items-center gap-space-xl">
+<!-- Logo MyTasks -->
+<a class="flex items-center gap-space-sm group focus:outline-none" href="#">
+<div class="w-9 h-9 rounded-lg bg-primary flex items-center justify-center text-on-primary shadow-sm group-hover:bg-primary-container transition-colors duration-150">
+<span class="material-symbols-outlined text-[22px]" data-icon="grid_view" data-weight="fill" style="font-variation-settings: 'FILL' 1;">grid_view</span>
+</div>
+<span class="text-heading font-heading font-bold text-primary tracking-tight">MyTasks</span>
+</a>
+<!-- Enlaces de navegación desktop -->
+<nav aria-label="Navegación principal" class="hidden md:flex items-center gap-space-lg">
+<a class="px-space-md py-space-sm font-body text-text-muted hover:text-primary transition-colors duration-150 rounded-lg" href="#">
+          Tablero
+        </a>
+<a aria-current="page" class="px-space-md py-space-sm font-body-strong text-primary border-b-2 border-primary rounded-none flex items-center gap-space-xs" href="#">
+<span class="material-symbols-outlined text-[18px]" data-icon="history">history</span>
+          Historial
+        </a>
+<a class="px-space-md py-space-sm font-body text-text-muted hover:text-primary transition-colors duration-150 rounded-lg" href="#">
+          Papelera
+        </a>
+</nav>
+</div>
+<!-- Zona de Usuario -->
+<div class="flex items-center gap-space-lg"><a aria-label="Perfil de Ana Cruz" class="flex items-center gap-space-sm rounded-lg hover:bg-surface-alt py-1 px-1.5 transition-colors focus:outline-none focus:ring-2 focus:ring-primary" href="#"><div class="w-8 h-8 rounded-full bg-[#1D4ED8] text-white flex items-center justify-center font-heading font-semibold text-xs shadow-xs">AC</div><span class="font-medium text-text text-sm">Ana Cruz</span></a><div class="h-4 w-px bg-border"></div><button aria-label="Cerrar sesión" class="flex items-center gap-space-xs px-2 py-1.5 text-text-muted hover:text-text rounded-lg transition-colors duration-150 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-primary" type="button"><span class="material-symbols-outlined text-[18px]" data-icon="logout">logout</span><span class="hidden sm:inline font-body text-sm">Cerrar sesión</span></button></div>
+</header>
+<!-- Contenedor Central -->
+<main class="flex-1 w-full max-w-7xl mx-auto px-space-lg py-space-xl space-y-space-xl">
+<!-- 1. Encabezado de la página -->
+<section class="flex flex-col md:flex-row md:items-center md:justify-between gap-space-md pb-space-md border-b border-border">
+<div class="space-y-space-xs">
+<div class="flex items-center gap-space-md flex-wrap">
+<h1 class="text-display font-display text-text">Historial</h1>
+<span class="inline-flex items-center px-space-md py-0.5 rounded-full text-caption font-body-strong bg-secondary-container/40 text-secondary border border-secondary/20">
+<span class="w-2 h-2 rounded-full bg-secondary mr-1.5"></span>
+            24 tareas completadas
+          </span>
+</div>
+<p class="font-body text-text-muted max-w-3xl">
+          Registro cronológico de tareas finalizadas organizadas con su cuadrante y ámbito de origen.
+        </p>
+</div>
+<!-- Botón Exportar CSV -->
+<div class="flex items-center self-start md:self-auto">
+<button class="inline-flex items-center gap-space-sm px-space-lg py-space-sm rounded-lg bg-surface border border-border text-text font-body-strong text-sm shadow-sm hover:bg-surface-alt hover:border-slate-400 active:scale-95 transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-primary" type="button">
+<span class="material-symbols-outlined text-[20px] text-text-muted" data-icon="download">download</span>
+          Exportar CSV
+        </button>
+</div>
+</section><div class="bg-[#EFF6FF] border border-[#1D4ED8]/20 rounded-xl px-space-lg py-space-md flex items-center justify-between text-sm text-text my-space-md shadow-xs"><div class="flex items-center gap-space-sm font-body text-sm text-text"><span class="material-symbols-outlined text-[20px] text-primary" data-icon="schedule">schedule</span><span>Mostrando solo los últimos 30 días</span></div><a class="font-body-strong text-primary hover:underline text-sm" href="#">Ver todo</a></div>
+<!-- 2. Barra de filtros y búsqueda -->
+<section class="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-space-md bg-surface p-space-md rounded-xl border border-border shadow-sm">
+<div class="flex flex-col md:flex-row items-stretch md:items-center gap-space-md flex-1">
+<!-- Input de búsqueda -->
+<div class="relative min-w-[280px] md:w-96">
+<label class="sr-only" for="search-history">Buscar en el historial de tareas</label>
+<div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-text-muted">
+<span class="material-symbols-outlined text-[20px]" data-icon="search">search</span>
+</div>
+<input class="w-full pl-10 pr-space-md py-space-sm bg-background border border-border rounded-lg text-body text-text placeholder-text-muted focus:ring-2 focus:ring-primary focus:border-primary text-sm transition-shadow outline-none" id="search-history" placeholder="Buscar en el historial de tareas..." type="search"/>
+</div>
+<!-- Filtros de ámbito -->
+<div aria-label="Filtro de ámbito" class="flex items-center gap-space-xs overflow-x-auto py-1" role="group">
+<!-- Todas -->
+<button class="inline-flex items-center px-space-md py-1.5 rounded-lg text-sm font-body-strong bg-primary text-on-primary shadow-xs transition-colors" type="button">
+            Todas (24)
+          </button>
+<!-- Laboral -->
+<button class="inline-flex items-center gap-1.5 px-space-md py-1.5 rounded-lg text-sm font-body text-text-muted hover:text-text hover:bg-surface-alt border border-transparent hover:border-border transition-colors" type="button">
+<span aria-hidden="true" class="w-2.5 h-2.5 rounded-full bg-[#7C3AED]"></span>
+            Laboral (16)
+          </button>
+<!-- Personal -->
+<button class="inline-flex items-center gap-1.5 px-space-md py-1.5 rounded-lg text-sm font-body text-text-muted hover:text-text hover:bg-surface-alt border border-transparent hover:border-border transition-colors" type="button">
+<span aria-hidden="true" class="w-2.5 h-2.5 rounded-full bg-[#0D9488]"></span>
+            Personal (8)
+          </button>
+</div>
+</div>
+<!-- Selector de Ordenación -->
+<div class="flex items-center justify-end gap-space-sm pt-2 lg:pt-0 border-t lg:border-t-0 border-border">
+<label class="font-caption text-caption text-text-muted whitespace-nowrap" for="sort-select">Ordenar por:</label>
+<div class="relative">
+<select class="appearance-none bg-surface border border-border rounded-lg pl-3 pr-8 py-1.5 text-sm font-body-strong text-text focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary cursor-pointer shadow-xs" id="sort-select">
+<option selected="">Más recientes primero</option>
+<option>Más antiguas primero</option>
+<option>Por cuadrante (Q1 → Q4)</option>
+<option>Por ámbito</option>
+</select>
+<div class="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none text-text-muted">
+<span class="material-symbols-outlined text-[18px]" data-icon="expand_more">expand_more</span>
+</div>
+</div>
+</div>
+</section>
+<!-- 3. Lista vertical de tareas completadas agrupadas por fechas -->
+<div class="space-y-space-xl"><!-- Grupo 1: Hoy, 28 de marzo -->
+<section aria-labelledby="heading-date-today" class="space-y-space-md">
+<div class="flex items-center gap-space-sm">
+<span class="material-symbols-outlined text-text-muted text-[20px]" data-icon="calendar_today">calendar_today</span>
+<h2 class="font-heading text-heading text-text" id="heading-date-today">Hoy, 28 de marzo</h2>
+<span class="text-caption font-caption text-text-muted">(2 tareas)</span>
+</div>
+<div class="space-y-space-sm">
+<!-- Tarea 1: Q1 Laboral -->
+<article class="bg-surface rounded-xl border border-border border-l-4 border-l-[#B91C1C] p-space-md shadow-sm hover:shadow-md transition-shadow duration-150 flex flex-col md:flex-row md:items-center justify-between gap-space-md">
+<div class="flex items-start gap-space-md flex-1">
+<span aria-label="Tarea finalizada" class="text-success mt-0.5 flex-shrink-0">
+<span class="material-symbols-outlined text-[24px]" data-icon="check_circle" data-weight="fill" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</span>
+<div class="space-y-1.5 flex-1">
+<p class="font-body text-text-muted line-through text-base leading-snug">
+Enviar reporte financiero mensual a dirección
+</p>
+<div class="flex flex-wrap items-center gap-space-sm">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-[#FEF2F2] text-[#B91C1C] border border-[#B91C1C]/20">
+Hacer ahora
+</span>
+<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-[#7C3AED]/10 text-[#7C3AED] border border-[#7C3AED]/20">
+Laboral
+</span>
+<span class="inline-flex items-center gap-1 text-caption font-caption text-text-muted">
+<span class="material-symbols-outlined text-[15px]" data-icon="schedule">schedule</span>
+Completada hoy, 10:42
+</span>
+</div>
+</div>
+</div>
+<div class="flex items-center gap-space-sm self-end md:self-center flex-shrink-0 pt-2 md:pt-0 border-t md:border-t-0 border-border w-full md:w-auto justify-end">
+<button class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-border bg-surface text-text hover:bg-surface-alt font-body-strong text-xs transition-colors focus:outline-none focus:ring-2 focus:ring-primary shadow-xs" type="button">
+<span class="material-symbols-outlined text-[16px] text-text-muted" data-icon="undo">undo</span>
+Reabrir
+</button>
+<button class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-border bg-surface text-text-muted hover:text-error hover:border-error/40 hover:bg-error-container/10 font-body text-xs transition-colors focus:outline-none focus:ring-2 focus:ring-error shadow-xs" title="Mover a la papelera" type="button">
+<span class="material-symbols-outlined text-[16px]" data-icon="delete">delete</span>
+Mover a la papelera
+</button>
+</div>
+</article>
+<!-- Tarea 2: Q2 Personal -->
+<article class="bg-surface rounded-xl border border-border border-l-4 border-l-[#1D4ED8] p-space-md shadow-sm hover:shadow-md transition-shadow duration-150 flex flex-col md:flex-row md:items-center justify-between gap-space-md">
+<div class="flex items-start gap-space-md flex-1">
+<span aria-label="Tarea finalizada" class="text-success mt-0.5 flex-shrink-0">
+<span class="material-symbols-outlined text-[24px]" data-icon="check_circle" data-weight="fill" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</span>
+<div class="space-y-1.5 flex-1">
+<p class="font-body text-text-muted line-through text-base leading-snug">
+Revisar y pagar factura de servicios del hogar
+</p>
+<div class="flex flex-wrap items-center gap-space-sm">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-[#FEF2F2] text-[#B91C1C] border border-[#B91C1C]/20">
+Hacer ahora
+</span>
+<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-[#0D9488]/10 text-[#0D9488] border border-[#0D9488]/20">
+Personal
+</span>
+<span class="inline-flex items-center gap-1 text-caption font-caption text-text-muted">
+<span class="material-symbols-outlined text-[15px]" data-icon="schedule">schedule</span>
+Completada hoy, 08:30
+</span>
+</div>
+</div>
+</div>
+<div class="flex items-center gap-space-sm self-end md:self-center flex-shrink-0 pt-2 md:pt-0 border-t md:border-t-0 border-border w-full md:w-auto justify-end">
+<button class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-border bg-surface text-text hover:bg-surface-alt font-body-strong text-xs transition-colors focus:outline-none focus:ring-2 focus:ring-primary shadow-xs" type="button">
+<span class="material-symbols-outlined text-[16px] text-text-muted" data-icon="undo">undo</span>
+Reabrir
+</button>
+<button class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-border bg-surface text-text-muted hover:text-error hover:border-error/40 hover:bg-error-container/10 font-body text-xs transition-colors focus:outline-none focus:ring-2 focus:ring-error shadow-xs" title="Mover a la papelera" type="button">
+<span class="material-symbols-outlined text-[16px]" data-icon="delete">delete</span>
+Mover a la papelera
+</button>
+</div>
+</article>
+</div>
+</section>
+<!-- Grupo 2: Ayer, 27 de marzo -->
+<section aria-labelledby="heading-date-yesterday" class="space-y-space-md">
+<div class="flex items-center gap-space-sm">
+<span class="material-symbols-outlined text-text-muted text-[20px]" data-icon="calendar_today">calendar_today</span>
+<h2 class="font-heading text-heading text-text" id="heading-date-yesterday">Ayer, 27 de marzo</h2>
+<span class="text-caption font-caption text-text-muted">(2 tareas)</span>
+</div>
+<div class="space-y-space-sm">
+<!-- Tarea 3: Q2 Personal -->
+<article class="bg-surface rounded-xl border border-border border-l-4 border-l-[#1D4ED8] p-space-md shadow-sm hover:shadow-md transition-shadow duration-150 flex flex-col md:flex-row md:items-center justify-between gap-space-md">
+<div class="flex items-start gap-space-md flex-1">
+<span aria-label="Tarea finalizada" class="text-success mt-0.5 flex-shrink-0">
+<span class="material-symbols-outlined text-[24px]" data-icon="check_circle" data-weight="fill" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</span>
+<div class="space-y-1.5 flex-1">
+<p class="font-body text-text-muted line-through text-base leading-snug">
+Sesión de entrenamiento de fuerza y cardio
+</p>
+<div class="flex flex-wrap items-center gap-space-sm">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-[#EFF6FF] text-[#1D4ED8] border border-[#1D4ED8]/20">
+Planificar
+</span>
+<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-[#0D9488]/10 text-[#0D9488] border border-[#0D9488]/20">
+Personal
+</span>
+<span class="inline-flex items-center gap-1 text-caption font-caption text-text-muted">
+<span class="material-symbols-outlined text-[15px]" data-icon="schedule">schedule</span>
+Completada ayer, 09:15
+</span>
+</div>
+</div>
+</div>
+<div class="flex items-center gap-space-sm self-end md:self-center flex-shrink-0 pt-2 md:pt-0 border-t md:border-t-0 border-border w-full md:w-auto justify-end">
+<button class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-border bg-surface text-text hover:bg-surface-alt font-body-strong text-xs transition-colors focus:outline-none focus:ring-2 focus:ring-primary shadow-xs" type="button">
+<span class="material-symbols-outlined text-[16px] text-text-muted" data-icon="undo">undo</span>
+Reabrir
+</button>
+<button class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-border bg-surface text-text-muted hover:text-error hover:border-error/40 hover:bg-error-container/10 font-body text-xs transition-colors focus:outline-none focus:ring-2 focus:ring-error shadow-xs" title="Mover a la papelera" type="button">
+<span class="material-symbols-outlined text-[16px]" data-icon="delete">delete</span>
+Mover a la papelera
+</button>
+</div>
+</article>
+<!-- Tarea 4: Q2 Laboral -->
+<article class="bg-surface rounded-xl border border-border border-l-4 border-l-[#1D4ED8] p-space-md shadow-sm hover:shadow-md transition-shadow duration-150 flex flex-col md:flex-row md:items-center justify-between gap-space-md">
+<div class="flex items-start gap-space-md flex-1">
+<span aria-label="Tarea finalizada" class="text-success mt-0.5 flex-shrink-0">
+<span class="material-symbols-outlined text-[24px]" data-icon="check_circle" data-weight="fill" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</span>
+<div class="space-y-1.5 flex-1">
+<p class="font-body text-text-muted line-through text-base leading-snug">
+Actualizar documentación del sprint y dependencias
+</p>
+<div class="flex flex-wrap items-center gap-space-sm">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-[#EFF6FF] text-[#1D4ED8] border border-[#1D4ED8]/20">
+Planificar
+</span>
+<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-[#7C3AED]/10 text-[#7C3AED] border border-[#7C3AED]/20">
+Laboral
+</span>
+<span class="inline-flex items-center gap-1 text-caption font-caption text-text-muted">
+<span class="material-symbols-outlined text-[15px]" data-icon="schedule">schedule</span>
+Completada ayer, 17:40
+</span>
+</div>
+</div>
+</div>
+<div class="flex items-center gap-space-sm self-end md:self-center flex-shrink-0 pt-2 md:pt-0 border-t md:border-t-0 border-border w-full md:w-auto justify-end">
+<button class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-border bg-surface text-text hover:bg-surface-alt font-body-strong text-xs transition-colors focus:outline-none focus:ring-2 focus:ring-primary shadow-xs" type="button">
+<span class="material-symbols-outlined text-[16px] text-text-muted" data-icon="undo">undo</span>
+Reabrir
+</button>
+<button class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-border bg-surface text-text-muted hover:text-error hover:border-error/40 hover:bg-error-container/10 font-body text-xs transition-colors focus:outline-none focus:ring-2 focus:ring-error shadow-xs" title="Mover a la papelera" type="button">
+<span class="material-symbols-outlined text-[16px]" data-icon="delete">delete</span>
+Mover a la papelera
+</button>
+</div>
+</article>
+</div>
+</section>
+<!-- Grupo 3: Esta semana -->
+<section aria-labelledby="heading-date-this-week" class="space-y-space-md">
+<div class="flex items-center gap-space-sm">
+<span class="material-symbols-outlined text-text-muted text-[20px]" data-icon="calendar_today">calendar_today</span>
+<h2 class="font-heading text-heading text-text" id="heading-date-this-week">Esta semana</h2>
+<span class="text-caption font-caption text-text-muted">(2 tareas)</span>
+</div>
+<div class="space-y-space-sm">
+<!-- Tarea 5: Q3 Laboral -->
+<article class="bg-surface rounded-xl border border-border border-l-4 border-l-[#B45309] p-space-md shadow-sm hover:shadow-md transition-shadow duration-150 flex flex-col md:flex-row md:items-center justify-between gap-space-md">
+<div class="flex items-start gap-space-md flex-1">
+<span aria-label="Tarea finalizada" class="text-success mt-0.5 flex-shrink-0">
+<span class="material-symbols-outlined text-[24px]" data-icon="check_circle" data-weight="fill" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</span>
+<div class="space-y-1.5 flex-1">
+<p class="font-body text-text-muted line-through text-base leading-snug">
+Coordinar logística y catering para evento de innovación
+</p>
+<div class="flex flex-wrap items-center gap-space-sm">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-[#FFFBEB] text-[#B45309] border border-[#B45309]/20">
+Delegar
+</span>
+<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-[#7C3AED]/10 text-[#7C3AED] border border-[#7C3AED]/20">
+Laboral
+</span>
+<span class="inline-flex items-center gap-1 text-caption font-caption text-text-muted">
+<span class="material-symbols-outlined text-[15px]" data-icon="schedule">schedule</span>
+Completada lun 24, 16:45
+</span>
+</div>
+</div>
+</div>
+<div class="flex items-center gap-space-sm self-end md:self-center flex-shrink-0 pt-2 md:pt-0 border-t md:border-t-0 border-border w-full md:w-auto justify-end">
+<button class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-border bg-surface text-text hover:bg-surface-alt font-body-strong text-xs transition-colors focus:outline-none focus:ring-2 focus:ring-primary shadow-xs" type="button">
+<span class="material-symbols-outlined text-[16px] text-text-muted" data-icon="undo">undo</span>
+Reabrir
+</button>
+<button class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-border bg-surface text-text-muted hover:text-error hover:border-error/40 hover:bg-error-container/10 font-body text-xs transition-colors focus:outline-none focus:ring-2 focus:ring-error shadow-xs" title="Mover a la papelera" type="button">
+<span class="material-symbols-outlined text-[16px]" data-icon="delete">delete</span>
+Mover a la papelera
+</button>
+</div>
+</article>
+<!-- Tarea 6: Q4 Personal -->
+<article class="bg-surface rounded-xl border border-border border-l-4 border-l-[#475569] p-space-md shadow-sm hover:shadow-md transition-shadow duration-150 flex flex-col md:flex-row md:items-center justify-between gap-space-md">
+<div class="flex items-start gap-space-md flex-1">
+<span aria-label="Tarea finalizada" class="text-success mt-0.5 flex-shrink-0">
+<span class="material-symbols-outlined text-[24px]" data-icon="check_circle" data-weight="fill" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</span>
+<div class="space-y-1.5 flex-1">
+<p class="font-body text-text-muted line-through text-base leading-snug">
+Dar de baja suscripción de prueba no utilizada
+</p>
+<div class="flex flex-wrap items-center gap-space-sm">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-[#F8FAFC] text-[#475569] border border-[#475569]/30">
+Eliminar
+</span>
+<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-[#0D9488]/10 text-[#0D9488] border border-[#0D9488]/20">
+Personal
+</span>
+<span class="inline-flex items-center gap-1 text-caption font-caption text-text-muted">
+<span class="material-symbols-outlined text-[15px]" data-icon="schedule">schedule</span>
+Completada lun 24, 11:20
+</span>
+</div>
+</div>
+</div>
+<div class="flex items-center gap-space-sm self-end md:self-center flex-shrink-0 pt-2 md:pt-0 border-t md:border-t-0 border-border w-full md:w-auto justify-end">
+<button class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-border bg-surface text-text hover:bg-surface-alt font-body-strong text-xs transition-colors focus:outline-none focus:ring-2 focus:ring-primary shadow-xs" type="button">
+<span class="material-symbols-outlined text-[16px] text-text-muted" data-icon="undo">undo</span>
+Reabrir
+</button>
+<button class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-border bg-surface text-text-muted hover:text-error hover:border-error/40 hover:bg-error-container/10 font-body text-xs transition-colors focus:outline-none focus:ring-2 focus:ring-error shadow-xs" title="Mover a la papelera" type="button">
+<span class="material-symbols-outlined text-[16px]" data-icon="delete">delete</span>
+Mover a la papelera
+</button>
+</div>
+</article>
+</div>
+</section>
+<!-- Pie de lista y Cargar más -->
+<div class="pt-space-md flex flex-col items-center justify-center space-y-space-sm">
+<button class="inline-flex items-center gap-space-sm px-space-xl py-space-sm rounded-lg bg-surface border border-border text-text font-body-strong text-sm shadow-xs hover:bg-surface-alt hover:border-slate-400 active:scale-95 transition-all" type="button">
+<span>Cargar más tareas</span>
+<span class="material-symbols-outlined text-[18px]" data-icon="expand_more">expand_more</span>
+</button>
+<p class="font-caption text-caption text-text-muted">
+Mostrando 6 de 24 tareas completadas
+</p>
+</div></div>
+<!-- 5. Sección de documentación o vista complementaria de Estado Vacío (Empty State) -->
+<div class="pt-space-xl border-t border-border">
+<div class="mb-space-md flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-text-muted text-[20px]" data-icon="visibility">visibility</span>
+<h3 class="font-heading text-heading text-text">Vista previa del estado vacío (Empty State)</h3>
+</div>
+<span class="text-caption font-caption text-text-muted bg-surface-container px-2 py-0.5 rounded border border-border">Referencia visual</span>
+</div>
+<div class="p-space-xl bg-surface rounded-2xl border border-dashed border-border flex flex-col items-center justify-center text-center max-w-2xl mx-auto shadow-xs">
+<div class="w-16 h-16 rounded-full bg-surface-container flex items-center justify-center text-text-muted mb-space-md border border-border">
+<span class="material-symbols-outlined text-[36px]" data-icon="inbox">inbox</span>
+</div>
+<h4 class="font-heading text-heading text-text mb-space-xs">
+          Aún no has completado ninguna tarea
+        </h4>
+<p class="font-body text-text-muted max-w-md mb-space-lg text-sm">
+          Cuando completes tareas en tu tablero de prioridades Eisenhower, aparecerán aquí para que puedas revisarlas o reabrirlas cuando lo necesites.
+        </p>
+<a class="inline-flex items-center gap-space-xs px-space-lg py-space-sm rounded-lg bg-primary text-on-primary font-body-strong text-sm shadow-sm hover:bg-primary-container active:scale-95 transition-all" href="#">
+<span class="material-symbols-outlined text-[18px]" data-icon="grid_view">grid_view</span>
+          Ir al Tablero
+        </a>
+</div>
+</div>
+</main>
+<!-- Pie de Página -->
+<footer class="mt-auto border-t border-border bg-surface py-space-lg px-space-lg"><div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-space-md text-caption font-caption text-text-muted"><p>© 2025 MyTasks · Enfoque estructurado con la matriz de Dwight D. Eisenhower</p><div class="flex items-center gap-space-md"><a class="hover:text-primary transition-colors" href="#">Privacidad</a><span>·</span><a class="hover:text-primary transition-colors" href="#">Términos</a><span>·</span><a class="hover:text-primary transition-colors" href="#">Ayuda</a></div></div></footer>
+</body></html>

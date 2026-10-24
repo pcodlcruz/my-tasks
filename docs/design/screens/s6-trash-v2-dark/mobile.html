@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Papelera - MyTasks</title>
+<!-- Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Inter Font -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "tertiary-container": "#ad91ff",
+            "on-secondary-fixed": "#00201c",
+            "on-secondary-container": "#004d44",
+            "on-primary-container": "#003a6b",
+            "surface-container-low": "#111c2d",
+            "on-tertiary-container": "#40208d",
+            "surface-variant": "#2a3548",
+            "secondary-fixed": "#62fae3",
+            "primary": "#a4c9ff",
+            "outline-variant": "#414751",
+            "on-surface": "#d8e3fb",
+            "inverse-on-surface": "#263143",
+            "tertiary-fixed": "#e8ddff",
+            "surface-tint": "#a4c9ff",
+            "surface-container": "#152031",
+            "secondary": "#44e2cd",
+            "on-tertiary": "#381385",
+            "on-surface-variant": "#c1c7d3",
+            "surface": "#081425",
+            "on-primary-fixed": "#001c39",
+            "inverse-primary": "#0060ac",
+            "tertiary": "#cebdff",
+            "inverse-surface": "#d8e3fb",
+            "primary-fixed-dim": "#a4c9ff",
+            "primary-fixed": "#d4e3ff",
+            "surface-dim": "#081425",
+            "surface-container-highest": "#2a3548",
+            "on-tertiary-fixed-variant": "#4f319c",
+            "on-secondary-fixed-variant": "#005047",
+            "on-secondary": "#003731",
+            "surface-bright": "#2f3a4c",
+            "error-container": "#93000a",
+            "surface-container-high": "#1f2a3c",
+            "on-tertiary-fixed": "#21005e",
+            "primary-container": "#60a5fa",
+            "secondary-container": "#03c6b2",
+            "background": "#081425",
+            "on-primary-fixed-variant": "#004883",
+            "on-error-container": "#ffdad6",
+            "secondary-fixed-dim": "#3cddc7",
+            "outline": "#8b919d",
+            "on-background": "#d8e3fb",
+            "error": "#ffb4ab",
+            "surface-container-lowest": "#040e1f",
+            "on-primary": "#00315d",
+            "on-error": "#690005",
+            "tertiary-fixed-dim": "#cebdff"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.125rem",
+            "lg": "0.25rem",
+            "xl": "0.5rem",
+            "full": "0.75rem"
+          },
+          "spacing": {
+            "margin": "1.5rem",
+            "space-lg": "1rem",
+            "space-xl": "2rem",
+            "space-xs": "0.25rem",
+            "space-sm": "0.5rem",
+            "space-md": "0.75rem",
+            "space-2xl": "3rem",
+            "gutter": "1.5rem"
+          },
+          "fontFamily": {
+            "body-strong": ["Inter"],
+            "heading": ["Inter"],
+            "display": ["Inter"],
+            "body": ["Inter"],
+            "caption": ["Inter"]
+          },
+          "fontSize": {
+            "body-strong": ["16px", { "lineHeight": "24px", "fontWeight": "600" }],
+            "heading": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+            "display": ["28px", { "lineHeight": "36px", "fontWeight": "700" }],
+            "body": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+            "caption": ["13px", { "lineHeight": "18px", "fontWeight": "400" }]
+          }
+        },
+      },
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      line-height: 1;
+    }
+    .material-symbols-outlined.fill {
+      font-variation-settings: 'FILL' 1;
+    }
+    /* Touch target helpers */
+    .touch-target {
+      min-height: 44px;
+      min-width: 44px;
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface font-body antialiased min-h-screen pb-28 selection:bg-primary-container selection:text-on-primary-container">
+<!-- TOP APP BAR (Shared Component Anchor) -->
+<header class="sticky top-0 z-40 bg-surface dark:bg-surface shadow-sm dark:shadow-sm">
+<div class="flex justify-between items-center w-full px-margin py-space-sm max-w-7xl mx-auto">
+<!-- Leading: Logo & Headline -->
+<div class="flex items-center gap-space-sm">
+<span class="material-symbols-outlined text-primary dark:text-primary text-[26px]">checklist</span>
+<span class="text-heading font-heading text-on-surface dark:text-on-surface font-semibold tracking-tight">MyTasks</span>
+</div>
+<!-- Trailing: User Profile & Logout -->
+<div class="flex items-center gap-space-md">
+<!-- User Avatar Circle -->
+<button aria-label="Perfil de Ana Cruz" class="touch-target w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-white text-[13px] font-heading font-bold shadow-sm active:scale-95 transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-surface" title="Perfil de Ana Cruz" type="button">
+          AC
+        </button>
+<!-- Logout Action Button -->
+<button class="touch-target flex items-center gap-space-xs px-space-sm py-1.5 rounded-lg text-on-surface-variant dark:text-on-surface-variant font-body hover:bg-surface-container dark:hover:bg-surface-container hover:text-on-surface dark:hover:text-on-surface active:scale-95 transition-all duration-150 focus:outline-none focus:ring-1 focus:ring-outline" type="button">
+<span class="material-symbols-outlined text-[18px]">logout</span>
+<span class="text-caption font-caption hidden xs:inline">Cerrar sesión</span>
+</button>
+</div>
+</div>
+</header>
+<!-- MAIN CANVAS / CONTENT -->
+<main class="w-full max-w-md mx-auto px-margin pt-space-lg space-y-space-lg">
+<!-- Title & Top Action Header -->
+<div class="flex items-center justify-between gap-space-md">
+<div class="flex items-baseline gap-space-sm">
+<h1 class="text-display font-display text-on-surface tracking-tight">Papelera</h1>
+<span class="text-caption font-caption text-on-surface-variant bg-surface-container-high px-space-sm py-0.5 rounded-full border border-outline-variant">(6 tareas)</span>
+</div>
+<!-- Action: Empty Trash -->
+<button class="touch-target inline-flex items-center gap-1.5 px-space-sm py-1.5 text-caption font-body-strong text-error hover:bg-error-container/20 rounded-lg border border-error/30 active:scale-95 transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-error" type="button">
+<span class="material-symbols-outlined text-[18px]">delete_sweep</span>
+<span>Vaciar</span>
+</button>
+</div>
+<!-- Prominent Warning / Info Banner -->
+<div aria-label="Aviso de retención" class="bg-surface-container-low border border-primary/20 rounded-xl p-space-md flex gap-space-md items-start shadow-sm" role="region">
+<span class="material-symbols-outlined text-primary text-[22px] mt-0.5 shrink-0">schedule</span>
+<div class="space-y-0.5">
+<p class="text-caption font-body-strong text-on-surface">Las tareas se eliminan automáticamente a los 30 días</p>
+<p class="text-caption font-caption text-on-surface-variant">Los elementos descartados pueden restaurarse a su cuadrante antes del plazo límite.</p>
+</div>
+</div>
+<!-- Search Bar -->
+<div class="relative w-full">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-[20px] pointer-events-none">search</span>
+<input aria-label="Buscar en la papelera" class="w-full bg-surface-container-high border border-outline-variant text-on-surface placeholder:text-outline text-body font-body rounded-lg pl-10 pr-space-md py-2.5 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all" placeholder="Buscar en la papelera..." type="search"/>
+</div>
+<!-- Scope Filter Chips -->
+<div aria-label="Filtro por ámbito" class="flex items-center gap-space-sm overflow-x-auto pb-1 no-scrollbar" role="tablist">
+<!-- Active Chip: Todas -->
+<button aria-selected="true" class="touch-target inline-flex items-center justify-center px-space-md py-1.5 bg-primary-container text-on-primary-container font-body-strong text-caption rounded-full shadow-sm active:scale-95 transition-all duration-150" role="tab" type="button">
+        Todas (6)
+      </button>
+<!-- Inactive Chip: Laboral -->
+<button aria-selected="false" class="touch-target inline-flex items-center gap-1 px-space-md py-1.5 bg-surface-container-high border border-outline-variant text-on-surface font-caption rounded-full hover:bg-surface-variant active:scale-95 transition-all duration-150" role="tab" type="button">
+<span class="w-2 h-2 rounded-full bg-[#C084FC]"></span>
+<span>Laboral (4)</span>
+</button>
+<!-- Inactive Chip: Personal -->
+<button aria-selected="false" class="touch-target inline-flex items-center gap-1 px-space-md py-1.5 bg-surface-container-high border border-outline-variant text-on-surface font-caption rounded-full hover:bg-surface-variant active:scale-95 transition-all duration-150" role="tab" type="button">
+<span class="w-2 h-2 rounded-full bg-[#2DD4BF]"></span>
+<span>Personal (2)</span>
+</button>
+</div>
+<!-- Trash Task Cards Feed -->
+<div class="space-y-space-md">
+<!-- CARD 1: Q1 (Hacer ahora - Borde Rojo) -->
+<article class="bg-surface-container-high border-l-4 border-l-error border border-outline-variant rounded-xl p-space-lg shadow-sm space-y-space-md hover:border-outline transition-colors">
+<!-- Badges Cluster -->
+<div class="flex flex-wrap items-center justify-between gap-space-xs">
+<div class="flex flex-wrap items-center gap-space-xs">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-caption font-caption font-semibold bg-error-container/30 text-error border border-error/30">
+<span class="material-symbols-outlined text-[14px]">priority_high</span>
+              Cuadrante I: Hacer ahora
+            </span>
+<span class="px-2 py-0.5 rounded text-caption font-caption bg-surface-variant text-on-surface-variant">
+              Activa
+            </span>
+</div>
+<!-- Ámbito Chip -->
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-caption font-caption font-medium bg-[#A855F7]/15 text-[#C084FC]">
+<span class="material-symbols-outlined text-[13px]">domain</span>
+            Laboral
+          </span>
+</div>
+<!-- Task Content -->
+<div class="space-y-1">
+<h2 class="text-body-strong font-body-strong text-on-surface">Revisar logs de servidor heredado</h2>
+<div class="flex items-center gap-1 text-on-surface-variant text-caption font-caption">
+<span class="material-symbols-outlined text-[16px] text-error">hourglass_bottom</span>
+<span class="text-error font-medium">Se eliminará en 5 días</span>
+</div>
+</div>
+<!-- Actions -->
+<div class="grid grid-cols-2 gap-space-sm pt-space-xs border-t border-outline-variant/60">
+<button class="touch-target inline-flex items-center justify-center gap-1.5 px-space-sm py-2 rounded-lg bg-surface-variant hover:bg-outline-variant text-on-surface text-caption font-body-strong active:scale-95 transition-all" type="button">
+<span class="material-symbols-outlined text-[18px]">restore</span>
+            Restaurar
+          </button>
+<button class="touch-target inline-flex items-center justify-center gap-1.5 px-space-sm py-2 rounded-lg text-error hover:bg-error-container/20 border border-error/30 text-caption font-body-strong active:scale-95 transition-all" type="button">
+<span class="material-symbols-outlined text-[18px]">delete_forever</span>
+            Eliminar
+          </button>
+</div>
+</article>
+<!-- CARD 2: Q2 (Planificar - Borde Azul) -->
+<article class="bg-surface-container-high border-l-4 border-l-primary-container border border-outline-variant rounded-xl p-space-lg shadow-sm space-y-space-md hover:border-outline transition-colors">
+<!-- Badges Cluster -->
+<div class="flex flex-wrap items-center justify-between gap-space-xs">
+<div class="flex flex-wrap items-center gap-space-xs">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-caption font-caption font-semibold bg-primary/10 text-primary border border-primary/20">
+<span class="material-symbols-outlined text-[14px]">event_upcoming</span>
+              Cuadrante II: Planificar
+            </span>
+<span class="px-2 py-0.5 rounded text-caption font-caption bg-surface-variant text-on-surface-variant">
+              Activa
+            </span>
+</div>
+<!-- Ámbito Chip -->
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-caption font-caption font-medium bg-[#14B8A6]/15 text-[#2DD4BF]">
+<span class="material-symbols-outlined text-[13px]">person</span>
+            Personal
+          </span>
+</div>
+<!-- Task Content -->
+<div class="space-y-1">
+<h2 class="text-body-strong font-body-strong text-on-surface">Planificar renovación de póliza</h2>
+<div class="flex items-center gap-1 text-on-surface-variant text-caption font-caption">
+<span class="material-symbols-outlined text-[16px]">schedule</span>
+<span>Se eliminará en 12 días</span>
+</div>
+</div>
+<!-- Actions -->
+<div class="grid grid-cols-2 gap-space-sm pt-space-xs border-t border-outline-variant/60">
+<button class="touch-target inline-flex items-center justify-center gap-1.5 px-space-sm py-2 rounded-lg bg-surface-variant hover:bg-outline-variant text-on-surface text-caption font-body-strong active:scale-95 transition-all" type="button">
+<span class="material-symbols-outlined text-[18px]">restore</span>
+            Restaurar
+          </button>
+<button class="touch-target inline-flex items-center justify-center gap-1.5 px-space-sm py-2 rounded-lg text-error hover:bg-error-container/20 border border-error/30 text-caption font-body-strong active:scale-95 transition-all" type="button">
+<span class="material-symbols-outlined text-[18px]">delete_forever</span>
+            Eliminar
+          </button>
+</div>
+</article>
+<!-- CARD 3: Q3 (Delegar - Borde Ámbar) -->
+<article class="bg-surface-container-high border-l-4 border-l-amber-400 border border-outline-variant rounded-xl p-space-lg shadow-sm space-y-space-md hover:border-outline transition-colors">
+<!-- Badges Cluster -->
+<div class="flex flex-wrap items-center justify-between gap-space-xs">
+<div class="flex flex-wrap items-center gap-space-xs">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-caption font-caption font-semibold bg-amber-400/10 text-amber-300 border border-amber-400/20">
+<span class="material-symbols-outlined text-[14px]">group</span>
+              Cuadrante III: Delegar
+            </span>
+<span class="px-2 py-0.5 rounded text-caption font-caption bg-surface-variant text-on-surface-variant">
+              Completada
+            </span>
+</div>
+<!-- Ámbito Chip -->
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-caption font-caption font-medium bg-[#A855F7]/15 text-[#C084FC]">
+<span class="material-symbols-outlined text-[13px]">domain</span>
+            Laboral
+          </span>
+</div>
+<!-- Task Content -->
+<div class="space-y-1">
+<h2 class="text-body-strong font-body-strong text-on-surface">Enviar recordatorio de facturas vencidas</h2>
+<div class="flex items-center gap-1 text-on-surface-variant text-caption font-caption">
+<span class="material-symbols-outlined text-[16px]">schedule</span>
+<span>Se eliminará en 18 días</span>
+</div>
+</div>
+<!-- Actions -->
+<div class="grid grid-cols-2 gap-space-sm pt-space-xs border-t border-outline-variant/60">
+<button class="touch-target inline-flex items-center justify-center gap-1.5 px-space-sm py-2 rounded-lg bg-surface-variant hover:bg-outline-variant text-on-surface text-caption font-body-strong active:scale-95 transition-all" type="button">
+<span class="material-symbols-outlined text-[18px]">restore</span>
+            Restaurar
+          </button>
+<button class="touch-target inline-flex items-center justify-center gap-1.5 px-space-sm py-2 rounded-lg text-error hover:bg-error-container/20 border border-error/30 text-caption font-body-strong active:scale-95 transition-all" type="button">
+<span class="material-symbols-outlined text-[18px]">delete_forever</span>
+            Eliminar
+          </button>
+</div>
+</article>
+<!-- CARD 4: Q4 (Descartar - Borde Pizarra) -->
+<article class="bg-surface-container-high border-l-4 border-l-slate-400 border border-outline-variant rounded-xl p-space-lg shadow-sm space-y-space-md hover:border-outline transition-colors">
+<!-- Badges Cluster -->
+<div class="flex flex-wrap items-center justify-between gap-space-xs">
+<div class="flex flex-wrap items-center gap-space-xs">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-caption font-caption font-semibold bg-slate-400/10 text-slate-300 border border-slate-400/20">
+<span class="material-symbols-outlined text-[14px]">archive</span>
+              Cuadrante IV: Descartar
+            </span>
+<span class="px-2 py-0.5 rounded text-caption font-caption bg-surface-variant text-on-surface-variant">
+              Activa
+            </span>
+</div>
+<!-- Ámbito Chip -->
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-caption font-caption font-medium bg-[#14B8A6]/15 text-[#2DD4BF]">
+<span class="material-symbols-outlined text-[13px]">person</span>
+            Personal
+          </span>
+</div>
+<!-- Task Content -->
+<div class="space-y-1">
+<h2 class="text-body-strong font-body-strong text-on-surface">Comprar accesorios ergonómicos</h2>
+<div class="flex items-center gap-1 text-on-surface-variant text-caption font-caption">
+<span class="material-symbols-outlined text-[16px]">schedule</span>
+<span>Se eliminará en 27 días</span>
+</div>
+</div>
+<!-- Actions -->
+<div class="grid grid-cols-2 gap-space-sm pt-space-xs border-t border-outline-variant/60">
+<button class="touch-target inline-flex items-center justify-center gap-1.5 px-space-sm py-2 rounded-lg bg-surface-variant hover:bg-outline-variant text-on-surface text-caption font-body-strong active:scale-95 transition-all" type="button">
+<span class="material-symbols-outlined text-[18px]">restore</span>
+            Restaurar
+          </button>
+<button class="touch-target inline-flex items-center justify-center gap-1.5 px-space-sm py-2 rounded-lg text-error hover:bg-error-container/20 border border-error/30 text-caption font-body-strong active:scale-95 transition-all" type="button">
+<span class="material-symbols-outlined text-[18px]">delete_forever</span>
+            Eliminar
+          </button>
+</div>
+</article>
+</div>
+<!-- Pagination & Informative Counter -->
+<div class="pt-space-sm pb-space-lg flex flex-col items-center gap-space-md text-center">
+<button class="touch-target w-full inline-flex items-center justify-center gap-2 py-3 px-space-lg bg-surface-container-high border border-outline-variant hover:bg-surface-variant text-on-surface font-body-strong text-caption rounded-xl active:scale-98 transition-all duration-150" type="button">
+<span>Cargar más tareas</span>
+<span class="material-symbols-outlined text-[18px]">expand_more</span>
+</button>
+<p class="text-caption font-caption text-on-surface-variant">
+        Mostrando 4 de 6 tareas en papelera
+      </p>
+</div>
+</main>
+<!-- BOTTOM NAVIGATION BAR (Shared Component Anchor) -->
+<!-- Contextually maps to Papelera as active -->
+<nav aria-label="Navegación principal" class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-margin py-space-xs bg-surface-container dark:bg-surface-container shadow-md dark:shadow-md">
+<!-- Tab 1: Tablero (Inactive) -->
+<a class="touch-target flex flex-col items-center justify-center text-on-surface-variant dark:text-on-surface-variant px-space-md py-space-xs hover:bg-surface-container-high dark:hover:bg-surface-container-high hover:text-on-surface dark:hover:text-on-surface active:scale-95 transition-transform duration-150" href="#">
+<span class="material-symbols-outlined text-[24px]">grid_view</span>
+<span class="text-caption font-caption">Tablero</span>
+</a>
+<!-- Tab 2: Historial (Inactive) -->
+<a class="touch-target flex flex-col items-center justify-center text-on-surface-variant dark:text-on-surface-variant px-space-md py-space-xs hover:bg-surface-container-high dark:hover:bg-surface-container-high hover:text-on-surface dark:hover:text-on-surface active:scale-95 transition-transform duration-150" href="#">
+<span class="material-symbols-outlined text-[24px]">history</span>
+<span class="text-caption font-caption">Historial</span>
+</a>
+<!-- Tab 3: Papelera (ACTIVE) -->
+<a aria-current="page" class="touch-target flex flex-col items-center justify-center bg-primary-container/20 dark:bg-primary-container/20 text-primary dark:text-primary rounded-xl px-space-md py-space-xs active:scale-95 transition-transform duration-150" href="#">
+<span class="material-symbols-outlined text-[24px]" style="font-variation-settings: 'FILL' 1;">delete</span>
+<span class="text-caption font-caption font-semibold">Papelera</span>
+</a>
+</nav>
+</body></html>

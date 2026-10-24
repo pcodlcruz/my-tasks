@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html class="dark" lang="es">
+<head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+  <title>S4 Formulario de tarea oscuro - MyTasks (Móvil)</title>
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin=""/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <!-- Material Symbols Outlined -->
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+  <!-- Tailwind CSS v3 -->
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              bg: "#0B1120",
+              modal: "#1E293B",
+              field: "#0F172A",
+              border: "#334155",
+              text: "#F1F5F9",
+              muted: "#94A3B8",
+              primary: "#60A5FA",
+              primaryText: "#0F172A",
+              error: "#F87171",
+              work: "#A78BFA",
+              personal: "#2DD4BF"
+            }
+          },
+          fontFamily: {
+            sans: ["Inter", "-apple-system", "BlinkMacSystemFont", "Segoe UI", "Roboto", "sans-serif"]
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    /* Asegurar que la tipografía y suavizado sean nítidos */
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+    /* Estilos personalizados para inputs y scroll */
+    ::-webkit-scrollbar {
+      width: 4px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #1E293B;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #334155;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body class="bg-[#0B1120] text-[#F1F5F9] min-h-screen relative overflow-hidden flex flex-col justify-between antialiased selection:bg-[#60A5FA] selection:text-[#0F172A]">
+
+  <!-- ======================================================== -->
+  <!-- CAPA DE FONDO: TABLERO MÓVIL OSCURECIDO Y DESENFOCADO   -->
+  <!-- ======================================================== -->
+  <div aria-hidden="true" class="absolute inset-0 flex flex-col justify-between filter blur-[2px] opacity-30 pointer-events-none select-none z-0">
+    <!-- Cabecera de fondo -->
+    <header class="h-14 border-b border-[#334155] bg-[#0F172A] px-4 flex items-center justify-between">
+      <div class="flex items-center gap-2">
+        <span class="material-symbols-outlined text-[#60A5FA] text-2xl">checklist</span>
+        <span class="font-bold text-lg text-[#F1F5F9] tracking-tight">MyTasks</span>
+      </div>
+      <div class="flex items-center gap-2.5">
+        <div class="w-8 h-8 rounded-full bg-[#60A5FA] text-[#0F172A] flex items-center justify-center font-bold text-xs ring-2 ring-[#334155]">
+          AC
+        </div>
+        <button class="text-xs text-[#94A3B8] font-medium py-1 px-1.5 rounded hover:text-[#F1F5F9]">
+          Cerrar sesión
+        </button>
+      </div>
+    </header>
+
+    <!-- Contenido simulado del tablero detrás -->
+    <main class="p-4 space-y-3 flex-1 overflow-hidden">
+      <div class="flex items-center justify-between">
+        <h1 class="text-lg font-bold text-[#F1F5F9]">Tablero Eisenhower</h1>
+        <span class="text-xs bg-[#1E293B] text-[#94A3B8] px-2 py-0.5 rounded-full">7 tareas</span>
+      </div>
+
+      <!-- Cuadrante Hacer Ahora -->
+      <div class="bg-[#1E293B] border-l-4 border-[#EF4444] rounded-lg p-3">
+        <div class="flex justify-between items-center mb-1">
+          <span class="text-xs font-bold text-[#EF4444] uppercase tracking-wider">Hacer ahora</span>
+          <span class="text-[11px] text-[#94A3B8]">Hoy</span>
+        </div>
+        <p class="text-xs text-[#F1F5F9] font-medium">Revisar caída de servidor en producción</p>
+      </div>
+
+      <!-- Cuadrante Planificar -->
+      <div class="bg-[#1E293B] border-l-4 border-[#60A5FA] rounded-lg p-3">
+        <div class="flex justify-between items-center mb-1">
+          <span class="text-xs font-bold text-[#60A5FA] uppercase tracking-wider">Planificar</span>
+          <span class="text-[11px] text-[#94A3B8]">Jueves</span>
+        </div>
+        <p class="text-xs text-[#F1F5F9] font-medium">Diseñar arquitectura v2</p>
+      </div>
+    </main>
+
+    <!-- Barra de navegación inferior simulada -->
+    <nav class="h-16 border-t border-[#334155] bg-[#0F172A] px-6 flex items-center justify-around">
+      <div class="flex flex-col items-center gap-1 text-[#60A5FA]">
+        <span class="material-symbols-outlined text-xl">grid_view</span>
+        <span class="text-[10px] font-medium">Tablero</span>
+      </div>
+      <div class="flex flex-col items-center gap-1 text-[#94A3B8]">
+        <span class="material-symbols-outlined text-xl">history</span>
+        <span class="text-[10px] font-medium">Historial</span>
+      </div>
+      <div class="flex flex-col items-center gap-1 text-[#94A3B8]">
+        <span class="material-symbols-outlined text-xl">delete</span>
+        <span class="text-[10px] font-medium">Papelera</span>
+      </div>
+    </nav>
+  </div>
+
+  <!-- ======================================================== -->
+  <!-- CAPA OVERLAY OSCURA                                     -->
+  <!-- ======================================================== -->
+  <div class="fixed inset-0 bg-[#0B1120]/80 backdrop-blur-sm z-10 transition-opacity"></div>
+
+  <!-- ======================================================== -->
+  <!-- MODAL NUEVA TAREA (A PANTALLA CASI COMPLETA MÓVIL)     -->
+  <!-- ======================================================== -->
+  <div class="fixed inset-0 z-20 flex flex-col justify-end pointer-events-none">
+    
+    <!-- Contenedor del Bottom Sheet / Modal a pantalla casi completa -->
+    <div 
+      role="dialog" 
+      aria-modal="true" 
+      aria-labelledby="modal-title"
+      class="w-full bg-[#1E293B] border-t border-x border-[#334155] rounded-t-2xl shadow-2xl flex flex-col max-h-[94vh] pointer-events-auto overflow-hidden animate-in slide-in-from-bottom-6 duration-200"
+    >
+      
+      <!-- Tirador superior / Drag Handle -->
+      <div class="w-full flex justify-center pt-2.5 pb-1">
+        <div class="w-10 h-1.5 bg-[#475569] rounded-full"></div>
+      </div>
+
+      <!-- Cabecera del Modal -->
+      <div class="flex items-center justify-between px-5 py-3 border-b border-[#334155]">
+        <div class="flex items-center gap-2.5">
+          <span class="material-symbols-outlined text-[#60A5FA] text-2xl" data-icon="add_task">add_task</span>
+          <h2 id="modal-title" class="text-lg font-bold text-[#F1F5F9] tracking-tight">Nueva tarea</h2>
+        </div>
+        <button 
+          type="button" 
+          aria-label="Cerrar modal" 
+          class="w-11 h-11 flex items-center justify-center rounded-lg text-[#94A3B8] hover:text-[#F1F5F9] hover:bg-[#334155]/60 active:scale-95 transition-all focus:outline-none focus:ring-2 focus:ring-[#60A5FA]"
+        >
+          <span class="material-symbols-outlined text-22px">close</span>
+        </button>
+      </div>
+
+      <!-- Cuerpo del Formulario (Scrollable) -->
+      <form class="p-5 overflow-y-auto space-y-4 flex-1">
+        
+        <!-- Campo: Título -->
+        <div>
+          <div class="flex justify-between items-center mb-1.5">
+            <label for="task-title" class="text-sm font-semibold text-[#F1F5F9] flex items-center gap-1">
+              Título <span class="text-[#60A5FA]" aria-hidden="true">*</span>
+            </label>
+            <span class="text-xs text-[#94A3B8] font-mono">0/200</span>
+          </div>
+          <input 
+            type="text" 
+            id="task-title" 
+            name="title" 
+            placeholder="Ej. Revisar informe de balance trimestral..."
+            required 
+            class="w-full h-11 px-3.5 bg-[#0F172A] text-[#F1F5F9] placeholder-[#64748B] text-sm rounded-lg border border-[#334155] focus:outline-none focus:ring-2 focus:ring-[#60A5FA] focus:border-transparent transition-all"
+          />
+        </div>
+
+        <!-- Campo: Descripción -->
+        <div>
+          <div class="flex justify-between items-center mb-1.5">
+            <label for="task-desc" class="text-sm font-semibold text-[#F1F5F9]">
+              Descripción <span class="text-xs font-normal text-[#94A3B8]">(Opcional)</span>
+            </label>
+            <span class="text-xs text-[#94A3B8] font-mono">0/2000</span>
+          </div>
+          <textarea 
+            id="task-desc" 
+            name="description" 
+            rows="3" 
+            placeholder="Añade detalles, notas o enlaces de apoyo para contextualizar la tarea..."
+            class="w-full p-3.5 bg-[#0F172A] text-[#F1F5F9] placeholder-[#64748B] text-sm rounded-lg border border-[#334155] focus:outline-none focus:ring-2 focus:ring-[#60A5FA] focus:border-transparent transition-all resize-none"
+          ></textarea>
+        </div>
+
+        <!-- Bloque: Criterios de Priorización Eisenhower -->
+        <div class="bg-[#0F172A] border border-[#334155] rounded-xl p-3.5 space-y-3">
+          <div class="flex items-center gap-1.5">
+            <span class="material-symbols-outlined text-xs text-[#60A5FA]">tune</span>
+            <span class="text-[11px] font-bold tracking-wider uppercase text-[#94A3B8]">Priorización Eisenhower</span>
+          </div>
+
+          <div class="space-y-2">
+            <!-- Interruptor: ¿Es Urgente? (Inactivo) -->
+            <div class="flex items-center justify-between bg-[#1E293B] border border-[#334155]/80 rounded-lg px-3.5 min-h-[48px]">
+              <div class="flex items-center gap-2.5">
+                <span class="material-symbols-outlined text-[#94A3B8] text-[20px]" data-icon="alarm">alarm</span>
+                <div>
+                  <span class="text-sm font-medium text-[#F1F5F9] block leading-tight">¿Es Urgente?</span>
+                  <span class="text-[11px] text-[#94A3B8] leading-none">Plazo inmediato o crítico</span>
+                </div>
+              </div>
+              <button 
+                type="button" 
+                role="switch" 
+                aria-checked="false" 
+                class="relative inline-flex h-7 w-12 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent bg-[#334155] transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-[#60A5FA] focus:ring-offset-2 focus:ring-offset-[#1E293B]"
+              >
+                <span class="sr-only">Activar urgencia</span>
+                <span class="translate-x-0 pointer-events-none inline-block h-6 w-6 transform rounded-full bg-[#94A3B8] shadow-md ring-0 transition duration-200 ease-in-out"></span>
+              </button>
+            </div>
+
+            <!-- Interruptor: ¿Es Importante? (Activo) -->
+            <div class="flex items-center justify-between bg-[#1E293B] border border-[#334155]/80 rounded-lg px-3.5 min-h-[48px]">
+              <div class="flex items-center gap-2.5">
+                <span class="material-symbols-outlined text-[#60A5FA] text-[20px]" data-icon="star">star</span>
+                <div>
+                  <span class="text-sm font-medium text-[#F1F5F9] block leading-tight">¿Es Importante?</span>
+                  <span class="text-[11px] text-[#94A3B8] leading-none">Alto impacto o valor estratégico</span>
+                </div>
+              </div>
+              <button 
+                type="button" 
+                role="switch" 
+                aria-checked="true" 
+                class="relative inline-flex h-7 w-12 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent bg-[#60A5FA] transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-[#60A5FA] focus:ring-offset-2 focus:ring-offset-[#1E293B]"
+              >
+                <span class="sr-only">Desactivar importancia</span>
+                <span class="translate-x-5 pointer-events-none inline-block h-6 w-6 transform rounded-full bg-[#0F172A] shadow-md ring-0 transition duration-200 ease-in-out"></span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Cuadro de Vista Previa: Destino Previsto -->
+          <div class="bg-[#1E293B]/80 border border-[#60A5FA]/40 rounded-lg p-3 flex items-start gap-2.5">
+            <span class="material-symbols-outlined text-[#60A5FA] text-xl mt-0.5" data-icon="event">event</span>
+            <div class="flex-1">
+              <div class="flex items-center gap-2 flex-wrap">
+                <span class="text-[11px] font-bold text-[#94A3B8] uppercase tracking-wider">Destino previsto:</span>
+                <span class="text-sm font-bold text-[#60A5FA]">Irá a: Planificar</span>
+                <span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-[#60A5FA]/20 text-[#94A3B8] border border-[#60A5FA]/30">Cuadrante II</span>
+              </div>
+              <p class="text-xs text-[#94A3B8] mt-1 leading-snug">
+                No urgente, pero Importante — Asignar tiempo en agenda
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bloque: Ámbito de la tarea (Obligatorio, sin preselección + Error) -->
+        <div>
+          <label class="block text-sm font-semibold text-[#F1F5F9] mb-1.5">
+            Ámbito de la tarea <span class="text-[#60A5FA]" aria-hidden="true">*</span>
+          </label>
+          
+          <div class="grid grid-cols-2 gap-3" role="group" aria-label="Selección de ámbito">
+            <!-- Chip Laboral (Sin preselección) -->
+            <button 
+              type="button" 
+              class="h-11 min-h-[44px] flex items-center justify-center gap-2 px-3 rounded-lg border border-[#334155] bg-[#0F172A] hover:bg-[#334155]/50 active:scale-95 transition-all focus:outline-none focus:ring-2 focus:ring-[#60A5FA]"
+            >
+              <span class="w-2.5 h-2.5 rounded-full bg-[#A78BFA]" aria-hidden="true"></span>
+              <span class="material-symbols-outlined text-[18px] text-[#A78BFA]" data-icon="business_center">business_center</span>
+              <span class="text-sm font-medium text-[#F1F5F9]">Laboral</span>
+            </button>
+
+            <!-- Chip Personal (Sin preselección) -->
+            <button 
+              type="button" 
+              class="h-11 min-h-[44px] flex items-center justify-center gap-2 px-3 rounded-lg border border-[#334155] bg-[#0F172A] hover:bg-[#334155]/50 active:scale-95 transition-all focus:outline-none focus:ring-2 focus:ring-[#60A5FA]"
+            >
+              <span class="w-2.5 h-2.5 rounded-full bg-[#2DD4BF]" aria-hidden="true"></span>
+              <span class="material-symbols-outlined text-[18px] text-[#2DD4BF]" data-icon="home">home</span>
+              <span class="text-sm font-medium text-[#F1F5F9]">Personal</span>
+            </button>
+          </div>
+
+          <!-- Mensaje de error en línea -->
+          <div class="flex items-center gap-1.5 mt-2 text-[#F87171]" role="alert">
+            <span class="material-symbols-outlined text-base" data-icon="error">error</span>
+            <span class="text-xs font-semibold text-[#F87171]">Elige un ámbito.</span>
+          </div>
+        </div>
+
+      </form>
+
+      <!-- Pie de acciones del Modal (44px min height para zonas táctiles) -->
+      <div class="p-4 border-t border-[#334155] bg-[#0F172A] flex flex-col gap-2.5">
+        <button 
+          type="button" 
+          class="w-full h-11 min-h-[44px] flex items-center justify-center gap-2 rounded-lg bg-[#60A5FA] text-[#0F172A] font-bold text-sm hover:bg-[#93C5FD] active:scale-[0.98] transition-all shadow-md focus:outline-none focus:ring-2 focus:ring-[#60A5FA] focus:ring-offset-2 focus:ring-offset-[#0F172A]"
+        >
+          <span class="material-symbols-outlined text-lg">check</span>
+          Guardar tarea
+        </button>
+
+        <button 
+          type="button" 
+          class="w-full h-11 min-h-[44px] flex items-center justify-center rounded-lg border border-[#334155] text-[#94A3B8] hover:text-[#F1F5F9] hover:bg-[#1E293B] active:scale-[0.98] transition-all font-medium text-sm focus:outline-none focus:ring-2 focus:ring-[#60A5FA]"
+        >
+          Cancelar
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+</body>
+</html>

@@ -229,26 +229,34 @@ vuelve a «Laboral».
 
 ### Diseño pendiente de la ronda 2 (S4, S5, S6 y S1 móvil)
 
-- [ ] T111 Con el MCP de Stitch, generar las versiones nuevas de **S5 Historial** (con la franja «Mostrando solo los últimos N días · Ver todo»), **S4 Formulario de tarea** y **S6 Papelera** en claro y oscuro (escritorio y móvil), y **S1 Iniciar sesión oscuro móvil**, con los prompts de `docs/design/screens/prompts-004.md`; esperar a que Stitch los coloque, revisar las capturas, exportarlas a `docs/design/screens/` y anotarlas en `docs/design/screens/README.md`
-- [ ] T112 (propietario) Aprobar las pantallas de T111 (ronda 2 del punto de control) y registrar la pantalla vigente de cada una en `docs/design/screens/README.md`
+- [X] T111 Con el MCP de Stitch, generar las versiones nuevas de **S5 Historial** (con la franja «Mostrando solo los últimos N días · Ver todo»), **S4 Formulario de tarea** y **S6 Papelera** en claro y oscuro (escritorio y móvil), y **S1 Iniciar sesión oscuro móvil**, con los prompts de `docs/design/screens/prompts-004.md`; esperar a que Stitch los coloque, revisar las capturas, exportarlas a `docs/design/screens/` y anotarlas en `docs/design/screens/README.md`
+  - Avance (2026-10-24): las pantallas ya estaban en el lienzo (no se generó nada). Exportadas y revisadas 11 de 14 (S5, S4, S6 y S1 en escritorio; S6 y S4/S1 oscuras); **faltan por exportar a mano desde Stitch** S5 v2 móvil, S5 oscuro móvil y S4 v2 móvil, cuyas URLs exigen credenciales (ver `docs/design/screens/README.md`, § Ronda 2). El propietario decidió seguir sin ellas (2026-10-24): T111 se da por hecha con esa salvedad.
+- [X] T112 (propietario) Aprobar las pantallas de T111 (ronda 2 del punto de control) y registrar la pantalla vigente de cada una en `docs/design/screens/README.md`
 
 ### Tests de la Fase 4 (escribirlos primero; deben fallar)
 
-- [ ] T053 [P] [US2] Tests unitarios en `frontend/tests/unit/features/board/BoardPage.test.tsx`: el tablero no pide tareas hasta que el perfil se resuelve (éxito o error); al llegar el perfil fija el ámbito **una sola vez** (una recarga del perfil no lo cambia); un cambio manual del filtro no llama a `PATCH`; con error de perfil (tras su único reintento) usa «Todas» y no deja el tablero esperando; y pasa `order` a la petición
-- [ ] T054 [P] [US2] Tests unitarios en `frontend/tests/unit/features/history/HistoryPage.test.tsx`: con `history_days = 30` pide `within_days=30` y muestra «Mostrando solo los últimos 30 días · Ver todo»; «Ver todo» vuelve a pedir sin parámetro solo en esa visita; sin periodo no hay franja; periodo que deja el historial vacío muestra el aviso y no una pantalla en blanco
-- [ ] T055 [P] [US2] Tests unitarios de `BoardPreferences` en `frontend/tests/unit/features/profile/BoardPreferences.test.tsx`: tablero por defecto, orden y periodo guardan al elegir, con «Guardado» y vuelta atrás si falla, y el texto auxiliar de que las fijadas van siempre arriba
-- [ ] T056 [US2] Tests e2e en `frontend/tests/e2e/profile-board.spec.ts` (escenarios 4–6 de la quickstart): ámbito por defecto tras reabrir, filtro puntual que no persiste, orden más reciente primero con las fijadas arriba, periodo del historial con «Ver todo», y un tablero por defecto sin tareas en ese ámbito que muestra el estado vacío habitual
+- [X] T053 [P] [US2] Tests unitarios en `frontend/tests/unit/features/board/BoardPage.test.tsx`: el tablero no pide tareas hasta que el perfil se resuelve (éxito o error); al llegar el perfil fija el ámbito **una sola vez** (una recarga del perfil no lo cambia); un cambio manual del filtro no llama a `PATCH`; con error de perfil (tras su único reintento) usa «Todas» y no deja el tablero esperando; y pasa `order` a la petición
+- [X] T054 [P] [US2] Tests unitarios en `frontend/tests/unit/features/history/HistoryPage.test.tsx`: con `history_days = 30` pide `within_days=30` y muestra «Mostrando solo los últimos 30 días · Ver todo»; «Ver todo» vuelve a pedir sin parámetro solo en esa visita; sin periodo no hay franja; periodo que deja el historial vacío muestra el aviso y no una pantalla en blanco
+- [X] T055 [P] [US2] Tests unitarios de `BoardPreferences` en `frontend/tests/unit/features/profile/BoardPreferences.test.tsx`: tablero por defecto, orden y periodo guardan al elegir, con «Guardado» y vuelta atrás si falla, y el texto auxiliar de que las fijadas van siempre arriba
+- [X] T056 [US2] Tests e2e en `frontend/tests/e2e/profile-board.spec.ts` (escenarios 4–6 de la quickstart): ámbito por defecto tras reabrir, filtro puntual que no persiste, orden más reciente primero con las fijadas arriba, periodo del historial con «Ver todo», y un tablero por defecto sin tareas en ese ámbito que muestra el estado vacío habitual
 
 ### Implementación de la Fase 4
 
-- [ ] T057 [US2] Añadir `order` y `within_days` a `frontend/src/api/tasks.ts` (claves de consulta incluidas) y al tipo correspondiente en `frontend/src/api/types.ts`
-- [ ] T058 [US2] Hacer que `frontend/src/features/board/BoardPage.tsx` espere al perfil (éxito, o error tras su único reintento; nunca más allá de eso, FR-026) y fije el ámbito inicial una sola vez mediante `frontend/src/stores/uiStore.ts` (con un estado «ya inicializado» que sobrevive a las recargas del perfil), y que use `order` del perfil, hasta que pase T053
-- [ ] T059 [US2] Hacer que `frontend/src/features/history/HistoryPage.tsx` use `within_days` del perfil y muestre la franja con «Ver todo» (solo por visita), según la pantalla S5 aprobada, hasta que pase T054
-- [ ] T060 [US2] Crear `frontend/src/features/profile/BoardPreferences.tsx` (tablero por defecto, orden, periodo del historial) y montarlo en `ProfilePage.tsx`, hasta que pasen T055 y T056
-- [ ] T061 [US2] Ejecutar `npm run lint`, `tsc`, `prettier --check`, `npm test` y `npm run test:e2e` y dejarlos en verde
-- [ ] T062 Marcar T053–T061 como hechas en este fichero y anotar el avance de la fase
+- [X] T057 [US2] Añadir `order` y `within_days` a `frontend/src/api/tasks.ts` (claves de consulta incluidas) y al tipo correspondiente en `frontend/src/api/types.ts`
+- [X] T058 [US2] Hacer que `frontend/src/features/board/BoardPage.tsx` espere al perfil (éxito, o error tras su único reintento; nunca más allá de eso, FR-026) y fije el ámbito inicial una sola vez mediante `frontend/src/stores/uiStore.ts` (con un estado «ya inicializado» que sobrevive a las recargas del perfil), y que use `order` del perfil, hasta que pase T053
+- [X] T059 [US2] Hacer que `frontend/src/features/history/HistoryPage.tsx` use `within_days` del perfil y muestre la franja con «Ver todo» (solo por visita), según la pantalla S5 aprobada, hasta que pase T054
+- [X] T060 [US2] Crear `frontend/src/features/profile/BoardPreferences.tsx` (tablero por defecto, orden, periodo del historial) y montarlo en `ProfilePage.tsx`, hasta que pasen T055 y T056
+- [X] T061 [US2] Ejecutar `npm run lint`, `tsc`, `prettier --check`, `npm test` y `npm run test:e2e` y dejarlos en verde
+- [X] T062 Marcar T053–T061 como hechas en este fichero y anotar el avance de la fase
 
 **Checkpoint**: US1 y US2 funcionan juntas y por separado.
+
+**Avance (2026-10-24)**: Fase 4 completa. El propietario aprobó las pantallas de la ronda 2 (T112;
+`docs/design/screens/README.md`, § Aprobaciones · ronda 2; S5 v2 móvil, S5 oscuro móvil y S4 v2 móvil
+quedaron sin exportar por decisión suya). Código y tests: 212
+unitarios, 57 e2e, lint, formato y tipos en verde. El tablero espera al perfil (éxito, o error tras
+su único reintento) y fija el ámbito una sola vez; el historial aplica el periodo con la franja y
+«Ver todo» solo por visita; el estado de la interfaz se reinicia al cambiar de persona.
 
 ---
 
