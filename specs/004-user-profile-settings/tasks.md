@@ -175,7 +175,7 @@ ve el tema claro antes. Además, la comprobación axe pasa en las pantallas en a
 
 ### Diseño pendiente de la ronda 1 (tablero oscuro y compacto)
 
-- [ ] T109 Con el MCP de Stitch, generar **S3 Tablero v2 claro móvil**, **S3 oscuro** (escritorio y móvil), **S3 compacto** (claro, escritorio y móvil, con al menos un 25 % más de tareas visibles, SC-005) y **S7 Perfil oscuro móvil**, con los prompts de `docs/design/screens/prompts-004.md`; esperar a que Stitch los coloque, revisar las capturas, exportarlas a `docs/design/screens/` y anotarlas en `docs/design/screens/README.md`. Sin ellas, T040, T044 y T047 (densidad y tema oscuro del tablero) no tienen referencia
+- [X] T109 Con el MCP de Stitch, generar **S3 Tablero v2 claro móvil**, **S3 oscuro** (escritorio y móvil), **S3 compacto** (claro, escritorio y móvil, con al menos un 25 % más de tareas visibles, SC-005) y **S7 Perfil oscuro móvil**, con los prompts de `docs/design/screens/prompts-004.md`; esperar a que Stitch los coloque, revisar las capturas, exportarlas a `docs/design/screens/` y anotarlas en `docs/design/screens/README.md`. Sin ellas, T040, T044 y T047 (densidad y tema oscuro del tablero) no tienen referencia
 - [ ] T110 (propietario) Aprobar las pantallas de T109 y registrar la pantalla vigente de cada una en `docs/design/screens/README.md`
 
 ### Tests de la Fase 3 (escribirlos primero; deben fallar)
