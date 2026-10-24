@@ -1,11 +1,18 @@
+import math
 import unicodedata
 from dataclasses import dataclass
+from datetime import datetime, timedelta
 from enum import StrEnum
 from typing import Any
 
 from mytasks_api.domain.task import BoardOrder, HistoryDays
 
 DISPLAY_NAME_MAX_LENGTH = 50
+
+# At most this many uploaded images per person in a fixed window that opens with the first one
+# (FR-025). Removing the avatar does not count.
+AVATAR_UPLOADS_PER_WINDOW = 10
+AVATAR_UPLOAD_WINDOW = timedelta(hours=1)
 
 # `avatar-01` … `avatar-12`: the catalog approved in the design phase.
 AVATAR_PRESETS = tuple(f"avatar-{number:02d}" for number in range(1, 13))
@@ -52,6 +59,22 @@ class InvalidDisplayNameError(ValueError):
 
 class InvalidAvatarError(ValueError):
     pass
+
+
+class AvatarNotFoundError(Exception):
+    pass
+
+
+class AvatarRateLimitedError(Exception):
+    def __init__(self, retry_after_seconds: int) -> None:
+        super().__init__(retry_after_seconds)
+        self.retry_after_seconds = retry_after_seconds
+
+
+@dataclass(frozen=True)
+class UploadWindow:
+    window_start: datetime
+    count: int
 
 
 @dataclass(frozen=True)
@@ -168,3 +191,14 @@ def profile_from_document(data: dict[str, Any]) -> Profile:
             version=version if isinstance(version, int) and version >= 0 else 0,
         ),
     )
+
+
+def register_upload(window: UploadWindow | None, now: datetime) -> UploadWindow:
+    """The window after one more upload, or `AvatarRateLimitedError` with the seconds left if the
+    current one is full. A window that has run for an hour is replaced by a new one."""
+    if window is None or now >= window.window_start + AVATAR_UPLOAD_WINDOW:
+        return UploadWindow(window_start=now, count=1)
+    if window.count >= AVATAR_UPLOADS_PER_WINDOW:
+        remaining = (window.window_start + AVATAR_UPLOAD_WINDOW - now).total_seconds()
+        raise AvatarRateLimitedError(max(1, math.ceil(remaining)))
+    return UploadWindow(window_start=window.window_start, count=window.count + 1)

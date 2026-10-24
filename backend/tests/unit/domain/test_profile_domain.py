@@ -1,12 +1,17 @@
+from datetime import UTC, datetime, timedelta
+
 import pytest
 
 from mytasks_api.domain.profile import (
     AVATAR_PRESETS,
+    AVATAR_UPLOAD_WINDOW,
+    AVATAR_UPLOADS_PER_WINDOW,
     DISPLAY_NAME_MAX_LENGTH,
     RESETTABLE_FIELDS,
     Avatar,
     AvatarChoice,
     AvatarKind,
+    AvatarRateLimitedError,
     BoardOrder,
     DefaultScope,
     Density,
@@ -14,10 +19,12 @@ from mytasks_api.domain.profile import (
     InvalidAvatarError,
     InvalidDisplayNameError,
     Theme,
+    UploadWindow,
     choose_avatar,
     default_profile,
     normalize_display_name,
     profile_from_document,
+    register_upload,
 )
 
 pytestmark = pytest.mark.unit
@@ -181,3 +188,72 @@ def test_choose_avatar_reports_that_an_uploaded_image_must_be_dropped() -> None:
     after = choose_avatar(uploaded, AvatarChoice(kind=AvatarKind.PRESET, preset="avatar-01"))
     assert not after.has_uploaded_image
     assert after.version == 6
+
+
+NOW = datetime(2026, 10, 24, 12, 0, tzinfo=UTC)
+
+
+def test_the_limit_is_ten_uploads_per_hour() -> None:
+    assert AVATAR_UPLOADS_PER_WINDOW == 10
+    assert timedelta(hours=1) == AVATAR_UPLOAD_WINDOW
+
+
+def test_the_first_upload_opens_a_window_with_one_upload() -> None:
+    assert register_upload(None, NOW) == UploadWindow(window_start=NOW, count=1)
+
+
+def test_ten_uploads_in_the_window_are_allowed() -> None:
+    window = None
+    for index in range(AVATAR_UPLOADS_PER_WINDOW):
+        window = register_upload(window, NOW + timedelta(minutes=index))
+
+    assert window == UploadWindow(window_start=NOW, count=10)
+
+
+def test_the_eleventh_upload_is_rejected_with_the_seconds_left() -> None:
+    window = UploadWindow(window_start=NOW, count=10)
+
+    with pytest.raises(AvatarRateLimitedError) as rejected:
+        register_upload(window, NOW + timedelta(minutes=10))
+
+    assert rejected.value.retry_after_seconds == 50 * 60
+
+
+def test_the_seconds_left_round_up_and_are_never_zero() -> None:
+    window = UploadWindow(window_start=NOW, count=10)
+
+    with pytest.raises(AvatarRateLimitedError) as rejected:
+        register_upload(window, NOW + timedelta(seconds=3599, milliseconds=500))
+
+    assert rejected.value.retry_after_seconds == 1
+
+
+def test_a_rejected_upload_does_not_change_the_window() -> None:
+    window = UploadWindow(window_start=NOW, count=10)
+
+    with pytest.raises(AvatarRateLimitedError):
+        register_upload(window, NOW + timedelta(minutes=5))
+
+    assert window == UploadWindow(window_start=NOW, count=10)
+
+
+def test_the_window_restarts_when_it_expires() -> None:
+    window = UploadWindow(window_start=NOW, count=10)
+
+    assert register_upload(window, NOW + timedelta(hours=1, seconds=1)) == UploadWindow(
+        window_start=NOW + timedelta(hours=1, seconds=1), count=1
+    )
+
+
+def test_the_window_has_expired_exactly_one_hour_after_it_opened() -> None:
+    window = UploadWindow(window_start=NOW, count=10)
+
+    assert register_upload(window, NOW + timedelta(hours=1)).count == 1
+
+
+def test_uploads_below_the_limit_just_count() -> None:
+    window = UploadWindow(window_start=NOW, count=3)
+
+    assert register_upload(window, NOW + timedelta(minutes=30)) == UploadWindow(
+        window_start=NOW, count=4
+    )

@@ -158,3 +158,35 @@ def test_export_lists_the_two_new_task_list_parameters(tmp_path: Path) -> None:
     assert parameters["order"]["required"] is False
     assert parameters["within_days"]["required"] is False
     assert "422" in contract["paths"]["/api/v1/tasks"]["get"]["responses"]
+
+
+def test_export_matches_the_avatar_contract_of_feature_004(tmp_path: Path) -> None:
+    target = tmp_path / "openapi.json"
+
+    export_openapi(target)
+    contract = json.loads(target.read_text(encoding="utf-8"))
+
+    avatar = contract["paths"]["/api/v1/me/avatar"]
+    assert set(avatar) == {"get", "put", "delete"}
+    for operation in avatar.values():
+        assert {"200", "401", "403"} <= set(operation["responses"])
+    assert "404" in avatar["get"]["responses"]
+    assert {"413", "415", "429"} <= set(avatar["put"]["responses"])
+    assert "image/webp" in avatar["get"]["responses"]["200"]["content"]
+    assert set(avatar["put"]["requestBody"]["content"]) == {"image/jpeg", "image/png", "image/webp"}
+    parameters = {p["name"]: p for p in avatar["get"]["parameters"]}
+    assert parameters["v"]["required"] is False
+    assert (
+        "ProfileOut"
+        in avatar["put"]["responses"]["200"]["content"]["application/json"]["schema"]["$ref"]
+    )
+    assert (
+        "ProfileOut"
+        in avatar["delete"]["responses"]["200"]["content"]["application/json"]["schema"]["$ref"]
+    )
+
+
+def test_the_cors_policy_allows_put_for_the_avatar_upload() -> None:
+    from mytasks_api.factory import ALLOWED_METHODS
+
+    assert "PUT" in ALLOWED_METHODS
