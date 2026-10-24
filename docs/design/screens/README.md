@@ -222,6 +222,56 @@ clara equivalente y de la S6 móvil exportada.
 | S1 · Iniciar sesión (oscuro, escritorio) | `152e0cebe5114f25acd072fca6b63c84` | `s1-login-dark/desktop.*` | Login en oscuro (con las salvedades de la ronda 1) |
 | S1 · Iniciar sesión (oscuro, «móvil») | `50c57f5653944fc8a95276eedf76b4f8` | `s1-login-dark/mobile.*` | **Solo color** (es un lienzo de escritorio) |
 
+## Ronda 2 · selector de avatar y recortador (T113, 2026-10-24)
+
+Las pantallas ya estaban en el lienzo de Stitch (lanzadas el 2026-10-23), así que no se generó nada.
+Se exportaron HTML y PNG y se revisaron las capturas. **Pendiente de aprobación del propietario
+(T114)**.
+
+| Pantalla | Id de Stitch | Carpeta | Medidas que devuelve Stitch |
+|---|---|---|---|
+| Selector y recortador (claro, escritorio) | `d8962380a2084a4cb1f1a5a501790c9b` | `s7-avatar-picker/desktop.*` | `DESKTOP`, 2560 px |
+| Selector y recortador (claro, «móvil») | `93139ff3f5e545e897924ff1690e7035` (duplicada sin exportar: `c91633b694a9432ca833333f9d40d98c`) | `s7-avatar-picker/mobile.*` | `DESKTOP`, 2560 px ⚠ |
+| Selector y recortador (oscuro, escritorio) | `a237bccd3d42414fb94b0d4279388710` | `s7-avatar-picker-dark/desktop.*` | `DESKTOP`, 2560 px |
+| Selector y recortador (oscuro, «móvil») | `aac95f69a8db4b19a971be6d0d22d9ab` | `s7-avatar-picker-dark/mobile.*` | `DESKTOP`, 2560 px ⚠ |
+
+**Catálogo de 12 avatares** (se ve en las cuatro): Búho, Zorro, Oso, Gato, Rana, Pingüino, Ballena,
+Panda, Conejo, Tortuga, Delfín y Mariposa, en ese orden = `avatar-01` … `avatar-12`. Son ilustraciones
+SVG de 64×64 sin rostros reales; el HTML claro las lleva en línea y de ahí salen los ficheros de
+`frontend/src/assets/avatars/`.
+
+**Revisión de las capturas**
+
+- El selector tiene dos pestañas, «Catálogo» (rejilla de 12 con el nombre debajo y el seleccionado con
+  borde, check y nombre en azul, no solo color) y «Subir imagen» (recortador con zoom, vista previa
+  redonda y error de más de 2 MB). La Fase 5 implementa solo «Catálogo»; la subida y el recortador son
+  de la Fase 6.
+- ⚠ **Las dos «móvil» no son móviles**: Stitch las devuelve como `DESKTOP` a 2560 px (una columna
+  estrecha centrada, con la hoja inferior del diálogo). Sirven como referencia de maquetación del
+  diálogo en pantalla pequeña (hoja que sube desde abajo, rejilla de 3 columnas), no de medidas.
+- **Avatares en oscuro**: el diseño oscuro los **recolorea** (tonos neón sobre un círculo oscuro). La
+  implementación usa **un solo juego** (el claro) sobre un círculo claro fijo, de modo que se ven bien
+  en ambos temas sin duplicar ilustraciones; los cuatro catálogos son el mismo conjunto de animales.
+
+**Elementos que la implementación no sigue** (Stitch los añade y el contrato no los pide): las
+cabeceras y cuadros de «Criterios de accesibilidad / WCAG» y de especificación que rodean al diálogo
+(son anotaciones de diseño, no interfaz), el texto «Avatar seleccionado: Búho sabio» y «Listo para
+aplicar», y los controles «Girar 90°» y «Arrastra para encuadrar» (de la Fase 6).
+
+### Aprobaciones de la feature 004 · selector de avatar (2026-10-24)
+
+El propietario aprobó el 2026-10-24 (T114) el selector de avatar, el recortador y el catálogo de 12
+avatares. Son la **pantalla vigente**; las de la feature 001 siguen intactas como referencia anterior.
+La Fase 5 implementa solo la pestaña «Catálogo»; «Subir imagen» y el recortador son de la Fase 6.
+
+| Pantalla | Id de Stitch | Carpeta | Vigente para |
+|---|---|---|---|
+| Selector y recortador (claro, escritorio) | `d8962380a2084a4cb1f1a5a501790c9b` | `s7-avatar-picker/desktop.*` | Selector de avatar |
+| Selector y recortador (claro, «móvil») | `93139ff3f5e545e897924ff1690e7035` | `s7-avatar-picker/mobile.*` | **Solo maquetación en pantalla pequeña** (lienzo de escritorio) |
+| Selector y recortador (oscuro, escritorio) | `a237bccd3d42414fb94b0d4279388710` | `s7-avatar-picker-dark/desktop.*` | Selector en oscuro |
+| Selector y recortador (oscuro, «móvil») | `aac95f69a8db4b19a971be6d0d22d9ab` | `s7-avatar-picker-dark/mobile.*` | **Solo color** (lienzo de escritorio) |
+| Catálogo de 12 avatares | — | `frontend/src/assets/avatars/avatar-01.svg … 12.svg` | Un solo juego (el claro) sobre un círculo claro fijo en ambos temas |
+
 ## Punto de control en dos rondas (decisión del propietario, 2026-10-23)
 
 Stitch tarda unos 45-60 minutos en colocar cada pantalla (28 en total), así que el punto de

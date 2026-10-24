@@ -2,8 +2,11 @@ import { useState } from 'react'
 import { useProfile, useResetProfile, useUpdateProfile } from '../../api/profile'
 import type { ProfileUpdate } from '../../api/types'
 import { ConfirmDialog } from '../../app/ConfirmDialog'
+import { useSession } from '../auth/useSession'
 import { AppearanceSection } from './AppearanceSection'
+import { AvatarPicker } from './AvatarPicker'
 import { BoardPreferences } from './BoardPreferences'
+import { IdentitySection } from './IdentitySection'
 
 // One fixed message for any failure to save: the server's own text is never shown.
 const SAVE_ERROR_MESSAGE = 'No se pudo guardar el cambio. Inténtalo de nuevo.'
@@ -16,6 +19,8 @@ export function ProfilePage(): JSX.Element {
   const reset = useResetProfile()
   const [lastAction, setLastAction] = useState<LastAction | null>(null)
   const [isConfirmingReset, setIsConfirmingReset] = useState(false)
+  const [isPickingAvatar, setIsPickingAvatar] = useState(false)
+  const { user } = useSession()
   const profile = profileQuery.data
 
   // Status of the last thing the person did (a change or a reset).
@@ -32,6 +37,11 @@ export function ProfilePage(): JSX.Element {
   function retry(): void {
     if (lastAction?.type === 'reset') reset.mutate()
     else if (lastAction?.type === 'update') update.mutate(lastAction.change)
+  }
+
+  function chooseAvatar(presetId: string): void {
+    setIsPickingAvatar(false)
+    save({ avatar: { kind: 'preset', preset: presetId } })
   }
 
   function confirmReset(): void {
@@ -70,6 +80,14 @@ export function ProfilePage(): JSX.Element {
 
       {profile !== undefined && (
         <div className="flex flex-col gap-6">
+          <IdentitySection
+            profile={profile}
+            uid={user?.uid ?? ''}
+            googleName={user?.displayName ?? null}
+            email={user?.email ?? ''}
+            onChange={save}
+            onChooseAvatar={() => setIsPickingAvatar(true)}
+          />
           <AppearanceSection profile={profile} onChange={save} />
           <BoardPreferences profile={profile} onChange={save} />
 
@@ -111,6 +129,14 @@ export function ProfilePage(): JSX.Element {
             <p className="mt-2 text-caption text-text-muted">No cambia tu nombre ni tu avatar.</p>
           </section>
         </div>
+      )}
+
+      {isPickingAvatar && profile !== undefined && (
+        <AvatarPicker
+          currentPreset={profile.avatar.kind === 'preset' ? profile.avatar.preset : null}
+          onSelect={chooseAvatar}
+          onClose={() => setIsPickingAvatar(false)}
+        />
       )}
 
       {isConfirmingReset && (

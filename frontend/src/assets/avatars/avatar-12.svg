@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+<title>Mariposa</title>
+<ellipse cx="22" cy="26" rx="9" ry="8" fill="#FB7185"/>
+<ellipse cx="42" cy="26" rx="9" ry="8" fill="#FB7185"/>
+<ellipse cx="25" cy="40" rx="7" ry="6" fill="#F43F5E"/>
+<ellipse cx="39" cy="40" rx="7" ry="6" fill="#F43F5E"/>
+<ellipse cx="32" cy="33" rx="2.5" ry="12" fill="#881337"/>
+<path d="M30,22 Q27,15 24,14 M34,22 Q37,15 40,14" stroke="#881337" stroke-width="1.5" fill="none"/>
+</svg>

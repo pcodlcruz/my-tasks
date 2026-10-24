@@ -12,6 +12,12 @@ vi.mock('firebase/auth', () => ({
   getIdToken: vi.fn(),
 }))
 
+vi.mock('../../../../src/features/auth/useSession', () => ({
+  useSession: () => ({
+    user: { uid: 'uid-1', displayName: 'Ana Cruz López', email: 'ana@example.com' },
+  }),
+}))
+
 const PROFILE: Profile = {
   theme: 'system',
   density: 'comfortable',
@@ -282,5 +288,67 @@ describe('<ProfilePage>', () => {
 
     expect(await screen.findByRole('alert')).toHaveTextContent(SAVE_ERROR)
     expect(radio('Tema', 'Oscuro')).toBeChecked()
+  })
+
+  describe('identidad', () => {
+    it('guarda el nombre para mostrar con «Guardar» y solo ese campo', async () => {
+      installBackend()
+      await renderPage()
+
+      const input = await screen.findByLabelText('Nombre para mostrar')
+      await userEvent.type(input, 'Ana 🌱')
+      await userEvent.click(screen.getByRole('button', { name: 'Guardar' }))
+
+      await waitFor(() => expect(backend.patchBodies).toEqual([{ display_name: 'Ana 🌱' }]))
+      await waitFor(() => expect(screen.getByRole('status')).toHaveTextContent('Guardado'))
+    })
+
+    it('«Usar el de Google» guarda display_name null', async () => {
+      installBackend({ profile: { ...PROFILE, display_name: 'Ana 🌱' } })
+      await renderPage()
+
+      await userEvent.click(await screen.findByRole('button', { name: 'Usar el de Google' }))
+
+      await waitFor(() => expect(backend.patchBodies).toEqual([{ display_name: null }]))
+    })
+
+    it('elegir un avatar del catálogo abre el selector, lo guarda y lo cierra', async () => {
+      installBackend()
+      await renderPage()
+
+      await userEvent.click(await screen.findByRole('button', { name: 'Elegir avatar' }))
+      const dialog = screen.getByRole('dialog', { name: 'Elegir avatar' })
+      await userEvent.click(within(dialog).getByRole('radio', { name: 'Rana' }))
+      await userEvent.click(within(dialog).getByRole('button', { name: 'Guardar avatar' }))
+
+      await waitFor(() =>
+        expect(backend.patchBodies).toEqual([{ avatar: { kind: 'preset', preset: 'avatar-05' } }]),
+      )
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+      await waitFor(() => expect(screen.getByRole('status')).toHaveTextContent('Guardado'))
+    })
+
+    it('«Quitar avatar» vuelve a las iniciales', async () => {
+      installBackend({
+        profile: { ...PROFILE, avatar: { kind: 'preset', preset: 'avatar-02', version: 1 } },
+      })
+      await renderPage()
+
+      await userEvent.click(await screen.findByRole('button', { name: 'Quitar avatar' }))
+
+      await waitFor(() => expect(backend.patchBodies).toEqual([{ avatar: { kind: 'initials' } }]))
+    })
+
+    it('si falla al guardar el avatar, avisa y mantiene el anterior', async () => {
+      installBackend({ patchStatus: 500 })
+      await renderPage()
+
+      await userEvent.click(await screen.findByRole('button', { name: 'Elegir avatar' }))
+      await userEvent.click(screen.getByRole('radio', { name: 'Oso' }))
+      await userEvent.click(screen.getByRole('button', { name: 'Guardar avatar' }))
+
+      expect(await screen.findByRole('alert')).toHaveTextContent(SAVE_ERROR)
+      expect(screen.queryByRole('button', { name: 'Quitar avatar' })).not.toBeInTheDocument()
+    })
   })
 })

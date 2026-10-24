@@ -12,6 +12,12 @@ vi.mock('firebase/auth', () => ({
   getIdToken: vi.fn(),
 }))
 
+vi.mock('../../../../src/features/auth/useSession', () => ({
+  useSession: () => ({
+    user: { uid: 'uid-1', displayName: 'Ana Cruz López', email: 'ana@example.com' },
+  }),
+}))
+
 const PROFILE: Profile = {
   theme: 'system',
   density: 'comfortable',

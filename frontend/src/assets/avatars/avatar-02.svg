@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+<title>Zorro</title>
+<polygon points="32,46 16,24 48,24" fill="#EA580C"/>
+<polygon points="16,24 20,12 28,24" fill="#C2410C"/>
+<polygon points="48,24 44,12 36,24" fill="#C2410C"/>
+<polygon points="32,46 22,30 42,30" fill="#FFF7ED"/>
+<circle cx="26" cy="28" r="2.5" fill="#431407"/>
+<circle cx="38" cy="28" r="2.5" fill="#431407"/>
+<circle cx="32" cy="42" r="2.5" fill="#1C1917"/>
+</svg>

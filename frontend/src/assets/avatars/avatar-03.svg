@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+<title>Oso</title>
+<circle cx="18" cy="18" r="7" fill="#78350F"/>
+<circle cx="46" cy="18" r="7" fill="#78350F"/>
+<circle cx="32" cy="34" r="20" fill="#92400E"/>
+<ellipse cx="32" cy="38" rx="11" ry="8" fill="#FDE68A"/>
+<circle cx="25" cy="28" r="2.5" fill="#451A03"/>
+<circle cx="39" cy="28" r="2.5" fill="#451A03"/>
+<ellipse cx="32" cy="36" rx="4" ry="2.5" fill="#1C1917"/>
+</svg>

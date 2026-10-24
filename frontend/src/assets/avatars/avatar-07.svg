@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+<title>Ballena</title>
+<path d="M12,36 C12,25 24,20 38,20 C48,20 54,26 54,36 C54,42 46,46 34,46 C22,46 12,42 12,36 Z" fill="#0284C7"/>
+<ellipse cx="30" cy="40" rx="14" ry="5" fill="#E0F2FE"/>
+<circle cx="22" cy="31" r="2.5" fill="#0C4A6E"/>
+<path d="M38,18 Q40,12 36,9 M42,18 Q45,11 48,10" stroke="#38BDF8" stroke-width="2" fill="none" stroke-linecap="round"/>
+</svg>

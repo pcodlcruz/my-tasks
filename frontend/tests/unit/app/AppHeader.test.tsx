@@ -1,9 +1,11 @@
 import { render, screen, within } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
+import type { Profile } from '../../../src/api/types'
 
 const useSessionMock = vi.fn()
 const useIsAdminMock = vi.fn()
+const useProfileMock = vi.fn()
 
 vi.mock('../../../src/features/auth/useSession', () => ({
   useSession: () => useSessionMock(),
@@ -12,6 +14,31 @@ vi.mock('../../../src/features/auth/useSession', () => ({
 vi.mock('../../../src/features/auth/useIsAdmin', () => ({
   useIsAdmin: () => useIsAdminMock(),
 }))
+
+vi.mock('../../../src/api/profile', () => ({
+  useProfile: () => useProfileMock(),
+}))
+
+const PROFILE: Profile = {
+  theme: 'system',
+  density: 'comfortable',
+  default_scope: 'all',
+  board_order: 'oldest',
+  history_days: null,
+  display_name: null,
+  avatar: { kind: 'initials', preset: null, version: 0 },
+}
+
+function profileResult(profile: Partial<Profile> = {}): Record<string, unknown> {
+  return { data: { ...PROFILE, ...profile }, isPending: false, isError: false }
+}
+
+function signedIn(user: Record<string, unknown> = {}): void {
+  useSessionMock.mockReturnValue({
+    user: { uid: 'u1', displayName: 'Ana Cruz', email: 'ana@example.com', ...user },
+    signOut: vi.fn(),
+  })
+}
 
 async function renderHeader(path = '/'): Promise<void> {
   const { AppHeader } = await import('../../../src/app/AppHeader')
@@ -22,51 +49,149 @@ async function renderHeader(path = '/'): Promise<void> {
   )
 }
 
+function profileLink(name: string | RegExp = /^Perfil de /): HTMLElement {
+  return screen.getByRole('link', { name })
+}
+
 describe('<AppHeader>', () => {
   beforeEach(() => {
     useSessionMock.mockReset()
     useIsAdminMock.mockReset()
-    useSessionMock.mockReturnValue({
-      user: { uid: 'u1', displayName: 'Ana Cruz', email: 'ana@example.com' },
-      signOut: vi.fn(),
-    })
+    useProfileMock.mockReset()
+    signedIn()
     useIsAdminMock.mockReturnValue(false)
+    useProfileMock.mockReturnValue(profileResult())
   })
 
-  it('muestra un enlace "Perfil" a /perfil', async () => {
-    await renderHeader()
+  describe('enlace al perfil', () => {
+    it('es un único enlace «Perfil de <nombre>» a /perfil con el avatar y el nombre dentro', async () => {
+      await renderHeader()
 
-    expect(screen.getByRole('link', { name: 'Perfil' })).toHaveAttribute('href', '/perfil')
+      const links = screen.getAllByRole('link', { name: /^Perfil de / })
+      expect(links).toHaveLength(1)
+      const link = profileLink('Perfil de Ana Cruz')
+      expect(link).toHaveAttribute('href', '/perfil')
+      expect(link).toHaveTextContent('AC')
+      expect(within(link).getByText('Ana Cruz')).toBeInTheDocument()
+    })
+
+    it('usa el nombre elegido en el perfil antes que ningún otro', async () => {
+      useProfileMock.mockReturnValue(profileResult({ display_name: 'Ana 🌱' }))
+
+      await renderHeader()
+
+      expect(profileLink('Perfil de Ana 🌱')).toBeInTheDocument()
+    })
+
+    it('sin nombre en el perfil usa el de Google', async () => {
+      await renderHeader()
+
+      expect(profileLink('Perfil de Ana Cruz')).toBeInTheDocument()
+    })
+
+    it('sin nombre de Google usa el correo', async () => {
+      signedIn({ displayName: null })
+
+      await renderHeader()
+
+      expect(profileLink('Perfil de ana@example.com')).toBeInTheDocument()
+    })
+
+    it('mientras carga el perfil usa el nombre de Google y muestra las iniciales, no un hueco', async () => {
+      useProfileMock.mockReturnValue({ data: undefined, isPending: true, isError: false })
+
+      await renderHeader()
+
+      expect(profileLink('Perfil de Ana Cruz')).toHaveTextContent('AC')
+    })
+
+    it('si el perfil falla sigue mostrando el nombre de Google y las iniciales', async () => {
+      useProfileMock.mockReturnValue({ data: undefined, isPending: false, isError: true })
+
+      await renderHeader()
+
+      expect(profileLink('Perfil de Ana Cruz')).toHaveTextContent('AC')
+    })
+
+    it('muestra el avatar del catálogo elegido, decorativo (el nombre ya va en el enlace)', async () => {
+      useProfileMock.mockReturnValue(
+        profileResult({ avatar: { kind: 'preset', preset: 'avatar-02', version: 1 } }),
+      )
+
+      await renderHeader()
+
+      const link = profileLink('Perfil de Ana Cruz')
+      const image = link.querySelector('img')
+      expect(image?.getAttribute('src')).toBeTruthy()
+      expect(image?.getAttribute('alt')).toBe('')
+    })
+
+    it('recorta un nombre largo con puntos suspensivos', async () => {
+      useProfileMock.mockReturnValue(profileResult({ display_name: 'N'.repeat(50) }))
+
+      await renderHeader()
+
+      const name = within(profileLink(/^Perfil de N+$/)).getByText('N'.repeat(50))
+      expect(name.className).toContain('truncate')
+      expect(name.className).toMatch(/max-w-/)
+    })
+
+    it('en móvil muestra solo el avatar: el nombre se oculta por debajo del punto de corte', async () => {
+      await renderHeader()
+
+      const name = within(profileLink('Perfil de Ana Cruz')).getByText('Ana Cruz')
+      expect(name.className).toContain('hidden')
+      expect(name.className).toContain('sm:inline')
+    })
+
+    it('un nombre con HTML se muestra como texto, sin crear elementos', async () => {
+      useProfileMock.mockReturnValue(profileResult({ display_name: '<b>Ana</b><img src=x>' }))
+
+      await renderHeader()
+
+      const link = profileLink(/^Perfil de /)
+      expect(link).toHaveTextContent('<b>Ana</b><img src=x>')
+      expect(link.querySelector('b')).toBeNull()
+      expect(link.querySelector('img[src="x"]')).toBeNull()
+    })
+
+    it('no entra en las pestañas principales', async () => {
+      await renderHeader()
+
+      const nav = screen.getByRole('navigation', { name: 'Navegación principal' })
+      expect(within(nav).queryByRole('link', { name: /^Perfil/ })).not.toBeInTheDocument()
+      expect(
+        within(nav)
+          .getAllByRole('link')
+          .map((link) => link.textContent),
+      ).toEqual(['Tablero', 'Historial', 'Papelera'])
+    })
+
+    it('está activo (aria-current) solo en /perfil', async () => {
+      await renderHeader('/perfil')
+
+      expect(profileLink('Perfil de Ana Cruz')).toHaveAttribute('aria-current', 'page')
+    })
+
+    it('no está activo en el resto de rutas', async () => {
+      await renderHeader('/historial')
+
+      expect(profileLink('Perfil de Ana Cruz')).not.toHaveAttribute('aria-current')
+    })
   })
 
-  it('no incluye "Perfil" entre las pestañas principales', async () => {
-    await renderHeader()
-
-    const nav = screen.getByRole('navigation', { name: 'Navegación principal' })
-    expect(within(nav).queryByRole('link', { name: 'Perfil' })).not.toBeInTheDocument()
-    expect(
-      within(nav)
-        .getAllByRole('link')
-        .map((link) => link.textContent),
-    ).toEqual(['Tablero', 'Historial', 'Papelera'])
-  })
-
-  it('marca "Perfil" como activo solo en /perfil', async () => {
-    await renderHeader('/perfil')
-
-    expect(screen.getByRole('link', { name: 'Perfil' })).toHaveAttribute('aria-current', 'page')
-  })
-
-  it('no marca "Perfil" como activo en el resto de rutas', async () => {
-    await renderHeader('/historial')
-
-    expect(screen.getByRole('link', { name: 'Perfil' })).not.toHaveAttribute('aria-current')
-  })
-
-  it('mantiene "Cerrar sesión" y el nombre de la cuenta', async () => {
+  it('mantiene «Cerrar sesión»', async () => {
     await renderHeader()
 
     expect(screen.getByRole('button', { name: 'Cerrar sesión' })).toBeInTheDocument()
-    expect(screen.getByText('Ana Cruz')).toBeInTheDocument()
+  })
+
+  it('para el administrador añade «Accesos» a las pestañas', async () => {
+    useIsAdminMock.mockReturnValue(true)
+
+    await renderHeader()
+
+    const nav = screen.getByRole('navigation', { name: 'Navegación principal' })
+    expect(within(nav).getByRole('link', { name: 'Accesos' })).toBeInTheDocument()
   })
 })
