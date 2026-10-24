@@ -1,6 +1,6 @@
 from dataclasses import dataclass, replace
 from datetime import datetime, timedelta
-from enum import StrEnum
+from enum import IntEnum, StrEnum
 
 TRASH_RETENTION = timedelta(days=30)
 
@@ -12,6 +12,18 @@ MAX_ACTIVE_TASKS = 500
 class Scope(StrEnum):
     WORK = "work"
     PERSONAL = "personal"
+
+
+class BoardOrder(StrEnum):
+    OLDEST = "oldest"
+    NEWEST = "newest"
+
+
+class HistoryDays(IntEnum):
+    """The windows the history can be limited to; no value means the whole history."""
+
+    DAYS_30 = 30
+    DAYS_90 = 90
 
 
 class Quadrant(StrEnum):
@@ -74,8 +86,11 @@ class Task:
         return quadrant_for(urgent=self.urgent, important=self.important)
 
 
-def sort_board(tasks: list[Task]) -> list[Task]:
-    return sorted(tasks, key=lambda task: (not task.pinned, task.created_at))
+def sort_board(tasks: list[Task], order: BoardOrder = BoardOrder.OLDEST) -> list[Task]:
+    # Two stable passes: by creation date in the requested direction, then pinned first, so
+    # ties keep the input order in both directions.
+    by_date = sorted(tasks, key=lambda task: task.created_at, reverse=order == BoardOrder.NEWEST)
+    return sorted(by_date, key=lambda task: not task.pinned)
 
 
 def ensure_editable(task: Task) -> None:
