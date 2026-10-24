@@ -258,6 +258,20 @@ cabeceras y cuadros de «Criterios de accesibilidad / WCAG» y de especificació
 (son anotaciones de diseño, no interfaz), el texto «Avatar seleccionado: Búho sabio» y «Listo para
 aplicar», y los controles «Girar 90°» y «Arrastra para encuadrar» (de la Fase 6).
 
+### Aprobaciones de la feature 004 · selector de avatar (2026-10-24)
+
+El propietario aprobó el 2026-10-24 (T114) el selector de avatar, el recortador y el catálogo de 12
+avatares. Son la **pantalla vigente**; las de la feature 001 siguen intactas como referencia anterior.
+La Fase 5 implementa solo la pestaña «Catálogo»; «Subir imagen» y el recortador son de la Fase 6.
+
+| Pantalla | Id de Stitch | Carpeta | Vigente para |
+|---|---|---|---|
+| Selector y recortador (claro, escritorio) | `d8962380a2084a4cb1f1a5a501790c9b` | `s7-avatar-picker/desktop.*` | Selector de avatar |
+| Selector y recortador (claro, «móvil») | `93139ff3f5e545e897924ff1690e7035` | `s7-avatar-picker/mobile.*` | **Solo maquetación en pantalla pequeña** (lienzo de escritorio) |
+| Selector y recortador (oscuro, escritorio) | `a237bccd3d42414fb94b0d4279388710` | `s7-avatar-picker-dark/desktop.*` | Selector en oscuro |
+| Selector y recortador (oscuro, «móvil») | `aac95f69a8db4b19a971be6d0d22d9ab` | `s7-avatar-picker-dark/mobile.*` | **Solo color** (lienzo de escritorio) |
+| Catálogo de 12 avatares | — | `frontend/src/assets/avatars/avatar-01.svg … 12.svg` | Un solo juego (el claro) sobre un círculo claro fijo en ambos temas |
+
 ## Punto de control en dos rondas (decisión del propietario, 2026-10-23)
 
 Stitch tarda unos 45-60 minutos en colocar cada pantalla (28 en total), así que el punto de

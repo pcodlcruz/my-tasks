@@ -275,7 +275,7 @@ cabecera, quitar el avatar y ver las iniciales; probar nombre vacío, de 51 cara
 ### Diseño pendiente de la ronda 2 (selector de avatar)
 
 - [X] T113 Con el MCP de Stitch, generar el **selector de avatar y el recortador** (claro y oscuro, escritorio y móvil, con el catálogo de los 12 avatares dentro) según `contracts/ui-screens.md` y `docs/design/screens/prompts-004.md`; esperar a que Stitch los coloque (unos 45-60 minutos; no reintentar tras un *timeout*), revisar las capturas, exportarlos a `docs/design/screens/s7-avatar-picker*/` y anotarlos en `docs/design/screens/README.md`
-- [ ] T114 (propietario) Aprobar el selector, el recortador y el catálogo de avatares (ronda 2 del punto de control) y registrar la pantalla vigente en `docs/design/screens/README.md`
+- [X] T114 (propietario) Aprobar el selector, el recortador y el catálogo de avatares (ronda 2 del punto de control) y registrar la pantalla vigente en `docs/design/screens/README.md`
 
 ### Tests de la Fase 5 (escribirlos primero; deben fallar)
 
@@ -298,9 +298,9 @@ cabecera, quitar el avatar y ver las iniciales; probar nombre vacío, de 51 cara
 
 **Checkpoint**: US1, US2 y US3 funcionan; la aplicación ya ofrece un perfil completo sin subir archivos.
 
-**Avance (2026-10-24)**: Fase 5 completa salvo **T114 (propietario)**: aprobar el selector, el
-recortador y el catálogo de avatares (`docs/design/screens/README.md`, § Ronda 2 · selector de
-avatar). Código y tests: 292 unitarios, 64 e2e (con axe en ambos temas y los avatares), lint, formato
+**Avance (2026-10-24)**: Fase 5 completa. El propietario aprobó el selector, el recortador y el
+catálogo de avatares (T114; `docs/design/screens/README.md`, § Aprobaciones · selector de avatar).
+Código y tests: 292 unitarios, 64 e2e (con axe en ambos temas y los avatares), lint, formato
 y tipos en verde. El nombre se pinta siempre como texto (cierra LOW-002 de la Fase 2: lo comprueban
 tests unitarios y un e2e con `<img onerror>`). Los 12 SVG del catálogo salen del HTML claro del
 diseño y se usan sobre un círculo claro fijo en ambos temas.
