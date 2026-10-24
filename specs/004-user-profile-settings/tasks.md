@@ -230,6 +230,7 @@ vuelve a «Laboral».
 ### Diseño pendiente de la ronda 2 (S4, S5, S6 y S1 móvil)
 
 - [ ] T111 Con el MCP de Stitch, generar las versiones nuevas de **S5 Historial** (con la franja «Mostrando solo los últimos N días · Ver todo»), **S4 Formulario de tarea** y **S6 Papelera** en claro y oscuro (escritorio y móvil), y **S1 Iniciar sesión oscuro móvil**, con los prompts de `docs/design/screens/prompts-004.md`; esperar a que Stitch los coloque, revisar las capturas, exportarlas a `docs/design/screens/` y anotarlas en `docs/design/screens/README.md`
+  - Avance (2026-10-24): las pantallas ya estaban en el lienzo (no se generó nada). Exportadas y revisadas 11 de 14 (S5, S4, S6 y S1 en escritorio; S6 y S4/S1 oscuras); **faltan por exportar a mano desde Stitch** S5 v2 móvil, S5 oscuro móvil y S4 v2 móvil, cuyas URLs exigen credenciales (ver `docs/design/screens/README.md`, § Ronda 2). Hasta entonces T111 sigue sin marcar.
 - [ ] T112 (propietario) Aprobar las pantallas de T111 (ronda 2 del punto de control) y registrar la pantalla vigente de cada una en `docs/design/screens/README.md`
 
 ### Tests de la Fase 4 (escribirlos primero; deben fallar)
