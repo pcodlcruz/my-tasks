@@ -101,6 +101,8 @@ canónica; abrir la dirección antigua de producción y comprobar que sigue resp
    permanente a la canónica conservando la ruta solicitada.
 2. **Given** la dirección técnica antigua de producción, **When** se abre, **Then** sigue
    mostrando la aplicación (no se corta el acceso a quien la tenía guardada).
+3. **Given** la dirección de Hosting `pdlco-mytasks.web.app`, **When** se abre, **Then** muestra la
+   misma aplicación sin redirigir; solo `https://inserttask.com` es la dirección canónica anunciada.
 
 ---
 
@@ -234,15 +236,15 @@ la aprobación del propietario, y que no se ejecutó ningún comando manual de d
   comprobarlo en menos de 5 minutos.
 - **SC-004**: Una persona invitada puede iniciar sesión y llegar a su tablero desde el dominio
   propio en menos de 1 minuto, el 100 % de las veces con una cuenta invitada.
-- **SC-005**: La carga inicial de la aplicación desde el dominio propio no es más lenta que desde la
-  dirección técnica actual (diferencia dentro de la variabilidad normal medida en la misma red).
+- **SC-005**: La mediana de tres cargas iniciales en frío desde el dominio propio no supera en más de
+  un 25 % la mediana desde la dirección técnica `run.app`, medidas desde la misma red y a la misma hora.
 - **SC-006**: Los escenarios de validación de producción (tablero, perfil, avatar, administración
   de accesos) pasan al 100 % desde el dominio propio sin errores de seguridad en la consola.
 - **SC-007**: Tras la publicación, el 100 % de las solicitudes `http://` y de la variante no
   canónica acaban en la dirección canónica `https://`.
-- **SC-008**: Cualquier persona con acceso al repositorio puede, con la guía, añadir los registros DNS
-  y dejar el dominio verificado en menos de 1 hora de trabajo efectivo (sin contar la propagación
-  DNS).
+- **SC-008**: El propietario, siguiendo solo la guía de la RUNBOOK y sin ayuda adicional, deja el
+  dominio de ensayo de staging con los registros DNS puestos en menos de 1 hora de trabajo efectivo
+  (sin contar la propagación DNS); el tiempo y si necesitó ayuda se anotan en el registro del ensayo.
 - **SC-009**: `staging.inserttask.com` llega a certificado activo y pasa la validación de
   funciones y de inicio de sesión antes de que exista ningún dominio de producción.
 
@@ -265,8 +267,14 @@ la aprobación del propietario, y que no se ejecutó ningún comando manual de d
 - La API de la aplicación sigue en su dirección técnica actual; el dominio propio atiende la
   aplicación web. Si el plan recomienda servir también la API bajo el dominio propio, se valora
   como parte del diseño.
-- La dirección técnica antigua de la web sigue operativa y sin redirección (la usa el pipeline);
-  no se anuncia más.
+- La dirección técnica antigua de la web (`run.app`) sigue operativa y sin redirección (la usa el
+  pipeline); no se anuncia más.
+- Al poner Hosting delante de la web, cada entorno gana además su dirección `<proyecto>.web.app`
+  (`pdlco-mytasks.web.app` y `pdlco-mytasks-stg.web.app`). Sirve la misma versión, **no redirige** a la
+  canónica y no se anuncia: se necesita para validar el camino de Hosting antes de que exista el DNS y
+  ya figura entre los dominios autorizados del inicio de sesión. La única dirección canónica anunciada
+  es `https://inserttask.com`; `run.app` y `web.app` son alias técnicos (la sesión y las preferencias
+  locales son por dirección, así que quien las use verá su sesión separada de la del dominio propio).
 - Se cumple el flujo habitual: la feature pasa por staging y por la release a producción. El
   dominio de ensayo (`staging.inserttask.com`) se pone en servicio y se valida en staging antes de la
   release; la validación final de `inserttask.com` es en producción, por el propietario, tras el

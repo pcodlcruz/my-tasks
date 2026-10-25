@@ -118,8 +118,11 @@ no, se crea.
 **Por qué**: `<proyecto>.web.app` **ya está** entre los dominios autorizados de Identity Platform
 (`identity.tf`), así que el inicio de sesión funciona en él sin cambios; y evita un segundo sitio.
 
-**A verificar (antes de empezar)**: si el sitio por defecto existe en cada proyecto (lectura con el MCP
-de Google Cloud cuando la cuenta del agente tenga lectura de Hosting, o el propietario en la consola).
+**A verificar (antes de empezar)**: si el sitio por defecto existe en cada proyecto. **No se puede leer
+con el MCP de Google Cloud**: hasta donde se ha comprobado, `gcloud` no tiene subcomandos de lectura de
+los sitios de Hosting, y la API REST directa queda fuera del MCP (Principio V). Lo comunica el propietario
+tras mirar la consola de Firebase (T003) o lo revela el primer `plan` con el bloque `import` (T022, T026).
+Lo que sí lee el MCP es si la API de Hosting está activa y los roles de `terraform-<env>` (T001, T004).
 
 ## R6 — Dominio propio: apex canónico y `www` con redirección
 

@@ -36,8 +36,9 @@ que producción (Principio IV). Solo `inserttask.com` y `www` existen únicament
    `run.app`) devuelven el mismo valor (FR-012).
 8. **Pipeline intacto**: forzar un despliegue de staging (cambio trivial) y comprobar que la prueba de
    humo pasa y que la lista `CORS_ORIGINS` queda con los dos orígenes esperados.
-9. **Rendimiento (SC-005)**: tres cargas en frío de `web.app` y de `run.app` desde la misma red; la
-   diferencia debe quedar dentro de la variabilidad normal.
+9. **Rendimiento (SC-005)**: tres cargas en frío de `web.app` y de `run.app` desde la misma red y a la
+   misma hora; la mediana de `web.app` no debe superar en más de un 25 % la de `run.app`. Repetir con
+   `staging.inserttask.com` en el ensayo (E4) y con `inserttask.com` en el escenario 14.
 
 ## A2. Ensayo del dominio en staging: `staging.inserttask.com` (antes de la release; FR-020, SC-009)
 
@@ -48,7 +49,9 @@ ningún dominio de producción.
   Firebase de `pdlco-mytasks-stg`), los registros exactos de `staging.inserttask.com`
   (`required_dns_updates`).
 - **E2. Registros DNS (el propietario)**: `TXT` de propiedad **en el subdominio** y `A`/`AAAA` hacia
-  Hosting (`edge.md` §3). Retirar antes cualquier registro de `staging.inserttask.com` previo.
+  Hosting (`edge.md` §3). Retirar antes cualquier registro de `staging.inserttask.com` previo. Seguir
+  solo la guía de la RUNBOOK §14 y anotar el tiempo de trabajo efectivo y si hizo falta ayuda adicional
+  (SC-008).
 - **E3. Propiedad compartida entre proyectos**: `ownership_state` de staging llega a `OWNERSHIP_ACTIVE`
   sin `OWNERSHIP_CONFLICT`/`MISMATCH`, aunque el apex acabe perteneciendo al proyecto de producción
   (research R7). Si hay conflicto, parar y revisar el diseño con el propietario.
@@ -71,7 +74,8 @@ ningún dominio de producción.
 13. **Esperar y consultar el estado**: `ownership_state` pasa a `OWNERSHIP_ACTIVE` y `cert.state` a
     `CERT_ACTIVE` (hasta 24 h; normalmente horas). No debe pasarse de 30 días sin propiedad activa.
 14. **Dominio en servicio (US1, SC-001)**: abrir `https://inserttask.com/` en Chrome, Safari, Firefox y
-    Edge actuales: candado, certificado emitido para `inserttask.com`, sin avisos.
+    Edge actuales: candado, certificado emitido para `inserttask.com`, sin avisos. Medir también el
+    rendimiento (SC-005): mediana de tres cargas en frío frente a la URL `run.app`, máximo +25 %.
 15. **Redirecciones (US4, SC-007)**: `http://inserttask.com`, `http://www.inserttask.com` y
     `https://www.inserttask.com/<ruta>?<q>` acaban en `https://inserttask.com/<ruta>?<q>`.
 16. **Inicio de sesión (US2, SC-004)**: cuenta invitada → tablero en menos de 1 minuto; recargar mantiene
