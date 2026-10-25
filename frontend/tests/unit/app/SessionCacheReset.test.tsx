@@ -5,6 +5,8 @@ import { useUiStore } from '../../../src/stores/uiStore'
 
 const useSessionMock = vi.fn()
 
+vi.mock('../../../src/lib/firebase', () => ({ auth: { currentUser: null, signOut: vi.fn() } }))
+
 vi.mock('../../../src/features/auth/useSession', () => ({
   useSession: () => useSessionMock(),
 }))
