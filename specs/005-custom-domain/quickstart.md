@@ -4,15 +4,16 @@
 [pipeline-env](./contracts/pipeline-env.md)
 
 Guía para demostrar de extremo a extremo que la feature funciona. Cada escenario indica **dónde** se
-ejecuta. Como el dominio solo existe en producción, la mitad del camino (Hosting, inicio de sesión, CORS)
-se prueba antes en **staging**, por `<proyecto>.web.app`, que usa los mismos recursos (Principio IV).
+ejecuta. Todo el camino (Hosting, inicio de sesión, CORS y, con el subdominio `staging.inserttask.com`,
+también la propiedad DNS y el certificado) se prueba antes en **staging**, que usa los mismos recursos
+que producción (Principio IV). Solo `inserttask.com` y `www` existen únicamente en producción.
 
 ## Prerrequisitos
 
 - Permisos concedidos a `terraform-<env>` y API activada (contrato `pipeline-env.md` §3), verificados en
   solo lectura.
-- Variable `CUSTOM_WEB_ORIGINS=https://inserttask.com` en el entorno de GitHub `production` (no en
-  `staging`).
+- Variable `CUSTOM_WEB_ORIGINS` en cada entorno de GitHub: `https://staging.inserttask.com` en
+  `staging` y `https://inserttask.com` en `production`.
 - Acceso al proveedor de DNS donde está registrado `inserttask.com`.
 - Una cuenta de Google invitada y otra no invitada en cada entorno.
 
@@ -37,6 +38,26 @@ se prueba antes en **staging**, por `<proyecto>.web.app`, que usa los mismos rec
    humo pasa y que la lista `CORS_ORIGINS` queda con los dos orígenes esperados.
 9. **Rendimiento (SC-005)**: tres cargas en frío de `web.app` y de `run.app` desde la misma red; la
    diferencia debe quedar dentro de la variabilidad normal.
+
+## A2. Ensayo del dominio en staging: `staging.inserttask.com` (antes de la release; FR-020, SC-009)
+
+Mismo mecanismo que producción, con otro proyecto. Si algo falla aquí, se corrige antes de crear
+ningún dominio de producción.
+
+- **E1. Leer lo que pide Hosting en staging**: de las salidas de Terraform de staging (o de la consola de
+  Firebase de `pdlco-mytasks-stg`), los registros exactos de `staging.inserttask.com`
+  (`required_dns_updates`).
+- **E2. Registros DNS (el propietario)**: `TXT` de propiedad **en el subdominio** y `A`/`AAAA` hacia
+  Hosting (`edge.md` §3). Retirar antes cualquier registro de `staging.inserttask.com` previo.
+- **E3. Propiedad compartida entre proyectos**: `ownership_state` de staging llega a `OWNERSHIP_ACTIVE`
+  sin `OWNERSHIP_CONFLICT`/`MISMATCH`, aunque el apex acabe perteneciendo al proyecto de producción
+  (research R7). Si hay conflicto, parar y revisar el diseño con el propietario.
+- **E4. Certificado**: `cert.state` pasa a `CERT_ACTIVE`; abrir `https://staging.inserttask.com/` en un
+  navegador: candado y certificado emitido para el subdominio.
+- **E5. Inicio de sesión y funciones**: cuenta invitada → tablero; no invitada → «Necesitas una
+  invitación»; tarea, perfil y avatar sin errores de CORS ni de CSP; `http://` redirige a `https://`.
+- **E6. Lista CORS de staging**: la API de staging tiene `CORS_ORIGINS` con los tres orígenes y el
+  siguiente despliegue de staging mantiene la prueba de humo en verde.
 
 ## B. Producción (tras la release y el `apply` de `infra` aprobado)
 
@@ -79,6 +100,6 @@ terraform -chdir=infra/envs/production fmt -check
 
 ## Resultado esperado
 
-Los escenarios 1–9 en verde en staging antes de la release, y los 10–19 en verde en producción antes de
-dar la feature por lista. Los escenarios 4, 5, 14, 16 y 17 se registran en
+Los escenarios 1–9 y E1–E6 en verde en staging antes de la release, y los 10–19 en verde en producción
+antes de dar la feature por lista. Los escenarios 4, 5, 14, 16 y 17 se registran en
 `specs/005-custom-domain/validacion-produccion.md` por el propietario (como en las features 003 y 004).

@@ -10,7 +10,8 @@ implementación debe cumplir y que la validación comprueba.
 | `GET https://inserttask.com/<cualquier ruta>` | La misma respuesta que daría `mytasks-web` de producción para esa ruta (SPA, activos, `/config.js`), por una conexión con certificado válido |
 | `GET https://www.inserttask.com/<ruta>?<query>` | `301` a `https://inserttask.com/<ruta>?<query>` |
 | `GET http://inserttask.com/<ruta>` y `http://www…` | Redirección a `https://` y, en el caso de `www`, al canónico. Se asume que Hosting redirige HTTP a HTTPS por sí solo (no figura en la documentación consultada): **a verificar en staging** (escenario 2) y, si no fuera así, declarar la redirección en la configuración de Hosting |
-| `GET https://<proyecto>.web.app/<ruta>` | Igual que el canónico (sirve la misma versión). En staging es el único camino por Hosting |
+| `GET https://staging.inserttask.com/<ruta>` | La misma respuesta que `mytasks-web` de staging, con certificado válido. Es el **ensayo** del dominio de producción (FR-014, FR-020) |
+| `GET https://<proyecto>.web.app/<ruta>` | Igual que el canónico de su entorno (sirve la misma versión). Sigue funcionando en ambos |
 | `GET https://mytasks-web-<nº>.europe-southwest1.run.app/<ruta>` | Sigue respondiendo con la aplicación, sin redirección (FR-011) |
 
 Una sola regla de reescritura en Hosting: `**` → servicio `mytasks-web`, región `europe-southwest1`.
@@ -42,6 +43,11 @@ consola de Firebase). Forma de lo que se pide:
 | `inserttask.com` | `A`, `AAAA` | IP indicadas por Hosting | Para dirigir el tráfico |
 | `www.inserttask.com` | `A`, `AAAA` | IP indicadas por Hosting | Para dirigir el tráfico |
 | `inserttask.com` | `CAA` | `0 issue "pki.goog"` y `0 issue "letsencrypt.org"` | Solo si ya existen `CAA` en el dominio |
+| `staging.inserttask.com` | `TXT` | `hosting-site=pdlco-mytasks-stg` (confirmar con las salidas de **staging**) | Propiedad del subdominio para el proyecto de staging; **permanente** |
+| `staging.inserttask.com` | `A`, `AAAA` | IP indicadas por Hosting (salidas de staging) | Para dirigir el tráfico del ensayo |
+
+Los registros de staging se ponen **antes** que los de producción (FR-020). Los `CAA` del apex, si
+existen, también cubren el subdominio por herencia.
 
 Antes de añadirlos: retirar los `A`, `AAAA` y `CNAME` previos del proveedor (registros de «aparcado»).
 Dejar otros distintos a los de Hosting impide emitir el certificado.
@@ -50,8 +56,8 @@ Dejar otros distintos a los de Hosting impide emitir el certificado.
 
 - El *popup* de Google se abre contra el dominio de autenticación del proyecto
   (`pdlco-mytasks.firebaseapp.com`); `FIREBASE_AUTH_DOMAIN` no cambia.
-- `inserttask.com` está en los dominios autorizados de Identity Platform y en los *referrers* de la clave
-  de API web.
+- `inserttask.com` (producción) y `staging.inserttask.com` (staging) están en los dominios autorizados
+  de Identity Platform y en los *referrers* de la clave de API web de su proyecto.
 - Las reglas de invitación son las de la feature 003, sin cambios.
 
 ## 5. Garantías de no regresión

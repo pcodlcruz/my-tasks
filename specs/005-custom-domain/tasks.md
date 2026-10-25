@@ -36,8 +36,11 @@ Hosting exista en staging, la API ya acepte su origen y la validación pueda hac
   el comportamiento de ningún usuario, así que `develop` sigue desplegable.
 - La **Phase 3** crea Hosting en staging y producción. Staging pasa a servir la web por `web.app`; es la
   prueba real del camino que usará el dominio.
-- La **Phase 4** declara los dominios solo en producción. Crearlos es inocuo hasta que el propietario
-  ponga el DNS.
+- La **Phase 4** declara los dominios en **ambos** entornos: `staging.inserttask.com` como ensayo y
+  `inserttask.com` + `www` en producción (decisión del propietario sobre el hallazgo C1 de
+  `/speckit-analyze`, FR-020). Crearlos es inocuo hasta que el propietario ponga el DNS.
+- El **ensayo de staging** (Phase 5, T055–T060) debe terminar **antes** de crear la release: la
+  propiedad DNS y el certificado se prueban primero con el subdominio.
 - Las fases 2–4 viajan **en la misma release**; la **Phase 6** la ejecuta el propietario con el pipeline.
 
 ## Formato: `[ID] [P?] [Story] Descripción`
@@ -75,8 +78,8 @@ Se entrega como PR documental (`mytasks-project-manager` + `mytasks-iac-develope
 `terraform-production`; el entorno `production` de GitHub tiene `CUSTOM_WEB_ORIGINS`.
 
 - [ ] T001 [P] [US5] Comprobar en solo lectura con el MCP de Google Cloud (cuenta del agente) si existe el sitio por defecto de Hosting en `pdlco-mytasks` y `pdlco-mytasks-stg`, y si la API `firebasehosting.googleapis.com` está activa; anotar el resultado en `specs/005-custom-domain/research.md` (R5, «A verificar»). Si el MCP no puede leerlo, no usar otra vía: anotarlo y pedir al propietario que lo mire en la consola de Firebase
-- [ ] T002 [P] [US5] Redactar `specs/005-custom-domain/guia-propietario-hosting.md` (mismo formato que `specs/002-cloud-run-cicd/guia-propietario-*.md`): conceder `roles/firebasehosting.admin` a `terraform-staging@pdlco-mytasks-stg.iam.gserviceaccount.com` y `terraform-production@pdlco-mytasks.iam.gserviceaccount.com` en la consola de IAM de su proyecto, crear la variable **no secreta** `CUSTOM_WEB_ORIGINS=https://inserttask.com` en *Settings → Environments → production → Variables*, y cómo comprobar ambas cosas. Los comandos van solo como texto; el agente no los ejecuta
-- [ ] T003 (propietario) Seguir la guía de T002: conceder los dos roles y crear la variable `CUSTOM_WEB_ORIGINS` en el entorno `production` (no en `staging`)
+- [ ] T002 [P] [US5] Redactar `specs/005-custom-domain/guia-propietario-hosting.md` (mismo formato que `specs/002-cloud-run-cicd/guia-propietario-*.md`): conceder `roles/firebasehosting.admin` a `terraform-staging@pdlco-mytasks-stg.iam.gserviceaccount.com` y `terraform-production@pdlco-mytasks.iam.gserviceaccount.com` en la consola de IAM de su proyecto, crear la variable **no secreta** `CUSTOM_WEB_ORIGINS` en *Settings → Environments → Variables* de cada entorno (`https://staging.inserttask.com` en `staging`, `https://inserttask.com` en `production`), y cómo comprobar ambas cosas. Los comandos van solo como texto; el agente no los ejecuta
+- [ ] T003 (propietario) Seguir la guía de T002: conceder los dos roles y crear la variable `CUSTOM_WEB_ORIGINS` en los entornos `staging` (`https://staging.inserttask.com`) y `production` (`https://inserttask.com`), cada una con el suyo
 - [ ] T004 [US5] Verificar en solo lectura con el MCP que `terraform-staging` y `terraform-production` tienen `roles/firebasehosting.admin` y que no se concedió nada más; registrar la comprobación (fecha, identidades, roles) en una sección nueva «14. Dominio propio» de `infra/RUNBOOK.md` (esqueleto: permisos concedidos; las demás subsecciones las rellena la Phase 4)
 
 **Checkpoint**: permisos y variable verificados; el esqueleto de la sección 14 del RUNBOOK existe.
@@ -96,13 +99,13 @@ existentes. Skill: `mytasks-iac-developer` (excepción a justificar en la PR).
 
 ### Tests de la Phase 2 (escribirlos primero; deben fallar)
 
-- [ ] T005 [P] [US2] Crear `.github/scripts/tests/test_cors_origins.py` con los casos de la tabla de `pipeline-env.md` §1: staging sin variable (dos orígenes); producción con `https://inserttask.com` (tres); varios orígenes separados por espacio; valor con `http://`, `*`, ruta, puerto, mayúsculas o espacio interno (falla nombrando el valor); duplicado (se descarta); orden estable. Ejecuta el script que creará T008
+- [ ] T005 [P] [US2] Crear `.github/scripts/tests/test_cors_origins.py` con los casos de la tabla de `pipeline-env.md` §1: variable sin definir (dos orígenes); staging con `https://staging.inserttask.com` (tres); producción con `https://inserttask.com` (tres); un origen de staging en producción o uno que no empiece por `https://staging.` en staging (falla); varios orígenes separados por espacio; valor con `http://`, `*`, ruta, puerto, mayúsculas o espacio interno (falla nombrando el valor); duplicado (se descarta); orden estable. Ejecuta el script que creará T008
 - [ ] T006 [P] [US2] Ampliar `.github/scripts/tests/test_deploy_variable_check.py`: la comprobación previa de `CORS_ORIGINS` pasa si el valor **contiene** la URL `run.app` de este entorno aunque lleve más orígenes y falla si es de otro entorno o no existe; añadir un caso «servicio de producción con el valor antiguo (solo `run.app`)» que debe pasar
 - [ ] T007 [P] [US2] Ampliar `.github/scripts/tests/test_deploy_bootstrap_admin.py` (o crear `test_deploy_custom_origins.py` siguiendo su estructura) para comprobar que el job lee `vars.CUSTOM_WEB_ORIGINS`, que el paso de validación va antes de cualquier construcción o revisión y que la asignación de `CORS_ORIGINS` aparece en el despliegue de revisiones
 
 ### Implementación de la Phase 2
 
-- [ ] T008 [US2] Crear `.github/scripts/cors-origins.sh`: recibe `PROJECT_ID`, `PROJECT_NUMBER`, `REGION` y `CUSTOM_WEB_ORIGINS` (opcional, separada por espacios); valida cada origen (`https://` + dominio en minúsculas, sin ruta ni puerto ni `*`); imprime la lista compuesta separada por comas, sin duplicados, en el orden de `pipeline-env.md` §1; ante un valor inválido sale con error y `::error::` nombrando el valor
+- [ ] T008 [US2] Crear `.github/scripts/cors-origins.sh`: recibe `PROJECT_ID`, `PROJECT_NUMBER`, `REGION` y `CUSTOM_WEB_ORIGINS` (opcional, separada por espacios); valida cada origen (`https://` + dominio en minúsculas, sin ruta ni puerto ni `*`; en `staging` solo los que empiecen por `https://staging.` y en `production` ninguno que lo haga, para que un entorno no herede el dominio del otro); imprime la lista compuesta separada por comas, sin duplicados, en el orden de `pipeline-env.md` §1; ante un valor inválido sale con error y `::error::` nombrando el valor
 - [ ] T009 [US2] En `.github/workflows/deploy.yml`, añadir `CUSTOM_WEB_ORIGINS: ${{ vars.CUSTOM_WEB_ORIGINS }}` al `env` del job (junto a `BOOTSTRAP_ADMIN_EMAIL`) y un paso «Check the custom web origins» que ejecuta `cors-origins.sh` antes de cualquier construcción y guarda la lista compuesta como salida del job
 - [ ] T010 [US2] En `.github/workflows/deploy.yml`, paso «Check the service variables»: cambiar la comprobación de `CORS_ORIGINS` de igualdad exacta a «contiene la URL `run.app` de este entorno» (modo nuevo `NOMBRE~=valor` en la función `check`), sin debilitar el resto de variables
 - [ ] T011 [US2] En `.github/workflows/deploy.yml`, paso «Deploy the revisions without traffic»: escribir `CORS_ORIGINS` de la API con `--update-env-vars` usando el delimitador alternativo de `gcloud` (`^@^`) para que las comas de la lista no la dividan, conservando `APP_VERSION` y `BOOTSTRAP_ADMIN_EMAIL`
@@ -136,7 +139,7 @@ tablero (escenarios 1–7 y 9 del quickstart).
 - [ ] T017 [US1] Añadir `google-beta` (`hashicorp/google-beta`, `~> 8.6.0`) a `required_providers` de `infra/modules/environment/versions.tf`, `infra/envs/staging/versions.tf` e `infra/envs/production/versions.tf`; declarar `provider "google-beta"` con los mismos `project`, `region`, `user_project_override` y `billing_project` que `google` en `infra/envs/staging/providers.tf` e `infra/envs/production/providers.tf`, y pasárselo al módulo en `infra/envs/*/main.tf` (`providers = { google = google, google-beta = google-beta }`)
 - [ ] T018 [US1] Actualizar `infra/envs/staging/.terraform.lock.hcl` e `infra/envs/production/.terraform.lock.hcl` con el proveedor nuevo y *hashes* de las plataformas del CI y de macOS (`terraform providers lock …`, con `allowed_domains: registry.terraform.io` y `releases.hashicorp.com`); si el sandbox no lo permite, pedir al propietario que lo genere y no continuar sin los ficheros
 - [ ] T019 [P] [US1] Añadir `firebasehosting.googleapis.com` a la variable `apis` de `infra/modules/environment/variables.tf`
-- [ ] T020 [P] [US1] Añadir la variable `custom_domains` (lista de objetos `domain` y `redirect_to` opcional, por defecto `[]`) a `infra/modules/environment/variables.tf`, con validaciones: nombres en minúsculas sin esquema ni barra, sin duplicados y `redirect_to` apuntando a otro dominio de la misma lista. Pasar `custom_domains = []` explícito en `infra/envs/staging/main.tf` (producción lo rellena la Phase 4)
+- [ ] T020 [P] [US1] Añadir la variable `custom_domains` (lista de objetos `domain` y `redirect_to` opcional, por defecto `[]`) a `infra/modules/environment/variables.tf`, con validaciones: nombres en minúsculas sin esquema ni barra, sin duplicados y `redirect_to` apuntando a otro dominio de la misma lista. Pasar `custom_domains = []` explícito en `infra/envs/staging/main.tf` y en `infra/envs/production/main.tf` (ambos los rellena la Phase 4)
 - [ ] T021 [US1] Crear `infra/modules/environment/hosting.tf` con `provider = google-beta`: el sitio por defecto (`site_id` = `var.project_id`) con `lifecycle { prevent_destroy = true }`, la versión con una única regla `**` hacia el servicio `google_cloud_run_v2_service.web` (nombre y región del entorno, **sin** `pinTag`) y su *release* con un mensaje que identifique la feature; comentarios en inglés que expliquen por qué Hosting no sirve contenido propio
 - [ ] T022 [US1] Según el resultado de T001: si el sitio por defecto ya existe, añadir el bloque `import` correspondiente en `infra/envs/staging/main.tf` y `infra/envs/production/main.tf` (mismo estilo que el de Identity Platform) y explicarlo en un comentario; si no existe, dejar que lo cree el módulo
 - [ ] T023 [US2] En `infra/modules/environment/identity.tf`, añadir a `authorized_domains` los dominios de `var.custom_domains` que no tengan `redirect_to`, y a `allowed_referrers` de la clave de API web `https://${var.project_id}.web.app/*` y `https://<dominio>/*` para esos mismos dominios; conservar todo lo existente
@@ -152,33 +155,36 @@ tablero (escenarios 1–7 y 9 del quickstart).
 
 ---
 
-## Phase 4: Dominio propio `inserttask.com` en producción (US1, US3, US4)
+## Phase 4: Dominios propios: ensayo en staging y producción (US1, US3, US4)
 
-**Purpose**: declarar los dominios solo en producción y dejar la operación documentada. Skill:
-`mytasks-iac-developer`. Requiere la Phase 3 fusionada y aplicada en staging.
+**Purpose**: declarar `staging.inserttask.com` (ensayo) en staging y `inserttask.com` + `www` en
+producción, con el mismo código, y dejar la operación documentada. Skill: `mytasks-iac-developer`.
+Requiere la Phase 3 fusionada y aplicada en staging.
 
-**Goal**: `inserttask.com` (canónico) y `www.inserttask.com` (301 al canónico) declarados con certificado
-gestionado, sin esperar al DNS, con el estado y los registros requeridos legibles tras el `apply`.
+**Goal**: `staging.inserttask.com` (staging) e `inserttask.com` (canónico) + `www.inserttask.com` (301 al
+canónico) en producción declarados con certificado gestionado, sin esperar al DNS, con el estado y los
+registros requeridos legibles tras el `apply`.
 
-**Independent Test**: el plan de producción añade exactamente los dos dominios; tras el `apply` los
-registros DNS requeridos se pueden leer y la guía es suficiente para ponerlos (escenarios 10–11).
+**Independent Test**: el plan de staging añade exactamente `staging.inserttask.com` y el de producción
+los dos dominios de producción; tras el `apply` los registros DNS requeridos se pueden leer y la guía es
+suficiente para ponerlos (escenarios E1–E2 y 11).
 
 ### Tests de la Phase 4 (escribirlos primero; deben fallar)
 
-- [ ] T031 [P] [US4] Ampliar `.github/scripts/tests/test_env_roots_parity.py` para comprobar que **solo** `infra/envs/production/main.tf` define dominios en `custom_domains` y que staging lo deja vacío; debe fallar hasta T032–T033
+- [ ] T031 [P] [US4] Ampliar `.github/scripts/tests/test_env_roots_parity.py` para comprobar que ambos roots definen `custom_domains` con los mismos campos y solo difieren los valores (`staging.inserttask.com` en staging; `inserttask.com` y `www.inserttask.com` en producción, y ningún dominio de producción en staging ni al revés); debe fallar hasta T032–T033
 
 ### Implementación de la Phase 4
 
 - [ ] T032 [US1] En `infra/modules/environment/hosting.tf`, añadir `google_firebase_hosting_custom_domain` con `for_each` sobre `var.custom_domains` (`provider = google-beta`, `site_id` del sitio, `wait_dns_verification = false`, `redirect_target` cuando `redirect_to` esté definido, certificado gestionado con el tipo por defecto, `prevent_destroy`), dependiendo del *release*; comentario en inglés sobre la regla de 30 días de propiedad
-- [ ] T033 [US4] En `infra/envs/production/main.tf`, pasar `custom_domains` con `inserttask.com` (canónico) y `www.inserttask.com` con `redirect_to = "inserttask.com"`
-- [ ] T034 [US3] Añadir a `infra/modules/environment/outputs.tf` una salida por dominio con `host_state`, `ownership_state`, el estado del certificado, `issues` y `required_dns_updates` (valores públicos), vacía en staging
-- [ ] T035 [US3] Revisar `.github/workflows/infra.yml`: si el resumen del `apply` no muestra las salidas de Terraform, añadir al resumen solo la salida de los dominios (T034), sin otras salidas ni secretos, para que el propietario lea los registros DNS sin entrar en la consola; añadir su prueba al script de pruebas de `infra` que corresponda
-- [ ] T036 [US3] Completar `infra/RUNBOOK.md` §14: (a) registros DNS que debe poner el propietario (TXT permanente, A/AAAA del apex y de `www`, CAA solo si ya existen), retirada previa de registros de «aparcado» y comprobación con una consulta DNS; (b) plazos (hasta 24 h de emisión, 30 días de propiedad); (c) tabla de diagnóstico de la research R12; (d) cómo leer el estado con las salidas del `apply` y con la consola de Firebase; (e) renovación automática y qué la rompe (retirar el TXT o cambiar el DNS); (f) retirar el dominio dejando `run.app` y `web.app` operativos; (g) aviso a las personas usuarias: la sesión y las preferencias locales se reinician por origen
+- [ ] T033 [US4] Rellenar `custom_domains`: en `infra/envs/production/main.tf` con `inserttask.com` (canónico) y `www.inserttask.com` con `redirect_to = "inserttask.com"`; en `infra/envs/staging/main.tf` con `staging.inserttask.com` (sin redirección)
+- [ ] T034 [US3] Añadir a `infra/modules/environment/outputs.tf` una salida por dominio con `host_state`, `ownership_state`, el estado del certificado, `issues` y `required_dns_updates` (valores públicos), en ambos entornos
+- [ ] T035 [US3] Revisar `.github/workflows/infra.yml`: si el resumen del `apply` no muestra las salidas de Terraform, añadir al resumen (de staging y de producción) solo la salida de los dominios (T034), sin otras salidas ni secretos, para que el propietario lea los registros DNS sin entrar en la consola; añadir su prueba al script de pruebas de `infra` que corresponda
+- [ ] T036 [US3] Completar `infra/RUNBOOK.md` §14: (a) registros DNS que debe poner el propietario (TXT permanente, A/AAAA del apex y de `www`, CAA solo si ya existen; y, **primero**, el `TXT` propio y los `A`/`AAAA` de `staging.inserttask.com` para el proyecto de staging), retirada previa de registros de «aparcado» y comprobación con una consulta DNS; (b) plazos (hasta 24 h de emisión, 30 días de propiedad); (c) tabla de diagnóstico de la research R12; (d) cómo leer el estado con las salidas del `apply` y con la consola de Firebase; (e) renovación automática y qué la rompe (retirar el TXT o cambiar el DNS); (f) retirar el dominio dejando `run.app` y `web.app` operativos; (g) aviso a las personas usuarias: la sesión y las preferencias locales se reinician por origen
 - [ ] T037 [P] [US1] Añadir la dirección pública de producción y la de `web.app` al `README.md` (apartado de entornos) y a la tabla de entornos de `infra/RUNBOOK.md` §11
 - [ ] T038 [US4] Ejecutar `terraform fmt -check -recursive infra` y `python3 .github/scripts/tests/test_env_roots_parity.py`; en verde
-- [ ] T039 [US1] Leer el plan de solo lectura de producción en la PR: solo altas de los dos dominios y el cambio de `authorized_domains` y *referrers* (con `inserttask.com`), nada más; registrar la lectura en la PR
+- [ ] T039 [US1] Leer el plan de solo lectura de staging y de producción en la PR: en staging, solo el alta de `staging.inserttask.com` y su cambio de `authorized_domains` y *referrers*; en producción, solo las altas de los dos dominios y el cambio de `authorized_domains` y *referrers* (con `inserttask.com`); nada más; registrar la lectura en la PR
 
-**Checkpoint**: el código declara el dominio; sigue sin afectar a ningún usuario hasta que exista el DNS.
+**Checkpoint**: el código declara los dominios; no afecta a ningún usuario hasta que exista el DNS.
 
 ---
 
@@ -197,21 +203,36 @@ abiertos salvo los de la puesta en servicio (Phase 6).
 - [ ] T042 [P] [US5] Comprobar que `infra/README.md`, `infra/RUNBOOK.md` y `README.md` describen lo implementado (proveedor beta, sección 14, direcciones) y que `specs/005-custom-domain/contracts/*.md` coinciden con lo construido; corregir lo que haya cambiado durante la implementación
 - [ ] T043 (propietario) Con las Phases 2–4 fusionadas y el CI de `develop` en verde, ejecutar en staging los escenarios 1–9 completos del quickstart si falta alguno, y cerrar `specs/005-custom-domain/validacion-staging.md`
 
-**Checkpoint**: la feature queda lista para release.
+### Ensayo del dominio en staging (FR-020, SC-009; tareas añadidas tras el análisis)
+
+> Se numeran a continuación de las existentes, como se hizo con T109–T114 en la feature 004. Se ejecutan
+> **después** de que la Phase 4 esté fusionada y aplicada en staging, y **antes** de la Phase 6. Su
+> registro (`validacion-staging.md`) viaja en una PR documental de cierre posterior, como en la 003 y la 004.
+
+- [ ] T055 [US3] Leer del resumen del `apply` de staging (T035) o de la consola de Firebase de `pdlco-mytasks-stg` los registros exactos de `staging.inserttask.com` (`required_dns_updates`) y comunicárselos al propietario con el orden de la guía de `infra/RUNBOOK.md` §14 (escenario E1)
+- [ ] T056 (propietario) Escenario E2: en su proveedor de DNS, retirar cualquier registro previo de `staging.inserttask.com` y añadir el `TXT` de propiedad propio y los `A`/`AAAA` hacia Hosting (no tocar todavía el apex ni `www`)
+- [ ] T057 [US3] Escenarios E3 y E4: seguir `ownership_state` hasta `OWNERSHIP_ACTIVE` sin `OWNERSHIP_CONFLICT`/`MISMATCH` y `cert.state` hasta `CERT_ACTIVE`, y comprobar con `curl -sI https://staging.inserttask.com/` el certificado y las cabeceras de seguridad. **Si hay conflicto de propiedad con el apex, parar y revisar el diseño con el propietario antes de seguir** (research R7)
+- [ ] T058 (propietario) Escenario E5: iniciar sesión con la cuenta invitada y con la no invitada desde `https://staging.inserttask.com`, recorrer tablero, tareas, perfil y avatar sin errores de CORS ni de CSP, y comprobar que `http://` redirige a `https://`
+- [ ] T059 [US2] Escenario E6: comprobar con el MCP en solo lectura que la API de staging tiene `CORS_ORIGINS` con los tres orígenes (`run.app`, `web.app`, `https://staging.inserttask.com`) y que el siguiente despliegue de staging mantiene la prueba de humo en verde
+- [ ] T060 [US5] Anotar en `specs/005-custom-domain/validacion-staging.md` el resultado del ensayo (valores comunicados por el propietario, sin inventar detalle), y dejar marcada la fecha en que `staging.inserttask.com` quedó con certificado activo; es la condición para empezar la Phase 6
+
+**Checkpoint**: la feature queda lista para release **con el ensayo de staging validado**.
 
 ---
 
 ## Phase 6: Release y puesta en servicio del dominio (propietario + pipeline)
 
 **Purpose**: llevar la feature a producción y activar el dominio. Mayoría de tareas son del propietario;
-el agente ayuda con las comprobaciones de solo lectura. Requiere la Phase 5 fusionada.
+el agente ayuda con las comprobaciones de solo lectura. Requiere la Phase 5 fusionada **y el ensayo de
+staging validado (T060)**: no se crea la release mientras `staging.inserttask.com` no tenga certificado
+activo.
 
 **Goal**: `https://inserttask.com` en servicio con certificado válido y las redirecciones funcionando.
 
 **Independent Test**: escenarios 10–19 del quickstart en verde y registrados en
 `specs/005-custom-domain/validacion-produccion.md`.
 
-- [ ] T044 [US5] Crear la rama `release/1.3.0` desde `origin/develop` **sin commits propios** (el *ruleset* exige los 9 checks al crearla; si el último commit de `develop` los trae en rojo por un test flaky conocido, relanzar el job antes) y abrir la PR a `main` en español, con la lista de cambios, la validación de staging y las instrucciones posteriores a la fusión
+- [ ] T044 [US5] Solo con T060 cumplida (ensayo de staging validado), crear la rama `release/1.3.0` desde `origin/develop` **sin commits propios** (el *ruleset* exige los 9 checks al crearla; si el último commit de `develop` los trae en rojo por un test flaky conocido, relanzar el job antes) y abrir la PR a `main` en español, con la lista de cambios, la validación de staging y las instrucciones posteriores a la fusión
 - [ ] T045 (propietario) Fusionar la PR de la release; leer el plan de `plan-production` en `infra.yml` (altas de Hosting y de los dos dominios; cambios de `authorized_domains` y *referrers*; nada sobre Cloud Run, Firestore ni Firebase Auth más allá de eso) y aprobar el `apply` en el entorno `infra-production`
 - [ ] T046 (propietario) Aprobar/esperar `deploy-production` y avisar cuando termine; si falla por «versión no validada», no relanzar y avisar al agente
 - [ ] T047 [US1] Escenario 10 del quickstart: comprobar con `curl` que `https://pdlco-mytasks.web.app/` sirve la aplicación de producción (certificado, cabeceras, `/config.js` con la API y el proyecto de producción) y que `GET /health` de la API y `APP_VERSION` coinciden; comprobar la lista `CORS_ORIGINS` de la API de producción con el MCP en solo lectura
@@ -235,8 +256,8 @@ el agente ayuda con las comprobaciones de solo lectura. Requiere la Phase 5 fusi
 - **Phase 2**: independiente de la 1 para el código; puede hacerse en paralelo a ella. Debe estar fusionada antes de validar la Phase 3 (T030).
 - **Phase 3**: necesita la Phase 1 completa (permisos). Bloquea la Phase 4.
 - **Phase 4**: necesita la Phase 3 fusionada y aplicada en staging.
-- **Phase 5**: necesita las Phases 2–4 fusionadas.
-- **Phase 6**: necesita la Phase 5 fusionada y el CI de `develop` en verde.
+- **Phase 5**: necesita las Phases 2–4 fusionadas; el ensayo (T055–T060) necesita además el `apply` de staging de la Phase 4.
+- **Phase 6**: necesita la Phase 5 fusionada, el ensayo de staging validado (T060) y el CI de `develop` en verde.
 
 ### Dentro de cada fase
 
@@ -256,10 +277,10 @@ el agente ayuda con las comprobaciones de solo lectura. Requiere la Phase 5 fusi
 | Historia | Fases | Qué la completa |
 |---|---|---|
 | US1 Abrir con el dominio propio | 3, 4, 6 | T029, T032–T033, T047, T050 |
-| US2 Iniciar sesión desde él | 2, 3, 6 | T006–T012, T023, T030, T051 |
-| US3 Certificado gratuito que se renueva | 4, 6 | T034–T036, T049, T052 |
+| US2 Iniciar sesión desde él | 2, 3, 5, 6 | T006–T012, T023, T030, T059, T051 |
+| US3 Certificado gratuito que se renueva | 4, 5, 6 | T034–T036, T055, T057, T049, T052 |
 | US4 Canónico y redirecciones | 4, 6 | T031, T033, T050 |
-| US5 Gobierno por IaC y guías | 1, 2, 5, 6 | T001–T004, T014–T015, T040–T043, T044–T054 |
+| US5 Gobierno por IaC y guías | 1, 2, 5, 6 | T001–T004, T014–T015, T040–T043, T060, T044–T054 |
 
 ---
 
@@ -268,14 +289,15 @@ el agente ayuda con las comprobaciones de solo lectura. Requiere la Phase 5 fusi
 ### MVP primero
 
 El MVP útil para el propietario es la **US1 con la US2**: Phases 1, 2 y 3 dejan la web servida por Hosting
-en staging con el flujo completo; con la Phase 4 y el DNS se convierte en `inserttask.com`. No tiene
-sentido entregar la Phase 4 sin la 3.
+en staging con el flujo completo; con la Phase 4 y el DNS se convierte en `staging.inserttask.com` (ensayo)
+y, tras la release, en `inserttask.com`. No tiene sentido entregar la Phase 4 sin la 3.
 
 ### Entrega incremental
 
 1. Phase 1 y Phase 2 en paralelo → fusionar la 2 (inocua) → desplegar en staging.
 2. Phase 3 → `apply` de staging aprobado → validar con `web.app`.
-3. Phase 4 y Phase 5 → release 1.3.0 → `apply` de producción aprobado → DNS → validación.
+3. Phase 4 → `apply` de staging → DNS de `staging.inserttask.com` → **ensayo validado (T055–T060)**.
+4. Phase 5 (revisión de seguridad y DoD) → release 1.3.0 → `apply` de producción aprobado → DNS → validación.
 
 ### Riesgos conocidos
 
@@ -288,6 +310,9 @@ sentido entregar la Phase 4 sin la 3.
   `infra.yml` lo anota en el check.
 - **Propiedad del dominio en 30 días**: si el propietario no pone el DNS a tiempo, Hosting borra el
   dominio y habría que volver a crearlo (un nuevo `apply`); T048 lo deja a la vista.
+- **Propiedad compartida entre dos proyectos**: que Hosting acepte el apex para producción y
+  `staging.` para staging a la vez es la hipótesis que el ensayo comprueba (T057). Si no la acepta, se
+  para y se revisa el diseño con el propietario (por ejemplo, otro dominio de ensayo) antes de la release.
 - **Flaky conocido de la 003** (`test_invite_the_same_address_twice_at_once…`): puede ponerse rojo el
   CI de `develop`; relanzar el job antes de crear `release/1.3.0` (T044). No tocar su código en esta
   feature.

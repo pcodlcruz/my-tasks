@@ -125,8 +125,10 @@ de Google Cloud cuando la cuenta del agente tenga lectura de Hosting, o el propi
 
 **Decisión**: dos dominios personalizados en el sitio de **producción**:
 `inserttask.com` (canónico, sirve la web) y `www.inserttask.com` con `redirect_target = inserttask.com`
-(Hosting responde 301 conservando la ruta). `wait_dns_verification = false`: el `apply` no debe quedarse
-esperando al DNS del propietario; el estado se consulta después (R12).
+(Hosting responde 301 conservando la ruta). Y uno en el sitio de **staging**:
+`staging.inserttask.com`, sin redirección, como **ensayo** (decisión del propietario, R10).
+`wait_dns_verification = false` en todos: el `apply` no debe quedarse esperando al DNS del propietario;
+el estado se consulta después (R12).
 
 **Certificado**: gratuito y gestionado por Hosting (CA `pki.goog` o `letsencrypt.org`), emitido y
 renovado automáticamente («SSL incluido sin cargo» según la página de precios). Se deja el tipo por
@@ -151,6 +153,20 @@ públicos). Estructura esperada:
 
 La documentación avisa de que propagar y emitir puede tardar horas y hasta 24 h.
 
+**Dos proyectos, un mismo dominio base.** La propiedad en Hosting se establece por proyecto de Firebase
+mediante registros `TXT` y **se hereda por los subdominios**; la referencia del recurso indica que se
+puede conceder otro proyecto sobre un subdominio añadiendo registros `TXT` específicos en él. Por tanto:
+
+| Nombre | Proyecto propietario | Registro de propiedad |
+|---|---|---|
+| `inserttask.com` (y `www`, por herencia) | `pdlco-mytasks` | `TXT` `hosting-site=pdlco-mytasks` en el apex |
+| `staging.inserttask.com` | `pdlco-mytasks-stg` | `TXT` `hosting-site=pdlco-mytasks-stg` en `staging.inserttask.com` |
+
+Los `A`/`AAAA` de `staging` apuntan a Hosting igual que los del apex. **A verificar en el ensayo de
+staging**: que Hosting acepta a la vez la propiedad del apex para producción y la del subdominio para
+staging sin conflicto (`OWNERSHIP_CONFLICT`/`MISMATCH`). Si no la aceptara, el ensayo lo revela antes de
+producción y se revisa el diseño con el propietario (la alternativa sería un dominio de ensayo distinto).
+
 ## R8 — Inicio de sesión: solo hay que autorizar el dominio
 
 **Hallazgo**: el frontend inicia sesión con `signInWithPopup` y el `authDomain` seguirá siendo
@@ -158,10 +174,11 @@ La documentación avisa de que propagar y emitir puede tardar horas y hasta 24 h
 Por tanto **no se cambia `FIREBASE_AUTH_DOMAIN`** ni el cliente OAuth de Google.
 
 **Qué sí cambia** (todo ya gestionado por Terraform en `identity.tf`):
-- añadir `inserttask.com` a `authorized_domains` de Identity Platform (FR-009; conservar los
-  existentes);
-- añadir `https://inserttask.com/*` a los *referrers* permitidos de la clave de API web (si no, la clave
-  rechaza las llamadas desde el dominio nuevo aunque esté autorizado);
+- añadir `inserttask.com` (en producción) y `staging.inserttask.com` (en staging) a
+  `authorized_domains` de Identity Platform (FR-009; conservar los existentes);
+- añadir `https://inserttask.com/*` (producción) y `https://staging.inserttask.com/*` (staging) a los
+  *referrers* permitidos de la clave de API web (si no, la clave rechaza las llamadas desde el dominio
+  nuevo aunque esté autorizado);
 - `www` **no** hace falta en ninguno: nunca carga la aplicación, solo redirige.
 
 **A verificar (staging, vía `web.app`)**: que el *popup* funciona desde un origen servido por Hosting
@@ -179,8 +196,8 @@ backend ya acepta una lista separada por comas (`cors_origin_list`).
 2. `https://<proyecto>.web.app` (siempre; es el origen del sitio de Hosting, en ambos entornos para
    mantener la paridad de topología),
 3. los orígenes de dominios propios que declare una variable **no secreta** del entorno de GitHub
-   (`CUSTOM_WEB_ORIGINS`, solo en `production`: `https://inserttask.com`), igual que ya ocurre con
-   `BOOTSTRAP_ADMIN_EMAIL`.
+   (`CUSTOM_WEB_ORIGINS`: `https://inserttask.com` en `production` y
+   `https://staging.inserttask.com` en `staging`), igual que ya ocurre con `BOOTSTRAP_ADMIN_EMAIL`.
 
 Se aplica con `--update-env-vars` en el despliegue (patrón existente). Detalles que el desarrollador debe
 respetar:
@@ -196,11 +213,17 @@ razón que sigue vigente (cada despliegue reescribiría `APP_VERSION`).
 
 ## R10 — Paridad con staging (Principio IV)
 
-**Decisión**: el módulo `environment` crea el sitio, la versión y el *release* de Hosting en **los dos**
-entornos, de modo que lo que se valida en staging (`pdlco-mytasks-stg.web.app`) es el mismo camino que
-sirve producción. Los dominios personalizados son una variable del módulo: vacía en staging, con
-`inserttask.com` y `www.inserttask.com` en producción. La prueba `test_env_roots_parity.py` se amplía
-para que solo puedan diferir el dimensionado, los identificadores y esa lista.
+**Decisión** (revisada por el propietario tras el análisis): el módulo `environment` crea el sitio, la
+versión, el *release* **y los dominios personalizados** en **los dos** entornos con el mismo código. La
+lista de dominios es una variable del módulo: `staging.inserttask.com` en staging; `inserttask.com` y
+`www.inserttask.com` (redirige) en producción. Así el recurso beta de dominio, la propiedad DNS y la
+emisión del certificado se ensayan en staging **antes** de producción, que era el hueco que dejaba la
+primera versión del diseño (hallazgo C1 de `/speckit-analyze`). La prueba `test_env_roots_parity.py` se
+amplía para que solo puedan diferir el dimensionado, los identificadores y los valores de esa lista.
+
+**Orden**: el `apply` de staging ocurre al fusionar en `develop`, el propietario pone el DNS de
+`staging.inserttask.com` y se valida; solo entonces se crea la release a producción (FR-020, SC-009).
+Staging mantiene también `<proyecto>.web.app`, que sigue funcionando.
 
 ## R11 — Permisos de Terraform (los concede el propietario)
 
@@ -253,7 +276,7 @@ consola de Firebase, sirvan de panel. Estados relevantes y qué hacer, según la
 
 ## R14 — Retorno atrás
 
-Eliminar los dominios personalizados (PR que quita la variable de producción) deja la aplicación en
+Eliminar los dominios personalizados (PR que vacía su lista en el entorno afectado) deja la aplicación en
 `<proyecto>.web.app` y en su dirección `run.app`, que no se tocan en ningún momento (FR-011). El sitio de
 Hosting y el *rewrite* se pueden retirar sin afectar a Cloud Run. Los registros DNS del proveedor los
 retira el propietario.
@@ -276,11 +299,11 @@ retira el propietario.
 | R3 | La API no pasa por Hosting |
 | R4 | Recursos de Hosting en `google-beta` fijado (el GA no los tiene) |
 | R5 | Sitio por defecto de cada proyecto |
-| R6 | `inserttask.com` canónico; `www` redirige con 301; certificado gratuito gestionado |
+| R6 | `inserttask.com` canónico; `www` redirige con 301; `staging.inserttask.com` de ensayo; certificado gratuito gestionado |
 | R7 | El propietario pone `TXT` + `A`/`AAAA` (+`CAA` si procede) en su DNS |
 | R8 | Solo se autoriza el dominio (Identity Platform + clave de API); el `authDomain` no cambia |
-| R9 | CORS como lista compuesta por el pipeline; variable `CUSTOM_WEB_ORIGINS` solo en producción |
-| R10 | Hosting en ambos entornos; dominios personalizados solo en producción |
+| R9 | CORS como lista compuesta por el pipeline; variable `CUSTOM_WEB_ORIGINS` en ambos entornos |
+| R10 | Hosting y dominios personalizados en ambos entornos; staging ensaya `staging.inserttask.com` antes de producción |
 | R11 | `roles/firebasehosting.admin` al `terraform-<env>` (lo concede el propietario) + API + lectura en el plan |
 | R12 | Estado del certificado visible en las salidas de Terraform y en la consola |
 | R13 | Coste esperado 0 €; a revisar en factura |

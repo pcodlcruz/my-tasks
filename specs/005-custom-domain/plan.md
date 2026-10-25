@@ -15,14 +15,16 @@ Enfoque (detalle y alternativas en [research.md](./research.md)):
    reescribe `**` al servicio Cloud Run existente. La documentación oficial confirma que
    `europe-southwest1` admite *rewrites* de Hosting a Cloud Run, así que el riesgo que anticipaba la spec
    queda descartado (R1).
-2. **Dominios personalizados solo en producción** (`inserttask.com` canónico, `www` con 301), con el
-   certificado gestionado por Hosting (incluido sin cargo, R6/R13). El propietario pone los registros DNS
-   en su proveedor; el resto es infraestructura como código.
+2. **Dominios personalizados en ambos entornos**: `inserttask.com` canónico y `www` con 301 en
+   producción, y `staging.inserttask.com` como **ensayo** en staging (decisión del propietario, R10), con
+   el certificado gestionado por Hosting (incluido sin cargo, R6/R13). El propietario pone los registros
+   DNS en su proveedor; el resto es infraestructura como código. El dominio de staging debe estar en
+   servicio y validado antes de crear los de producción (FR-020).
 3. **Autorizar el origen nuevo**: dominio autorizado de Identity Platform, *referrer* de la clave de API
    web y lista de orígenes CORS de la API. `authDomain` no cambia (el login usa *popup* contra
    `firebaseapp.com`).
 4. **Pipeline**: `CORS_ORIGINS` pasa a ser una lista que compone `deploy.yml` (con la variable no secreta
-   `CUSTOM_WEB_ORIGINS` solo en producción), con sus comprobaciones y pruebas.
+   `CUSTOM_WEB_ORIGINS` de cada entorno), con sus comprobaciones y pruebas.
 5. **Terraform**: los recursos de Hosting solo existen en el proveedor `google-beta`, que se añade fijado y
    acotado a esos cuatro recursos (R4).
 
@@ -86,7 +88,7 @@ dos dominios, dos entornos, un sitio por entorno.
 | **I. Simplicidad y complejidad justificada** | Una pieza nueva (Hosting) impuesta por el propietario. Cero código de aplicación. Se descartan balanceador (coste fijo), CLI de Firebase (herramienta y permisos nuevos) y mover la API a Hosting. Quedan dos costes de complejidad justificados en *Complexity Tracking* (proveedor beta; chequeo CORS del pipeline) | ✅ |
 | **II. Tests por niveles** | No hay lógica de aplicación nueva. Se prueban los scripts del pipeline (casos de CORS, paridad), `terraform validate/plan` en CI y la validación por escenarios. Un cambio en el pipeline sin prueba de script es inaceptable | ✅ |
 | **III. Seguridad de aplicación** | Toca autorización de orígenes (dominio autorizado, *referrer* de la clave, CORS) y permisos: **revisión obligatoria con `mytasks-security-auditor`**. Sin secretos: los registros DNS y los orígenes son públicos. Dependencias fijadas (proveedor con *lockfile*) | ✅ (con revisión pendiente: tarea explícita) |
-| **IV. Paridad de entornos** | Hosting y su *rewrite* existen en staging y producción con el mismo módulo; solo difiere la lista de dominios. Lo que valida staging por `web.app` es el camino exacto de producción | ✅ |
+| **IV. Paridad de entornos** | Hosting, su *rewrite* **y los dominios personalizados** existen en staging y producción con el mismo módulo; solo difieren los valores de la lista de dominios. `staging.inserttask.com` ensaya la propiedad DNS y el certificado antes de producción (cierra el hallazgo C1 de `/speckit-analyze`). Solo `inserttask.com` y `www` existen únicamente en producción | ✅ |
 | **V. Identidad de agente y MCP** | El agente solo escribe IaC y documentos; no ejecuta `gcloud`/`terraform apply`. Lecturas de verificación, solo por el MCP con la cuenta del agente. Los permisos nuevos los concede el propietario | ✅ |
 | **VI. Despliegue por pipeline** | Hosting, dominios, CORS y variables se aplican solo por `infra.yml` y `deploy.yml`. Lo único fuera de Google Cloud (DNS) lo hace el propietario en su registrador | ✅ |
 | **VII. Revisión humana** | Una PR por fase; `infra` exige aprobación del propietario del plan; el agente no fusiona | ✅ |
@@ -98,9 +100,14 @@ confirmar; no bloquea.
 
 ### Re-evaluación tras el diseño (Fase 1)
 
-Sin cambios: el diseño no introdujo nada nuevo respecto a lo anterior. El riesgo principal de la spec
-(región) se resolvió con la documentación oficial. Nuevo punto a vigilar: los recursos beta (R4), con el
-procedimiento de mitigación descrito.
+El diseño no introdujo nada nuevo respecto a lo anterior. El riesgo principal de la spec (región) se
+resolvió con la documentación oficial. Puntos a vigilar: los recursos beta (R4), con el procedimiento de
+mitigación descrito, y que Hosting acepte a la vez la propiedad del apex (producción) y del subdominio
+(staging) en dos proyectos (R7), que el ensayo de staging comprueba antes de producción.
+
+**Revisión tras `/speckit-analyze`**: el propietario resolvió el hallazgo C1 (el recurso de dominio no
+pasaba por staging) añadiendo el subdominio de ensayo `staging.inserttask.com`. El Principio IV queda
+cumplido sin excepciones.
 
 ## Project Structure
 
@@ -132,7 +139,7 @@ infra/
 │   └── outputs.tf           # + estado de dominios y registros DNS requeridos
 ├── envs/staging/ y envs/production/
 │   ├── versions.tf, providers.tf, .terraform.lock.hcl   # + google-beta
-│   └── main.tf / terraform.tfvars   # producción: lista de dominios; staging: vacía
+│   └── main.tf / terraform.tfvars   # lista de dominios: staging.inserttask.com / inserttask.com + www
 ├── iam/roles/plan-reader.yaml       # + permisos de lectura de Hosting (los fija el primer plan)
 ├── RUNBOOK.md                       # + sección 14: dominio propio, DNS, certificado y retirada
 └── README.md                        # + el proveedor beta y por qué
@@ -171,16 +178,17 @@ Las fases 1 y 2 pueden ir en paralelo salvo por la dependencia indicada.
 
 | Fase | Contenido | Quién | Depende de | Salida verificable |
 |---|---|---|---|---|
-| **0. Prerrequisitos** | Confirmar si existe el sitio por defecto de cada proyecto; el propietario concede `roles/firebasehosting.admin` a `terraform-staging` y `terraform-production` y añade la variable `CUSTOM_WEB_ORIGINS` en `production` | Propietario (+ agente en solo lectura) | PR de diseño fusionada | Roles y variable verificados en solo lectura |
+| **0. Prerrequisitos** | Confirmar si existe el sitio por defecto de cada proyecto; el propietario concede `roles/firebasehosting.admin` a `terraform-staging` y `terraform-production` y añade la variable `CUSTOM_WEB_ORIGINS` en `staging` (`https://staging.inserttask.com`) y en `production` (`https://inserttask.com`) | Propietario (+ agente en solo lectura) | PR de diseño fusionada | Roles y variable verificados en solo lectura |
 | **1. Hosting en ambos entornos** | Proveedor `google-beta`, API, sitio (import), versión y *release*; `authorized_domains`, *referrers*; permisos de lectura del plan; ampliación de la prueba de paridad | `mytasks-iac-developer` | Fase 0 | `plan` de staging revisado; staging sirve la web por `web.app` |
 | **2. Pipeline y CORS** | `CORS_ORIGINS` compuesto, comprobaciones previa/posterior y pruebas de scripts | `mytasks-iac-developer` (justificar) | — (puede ir con la 1) | Escenarios 5–8 de staging |
-| **3. Dominio propio (solo producción)** | Dominios personalizados con `wait_dns_verification = false`, salidas de estado y DNS, `prevent_destroy`, RUNBOOK §14, README | `mytasks-iac-developer` | Fase 1 fusionada | `plan` de producción revisado |
-| **4. Revisión de seguridad y cierre** | Informe del auditor, Definition of Done, validación en staging (escenarios 1–9) | `mytasks-security-auditor`, `mytasks-project-manager` | Fases 1–3 | Informe sin críticos ni altos |
-| **5. Release y puesta en servicio** | Release a producción por el flujo habitual; `apply` aprobado; el propietario añade los DNS; escenarios 10–19 | Propietario + pipeline | Fase 4 | `validacion-produccion.md` |
+| **3. Dominios propios (`staging.inserttask.com`, `inserttask.com`, `www`)** | Dominios personalizados en ambos entornos con `wait_dns_verification = false`, salidas de estado y DNS, `prevent_destroy`, RUNBOOK §14, README | `mytasks-iac-developer` | Fase 1 fusionada | `plan` de staging y de producción revisados |
+| **4. Revisión de seguridad y cierre** | Informe del auditor, Definition of Done, validación en staging (escenarios 1–9) y **ensayo del dominio de staging (E1–E6)** | `mytasks-security-auditor`, `mytasks-project-manager` | Fases 1–3 | Informe sin críticos ni altos; `staging.inserttask.com` con certificado activo |
+| **5. Release y puesta en servicio** | Release a producción por el flujo habitual (solo con el ensayo de staging validado); `apply` aprobado; el propietario añade los DNS de producción; escenarios 10–19 | Propietario + pipeline | Fase 4 | `validacion-produccion.md` |
 
-**Camino de despliegue**: las fases 1–3 viajan en una misma release (crear los dominios es inocuo hasta
-que el propietario ponga el DNS). Tras el `apply` de producción, la web ya responde en
-`pdlco-mytasks.web.app` y el propietario avanza con el DNS a su ritmo, dentro de los 30 días.
+**Camino de despliegue**: las fases 1–3 viajan en una misma release. Primero se aplican en **staging**
+(al fusionar en `develop`): el propietario pone el DNS de `staging.inserttask.com` y se valida el ensayo.
+Solo entonces se crea la release; tras el `apply` de producción, la web ya responde en
+`pdlco-mytasks.web.app` y el propietario avanza con el DNS de producción a su ritmo, dentro de los 30 días.
 
 ## Fichas de implementación
 
@@ -191,7 +199,8 @@ que el propietario ponga el DNS). Tras el `apply` de producción, la web ya resp
 **Qué debe construir**: lo descrito en [contracts/pipeline-env.md](./contracts/pipeline-env.md) §2 y en
 [data-model.md](./data-model.md): API de Hosting; sitio por defecto (con `import` si existe), versión con
 una única regla `**` → `mytasks-web` (región del entorno, sin `pinTag`) y su *release*; dominios
-personalizados desde una variable (vacía en staging); `authorized_domains` y *referrers* ampliados;
+personalizados desde una variable (`staging.inserttask.com` en staging; `inserttask.com` y `www` en
+producción); `authorized_domains` y *referrers* ampliados;
 salidas de estado y de DNS requerido.
 
 **Restricciones de arquitectura (no negociables)**
@@ -241,6 +250,7 @@ URL adicional.
 | Segundo proveedor Terraform (`google-beta`) | Los recursos de Hosting no existen en el proveedor GA fijado | CLI de Firebase en el pipeline (herramienta y permisos nuevos fuera del `apply` revisado) |
 | Chequeo de CORS en dos tiempos en `deploy.yml` | Terraform no corrige las variables de un servicio existente y la comprobación actual exige igualdad exacta | Quitar `env` de `ignore_changes` (reescribiría `APP_VERSION` en cada `apply`) |
 | `www` como dominio aparte con redirección | Lo pidió el propietario (opción A) | Solo apex (la spec ya lo descartó) |
+| Subdominio de ensayo `staging.inserttask.com` con su propia propiedad DNS | Lo decidió el propietario para cerrar el hallazgo C1 (Principio IV) | Aceptar que el recurso de dominio se estrene en producción (descartado: el recurso es beta y cualquier fallo de propiedad o de certificado se descubriría con el dominio real) |
 
 ## Riesgos y puntos «a verificar»
 
@@ -252,4 +262,5 @@ URL adicional.
 | El *popup* de inicio de sesión funciona desde un origen servido por Hosting | Escenario 4 |
 | Tarifa propia de los *rewrites* de Hosting a Cloud Run | Factura de staging tras una semana |
 | Propiedad DNS en menos de 30 días | Guía y recordatorio del propietario |
+| Hosting acepta la propiedad del apex (producción) y del subdominio `staging` (staging) en dos proyectos distintos | Ensayo E3 del quickstart, antes de la release |
 | Registros `CAA` o parking del registrador que impidan el certificado | Guía de DNS (R7) y tabla de diagnóstico (R12) |

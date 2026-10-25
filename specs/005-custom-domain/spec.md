@@ -144,8 +144,12 @@ la aprobación del propietario, y que no se ejecutó ningún comando manual de d
 - **Política de seguridad del navegador**: la política de contenidos de la aplicación debe seguir
   permitiendo el inicio de sesión, el avatar subido y las llamadas a la API desde el dominio nuevo,
   sin errores en la consola.
-- **Staging**: no debe verse afectado ni recibir el dominio de producción; no se prueba ningún
-  cambio de producción en staging con el dominio real (Principio IV).
+- **Staging**: no recibe el dominio de producción ni sus redirecciones; tiene su propio subdominio
+  de ensayo, `staging.inserttask.com`, que ejercita el mismo mecanismo (propiedad DNS, certificado,
+  inicio de sesión) antes de tocar producción (Principio IV).
+- **Propiedad del dominio compartida entre proyectos**: `inserttask.com` pertenece al proyecto de
+  producción y `staging.inserttask.com` al de staging; Hosting debe aceptar ambas propiedades a la
+  vez. Si no lo hiciera, el ensayo lo detecta antes de producción y se revisa el diseño.
 - **Certificado que no se puede emitir** (p. ej. por restricciones de registros CAA en el
   dominio): la guía debe indicar cómo reconocer la causa.
 - **Retirada futura del dominio**: debe poder quitarse sin dejar la aplicación inaccesible por su
@@ -183,8 +187,12 @@ la aprobación del propietario, y que no se ejecutó ningún comando manual de d
 - **FR-013**: El dominio propio MUST atenderse a través de Firebase, por decisión del propietario:
   los servicios están en la región de Madrid y el mapeo de dominios nativo de Cloud Run no está
   disponible allí. No se cambia de región ni se contrata otro servicio para evitarlo.
-- **FR-014**: Staging MUST mantener la misma topología que producción (Principio IV) pero SIN el
-  dominio propio de producción; se atiende con su dirección por defecto.
+- **FR-014**: Staging MUST mantener la misma topología que producción (Principio IV) y MUST tener
+  su propio dominio de ensayo, `staging.inserttask.com`, con certificado gratuito y gestionado, sin
+  recibir el dominio de producción ni la redirección de `www`.
+- **FR-020**: El dominio de ensayo de staging MUST ponerse en servicio y validarse (propiedad
+  activa, certificado activo, inicio de sesión y funciones habituales) **antes** de crear los
+  dominios de producción, de modo que el recurso y el flujo de DNS se prueben primero en staging.
 - **FR-015**: La declaración del dominio y su configuración MUST gestionarse como infraestructura
   como código, con plan revisable y aprobación explícita del propietario antes de aplicar
   (Principios V, VI y VII); el agente no ejecuta operaciones reales sobre Google Cloud fuera del
@@ -202,8 +210,10 @@ la aprobación del propietario, y que no se ejecutó ningún comando manual de d
 
 ### Key Entities
 
-- **Dominio propio**: `inserttask.com`, comprado por el propietario; es la variante canónica, y
-  `www.inserttask.com` redirige a ella.
+- **Dominio propio**: `inserttask.com`, comprado por el propietario; es la variante canónica de
+  producción, y `www.inserttask.com` redirige a ella.
+- **Dominio de ensayo**: `staging.inserttask.com`, subdominio del anterior que sirve la web de
+  staging; no tiene variante `www`.
 - **Certificado de seguridad**: acredita el dominio ante los navegadores; gratuito, emitido y
   renovado automáticamente; tiene fecha de caducidad y estado (pendiente, activo, fallo de
   renovación).
@@ -233,13 +243,17 @@ la aprobación del propietario, y que no se ejecutó ningún comando manual de d
 - **SC-008**: Cualquier persona con acceso al repositorio puede, con la guía, añadir los registros DNS
   y dejar el dominio verificado en menos de 1 hora de trabajo efectivo (sin contar la propagación
   DNS).
+- **SC-009**: `staging.inserttask.com` llega a certificado activo y pasa la validación de
+  funciones y de inicio de sesión antes de que exista ningún dominio de producción.
 
 ## Assumptions
 
 - El propietario es el titular del dominio y puede editar sus registros DNS en el proveedor donde
   lo compró; esa parte queda fuera de Google Cloud y la hace él.
-- El dominio se aplica **solo a producción** (`pdlco-mytasks`). Staging mantiene su dirección
-  actual y no recibe el dominio.
+- `inserttask.com` y `www.inserttask.com` se aplican **solo a producción** (`pdlco-mytasks`).
+  Staging (`pdlco-mytasks-stg`) recibe únicamente el subdominio de ensayo `staging.inserttask.com`,
+  decidido por el propietario para probar el mecanismo antes de producción (Principio IV). Los
+  registros DNS de ambos los pone el propietario en el mismo proveedor.
 - El propietario ha decidido que el dominio se atiende a través de Firebase (Hosting) porque Cloud
   Run está en `europe-southwest1` (Madrid), donde el mapeo de dominios nativo no está disponible.
   La forma exacta (qué región de Cloud Run admite el encaminamiento, si hay que cambiar la
@@ -253,10 +267,12 @@ la aprobación del propietario, y que no se ejecutó ningún comando manual de d
   como parte del diseño.
 - La dirección técnica antigua de la web sigue operativa y sin redirección (la usa el pipeline);
   no se anuncia más.
-- Se cumple el flujo habitual: la feature pasa por staging y por la release a producción; el
-  dominio en sí solo existe en producción, por lo que su validación final es en producción por el
-  propietario tras el despliegue del pipeline.
+- Se cumple el flujo habitual: la feature pasa por staging y por la release a producción. El
+  dominio de ensayo (`staging.inserttask.com`) se pone en servicio y se valida en staging antes de la
+  release; la validación final de `inserttask.com` es en producción, por el propietario, tras el
+  despliegue del pipeline.
 - Las personas usuarias son las ya invitadas; no se prevé tráfico que requiera dimensionado
   adicional.
 - La aplicación no tiene correo ni subdominios de servicio que gestionar; fuera de alcance: correo
-  con el dominio, subdominios adicionales y protección extra (WAF, CDN de terceros).
+  con el dominio, subdominios adicionales (salvo el de ensayo de staging) y protección extra (WAF,
+  CDN de terceros).

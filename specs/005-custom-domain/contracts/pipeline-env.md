@@ -16,12 +16,13 @@ Composición (en este orden, sin duplicados, sin barra final):
 
 | Entorno | `CUSTOM_WEB_ORIGINS` | Resultado |
 |---|---|---|
-| `staging` | no definida | `run.app`, `<proyecto>.web.app` |
+| `staging` | `https://staging.inserttask.com` | `run.app`, `<proyecto>.web.app`, `https://staging.inserttask.com` |
 | `production` | `https://inserttask.com` | `run.app`, `<proyecto>.web.app`, `https://inserttask.com` |
 
 ### Reglas de la variable `CUSTOM_WEB_ORIGINS`
 
-- **No secreta**, de *Settings → Environments → production → Variables* (como `BOOTSTRAP_ADMIN_EMAIL`).
+- **No secreta**, de *Settings → Environments → staging / production → Variables* (como
+  `BOOTSTRAP_ADMIN_EMAIL`). Cada entorno define la suya; nunca el origen del otro.
 - Opcional. Admite varios orígenes separados por **espacio** (para no chocar con la coma de la lista).
 - Cada valor debe ser `https://` + nombre de dominio en minúsculas, sin ruta ni puerto. Un valor mal
   formado, con `*`, con `http://` o con espacios dentro de un origen **falla el despliegue antes de tocar
@@ -46,8 +47,10 @@ Ampliar `.github/scripts/tests/test_deploy_variable_check.py` (o una prueba herm
 
 | Caso | Resultado |
 |---|---|
-| Staging sin variable: lista de dos orígenes | Pasa |
+| Variable no definida (cualquier entorno): lista de dos orígenes | Pasa |
+| Staging con `https://staging.inserttask.com` | Pasa; lista de tres |
 | Producción con `https://inserttask.com` | Pasa; lista de tres |
+| Staging con un origen que no empiece por `https://staging.`, o producción con uno que sí | Falla nombrando el valor (evita que un entorno herede el dominio del otro) |
 | Valor con `http://`, `*`, ruta, mayúsculas o espacio interno | Falla nombrando el valor |
 | Servicio de otro entorno (no contiene su `run.app`) | Falla (previa) |
 | Lista escrita distinta a la compuesta | Falla (posterior) |
@@ -59,11 +62,11 @@ Ampliar `.github/scripts/tests/test_deploy_variable_check.py` (o una prueba herm
 |---|---|---|
 | API `firebasehosting.googleapis.com` en `apis` | Sí | Sí |
 | Sitio de Hosting, versión y *release* (proveedor `google-beta` fijado) | Sí | Sí |
-| Dominios personalizados (variable del módulo) | Lista vacía | `inserttask.com` + `www.inserttask.com` (redirige) |
-| `authorized_domains` | + sin cambios (ya incluye `.web.app`) | + `inserttask.com` |
-| `allowed_referrers` de la clave de API | + `https://<proyecto>.web.app/*` | + `https://<proyecto>.web.app/*` y `https://inserttask.com/*` |
+| Dominios personalizados (variable del módulo) | `staging.inserttask.com` (ensayo, sin redirección) | `inserttask.com` + `www.inserttask.com` (redirige) |
+| `authorized_domains` | + `staging.inserttask.com` (`.web.app` ya incluido) | + `inserttask.com` |
+| `allowed_referrers` de la clave de API | + `https://<proyecto>.web.app/*` y `https://staging.inserttask.com/*` | + `https://<proyecto>.web.app/*` y `https://inserttask.com/*` |
 | Protección contra borrado | `prevent_destroy` en sitio y dominios | Igual |
-| *Outputs* | Estado del sitio | Estado de cada dominio (`host_state`, `ownership_state`, `cert.state`, `issues`) y `required_dns_updates` |
+| *Outputs* | Estado de cada dominio (`host_state`, `ownership_state`, `cert.state`, `issues`) y `required_dns_updates` | Igual |
 
 `test_env_roots_parity.py` debe seguir pasando: solo pueden diferir el dimensionado, los identificadores
 y la lista de dominios personalizados.
