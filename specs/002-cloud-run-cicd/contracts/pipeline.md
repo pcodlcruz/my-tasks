@@ -95,6 +95,12 @@ flowchart TD
    `APP_ENV`, `CORS_ORIGINS`, URL de la API, configuración pública de Firebase). Si falta una
    variable obligatoria, el job falla aquí con un mensaje que nombra lo que falta (edge case
    de la spec).
+   **Actualización (feature 005):** `CORS_ORIGINS` de la API deja de ser un valor fijo y pasa a ser una
+   **lista compuesta por el pipeline** (la web de `run.app`, `<proyecto>.web.app` y los orígenes de la
+   variable no secreta `CUSTOM_WEB_ORIGINS` del entorno de GitHub). Antes de crear la revisión basta con que
+   el servicio incluya la web de su propio entorno; después de crearla, la revisión debe llevar
+   **exactamente** la lista compuesta o el despliegue se detiene sin mover tráfico. Detalle en
+   `specs/005-custom-domain/contracts/pipeline-env.md`.
 6. **Humo** (todas obligatorias):
    - API `/health` → `200` con `version` = versión esperada (no `/healthz`: el frontal de Google lo
      intercepta en `run.app` y nunca llega al contenedor).
