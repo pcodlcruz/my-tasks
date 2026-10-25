@@ -124,6 +124,18 @@ los sitios de Hosting, y la API REST directa queda fuera del MCP (Principio V). 
 tras mirar la consola de Firebase (T003) o lo revela el primer `plan` con el bloque `import` (T022, T026).
 Lo que sí lee el MCP es si la API de Hosting está activa y los roles de `terraform-<env>` (T001, T004).
 
+**Resultado de T001 (2026-10-25, MCP de Google Cloud con `mytasks-ai-agent@pdlco-mytasks.iam.gserviceaccount.com`, solo lectura)**:
+
+| Comprobación | `pdlco-mytasks` (producción) | `pdlco-mytasks-stg` (staging) |
+|---|---|---|
+| API `firebasehosting.googleapis.com` | `ENABLED` | `ENABLED` |
+| Roles de `terraform-<env>` | `mytasksEnvironmentAdmin`, `mytasksPlanReader`, `mytasksPlatformPlanReader` (personalizados); `artifactregistry.admin`, `iam.serviceAccountAdmin`, `iam.workloadIdentityPoolAdmin`, `resourcemanager.projectIamAdmin`, `run.admin`, `serviceusage.serviceUsageAdmin` | `mytasksEnvironmentAdmin` (personalizado); `iam.serviceAccountAdmin`, `resourcemanager.projectIamAdmin`, `run.admin`, `serviceusage.serviceUsageAdmin` |
+| `roles/firebasehosting.admin` | **No concedido** (lo concede el propietario, T003) | **No concedido** (T003) |
+| Sitio de Hosting por defecto | Pendiente: lo comunica el propietario (T003) | Pendiente: lo comunica el propietario (T003) |
+
+La API ya activa no cambia el plan: `google_project_service` adoptará el servicio existente al incluir
+`firebasehosting.googleapis.com` en `apis` (T019), con `disable_on_destroy = false`.
+
 ## R6 — Dominio propio: apex canónico y `www` con redirección
 
 **Decisión**: dos dominios personalizados en el sitio de **producción**:
