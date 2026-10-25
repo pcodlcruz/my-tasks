@@ -390,8 +390,8 @@ día, revisión de seguridad final y *Definition of Done* repasada.
 - [X] T104 [P] Anotar en `specs/001-eisenhower-task-manager/data-model.md`, `spec.md` y `plan.md` que la feature 004 añade preferencias y avatar bajo `users/{uid}/settings/`, y comprobar que `docs/design/screens/README.md` indica la pantalla vigente de cada una
 - [X] T105 Revisión de seguridad **final** de la feature con `mytasks-security-auditor` (estado acumulado de los hallazgos de las Fases 2, 3 y 6, riesgo residual del tema en `localStorage` en equipos compartidos, y la documentación) y registrar el informe en `specs/004-user-profile-settings/security-review-final.md`
 - [X] T106 Repasar el checklist *Definition of Done* de la constitución para la feature completa y registrar el resultado en `specs/004-user-profile-settings/definition-of-done.md`
-- [ ] T107 (propietario) Validar en staging, ya desplegado por el pipeline, los escenarios 1, 4, 7, 9, 12 y 16 de [quickstart.md](./quickstart.md) con cuentas reales, comprobar que la consola del navegador no muestra errores de CSP, y anotar el resultado en `specs/004-user-profile-settings/validacion-staging.md`
-- [ ] T108 Marcar la feature como lista para release cuando T107 esté hecha y esta PR fusionada
+- [X] T107 (propietario) Validar en staging, ya desplegado por el pipeline, los escenarios 1, 4, 7, 9, 12 y 16 de [quickstart.md](./quickstart.md) con cuentas reales, comprobar que la consola del navegador no muestra errores de CSP, y anotar el resultado en `specs/004-user-profile-settings/validacion-staging.md`
+- [X] T108 Marcar la feature como lista para release cuando T107 esté hecha y esta PR fusionada
 
 **Checkpoint**: contrato único, documentación y revisiones al día; la feature queda lista para staging.
 
