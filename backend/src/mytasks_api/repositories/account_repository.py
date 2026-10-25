@@ -1,4 +1,5 @@
 import asyncio
+import random
 from collections.abc import Awaitable, Callable
 from datetime import datetime
 from typing import Any, Concatenate, cast
@@ -48,8 +49,16 @@ def _transactional[**P, T](
 
 # Firestore aborts a transaction that loses a lock race (e.g. the same person opening two
 # tabs on their first sign-in); the client library does not retry a read that aborts.
-_MAX_ATTEMPTS = 4
-_RETRY_DELAY_SECONDS = 0.05
+#
+# The client does retry a lost commit, but five times in a row and without pausing (the retry
+# keeps its "spot in line", so it expects the winner to finish in a moment). On a busy machine the
+# winner takes longer than those back-to-back attempts, and the loser failed with "Failed to commit
+# transaction in 5 attempts". The only real waiting a loser gets is therefore this one: exponential
+# backoff with a cap, and full jitter so that two losers of the same race do not wake up together
+# and collide again. Worst case it adds about 4.5 s, and only to a request that lost a race.
+_MAX_ATTEMPTS = 8
+_BACKOFF_BASE_SECONDS = 0.05
+_BACKOFF_CAP_SECONDS = 1.0
 
 
 def _lost_the_lock_race(error: Exception) -> bool:
@@ -67,7 +76,8 @@ async def _retry_on_abort[T](operation: Callable[[], Awaitable[T]]) -> T:
         except (google_exceptions.Aborted, ValueError) as error:
             if not _lost_the_lock_race(error) or attempt == _MAX_ATTEMPTS:
                 raise
-            await asyncio.sleep(_RETRY_DELAY_SECONDS * attempt)
+            ceiling = min(_BACKOFF_CAP_SECONDS, _BACKOFF_BASE_SECONDS * 2**attempt)
+            await asyncio.sleep(random.uniform(0.0, ceiling))
     raise AssertionError  # unreachable: the last attempt returns or raises
 
 
