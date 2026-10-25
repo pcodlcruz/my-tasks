@@ -105,15 +105,23 @@ y `_custom_domain`) existen únicamente en `google-beta`, con un ejemplo oficial
 mitiga fijando la versión, con el *lockfile* y con el plan de solo lectura en cada PR (`infra.yml`).
 
 **A verificar (primer `plan` real en staging)**: la forma exacta de `google_firebase_hosting_version`
-(inmutable: un cambio de configuración crea una versión nueva y un *release* nuevo) y la adopción por
-`import` del sitio por defecto si ya existe.
+(inmutable: un cambio de configuración crea una versión nueva y un *release* nuevo) y que el sitio por
+defecto existe con el id del proyecto (R5).
+
+**Actualización (Fase 3)**: el *root* `infra/platform/` ya usaba `google-beta` `~> 8.6.0` con su
+*lockfile*, así que no es un proveedor nuevo en el repositorio, solo se extiende a los *roots* de entorno
+(los *hashes* se copiaron del de `platform`).
 
 ## R5 — Sitio de Hosting: el sitio por defecto de cada proyecto
 
-**Decisión**: usar el sitio por defecto de cada proyecto (`pdlco-mytasks` → `pdlco-mytasks.web.app`;
-`pdlco-mytasks-stg` → `pdlco-mytasks-stg.web.app`), no crear sitios adicionales. Si ya existe (lo normal
-en un proyecto Firebase), se adopta con un bloque `import`, como ya se hizo con Identity Platform; si
-no, se crea.
+**Decisión (revisada en la Fase 3)**: usar el sitio por defecto de cada proyecto
+(`pdlco-mytasks` → `pdlco-mytasks.web.app`; `pdlco-mytasks-stg` → `pdlco-mytasks-stg.web.app`), no crear
+sitios adicionales, y **no declararlo en Terraform**: ni recurso ni `import`. La documentación oficial
+(`firebase.google.com/docs/hosting/default-site`) dice que ese sitio se crea solo para los proyectos
+anteriores al 2026-10-15 y siempre que se activa la API de Identity Platform (los dos casos se dan aquí) y
+que, una vez creado, no se puede cambiar ni borrar. Gestionarlo no aporta nada y crearlo fallaría si ya
+existe. Versión, *release* y dominios se apuntan a él por su identificador (`hosting_site_id`, el id del
+proyecto).
 
 **Por qué**: `<proyecto>.web.app` **ya está** entre los dominios autorizados de Identity Platform
 (`identity.tf`), así que el inicio de sesión funciona en él sin cambios; y evita un segundo sitio.
@@ -131,10 +139,14 @@ Lo que sí lee el MCP es si la API de Hosting está activa y los roles de `terra
 | API `firebasehosting.googleapis.com` | `ENABLED` | `ENABLED` |
 | Roles de `terraform-<env>` | `mytasksEnvironmentAdmin`, `mytasksPlanReader`, `mytasksPlatformPlanReader` (personalizados); `artifactregistry.admin`, `iam.serviceAccountAdmin`, `iam.workloadIdentityPoolAdmin`, `resourcemanager.projectIamAdmin`, `run.admin`, `serviceusage.serviceUsageAdmin` | `mytasksEnvironmentAdmin` (personalizado); `iam.serviceAccountAdmin`, `resourcemanager.projectIamAdmin`, `run.admin`, `serviceusage.serviceUsageAdmin` |
 | `roles/firebasehosting.admin` | No concedido en esta lectura. **Concedido por el propietario y verificado después (T004, 2026-10-25)** | Igual: concedido y verificado (T004) |
-| Sitio de Hosting por defecto | **No existe** (comunicado por el propietario en T003): lo crea Terraform | **No existe** (T003): lo crea Terraform |
+| Sitio de Hosting por defecto | El propietario **no lo ve en la consola** (T003); la respuesta pública de `pdlco-mytasks.web.app` es idéntica a la de un sitio inexistente (404 «Site Not Found», 21 265 bytes), así que no distingue | Igual (T003 y misma respuesta pública) |
 
-**Consecuencia para T022**: no hay sitio que adoptar, así que no se añade ningún bloque `import` y el
-módulo crea el sitio por defecto (`site_id` = `project_id`) en cada entorno.
+**Consecuencia para T022**: la consola puede mostrar «Empezar» aunque el sitio exista (se crea solo, ver la
+decisión de arriba), y desde fuera no se distingue. Por eso el código **no crea ni adopta el sitio**: lo
+referencia por su id. Para salir de dudas antes de aprobar el `apply` de staging, el propietario puede
+ejecutar con sus credenciales `firebase hosting:sites:list --project <proyecto>` en los dos proyectos y
+comunicar el id del sitio por defecto (`DEFAULT_SITE`). Si no existiera o su id llevara un sufijo, el
+primer `apply` falla en la versión de Hosting, antes de cambiar nada más, y se corrige en una PR.
 
 La API ya activa no cambia el plan: `google_project_service` adoptará el servicio existente al incluir
 `firebasehosting.googleapis.com` en `apis` (T019), con `disable_on_destroy = false`.

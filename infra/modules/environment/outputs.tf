@@ -8,6 +8,16 @@ output "api_url" {
   value       = local.api_url
 }
 
+output "hosting_site_id" {
+  description = "Id of the default Firebase Hosting site the web is served through."
+  value       = local.hosting_site_id
+}
+
+output "hosting_url" {
+  description = "Default Firebase Hosting address of the environment (feature 005)."
+  value       = "https://${local.hosting_site_id}.web.app"
+}
+
 output "firebase_auth_domain" {
   description = "Authentication domain the web uses."
   value       = local.auth_domain

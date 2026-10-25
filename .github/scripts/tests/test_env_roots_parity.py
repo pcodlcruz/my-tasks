@@ -24,6 +24,11 @@ MODULE_ARGUMENTS_THAT_DIFFER = {
     "manage_data_access_audit": "production shares its project with the platform, which owns the audit",
     "firestore_point_in_time_recovery": "production keeps 7 days of versions of the owner's tasks, staging only test data",
 }
+# Arguments that each environment fills with its own values but that need not differ (feature 005:
+# the custom domains each environment serves; both start empty and the phase 4 fills them in).
+MODULE_ARGUMENTS_THAT_MAY_DIFFER = {
+    "custom_domains": "each environment serves its own domains (staging a rehearsal one)",
+}
 # Values of terraform.tfvars that may differ: identifiers and sizing.
 TFVARS_THAT_DIFFER = {"project_id", "project_number", "api_max_instances", "web_max_instances"}
 # Files that must be identical.
@@ -85,7 +90,7 @@ check(
 
 for argument in sorted(set(staging_module) & set(production_module)):
     same = staging_module[argument] == production_module[argument]
-    if argument in MODULE_ARGUMENTS_THAT_DIFFER:
+    if argument in MODULE_ARGUMENTS_THAT_DIFFER or argument in MODULE_ARGUMENTS_THAT_MAY_DIFFER:
         continue
     check(f"module argument '{argument}' is the same", same, f"{staging_module[argument]} != {production_module[argument]}")
 
@@ -125,6 +130,42 @@ check(
     [item for item in imports(STAGING / "main.tf") if "identity_platform" in item[0]]
     == [item for item in imports(PRODUCTION / "main.tf") if "identity_platform" in item[0]]
     != [],
+)
+
+# --- Feature 005: Firebase Hosting needs the google-beta provider (the GA one has no
+# google_firebase_hosting_* resources). It must be pinned like google, configured like google and
+# handed to the module, in both environments.
+MODULE = ENVS.parent / "modules" / "environment"
+
+
+def provider_block(path: Path, name: str) -> str | None:
+    match = re.search(rf'provider "{name}" \{{(.*?)^\}}', path.read_text(encoding="utf-8"), re.DOTALL | re.MULTILINE)
+    return re.sub(r"\s+", " ", match.group(1)).strip() if match else None
+
+
+for label, versions in (
+    ("the module", MODULE / "versions.tf"),
+    ("the staging root", STAGING / "versions.tf"),
+    ("the production root", PRODUCTION / "versions.tf"),
+):
+    text = versions.read_text(encoding="utf-8")
+    check(
+        f"{label} pins google-beta to the same line as google",
+        bool(re.search(r'source\s*=\s*"hashicorp/google-beta"\s*version\s*=\s*"~> 8\.6\.0"', text)),
+    )
+
+google, beta = provider_block(STAGING / "providers.tf", "google"), provider_block(STAGING / "providers.tf", "google-beta")
+check("the roots configure google-beta exactly like google", beta is not None and beta == google, f"{beta!r} != {google!r}")
+check(
+    "both roots hand both providers to the module",
+    all(
+        "providers" in module and "google-beta = google-beta" in module["providers"] and "google = google" in module["providers"]
+        for module in (staging_module, production_module)
+    ),
+)
+check(
+    "both roots pass the custom domains to the module",
+    "custom_domains" in staging_module and "custom_domains" in production_module,
 )
 
 sys.exit(1 if failures else 0)

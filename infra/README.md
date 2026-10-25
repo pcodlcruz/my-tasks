@@ -63,3 +63,21 @@ antes de destruir. El procedimiento está en el [RUNBOOK](./RUNBOOK.md).
 Terraform `>= 1.9, < 2.0` y proveedores `hashicorp/google` y `hashicorp/google-beta` en `~> 8.6.0`.
 El fichero `.terraform.lock.hcl` de cada raíz se versiona y fija las versiones exactas y sus sumas
 de comprobación; se actualiza solo con una PR propia.
+
+### El proveedor `google-beta` y Firebase Hosting
+
+El proveedor GA `hashicorp/google` **no tiene** los recursos de Firebase Hosting
+(`google_firebase_hosting_*`; el binario del proveedor solo trae `google_firebase_app_hosting_*`, que es
+otro producto). Solo existen en `hashicorp/google-beta`, por eso el módulo `environment` lo declara junto
+al GA y cada raíz lo configura igual que a él (`providers.tf`). Reglas para no ampliar su uso sin querer:
+
+- Se usa **únicamente** en `modules/environment/hosting.tf` (con `provider = google-beta`): la versión y el
+  *release* de Hosting y, en la fase 4 de la feature 005, los dominios personalizados. Todo lo demás sigue
+  en el proveedor GA.
+- Va fijado a la **misma línea que el GA** (`~> 8.6.0`). Su *lockfile* es idéntico en `staging` y
+  `production` (lo exige `.github/scripts/tests/test_env_roots_parity.py`) y coincide con el de
+  `platform`, que ya usaba este proveedor.
+- Al subir el GA, se sube también el beta, en la misma PR. Un recurso beta puede cambiar entre versiones: el
+  plan de solo lectura de `infra.yml` en cada PR es lo que lo detecta.
+- El sitio de Hosting por defecto **no se declara**: Firebase lo crea solo, no se puede cambiar ni borrar,
+  y Terraform lo referencia por su identificador (`hosting_site_id`, el id del proyecto).
