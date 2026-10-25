@@ -10,6 +10,7 @@ dependencies = [
     "google-cloud-firestore>=2.19",
     "firebase-admin>=6.5",
     "uvicorn[standard]>=0.30",
+    "pillow>=13.0.0",
 ]
 
 [dependency-groups]

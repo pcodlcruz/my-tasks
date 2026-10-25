@@ -88,7 +88,7 @@ async def test_cors_allows_only_the_configured_origin() -> None:
 
 @pytest.mark.parametrize(
     ("method", "headers"),
-    [("PUT", "authorization"), ("TRACE", "authorization"), ("GET", "x-custom-header")],
+    [("PROPFIND", "authorization"), ("TRACE", "authorization"), ("GET", "x-custom-header")],
 )
 async def test_cors_rejects_methods_and_headers_the_api_does_not_use(
     method: str, headers: str

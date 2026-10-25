@@ -173,21 +173,47 @@ test.describe('Perfil · identidad', () => {
 
   test('la administración de accesos sigue mostrando el correo y no el nombre elegido', async ({
     page,
+    browser,
     loginAsAdmin,
   }) => {
+    // Checked on a newly invited account: the newest ones are always in the list, which shows
+    // only the 100 most recent and would drop the (oldest) administrator's own account.
+    const email = uniqueEmail('perfil-acceso')
+    const name = 'Nombre Elegido Por Eva'
     await loginAsAdmin()
-    await openProfile(page)
-    await saveName(page, 'Nombre Elegido')
-    await expectSaved(page)
-
     await page
       .getByRole('navigation', { name: 'Navegación principal' })
       .getByRole('link', { name: 'Accesos' })
       .click()
+    await page.getByLabel('Correo de la persona a invitar').fill(email)
+    await page.getByRole('button', { name: 'Invitar' }).click()
+    await expect(
+      page
+        .getByRole('list', { name: 'Invitaciones' })
+        .getByRole('listitem')
+        .filter({ hasText: email }),
+    ).toContainText('Pendiente')
 
-    await expect(page.getByRole('heading', { name: 'Accesos', level: 1 })).toBeVisible()
-    await expect(page.getByText('admin-e2e@example.com').first()).toBeVisible()
-    await expect(page.getByText('Nombre Elegido')).toHaveCount(1) // only the header link
-    await expect(page.getByRole('main').getByText('Nombre Elegido')).toHaveCount(0)
+    const invited = await browser.newContext()
+    const invitedPage = await invited.newPage()
+    await invitedPage.goto('/login')
+    await invitedPage.waitForFunction(() => typeof window.__mytasksTestLogin === 'function')
+    await invitedPage.evaluate(async (userEmail) => {
+      await window.__mytasksTestLogin?.(userEmail)
+    }, email)
+    await openProfile(invitedPage)
+    await saveName(invitedPage, name)
+    await expectSaved(invitedPage)
+    await invited.close()
+
+    await page.reload()
+
+    const account = page
+      .getByRole('list', { name: 'Personas con cuenta' })
+      .getByRole('listitem')
+      .filter({ hasText: email })
+    await expect(account).toBeVisible()
+    await expect(page.getByRole('main').getByText(name)).toHaveCount(0)
+    await expect(page.getByRole('main')).not.toContainText(name)
   })
 })

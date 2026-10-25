@@ -76,10 +76,12 @@ EOF
 # script-src: Firebase's popup sign-in loads the Google API loader. frame-src: the auth
 # handler iframe lives on the project's auth domain. style-src needs no 'unsafe-inline':
 # the app ships a stylesheet and uses no inline styles.
+# img-src blob:: the avatar is fetched with the token (an <img> cannot send it) and shown from a
+# blob: URL in memory; no remote image origin is allowed.
 csp="default-src 'self'; \
 script-src 'self' https://apis.google.com; \
 style-src 'self'; \
-img-src 'self' data:; \
+img-src 'self' data: blob:; \
 font-src 'self'; \
 connect-src 'self' ${API_BASE_URL} https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://www.googleapis.com; \
 frame-src https://${FIREBASE_AUTH_DOMAIN} https://accounts.google.com; \

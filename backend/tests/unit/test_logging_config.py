@@ -71,3 +71,10 @@ def test_json_formatter_emits_the_names_of_the_fields_a_profile_event_changed() 
 
     assert line["uid"] == "user-1"
     assert line["fields"] == "density,theme"
+
+
+def test_json_formatter_emits_the_size_of_an_uploaded_avatar() -> None:
+    line = _log_line(uid="user-1", size="18432")
+
+    assert line["uid"] == "user-1"
+    assert line["size"] == "18432"

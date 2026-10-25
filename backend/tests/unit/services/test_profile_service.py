@@ -1,3 +1,4 @@
+import asyncio
 import logging
 from collections.abc import Callable
 from dataclasses import replace
@@ -206,3 +207,61 @@ async def test_reset_profile_logs_the_reset_with_the_uid_and_the_field_names(
     (record,) = [r for r in caplog.records if r.getMessage() == "profile_reset"]
     assert record.uid == "uid-9"  # type: ignore[attr-defined]
     assert record.fields == ",".join(sorted(RESETTABLE_FIELDS))  # type: ignore[attr-defined]
+
+
+class UploadOnlyRepository:
+    async def upload_avatar(self, uid: str, image: bytes, now: object) -> Profile:
+        return default_profile()
+
+
+async def test_pictures_are_processed_at_most_two_at_a_time(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    # Decoding a big picture takes memory: a few at once would exhaust a small instance.
+    import threading
+    import time
+
+    from mytasks_api.services import profile_service
+
+    running = 0
+    most = 0
+    guard = threading.Lock()
+
+    def slow_process(data: bytes) -> bytes:
+        nonlocal running, most
+        with guard:
+            running += 1
+            most = max(most, running)
+        time.sleep(0.05)
+        with guard:
+            running -= 1
+        return b"webp"
+
+    monkeypatch.setattr(profile_service, "process_avatar", slow_process)
+    service = ProfileService(UploadOnlyRepository())  # type: ignore[arg-type]
+
+    await asyncio.gather(*(service.upload_avatar("uid-1", b"x") for _ in range(8)))
+
+    assert most == 2
+
+
+async def test_a_rejected_picture_frees_its_processing_slot(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from mytasks_api.domain.avatar_image import AvatarUnsupportedError
+    from mytasks_api.services import profile_service
+
+    def reject(data: bytes) -> bytes:
+        raise AvatarUnsupportedError
+
+    monkeypatch.setattr(profile_service, "process_avatar", reject)
+    service = ProfileService(UploadOnlyRepository())  # type: ignore[arg-type]
+
+    for _ in range(6):
+        with pytest.raises(AvatarUnsupportedError):
+            await service.upload_avatar("uid-1", b"x")
+
+    monkeypatch.setattr(profile_service, "process_avatar", lambda data: b"webp")
+    assert (
+        await asyncio.wait_for(service.upload_avatar("uid-1", b"x"), timeout=2) == default_profile()
+    )

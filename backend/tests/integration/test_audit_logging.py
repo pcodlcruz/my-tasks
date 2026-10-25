@@ -259,3 +259,63 @@ async def test_a_rejected_profile_update_is_not_logged_as_an_update(
 
     assert response.status_code == 422
     assert _records(caplog, "profile_updated") == []
+
+
+async def test_an_avatar_upload_is_logged_with_the_uid_and_the_final_size_only(
+    client: httpx.AsyncClient, google_user: GoogleUserFactory, caplog: pytest.LogCaptureFixture
+) -> None:
+    import io
+
+    from PIL import Image
+
+    user = await google_user("owner@example.com")
+    buffer = io.BytesIO()
+    Image.new("RGB", (90, 90), (10, 120, 10)).save(buffer, format="PNG")
+    caplog.set_level(logging.INFO, logger=LOGGER_NAME)
+
+    response = await client.put(
+        "/api/v1/me/avatar",
+        content=buffer.getvalue(),
+        headers={"Authorization": f"Bearer {user.id_token}", "Content-Type": "image/png"},
+    )
+    stored = await client.get(
+        "/api/v1/me/avatar", headers={"Authorization": f"Bearer {user.id_token}"}
+    )
+
+    assert response.status_code == 200
+    (record,) = _records(caplog, "avatar_uploaded")
+    assert record.uid == user.uid  # type: ignore[attr-defined]
+    assert record.size == str(len(stored.content))  # type: ignore[attr-defined]
+    assert "owner@example.com" not in caplog.text
+    assert user.id_token not in caplog.text
+    assert "RIFF" not in caplog.text
+    assert "WEBP" not in caplog.text
+
+
+async def test_an_avatar_removal_is_logged_with_the_uid(
+    client: httpx.AsyncClient, google_user: GoogleUserFactory, caplog: pytest.LogCaptureFixture
+) -> None:
+    user = await google_user("owner@example.com")
+    caplog.set_level(logging.INFO, logger=LOGGER_NAME)
+
+    await client.delete("/api/v1/me/avatar", headers={"Authorization": f"Bearer {user.id_token}"})
+
+    (record,) = _records(caplog, "avatar_removed")
+    assert record.uid == user.uid  # type: ignore[attr-defined]
+
+
+async def test_a_rejected_avatar_upload_is_not_logged_as_an_upload_and_leaks_no_content(
+    client: httpx.AsyncClient, google_user: GoogleUserFactory, caplog: pytest.LogCaptureFixture
+) -> None:
+    user = await google_user("owner@example.com")
+    caplog.set_level(logging.INFO, logger=LOGGER_NAME)
+
+    response = await client.put(
+        "/api/v1/me/avatar",
+        content=b"contenido-secreto-del-archivo",
+        headers={"Authorization": f"Bearer {user.id_token}", "Content-Type": "image/png"},
+    )
+
+    assert response.status_code == 415
+    assert _records(caplog, "avatar_uploaded") == []
+    assert "contenido-secreto-del-archivo" not in caplog.text

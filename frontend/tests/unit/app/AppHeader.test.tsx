@@ -6,6 +6,7 @@ import type { Profile } from '../../../src/api/types'
 const useSessionMock = vi.fn()
 const useIsAdminMock = vi.fn()
 const useProfileMock = vi.fn()
+const useAvatarUrlMock = vi.fn()
 
 vi.mock('../../../src/features/auth/useSession', () => ({
   useSession: () => useSessionMock(),
@@ -17,6 +18,7 @@ vi.mock('../../../src/features/auth/useIsAdmin', () => ({
 
 vi.mock('../../../src/api/profile', () => ({
   useProfile: () => useProfileMock(),
+  useAvatarUrl: (...args: unknown[]) => useAvatarUrlMock(...args),
 }))
 
 const PROFILE: Profile = {
@@ -58,6 +60,8 @@ describe('<AppHeader>', () => {
     useSessionMock.mockReset()
     useIsAdminMock.mockReset()
     useProfileMock.mockReset()
+    useAvatarUrlMock.mockReset()
+    useAvatarUrlMock.mockReturnValue(undefined)
     signedIn()
     useIsAdminMock.mockReturnValue(false)
     useProfileMock.mockReturnValue(profileResult())
@@ -124,6 +128,32 @@ describe('<AppHeader>', () => {
       const image = link.querySelector('img')
       expect(image?.getAttribute('src')).toBeTruthy()
       expect(image?.getAttribute('alt')).toBe('')
+    })
+
+    it('muestra la imagen subida como avatar, decorativa, con el blob: URL descargado', async () => {
+      const avatar = { kind: 'upload' as const, preset: null, version: 4 }
+      useProfileMock.mockReturnValue(profileResult({ avatar }))
+      useAvatarUrlMock.mockReturnValue('blob:imagen-subida')
+
+      await renderHeader()
+
+      const image = profileLink('Perfil de Ana Cruz').querySelector('img')
+      expect(image?.getAttribute('src')).toBe('blob:imagen-subida')
+      expect(image?.getAttribute('alt')).toBe('')
+      expect(useAvatarUrlMock).toHaveBeenCalledWith(avatar)
+    })
+
+    it('mientras se descarga la imagen subida muestra las iniciales, no un hueco', async () => {
+      useProfileMock.mockReturnValue(
+        profileResult({ avatar: { kind: 'upload', preset: null, version: 4 } }),
+      )
+      useAvatarUrlMock.mockReturnValue(undefined)
+
+      await renderHeader()
+
+      const link = profileLink('Perfil de Ana Cruz')
+      expect(link).toHaveTextContent('AC')
+      expect(link.querySelector('img')).toBeNull()
     })
 
     it('recorta un nombre largo con puntos suspensivos', async () => {

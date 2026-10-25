@@ -1,9 +1,11 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { render } from '@testing-library/react'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { useUiStore } from '../../../src/stores/uiStore'
 
 const useSessionMock = vi.fn()
+
+vi.mock('../../../src/lib/firebase', () => ({ auth: { currentUser: null, signOut: vi.fn() } }))
 
 vi.mock('../../../src/features/auth/useSession', () => ({
   useSession: () => useSessionMock(),
@@ -94,5 +96,69 @@ describe('<SessionCacheReset>', () => {
     rerender()
 
     expect(useUiStore.getState().scopeFilter).toBe('work')
+  })
+
+  describe('imagen del avatar', () => {
+    beforeEach(() => {
+      Object.assign(URL, { createObjectURL: vi.fn(), revokeObjectURL: vi.fn() })
+    })
+
+    afterEach(() => {
+      Reflect.deleteProperty(URL, 'createObjectURL')
+      Reflect.deleteProperty(URL, 'revokeObjectURL')
+    })
+
+    it('revoca los blob: URL del avatar al cambiar de persona', async () => {
+      useSessionMock.mockReturnValue({ user: { uid: 'user-1' }, loading: false })
+      const { rerender } = await renderReset(client)
+      client.setQueryData(['avatar', 3], 'blob:avatar-de-user-1')
+
+      useSessionMock.mockReturnValue({ user: { uid: 'user-2' }, loading: false })
+      rerender()
+
+      expect(vi.mocked(URL.revokeObjectURL)).toHaveBeenCalledExactlyOnceWith(
+        'blob:avatar-de-user-1',
+      )
+      expect(client.getQueryData(['avatar', 3])).toBeUndefined()
+    })
+
+    it('revoca los blob: URL del avatar al cerrar sesión', async () => {
+      useSessionMock.mockReturnValue({ user: { uid: 'user-1' }, loading: false })
+      const { rerender } = await renderReset(client)
+      client.setQueryData(['avatar', 1], 'blob:uno')
+      client.setQueryData(['avatar', 2], 'blob:dos')
+
+      useSessionMock.mockReturnValue({ user: null, loading: false })
+      rerender()
+
+      expect(
+        vi
+          .mocked(URL.revokeObjectURL)
+          .mock.calls.map(([url]) => url)
+          .sort(),
+      ).toEqual(['blob:dos', 'blob:uno'])
+    })
+
+    it('no revoca nada mientras la persona sigue siendo la misma', async () => {
+      useSessionMock.mockReturnValue({ user: { uid: 'user-1' }, loading: false })
+      const { rerender } = await renderReset(client)
+      client.setQueryData(['avatar', 3], 'blob:avatar')
+
+      useSessionMock.mockReturnValue({ user: { uid: 'user-1' }, loading: false })
+      rerender()
+
+      expect(URL.revokeObjectURL).not.toHaveBeenCalled()
+    })
+
+    it('no toca los datos de otras consultas que no son del avatar', async () => {
+      useSessionMock.mockReturnValue({ user: { uid: 'user-1' }, loading: false })
+      const { rerender } = await renderReset(client)
+      client.setQueryData(['tasks', 'board'], { items: [] })
+
+      useSessionMock.mockReturnValue({ user: { uid: 'user-2' }, loading: false })
+      rerender()
+
+      expect(URL.revokeObjectURL).not.toHaveBeenCalled()
+    })
   })
 })
