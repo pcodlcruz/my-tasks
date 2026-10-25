@@ -652,3 +652,29 @@ El navegador pide la imagen con el token (un `<img src>` no puede enviarlo) y la
 ### Validación en staging (T107, propietario)
 
 Tras desplegar por el pipeline, repetir en staging los escenarios 1, 4, 7, 9, 12 y 16 de `specs/004-user-profile-settings/quickstart.md` con cuentas reales, comprobar que la consola del navegador no muestra errores de CSP y anotar el resultado en `specs/004-user-profile-settings/validacion-staging.md`.
+
+## 14. Dominio propio con Firebase Hosting (feature 005)
+
+Diseño en `specs/005-custom-domain/`. Esta sección se completa por fases: aquí está el estado de partida y los permisos (Phase 1); el procedimiento de DNS, el diagnóstico del certificado y la retirada del dominio los añade la Phase 4 (T036).
+
+### Permisos de Hosting (T001, T003, T004)
+
+Leído en solo lectura por el agente con el MCP de Google Cloud el 2026-10-25, antes de que el propietario concediera nada:
+
+| Comprobación | Producción (`pdlco-mytasks`) | Staging (`pdlco-mytasks-stg`) |
+|---|---|---|
+| API `firebasehosting.googleapis.com` | Activa | Activa |
+| `roles/firebasehosting.admin` en `terraform-<entorno>` | No concedido | No concedido |
+
+Lo que concede el propietario (guía: `specs/005-custom-domain/guia-propietario-hosting.md`): `roles/firebasehosting.admin` a `terraform-staging` y a `terraform-production` en su proyecto, y la variable no secreta `CUSTOM_WEB_ORIGINS` en los entornos de GitHub `staging` (`https://staging.inserttask.com`) y `production` (`https://inserttask.com`). No se concede nada a `deployer-*` ni a `mytasks-ai-agent`.
+
+**Verificación posterior a la concesión (T004, 2026-10-25, solo lectura con el MCP)**:
+
+| Proyecto | Identidad | Resultado |
+|---|---|---|
+| `pdlco-mytasks` | `terraform-production` | Tiene `roles/firebasehosting.admin` además de los que ya tenía; ningún otro rol cambió |
+| `pdlco-mytasks-stg` | `terraform-staging` | Tiene `roles/firebasehosting.admin` además de los que ya tenía; ningún otro rol cambió |
+
+En cada proyecto, `roles/firebasehosting.admin` lo tiene **únicamente** la cuenta de Terraform de ese proyecto. Las variables `CUSTOM_WEB_ORIGINS` de los entornos de GitHub no se pueden leer sin credenciales: constan por confirmación del propietario.
+
+**Sitio de Hosting por defecto**: el propietario comprobó en la consola de Firebase que **no existe** en ninguno de los dos proyectos (ni `pdlco-mytasks.web.app` ni `pdlco-mytasks-stg.web.app`). Por tanto lo crea Terraform y no hace falta ningún bloque `import` (T022).
