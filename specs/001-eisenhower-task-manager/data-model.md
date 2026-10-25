@@ -10,6 +10,12 @@
 > El documento `users/{uid}` es el padre de la subcolección de tareas y solo se crea al aceptar
 > una invitación (o con el administrador inicial): el registro abierto queda sustituido. Lo que
 > sigue describe el modelo original.
+>
+> **Ampliado por la feature 004** ([data-model](../004-user-profile-settings/data-model.md)): bajo
+> `users/{uid}` hay ahora una subcolección `settings` con dos documentos por persona,
+> `settings/profile` (preferencias, nombre para mostrar y tipo de avatar) y `settings/avatar` (la
+> imagen subida, ya reprocesada). Solo los lee y escribe la API; sin ellos valen los valores por
+> defecto. No cambia ningún campo de `users/{uid}` ni de las tareas.
 
 No se persistía como documento propio (ver [research.md § R2](./research.md#r2-modelo-de-almacenamiento-en-firestore-y-aislamiento-por-usuario)).
 Su identidad es el `uid` que emite Firebase Authentication al iniciar sesión con Google. El sistema

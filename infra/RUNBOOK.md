@@ -622,3 +622,33 @@ El correo viaja en la ruta de `DELETE /api/v1/admin/invitations/{email}`, así q
 ### Validación en staging (T057, propietario)
 
 Tras desplegar por el pipeline, repetir en staging los escenarios 1–6 de `specs/003-user-roles-invitations/quickstart.md` con cuentas reales de prueba y anotar el resultado en `specs/003-user-roles-invitations/validacion-staging.md`.
+
+## 13. Perfil, preferencias y avatar (feature 004, T103)
+
+**No hay cambios de infraestructura**: ni variables de entorno, ni bucket, ni IAM, ni índices, ni cuentas de servicio nuevas. Todo vive en Firestore bajo el documento de cada cuenta y lo escribe solo la API. Diseño y decisiones: `specs/004-user-profile-settings/`; contrato en `specs/001-eisenhower-task-manager/contracts/openapi.yaml` (v1.3.0).
+
+### Dónde está cada cosa
+
+| Dato | Dónde |
+|---|---|
+| Preferencias, nombre para mostrar y tipo de avatar | `users/{uid}/settings/profile` (se crea al primer cambio; sin documento valen los valores por defecto) |
+| Imagen de avatar subida | `users/{uid}/settings/avatar` (un solo documento por persona, ≤ 200 KB, WebP 256×256) |
+| Copia de tema y densidad para el primer pintado | `localStorage` del navegador de cada persona (no es fuente de verdad) |
+
+Para comprobar el avatar de una cuenta (lo hace el propietario con sus credenciales, en la consola de Firestore del proyecto del entorno; el agente no lo hace): en `users/{uid}/settings/profile`, `avatar_kind = upload` y `avatar_version` > 0 deben ir acompañados de un documento `avatar` en la misma subcolección.
+
+### Si alguien sube una imagen inapropiada
+
+La aplicación no tiene moderación ni denuncia: la imagen solo la ve su dueña, así que el caso es acotado. Si hay que quitarla, lo hace el propietario con sus credenciales en la consola de Firestore del entorno: borrar el documento `users/{uid}/settings/avatar` y poner `avatar_kind = "initials"` (y `avatar_preset = null`) en `users/{uid}/settings/profile`. Subir `avatar_version` en uno evita que el navegador de esa persona siga mostrando la copia en caché. Procedimiento **no probado**.
+
+### Content-Security-Policy: `img-src` con `blob:`
+
+El navegador pide la imagen con el token (un `<img src>` no puede enviarlo) y la muestra desde un `blob:` URL, así que `docker-entrypoint.d/40-runtime-config.sh` del contenedor web fija `img-src 'self' data: blob:`. Es la **única** directiva que cambia; el test `frontend/nginx/tests/test-runtime-config.sh` comprueba la política completa. Si tras un despliegue la consola del navegador muestra un error de CSP al ver el avatar, mirar primero que la cabecera sigue llevando `blob:`.
+
+### Qué mirar en los registros
+
+`avatar_uploaded` (solo `uid` y `size`, el tamaño final en bytes) y `avatar_removed` (`uid`). Nunca llevan el contenido de la imagen, el nombre del archivo ni sus metadatos. Un 429 `avatar_rate_limited` indica más de 10 subidas en una hora para esa cuenta; un 415 `avatar_unsupported`, un archivo que no es JPEG, PNG ni WebP, está corrupto o supera 12 megapíxeles.
+
+### Validación en staging (T107, propietario)
+
+Tras desplegar por el pipeline, repetir en staging los escenarios 1, 4, 7, 9, 12 y 16 de `specs/004-user-profile-settings/quickstart.md` con cuentas reales, comprobar que la consola del navegador no muestra errores de CSP y anotar el resultado en `specs/004-user-profile-settings/validacion-staging.md`.
