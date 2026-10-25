@@ -18,6 +18,8 @@ module "environment" {
   project_number = var.project_number
   region         = var.region
 
+  providers = { google = google, google-beta = google-beta }
+
   terraform_service_account_email = google_service_account.terraform_staging.email
   deployer_service_account_email  = google_service_account.deployer_staging.email
 
@@ -29,6 +31,10 @@ module "environment" {
 
   # Staging holds test data only; point-in-time recovery stays off (LOW-003 of the phase 4 review).
   firestore_point_in_time_recovery = false
+
+  # Custom domains Firebase Hosting serves in this environment (feature 005). Staging gets its
+  # rehearsal domain in phase 4, before production gets any.
+  custom_domains = []
 }
 
 # Identity Platform is enabled by hand once per environment, because enabling it in a project that

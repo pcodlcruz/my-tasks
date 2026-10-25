@@ -22,6 +22,8 @@ module "environment" {
   project_number = var.project_number
   region         = var.region
 
+  providers = { google = google, google-beta = google-beta }
+
   terraform_service_account_email = local.terraform_service_account_email
   deployer_service_account_email  = local.deployer_service_account_email
 
@@ -35,6 +37,10 @@ module "environment" {
   # Production keeps 7 days of versions of the tasks, so a definitive delete (an application bug or
   # a compromised token) can be undone. Cheap for this volume (LOW-003 of the phase 4 review).
   firestore_point_in_time_recovery = true
+
+  # Custom domains Firebase Hosting serves in this environment (feature 005). Production gets its
+  # domains in phase 4, after the rehearsal domain of staging has been validated.
+  custom_domains = []
 }
 
 # Identity Platform already exists in production (created by the owner on 2025-12-03, with the

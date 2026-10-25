@@ -9,3 +9,12 @@ provider "google" {
   user_project_override = true
   billing_project       = var.project_id
 }
+
+# Same configuration for the beta provider, which only manages Firebase Hosting (the module's
+# hosting.tf). Every other resource of the environment stays on the GA provider above.
+provider "google-beta" {
+  project               = var.project_id
+  region                = var.region
+  user_project_override = true
+  billing_project       = var.project_id
+}
