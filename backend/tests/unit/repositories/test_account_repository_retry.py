@@ -8,11 +8,16 @@ pytestmark = pytest.mark.unit
 
 
 @pytest.fixture(autouse=True)
-def _no_waiting(monkeypatch: pytest.MonkeyPatch) -> None:
-    async def instant(_: float) -> None:
-        return None
+def waits(monkeypatch: pytest.MonkeyPatch) -> list[float]:
+    """Never really waits. Records each pause; the jitter is its upper bound (the worst case)."""
+    delays: list[float] = []
+
+    async def instant(seconds: float) -> None:
+        delays.append(seconds)
 
     monkeypatch.setattr(account_repository.asyncio, "sleep", instant)
+    monkeypatch.setattr(account_repository.random, "uniform", lambda _low, high: high)
+    return delays
 
 
 def _exhausted_attempts() -> ValueError:
@@ -48,13 +53,53 @@ async def test_retry_on_abort_also_retries_when_the_client_ran_out_of_commit_att
     assert operation.calls == 3
 
 
-async def test_retry_on_abort_gives_up_after_four_attempts() -> None:
-    operation = Flaky([google_exceptions.Aborted("lock timeout")] * 10)
+async def test_retry_on_abort_gives_up_after_the_maximum_attempts() -> None:
+    operation = Flaky([google_exceptions.Aborted("lock timeout")] * 100)
 
     with pytest.raises(google_exceptions.Aborted):
         await _retry_on_abort(operation)
 
-    assert operation.calls == 4
+    assert operation.calls == account_repository._MAX_ATTEMPTS
+
+
+async def test_retry_on_abort_still_succeeds_on_the_last_attempt() -> None:
+    attempts = account_repository._MAX_ATTEMPTS
+    operation = Flaky([google_exceptions.Aborted("lock timeout")] * (attempts - 1))
+
+    assert await _retry_on_abort(operation) == "done"
+    assert operation.calls == attempts
+
+
+async def test_retry_on_abort_backs_off_exponentially_up_to_a_cap(waits: list[float]) -> None:
+    # The Firestore client retries a lost commit at once and without pausing ("spot in line"), so
+    # the only waiting a loser gets is this one. It has to outlast a transaction that is slow
+    # because the machine is busy, not just one that is about to commit.
+    operation = Flaky([google_exceptions.Aborted("lock timeout")] * 100)
+
+    with pytest.raises(google_exceptions.Aborted):
+        await _retry_on_abort(operation)
+
+    assert waits == pytest.approx([0.1, 0.2, 0.4, 0.8, 1.0, 1.0, 1.0])
+    assert sum(waits) >= 3.0
+
+
+async def test_retry_on_abort_spreads_the_pauses_with_jitter(
+    monkeypatch: pytest.MonkeyPatch, waits: list[float]
+) -> None:
+    # Two requests that lost the same race must not wake up together and collide again.
+    bounds: list[tuple[float, float]] = []
+
+    def uniform(low: float, high: float) -> float:
+        bounds.append((low, high))
+        return low
+
+    monkeypatch.setattr(account_repository.random, "uniform", uniform)
+    operation = Flaky([google_exceptions.Aborted("lock timeout")] * 3)
+
+    assert await _retry_on_abort(operation) == "done"
+
+    assert bounds == pytest.approx([(0.0, 0.1), (0.0, 0.2), (0.0, 0.4)])
+    assert waits == [0.0, 0.0, 0.0]
 
 
 async def test_retry_on_abort_does_not_retry_an_unrelated_error() -> None:
