@@ -88,6 +88,9 @@ results = [
     run_check("a@b", "no dot in the domain", False, "BOOTSTRAP_ADMIN_EMAIL"),
     run_check("a@x.com,b@x.com", "two addresses (a comma would split the gcloud list)", False, "BOOTSTRAP_ADMIN_EMAIL"),
     run_check("a b@x.com", "an address with a space", False, "BOOTSTRAP_ADMIN_EMAIL"),
+    # Feature 005: the variables of the API revision are joined with `|` (gcloud alternative
+    # delimiter, because the list of CORS origins has commas), so the address cannot contain it.
+    run_check("a|b@x.com", "an address with the delimiter of the variable list", False, "BOOTSTRAP_ADMIN_EMAIL"),
     check_wiring(),
 ]
 sys.exit(0 if all(results) else 1)

@@ -516,12 +516,24 @@ Usa siempre la URL determinista de la tabla, no el `status.url` de Cloud Run (se
 ### Flujo de despliegue
 
 1. Una PR a `develop` pasa los checks requeridos por los *rulesets* (CI y, si toca `infra/`, `fmt`, `validate` y el plan de solo lectura de `infra.yml`).
-2. Al fusionar en `develop`, `deploy-staging` calcula el hash de árbol de `backend/` y `frontend/`, reutiliza la imagen si ya existe o la construye, comprueba su procedencia, crea las revisiones **sin tráfico**, pasa el humo por la URL con etiqueta, mueve el tráfico (primero la API, después la web) y marca las imágenes como `validated-<hash>`. Si cambia `infra/`, `infra` aplica `staging` tras aprobación del propietario.
+2. Al fusionar en `develop`, `deploy-staging` calcula el hash de árbol de `backend/` y `frontend/`, reutiliza la imagen si ya existe o la construye, comprueba su procedencia, crea las revisiones **sin tráfico**, comprueba que la revisión de la API lleva la lista de orígenes CORS esperada, pasa el humo por la URL con etiqueta, mueve el tráfico (primero la API, después la web) y marca las imágenes como `validated-<hash>`. Si cambia `infra/`, `infra` aplica `staging` tras aprobación del propietario.
 3. La release sale de `develop` como rama `release/*` nueva y se abre una PR a `main` (`release/*` no admite `push` directo).
 4. Al fusionar en `main`, `deploy-production` **no construye**: promueve el mismo *digest* que validó staging y falla antes de tocar nada si falta `validated-<hash>` de algún componente. `infra` aplica `production` y `platform` tras aprobación del *environment* `infra-production`.
 5. Cada despliegue deja un resumen en la ejecución con el resultado, las versiones y las URL.
 
 Orden en un entorno nuevo: `apply` de `infra` primero (crea los servicios) y `deploy` después; el primer `deploy` falla de forma esperada si los servicios no existen (sección 9, punto 1).
+
+#### Orígenes CORS de la API y `CUSTOM_WEB_ORIGINS` (feature 005)
+
+`CORS_ORIGINS` de `mytasks-api` lo escribe el despliegue en cada revisión, no Terraform. Lo compone `.github/scripts/cors-origins.sh`: la web de `run.app`, `https://<proyecto>.web.app` y los orígenes de la variable **no secreta** `CUSTOM_WEB_ORIGINS` del entorno de GitHub (*Settings → Environments → staging | production → Variables*). Reglas:
+
+- Cada origen es `https://` más un nombre de dominio en minúsculas, sin ruta, puerto, comodín ni coma; varios se separan con **espacios**.
+- `staging` solo admite orígenes que empiecen por `https://staging.` y `production` ninguno que lo haga: un entorno no hereda el dominio del otro.
+- Un origen mal formado detiene el despliegue **antes de construir nada** y nombra el valor (paso «Check the custom web origins»).
+- Las variables de la revisión de la API se unen con `|` (delimitador alternativo de `gcloud`, porque la lista lleva comas): ni los orígenes ni el correo de `BOOTSTRAP_ADMIN_EMAIL` pueden contenerlo.
+- Antes de desplegar, el servicio solo tiene que incluir la web de su entorno; después de crear la revisión, el paso «Check the CORS origins of the new API revision» exige la lista **exacta** y, si difiere, el despliegue se detiene sin mover tráfico.
+
+Probado en `.github/scripts/tests/test_cors_origins.py`, `test_deploy_custom_origins.py` y `test_deploy_variable_check.py`. Para quitar un dominio, borrar o cambiar la variable y desplegar: la revisión siguiente lleva la lista nueva.
 
 ### Recuperación de un despliegue fallido
 

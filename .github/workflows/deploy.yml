@@ -66,6 +66,9 @@ jobs:
       # Address that becomes admin on its first sign-in when it has no account yet (feature 003).
       # A variable of the GitHub environment, not a secret: it is an address, not a credential.
       BOOTSTRAP_ADMIN_EMAIL: ${{ vars.BOOTSTRAP_ADMIN_EMAIL }}
+      # Origins of the custom domains of this environment (feature 005), separated by spaces. Also a
+      # variable of the GitHub environment and not a secret; optional. cors-origins.sh validates it.
+      CUSTOM_WEB_ORIGINS: ${{ vars.CUSTOM_WEB_ORIGINS }}
     steps:
       - name: Check the environment
         run: |
@@ -76,11 +79,12 @@ jobs:
 
       # Without it nobody could ever become admin of this environment, and the access rules
       # (invitation only) would leave the owner outside. A comma would split the list that
-      # `gcloud run deploy --update-env-vars` receives, so exactly one address is accepted.
+      # `gcloud run deploy --update-env-vars` receives, so exactly one address is accepted. The
+      # variables of the API revision are joined with `|`, so the address cannot contain it either.
       - name: Check the bootstrap administrator
         run: |
           set -euo pipefail
-          if ! [[ "${BOOTSTRAP_ADMIN_EMAIL:-}" =~ ^[^,[:space:]@]+@[^,[:space:]@]+\.[^,[:space:]@]+$ ]]; then
+          if ! [[ "${BOOTSTRAP_ADMIN_EMAIL:-}" =~ ^[^,|[:space:]@]+@[^,|[:space:]@]+\.[^,|[:space:]@]+$ ]]; then
             echo "::error::The GitHub environment '$ENVIRONMENT' needs the variable BOOTSTRAP_ADMIN_EMAIL with one e-mail address (Settings > Environments > $ENVIRONMENT > Variables). It is the account that becomes admin on its first sign-in."
             exit 1
           fi
@@ -99,6 +103,17 @@ jobs:
             echo "api_hash=$(git rev-parse HEAD:backend)"
             echo "web_hash=$(git rev-parse HEAD:frontend)"
           } >> "$GITHUB_OUTPUT"
+
+      # The CORS origins the API accepts in this environment (feature 005): its own web, its Firebase
+      # Hosting address and the custom domains of CUSTOM_WEB_ORIGINS. A malformed origin, or one of
+      # the other environment, stops the job here, before anything is built or deployed. The result
+      # is passed on through the step output and written to the API revision, which is then checked.
+      - name: Check the custom web origins
+        id: origins
+        run: |
+          set -euo pipefail
+          cors_origins=$(.github/scripts/cors-origins.sh)
+          echo "cors_origins=$cors_origins" >> "$GITHUB_OUTPUT"
 
       - uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093 # v3.0.0
         with:
@@ -172,7 +187,8 @@ jobs:
           web_url="https://mytasks-web-${PROJECT_NUMBER}.${REGION}.run.app"
           api_url="https://mytasks-api-${PROJECT_NUMBER}.${REGION}.run.app"
 
-          # Each argument is NAME (must be set) or NAME=value (must be set to exactly that).
+          # Each argument is NAME (must be set), NAME=value (must be set to exactly that) or
+          # NAME~=value (must be a comma separated list that has value as one of its entries).
           # Expected values are not secrets; the actual ones are never printed.
           check() {
             local service="$1"
@@ -186,15 +202,28 @@ jobs:
             local missing=() wrong=()
             for spec in "$@"; do
               local variable="${spec%%=*}"
+              # The list of CORS origins is written by this very deployment (feature 005), so before
+              # it runs the service may still hold the old single value: all that is required here
+              # is that the web of this environment is one of the entries, which still stops a
+              # service that carries the configuration of the other environment.
+              local match='(.value // "") == $e'
+              if [[ "$variable" == *"~" ]]; then
+                variable="${variable%"~"}"
+                match='(.value // "") | split(",") | index($e) != null'
+              fi
               if [[ "$spec" == *=* ]]; then
                 expected="${spec#*=}"
                 if jq -e --arg v "$variable" --arg e "$expected" \
-                  '[.spec.template.spec.containers[0].env[]? | select(.name == $v and (.value // "") == $e)] | length > 0' \
+                  "[.spec.template.spec.containers[0].env[]? | select(.name == \$v and ($match))] | length > 0" \
                   <<< "$json" > /dev/null; then continue; fi
                 if jq -e --arg v "$variable" \
                   '[.spec.template.spec.containers[0].env[]? | select(.name == $v)] | length > 0' \
                   <<< "$json" > /dev/null; then
-                  wrong+=("$variable (expected '$expected')")
+                  if [[ "$match" == *split* ]]; then
+                    wrong+=("$variable (expected a list that includes '$expected')")
+                  else
+                    wrong+=("$variable (expected '$expected')")
+                  fi
                 else
                   missing+=("$variable")
                 fi
@@ -214,7 +243,7 @@ jobs:
           }
 
           check mytasks-api "APP_ENV=$ENVIRONMENT" "GOOGLE_CLOUD_PROJECT=$PROJECT_ID" \
-            "CORS_ORIGINS=$web_url" APP_VERSION
+            "CORS_ORIGINS~=$web_url" APP_VERSION
           check mytasks-web "API_BASE_URL=$api_url" FIREBASE_API_KEY \
             "FIREBASE_AUTH_DOMAIN=${PROJECT_ID}.firebaseapp.com" "FIREBASE_PROJECT_ID=$PROJECT_ID" \
             USE_EMULATORS=false APP_VERSION
@@ -313,6 +342,7 @@ jobs:
           WEB_DIGEST: ${{ steps.digests.outputs.web_digest }}
           COMMIT: ${{ github.sha }}
           RUN_ID: ${{ github.run_id }}
+          CORS_ORIGINS: ${{ steps.origins.outputs.cors_origins }}
         run: |
           set -euo pipefail
 
@@ -327,11 +357,15 @@ jobs:
             hash_var="${component^^}_HASH"
             digest_var="${component^^}_DIGEST"
             hash="${!hash_var}"
-            update_env="APP_VERSION=$hash"
-            # Only the API decides who is admin; the web has no use for the address. It is set
-            # here, not by Terraform, because Terraform ignores `env` once a service exists.
+            # `^|^` makes `|` the separator of the list instead of the comma, because the list of
+            # origins has commas. No value can contain it: hashes, the validated address and the
+            # validated origins.
+            update_env="^|^APP_VERSION=$hash"
+            # Only the API decides who is admin and which web origins it accepts; the web has no use
+            # for either. They are set here, not by Terraform, because Terraform ignores `env` once
+            # a service exists.
             if [ "$component" = api ]; then
-              update_env="$update_env,BOOTSTRAP_ADMIN_EMAIL=$BOOTSTRAP_ADMIN_EMAIL"
+              update_env="$update_env|BOOTSTRAP_ADMIN_EMAIL=$BOOTSTRAP_ADMIN_EMAIL|CORS_ORIGINS=$CORS_ORIGINS"
             fi
             gcloud run deploy "$service" --project "$PROJECT_ID" --region "$REGION" \
               --image "$REGISTRY/$service@${!digest_var}" \
@@ -359,6 +393,25 @@ jobs:
               echo "${component}_url=$service_url"
             } >> "$GITHUB_OUTPUT"
           done
+
+      # The list of CORS origins is written by the step above and Terraform no longer corrects it,
+      # so what the new API revision really carries is read back and must be exactly the list that
+      # was composed. Nothing has received traffic yet: a difference stops the deployment here.
+      # The values are origins, not secrets; no other variable of the revision is printed.
+      - name: Check the CORS origins of the new API revision
+        env:
+          API_REVISION: ${{ steps.revisions.outputs.api_revision }}
+          EXPECTED_CORS_ORIGINS: ${{ steps.origins.outputs.cors_origins }}
+        run: |
+          set -euo pipefail
+          json=$(gcloud run revisions describe "$API_REVISION" --project "$PROJECT_ID" \
+            --region "$REGION" --format=json)
+          actual=$(jq -r '[(.spec.containers[0].env // .spec.template.spec.containers[0].env // [])[]
+            | select(.name == "CORS_ORIGINS")][0].value // empty' <<< "$json")
+          if [ "$actual" != "$EXPECTED_CORS_ORIGINS" ]; then
+            echo "::error::The new revision $API_REVISION of mytasks-api has CORS_ORIGINS='${actual:-<not set>}' and it should be '$EXPECTED_CORS_ORIGINS'. Traffic was not changed."
+            exit 1
+          fi
 
       # --- Smoke test through the tag URLs (T072) ---
 
