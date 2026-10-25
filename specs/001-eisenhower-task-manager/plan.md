@@ -31,6 +31,12 @@ emuladores de Firebase; la infraestructura en la nube y el CI/CD son una feature
 > estado) y `/api/v1/admin` exige rol `admin`. La subcolección `users/{uid}/tasks` y el
 > aislamiento por usuario no cambian.
 
+> **Ampliado por la feature 004** ([plan](../004-user-profile-settings/plan.md)): añade el perfil de
+> cada persona (tema, densidad, ámbito por defecto, orden, periodo del historial, nombre y avatar)
+> bajo `users/{uid}/settings/`, los endpoints `/api/v1/me/profile` y `/api/v1/me/avatar` y dos
+> parámetros opcionales (`order`, `within_days`) en el listado de tareas. Contrato integrado en
+> `contracts/openapi.yaml` (v1.3.0). Única dependencia nueva: `pillow` en el backend.
+
 ## Technical Context
 
 **Language/Version**: Python 3.12+ (backend); TypeScript 5.x en modo estricto (frontend)

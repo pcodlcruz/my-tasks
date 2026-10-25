@@ -385,13 +385,21 @@ día, revisión de seguridad final y *Definition of Done* repasada.
 **Independent Test**: el contrato de 001 contiene los endpoints de perfil y coincide con
 `GET /openapi.json`; el `README.md` y `docs/design/screens/README.md` describen lo vigente.
 
-- [ ] T102 [P] Integrar `contracts/profile.yaml` en `specs/001-eisenhower-task-manager/contracts/openapi.yaml` (versión 1.3.0: endpoints `/me/profile` y `/me/avatar`, parámetros `order` y `within_days`, esquemas y respuestas 413/415/429) y comprobarlo contra `GET /openapi.json` como se hizo en la 003; dejar una nota en `contracts/profile.yaml` de que ya está integrado
-- [ ] T103 [P] Actualizar `README.md` (qué ofrece «Perfil», dónde viven las preferencias y el avatar, y que no hay variables nuevas) y `infra/RUNBOOK.md` (sección breve: sin cambios de infraestructura, cómo comprobar el avatar en `users/{uid}/settings/avatar`, qué hacer si una persona sube algo inadecuado —borrar el documento `avatar` y poner `avatar_kind = initials` a mano—, y la nota de `img-src` con `blob:`)
-- [ ] T104 [P] Anotar en `specs/001-eisenhower-task-manager/data-model.md`, `spec.md` y `plan.md` que la feature 004 añade preferencias y avatar bajo `users/{uid}/settings/`, y comprobar que `docs/design/screens/README.md` indica la pantalla vigente de cada una
-- [ ] T105 Revisión de seguridad **final** de la feature con `mytasks-security-auditor` (estado acumulado de los hallazgos de las Fases 2, 3 y 6, riesgo residual del tema en `localStorage` en equipos compartidos, y la documentación) y registrar el informe en `specs/004-user-profile-settings/security-review-final.md`
-- [ ] T106 Repasar el checklist *Definition of Done* de la constitución para la feature completa y registrar el resultado en `specs/004-user-profile-settings/definition-of-done.md`
+- [X] T102 [P] Integrar `contracts/profile.yaml` en `specs/001-eisenhower-task-manager/contracts/openapi.yaml` (versión 1.3.0: endpoints `/me/profile` y `/me/avatar`, parámetros `order` y `within_days`, esquemas y respuestas 413/415/429) y comprobarlo contra `GET /openapi.json` como se hizo en la 003; dejar una nota en `contracts/profile.yaml` de que ya está integrado
+- [X] T103 [P] Actualizar `README.md` (qué ofrece «Perfil», dónde viven las preferencias y el avatar, y que no hay variables nuevas) y `infra/RUNBOOK.md` (sección breve: sin cambios de infraestructura, cómo comprobar el avatar en `users/{uid}/settings/avatar`, qué hacer si una persona sube algo inadecuado —borrar el documento `avatar` y poner `avatar_kind = initials` a mano—, y la nota de `img-src` con `blob:`)
+- [X] T104 [P] Anotar en `specs/001-eisenhower-task-manager/data-model.md`, `spec.md` y `plan.md` que la feature 004 añade preferencias y avatar bajo `users/{uid}/settings/`, y comprobar que `docs/design/screens/README.md` indica la pantalla vigente de cada una
+- [X] T105 Revisión de seguridad **final** de la feature con `mytasks-security-auditor` (estado acumulado de los hallazgos de las Fases 2, 3 y 6, riesgo residual del tema en `localStorage` en equipos compartidos, y la documentación) y registrar el informe en `specs/004-user-profile-settings/security-review-final.md`
+- [X] T106 Repasar el checklist *Definition of Done* de la constitución para la feature completa y registrar el resultado en `specs/004-user-profile-settings/definition-of-done.md`
 - [ ] T107 (propietario) Validar en staging, ya desplegado por el pipeline, los escenarios 1, 4, 7, 9, 12 y 16 de [quickstart.md](./quickstart.md) con cuentas reales, comprobar que la consola del navegador no muestra errores de CSP, y anotar el resultado en `specs/004-user-profile-settings/validacion-staging.md`
 - [ ] T108 Marcar la feature como lista para release cuando T107 esté hecha y esta PR fusionada
+
+**Checkpoint**: contrato único, documentación y revisiones al día; la feature queda lista para staging.
+
+**Avance (2026-10-25)**: T102–T106 hechas. Contrato integrado en 001 (v1.3.0) y comprobado contra
+`GET /openapi.json`; README, RUNBOOK §13 y las notas de 001 al día; informe final en
+[security-review-final.md](./security-review-final.md) (sin críticos, altos ni medios abiertos) y
+Definition of Done en [definition-of-done.md](./definition-of-done.md). **T107 es del propietario**
+(validación en staging) y **T108 se cierra después**; por eso quedan sin marcar al abrir la PR.
 
 ---
 

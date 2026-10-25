@@ -8,8 +8,10 @@ info:
     endpoints exigen `Authorization: Bearer <ID token de Firebase>` y una **cuenta activa**
     (feature 003): una cuenta revocada o sin acceso recibe el mismo 403 `access_denied` que en el
     resto de la API. El `uid` sale siempre del token; ningún endpoint acepta el de otra persona.
-    Se integrará en el contrato de 001 en la fase de cierre; hasta entonces este fichero es la
-    referencia de lo que añade la feature.
+    **Ya integrado** en `specs/001-eisenhower-task-manager/contracts/openapi.yaml` (v1.3.0), que es
+    ahora la referencia única y completa; este fichero se conserva solo como registro del diseño de
+    la feature. En la integración se añadieron las respuestas 503 `auth_unavailable` (como en el
+    resto de la API) y el 422 de `GET /api/v1/me/avatar` por un `v` no válido.
 
 paths:
   /api/v1/me/profile:

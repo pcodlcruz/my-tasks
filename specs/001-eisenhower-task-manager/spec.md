@@ -31,6 +31,8 @@ Como usuario, quiero iniciar sesión con mi cuenta de Google (la primera vez se 
 
 > **Actualizado por la feature 003** ([`specs/003-user-roles-invitations/`](../003-user-roles-invitations/spec.md)): el registro abierto queda sustituido por el acceso **solo por invitación**. Iniciar sesión con Google ya no crea una cuenta por sí solo: la crea la primera sesión de una persona a la que el administrador ha invitado, o la del administrador inicial. Quien no tiene invitación ve la pantalla «Necesitas una invitación» y no obtiene ni datos ni cuenta. El aislamiento por usuario de esta historia no cambia.
 
+> **Ampliado por la feature 004** ([`specs/004-user-profile-settings/`](../004-user-profile-settings/spec.md)): cada persona gana un **perfil** con sus preferencias (tema, densidad, ámbito por defecto, orden del tablero, periodo del historial), un nombre para mostrar y un avatar (iniciales, predefinido o imagen propia). Se guardan por cuenta bajo `users/{uid}/settings/` y, como las tareas, solo las ve y modifica su dueña. Las historias y requisitos de esta spec no cambian.
+
 **Why this priority**: Es el requisito de acceso previo a cualquier otra funcionalidad: sin cuenta ni aislamiento de datos por usuario no hay tareas que crear ni tablero que ver.
 
 **Independent Test**: Se puede probar de forma aislada iniciando sesión con dos cuentas de Google distintas y comprobando que cada una solo ve sus propias tareas (inicialmente ninguna), sin acceso a las de la otra.

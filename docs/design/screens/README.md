@@ -262,7 +262,7 @@ aplicar», y los controles «Girar 90°» y «Arrastra para encuadrar» (de la F
 
 El propietario aprobó el 2026-10-24 (T114) el selector de avatar, el recortador y el catálogo de 12
 avatares. Son la **pantalla vigente**; las de la feature 001 siguen intactas como referencia anterior.
-La Fase 5 implementa solo la pestaña «Catálogo»; «Subir imagen» y el recortador son de la Fase 6.
+La Fase 5 implementó la pestaña «Catálogo»; «Subir imagen» y el recortador, la Fase 6.
 
 | Pantalla | Id de Stitch | Carpeta | Vigente para |
 |---|---|---|---|
@@ -304,9 +304,10 @@ vigente** de cada una; las aprobadas de la feature 001 siguen intactas como refe
 | S3 · Tablero v2 (claro, escritorio) | `a3f141c47d3946ea9c1466f3916df60d` | `s3-board-v2/desktop.*` | Cabecera nueva del tablero (también la de S4, S5 y S6 hasta que tengan versión propia) |
 | S1 · Iniciar sesión (oscuro, escritorio) | `152e0cebe5114f25acd072fca6b63c84` | no exportada todavía | Tema oscuro del login (con las salvedades de abajo) |
 
-El resto de pantallas de la ronda 1 y las de la ronda 2 siguen pendientes (tareas T109 a T114 de
-[`tasks.md`](../../../specs/004-user-profile-settings/tasks.md)). **Hasta que se aprueben, siguen
-vigentes las pantallas de la 001** (por ejemplo, el tablero móvil).
+*(Histórico, 2026-10-23.)* El resto de pantallas de la ronda 1 y las de la ronda 2 estaban
+entonces pendientes; se aprobaron después (T110, T112 y T114, ver las secciones «Aprobaciones»
+de más abajo y de arriba). Lo vigente hoy, función por función, está en la última sección de este
+fichero.
 
 ### Elementos de las pantallas aprobadas que la implementación **no** sigue
 
@@ -390,3 +391,19 @@ vigente** de cada una; las de la feature 001 siguen intactas como referencia ant
 
 Los elementos que la implementación no sigue (barra inferior, fechas y «Delegado a» de ejemplo,
 insignia «Compacto», enlace de perfil como botón) son los de la sección anterior.
+
+## Resumen de lo vigente de la feature 004 (T104, 2026-10-25)
+
+Qué pantalla manda para cada función. En todos los casos las de la feature 001 siguen intactas
+como referencia anterior (FR-028); el detalle (ids de Stitch y carpetas) está en las secciones
+«Aprobaciones» de arriba.
+
+| Función | Pantalla vigente | Sección con el detalle |
+|---|---|---|
+| Tema oscuro (tokens) | Paleta oscura (`DESIGN.md` § Tema oscuro) | Ronda 1 (parcial) |
+| Perfil: tema, densidad, tablero por defecto, orden, historial, nombre | S7 · Perfil (claro, escritorio y móvil; oscuro, escritorio) | Ronda 1 (parcial) y 1b |
+| Cabecera con avatar y nombre | S3 · Tablero v2 | Ronda 1 (parcial) |
+| Tablero (claro, oscuro, móvil) y densidad compacta | S3 · Tablero v2, v2 oscuro y compacto | Ronda 1b |
+| Historial, formulario de tarea y papelera (claro y oscuro) | S5, S4 y S6 v2 | Ronda 2 (T112) |
+| Inicio de sesión en oscuro | S1 · Iniciar sesión (oscuro) | Ronda 2 (T112) |
+| Selector de avatar (catálogo y «Subir imagen») y recortador | S7 · Selector y recortador (claro y oscuro) | Selector de avatar (T114) |
