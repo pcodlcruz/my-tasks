@@ -86,9 +86,9 @@ el código usa `import` o crea el sitio.
 *Consola de Firebase → selector de proyecto → Compilación → **Hosting*** (o *Hosting y Serverless → Hosting*).
 
 - [ ] **Staging** (`pdlco-mytasks-stg`): ¿aparece el sitio `pdlco-mytasks-stg` con la dirección
-      `pdlco-mytasks-stg.web.app`? Anota **sí** o **no**.
+      `pdlco-mytasks-stg.web.app`? Anota **sí** o **no**. **NO Aparece**
 - [ ] **Producción** (`pdlco-mytasks`): ¿aparece el sitio `pdlco-mytasks` con la dirección
-      `pdlco-mytasks.web.app`? Anota **sí** o **no**.
+      `pdlco-mytasks.web.app`? Anota **sí** o **no**. **NO Aparece**
 
 Si la consola te propone «Empezar» o «Configurar Hosting» y no hay ningún sitio, **no lo configures**:
 solo anota «no». Lo creará Terraform.

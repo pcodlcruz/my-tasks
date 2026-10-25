@@ -130,8 +130,11 @@ Lo que sí lee el MCP es si la API de Hosting está activa y los roles de `terra
 |---|---|---|
 | API `firebasehosting.googleapis.com` | `ENABLED` | `ENABLED` |
 | Roles de `terraform-<env>` | `mytasksEnvironmentAdmin`, `mytasksPlanReader`, `mytasksPlatformPlanReader` (personalizados); `artifactregistry.admin`, `iam.serviceAccountAdmin`, `iam.workloadIdentityPoolAdmin`, `resourcemanager.projectIamAdmin`, `run.admin`, `serviceusage.serviceUsageAdmin` | `mytasksEnvironmentAdmin` (personalizado); `iam.serviceAccountAdmin`, `resourcemanager.projectIamAdmin`, `run.admin`, `serviceusage.serviceUsageAdmin` |
-| `roles/firebasehosting.admin` | **No concedido** (lo concede el propietario, T003) | **No concedido** (T003) |
-| Sitio de Hosting por defecto | Pendiente: lo comunica el propietario (T003) | Pendiente: lo comunica el propietario (T003) |
+| `roles/firebasehosting.admin` | No concedido en esta lectura. **Concedido por el propietario y verificado después (T004, 2026-10-25)** | Igual: concedido y verificado (T004) |
+| Sitio de Hosting por defecto | **No existe** (comunicado por el propietario en T003): lo crea Terraform | **No existe** (T003): lo crea Terraform |
+
+**Consecuencia para T022**: no hay sitio que adoptar, así que no se añade ningún bloque `import` y el
+módulo crea el sitio por defecto (`site_id` = `project_id`) en cada entorno.
 
 La API ya activa no cambia el plan: `google_project_service` adoptará el servicio existente al incluir
 `firebasehosting.googleapis.com` en `apis` (T019), con `disable_on_destroy = false`.
