@@ -3,6 +3,7 @@ from datetime import UTC, datetime, timedelta
 import pytest
 
 from mytasks_api.domain.task import (
+    BoardOrder,
     InvalidTransitionError,
     Scope,
     Status,
@@ -54,6 +55,50 @@ def test_sort_board_orders_by_created_at_ascending_within_same_pinned_state() ->
     result = sort_board([second, first])
 
     assert [task.id for task in result] == ["first", "second"]
+
+
+def test_sort_board_oldest_is_the_default_order() -> None:
+    now = datetime.now(UTC)
+    first = _task(id="first", created_at=now - timedelta(minutes=5))
+    second = _task(id="second", created_at=now)
+
+    assert [task.id for task in sort_board([second, first], BoardOrder.OLDEST)] == [
+        "first",
+        "second",
+    ]
+
+
+def test_sort_board_newest_orders_by_created_at_descending() -> None:
+    now = datetime.now(UTC)
+    first = _task(id="first", created_at=now - timedelta(minutes=5))
+    second = _task(id="second", created_at=now)
+
+    result = sort_board([first, second], BoardOrder.NEWEST)
+
+    assert [task.id for task in result] == ["second", "first"]
+
+
+@pytest.mark.parametrize("order", [BoardOrder.OLDEST, BoardOrder.NEWEST])
+def test_sort_board_keeps_pinned_tasks_first_in_both_orders(order: BoardOrder) -> None:
+    now = datetime.now(UTC)
+    old_pinned = _task(id="old-pinned", pinned=True, created_at=now - timedelta(days=2))
+    new_pinned = _task(id="new-pinned", pinned=True, created_at=now - timedelta(days=1))
+    unpinned = _task(id="unpinned", pinned=False, created_at=now)
+
+    result = sort_board([unpinned, new_pinned, old_pinned], order)
+
+    assert {task.id for task in result[:2]} == {"old-pinned", "new-pinned"}
+    assert result[2].id == "unpinned"
+
+
+@pytest.mark.parametrize("order", [BoardOrder.OLDEST, BoardOrder.NEWEST])
+def test_sort_board_breaks_ties_by_keeping_the_input_order(order: BoardOrder) -> None:
+    moment = datetime.now(UTC)
+    tasks = [_task(id=f"task-{index}", created_at=moment) for index in range(4)]
+
+    result = sort_board(tasks, order)
+
+    assert [task.id for task in result] == [task.id for task in tasks]
 
 
 def test_ensure_editable_allows_active_task_out_of_trash() -> None:

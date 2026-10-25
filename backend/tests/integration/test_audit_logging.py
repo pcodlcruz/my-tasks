@@ -185,3 +185,137 @@ async def test_responses_include_a_request_id_that_appears_in_the_logs(
     assert [record.request_id for record in _records(caplog, "task_transition")] == [  # type: ignore[attr-defined]
         request_id
     ]
+
+
+async def test_profile_update_is_logged_with_the_uid_and_only_the_names_of_the_fields(
+    client: httpx.AsyncClient, google_user: GoogleUserFactory, caplog: pytest.LogCaptureFixture
+) -> None:
+    user = await google_user("owner@example.com")
+    caplog.set_level(logging.INFO, logger=LOGGER_NAME)
+
+    response = await client.patch(
+        "/api/v1/me/profile",
+        json={"display_name": "Nombre Muy Privado", "theme": "dark", "history_days": 90},
+        headers={"Authorization": f"Bearer {user.id_token}"},
+    )
+
+    assert response.status_code == 200
+    (record,) = _records(caplog, "profile_updated")
+    assert record.uid == user.uid  # type: ignore[attr-defined]
+    assert record.fields == "display_name,history_days,theme"  # type: ignore[attr-defined]
+    assert "Nombre Muy Privado" not in caplog.text
+    assert "owner@example.com" not in caplog.text
+    assert user.id_token not in caplog.text
+
+
+async def test_profile_avatar_choice_is_logged_by_field_name_only(
+    client: httpx.AsyncClient, google_user: GoogleUserFactory, caplog: pytest.LogCaptureFixture
+) -> None:
+    user = await google_user("owner@example.com")
+    caplog.set_level(logging.INFO, logger=LOGGER_NAME)
+
+    await client.patch(
+        "/api/v1/me/profile",
+        json={"avatar": {"kind": "preset", "preset": "avatar-05"}},
+        headers={"Authorization": f"Bearer {user.id_token}"},
+    )
+
+    (record,) = _records(caplog, "profile_updated")
+    assert record.fields == "avatar"  # type: ignore[attr-defined]
+    assert "avatar-05" not in caplog.text
+
+
+async def test_profile_reset_is_logged_with_the_uid_and_the_reset_field_names(
+    client: httpx.AsyncClient, google_user: GoogleUserFactory, caplog: pytest.LogCaptureFixture
+) -> None:
+    user = await google_user("owner@example.com")
+    await client.patch(
+        "/api/v1/me/profile",
+        json={"theme": "dark", "display_name": "Nombre Muy Privado"},
+        headers={"Authorization": f"Bearer {user.id_token}"},
+    )
+    caplog.clear()
+    caplog.set_level(logging.INFO, logger=LOGGER_NAME)
+
+    await client.delete("/api/v1/me/profile", headers={"Authorization": f"Bearer {user.id_token}"})
+
+    (record,) = _records(caplog, "profile_reset")
+    assert record.uid == user.uid  # type: ignore[attr-defined]
+    assert record.fields == "board_order,default_scope,density,history_days,theme"  # type: ignore[attr-defined]
+    assert "Nombre Muy Privado" not in caplog.text
+
+
+async def test_a_rejected_profile_update_is_not_logged_as_an_update(
+    client: httpx.AsyncClient, google_user: GoogleUserFactory, caplog: pytest.LogCaptureFixture
+) -> None:
+    user = await google_user("owner@example.com")
+    caplog.set_level(logging.INFO, logger=LOGGER_NAME)
+
+    response = await client.patch(
+        "/api/v1/me/profile",
+        json={"theme": "neon"},
+        headers={"Authorization": f"Bearer {user.id_token}"},
+    )
+
+    assert response.status_code == 422
+    assert _records(caplog, "profile_updated") == []
+
+
+async def test_an_avatar_upload_is_logged_with_the_uid_and_the_final_size_only(
+    client: httpx.AsyncClient, google_user: GoogleUserFactory, caplog: pytest.LogCaptureFixture
+) -> None:
+    import io
+
+    from PIL import Image
+
+    user = await google_user("owner@example.com")
+    buffer = io.BytesIO()
+    Image.new("RGB", (90, 90), (10, 120, 10)).save(buffer, format="PNG")
+    caplog.set_level(logging.INFO, logger=LOGGER_NAME)
+
+    response = await client.put(
+        "/api/v1/me/avatar",
+        content=buffer.getvalue(),
+        headers={"Authorization": f"Bearer {user.id_token}", "Content-Type": "image/png"},
+    )
+    stored = await client.get(
+        "/api/v1/me/avatar", headers={"Authorization": f"Bearer {user.id_token}"}
+    )
+
+    assert response.status_code == 200
+    (record,) = _records(caplog, "avatar_uploaded")
+    assert record.uid == user.uid  # type: ignore[attr-defined]
+    assert record.size == str(len(stored.content))  # type: ignore[attr-defined]
+    assert "owner@example.com" not in caplog.text
+    assert user.id_token not in caplog.text
+    assert "RIFF" not in caplog.text
+    assert "WEBP" not in caplog.text
+
+
+async def test_an_avatar_removal_is_logged_with_the_uid(
+    client: httpx.AsyncClient, google_user: GoogleUserFactory, caplog: pytest.LogCaptureFixture
+) -> None:
+    user = await google_user("owner@example.com")
+    caplog.set_level(logging.INFO, logger=LOGGER_NAME)
+
+    await client.delete("/api/v1/me/avatar", headers={"Authorization": f"Bearer {user.id_token}"})
+
+    (record,) = _records(caplog, "avatar_removed")
+    assert record.uid == user.uid  # type: ignore[attr-defined]
+
+
+async def test_a_rejected_avatar_upload_is_not_logged_as_an_upload_and_leaks_no_content(
+    client: httpx.AsyncClient, google_user: GoogleUserFactory, caplog: pytest.LogCaptureFixture
+) -> None:
+    user = await google_user("owner@example.com")
+    caplog.set_level(logging.INFO, logger=LOGGER_NAME)
+
+    response = await client.put(
+        "/api/v1/me/avatar",
+        content=b"contenido-secreto-del-archivo",
+        headers={"Authorization": f"Bearer {user.id_token}", "Content-Type": "image/png"},
+    )
+
+    assert response.status_code == 415
+    assert _records(caplog, "avatar_uploaded") == []
+    assert "contenido-secreto-del-archivo" not in caplog.text

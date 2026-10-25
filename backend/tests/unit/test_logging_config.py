@@ -64,3 +64,17 @@ def test_email_fingerprint_is_stable_short_and_hides_the_address() -> None:
     assert first != email_fingerprint("bob@example.com")
     assert len(first) == 12
     assert "ana" not in first
+
+
+def test_json_formatter_emits_the_names_of_the_fields_a_profile_event_changed() -> None:
+    line = _log_line(uid="user-1", fields="density,theme")
+
+    assert line["uid"] == "user-1"
+    assert line["fields"] == "density,theme"
+
+
+def test_json_formatter_emits_the_size_of_an_uploaded_avatar() -> None:
+    line = _log_line(uid="user-1", size="18432")
+
+    assert line["uid"] == "user-1"
+    assert line["size"] == "18432"

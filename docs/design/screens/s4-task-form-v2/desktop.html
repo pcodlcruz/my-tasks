@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+
+<html class="h-full bg-background" lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>S4 Formulario de tarea v2 - MyTasks</title>
+<!-- Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Inter Google Font -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS v3 -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "on-tertiary": "#ffffff",
+            "on-surface": "#1a1b23",
+            "surface": "#FFFFFF",
+            "success": "#15803D",
+            "outline-variant": "#c4c5d7",
+            "scope-personal": "#0D9488",
+            "tertiary-fixed-dim": "#ffb59c",
+            "eliminate": "#475569",
+            "on-primary-fixed-variant": "#0039b5",
+            "surface-bright": "#faf8ff",
+            "on-secondary-fixed": "#00201d",
+            "surface-container-high": "#e8e7f3",
+            "on-tertiary-fixed": "#390c00",
+            "on-secondary-container": "#006f66",
+            "secondary-fixed": "#89f5e7",
+            "tertiary": "#7f2500",
+            "on-tertiary-fixed-variant": "#832700",
+            "inverse-primary": "#b7c4ff",
+            "on-surface-variant": "#434655",
+            "secondary-container": "#86f2e4",
+            "secondary-fixed-dim": "#6bd8cb",
+            "primary": "#0037b0",
+            "on-error-container": "#93000a",
+            "secondary": "#006a61",
+            "surface-container-highest": "#e2e1ed",
+            "error": "#B91C1C",
+            "surface-container": "#ededf9",
+            "on-primary-fixed": "#001551",
+            "error-container": "#ffdad6",
+            "schedule": "#1D4ED8",
+            "text": "#0F172A",
+            "surface-tint": "#2151da",
+            "on-error": "#ffffff",
+            "on-secondary-fixed-variant": "#005049",
+            "border": "#CBD5E1",
+            "text-muted": "#475569",
+            "outline": "#747686",
+            "tertiary-fixed": "#ffdbcf",
+            "tertiary-container": "#a73400",
+            "surface-dim": "#d9d9e5",
+            "on-primary-container": "#cad3ff",
+            "inverse-surface": "#2e3039",
+            "inverse-on-surface": "#f0f0fb",
+            "do-now": "#B91C1C",
+            "on-primary": "#ffffff",
+            "on-secondary": "#ffffff",
+            "primary-fixed": "#dce1ff",
+            "delegate": "#B45309",
+            "surface-container-lowest": "#ffffff",
+            "primary-container": "#1d4ed8",
+            "primary-fixed-dim": "#b7c4ff",
+            "background": "#faf8ff",
+            "on-tertiary-container": "#ffc9b7",
+            "scope-work": "#7C3AED",
+            "on-background": "#1a1b23",
+            "surface-container-low": "#f3f2fe",
+            "surface-alt": "#F8FAFC",
+            "surface-variant": "#e2e1ed"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.125rem",
+            "lg": "0.25rem",
+            "xl": "0.5rem",
+            "full": "0.75rem",
+            "2xl": "1rem"
+          },
+          "spacing": {
+            "space-xs": "4px",
+            "space-sm": "8px",
+            "space-md": "12px",
+            "space-lg": "16px",
+            "space-xl": "32px",
+            "space-2xl": "48px",
+            "margin": "24px",
+            "gutter": "24px"
+          },
+          "fontFamily": {
+            "display": ["Inter", "sans-serif"],
+            "caption": ["Inter", "sans-serif"],
+            "body": ["Inter", "sans-serif"],
+            "heading": ["Inter", "sans-serif"],
+            "body-strong": ["Inter", "sans-serif"]
+          },
+          "fontSize": {
+            "display": ["28px", { "lineHeight": "36px", "fontWeight": "700" }],
+            "caption": ["13px", { "lineHeight": "18px", "fontWeight": "400" }],
+            "body": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+            "heading": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+            "body-strong": ["16px", { "lineHeight": "24px", "fontWeight": "600" }]
+          }
+        }
+      }
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      display: inline-block;
+      vertical-align: middle;
+      line-height: 1;
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 6px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: #f1f5f9;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 9999px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
+  </style>
+</head>
+<body class="h-full font-body text-text bg-background overflow-hidden relative selection:bg-primary selection:text-white">
+<!-- ========================================== -->
+<!-- CAPA DE FONDO: TABLERO DE MATRIZ DETRÁS    -->
+<!-- ========================================== -->
+<div aria-hidden="true" class="h-full flex flex-col pointer-events-none select-none filter blur-[1.5px] opacity-70">
+<!-- TopNavBar (Shared Component Template) -->
+<header class="flex items-center justify-between px-margin py-space-md w-full border-b border-outline-variant bg-surface-container-low">
+<div class="flex items-center gap-space-xl">
+<!-- Logo -->
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-schedule text-2xl" data-icon="grid_view">grid_view</span>
+<span class="text-heading font-heading font-bold text-schedule tracking-tight">MyTasks</span>
+</div>
+<!-- Navegación Primaria -->
+<nav class="flex items-center gap-space-lg">
+<a class="text-primary border-b-2 border-primary font-body-strong text-body-strong pb-1" href="#">Tablero</a>
+<a class="text-on-surface-variant hover:text-on-surface font-body text-body pb-1 transition-colors" href="#">Historial</a>
+<a class="text-on-surface-variant hover:text-on-surface font-body text-body pb-1 transition-colors" href="#">Papelera</a>
+</nav>
+</div>
+<!-- Acciones de Usuario -->
+<div class="flex items-center gap-space-md">
+<button aria-label="Perfil de Ana Cruz" class="flex items-center gap-2 text-on-surface-variant">
+<span class="w-8 h-8 rounded-full bg-schedule text-white font-body-strong text-xs flex items-center justify-center">AC</span>
+<span class="font-body text-sm font-medium text-text">Ana Cruz</span>
+</button>
+<span class="text-outline-variant">|</span>
+<button class="flex items-center gap-1.5 font-body text-sm text-on-surface-variant hover:text-text transition-colors">
+<span class="material-symbols-outlined text-lg" data-icon="logout">logout</span>
+<span>Cerrar sesión</span>
+</button>
+</div>
+</header>
+<!-- Eisenhower Board Background Content -->
+<main class="flex-1 p-margin overflow-hidden bg-surface-alt">
+<div class="max-w-7xl mx-auto h-full flex flex-col gap-space-md">
+<!-- Tablero Header Stats -->
+<div class="flex items-center justify-between pb-2">
+<div>
+<h1 class="text-display font-display text-text">Matriz de Eisenhower</h1>
+<p class="text-caption font-caption text-text-muted">Gestión de prioridades por impacto y urgencia</p>
+</div>
+<div class="flex gap-2">
+<span class="px-3 py-1 bg-surface rounded border border-border text-xs font-medium text-text-muted">Total: 14 tareas</span>
+</div>
+</div>
+<!-- Matriz 2x2 Grid -->
+<div class="flex-1 grid grid-cols-2 grid-rows-2 gap-space-md min-h-0">
+<!-- Cuadrante 1: Hacer Ahora -->
+<div class="bg-surface rounded-xl border border-border p-space-md flex flex-col gap-2">
+<div class="flex items-center justify-between pb-1 border-b border-border/50">
+<span class="font-body-strong text-sm text-do-now flex items-center gap-1.5">
+<span class="w-2.5 h-2.5 rounded-full bg-do-now"></span>
+                I. HACER AHORA (Urgente e Importante)
+              </span>
+<span class="text-xs bg-error-container text-on-error-container px-2 py-0.5 rounded-full font-semibold">3</span>
+</div>
+<div class="space-y-2 mt-1">
+<div class="p-2.5 bg-surface-alt rounded border-l-4 border-do-now border border-border">
+<p class="text-xs font-semibold text-text">Resolver caída del servidor de pagos</p>
+<div class="flex items-center gap-2 mt-1">
+<span class="text-[10px] bg-purple-100 text-scope-work px-1.5 py-0.2 rounded font-medium">Laboral</span>
+<span class="text-[11px] text-text-muted">Hoy, 18:00</span>
+</div>
+</div>
+<div class="p-2.5 bg-surface-alt rounded border-l-4 border-do-now border border-border">
+<p class="text-xs font-semibold text-text">Presentación para inversores Q3</p>
+<div class="flex items-center gap-2 mt-1">
+<span class="text-[10px] bg-purple-100 text-scope-work px-1.5 py-0.2 rounded font-medium">Laboral</span>
+<span class="text-[11px] text-text-muted">Mañana</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Cuadrante 2: Planificar -->
+<div class="bg-surface rounded-xl border border-border p-space-md flex flex-col gap-2">
+<div class="flex items-center justify-between pb-1 border-b border-border/50">
+<span class="font-body-strong text-sm text-schedule flex items-center gap-1.5">
+<span class="w-2.5 h-2.5 rounded-full bg-schedule"></span>
+                II. PLANIFICAR (No Urgente pero Importante)
+              </span>
+<span class="text-xs bg-blue-100 text-schedule px-2 py-0.5 rounded-full font-semibold">5</span>
+</div>
+<div class="space-y-2 mt-1">
+<div class="p-2.5 bg-surface-alt rounded border-l-4 border-schedule border border-border">
+<p class="text-xs font-semibold text-text">Auditoría de seguridad semestral</p>
+<div class="flex items-center gap-2 mt-1">
+<span class="text-[10px] bg-purple-100 text-scope-work px-1.5 py-0.2 rounded font-medium">Laboral</span>
+<span class="text-[11px] text-text-muted">24 Octubre</span>
+</div>
+</div>
+<div class="p-2.5 bg-surface-alt rounded border-l-4 border-schedule border border-border">
+<p class="text-xs font-semibold text-text">Plan de entrenamiento maratón</p>
+<div class="flex items-center gap-2 mt-1">
+<span class="text-[10px] bg-teal-100 text-scope-personal px-1.5 py-0.2 rounded font-medium">Personal</span>
+<span class="text-[11px] text-text-muted">Fin de semana</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Cuadrante 3: Delegar -->
+<div class="bg-surface rounded-xl border border-border p-space-md flex flex-col gap-2">
+<div class="flex items-center justify-between pb-1 border-b border-border/50">
+<span class="font-body-strong text-sm text-delegate flex items-center gap-1.5">
+<span class="w-2.5 h-2.5 rounded-full bg-delegate"></span>
+                III. DELEGAR (Urgente pero No Importante)
+              </span>
+<span class="text-xs bg-amber-100 text-delegate px-2 py-0.5 rounded-full font-semibold">4</span>
+</div>
+<div class="space-y-2 mt-1">
+<div class="p-2.5 bg-surface-alt rounded border-l-4 border-delegate border border-border">
+<p class="text-xs font-semibold text-text">Coordinar catering para el workshop</p>
+<div class="flex items-center gap-2 mt-1">
+<span class="text-[10px] bg-purple-100 text-scope-work px-1.5 py-0.2 rounded font-medium">Laboral</span>
+<span class="text-[11px] text-text-muted">Asignado a: Carlos</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Cuadrante 4: Eliminar -->
+<div class="bg-surface rounded-xl border border-border p-space-md flex flex-col gap-2">
+<div class="flex items-center justify-between pb-1 border-b border-border/50">
+<span class="font-body-strong text-sm text-eliminate flex items-center gap-1.5">
+<span class="w-2.5 h-2.5 rounded-full bg-eliminate"></span>
+                IV. ELIMINAR (Ni Urgente ni Importante)
+              </span>
+<span class="text-xs bg-slate-200 text-eliminate px-2 py-0.5 rounded-full font-semibold">2</span>
+</div>
+<div class="space-y-2 mt-1">
+<div class="p-2.5 bg-surface-alt rounded border-l-4 border-eliminate border border-border">
+<p class="text-xs font-semibold text-text">Limpiar bandejas de newsletters antiguas</p>
+<div class="flex items-center gap-2 mt-1">
+<span class="text-[10px] bg-teal-100 text-scope-personal px-1.5 py-0.2 rounded font-medium">Personal</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+<!-- ======================================================== -->
+<!-- OVERLAY / MODAL BACKDROP (rgba(15, 23, 42, 0.5) + BLUR) -->
+<!-- ======================================================== -->
+<div aria-labelledby="modal-title" aria-modal="true" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-[2px] transition-opacity" role="dialog">
+<!-- CONTENEDOR MODAL DE TAREA (560px - 620px, #FFFFFF, rounded-2xl, shadow-2xl, border #E2E8F0) -->
+<div class="w-full max-w-[600px] bg-surface rounded-2xl shadow-2xl border border-slate-200 flex flex-col max-h-[942px] overflow-hidden transform transition-all animate-in fade-in zoom-in-95 duration-200">
+<!-- CABECERA DEL MODAL -->
+<div class="px-space-xl py-space-lg border-b border-slate-200 flex items-center justify-between bg-surface">
+<div class="flex items-center gap-3">
+<div class="w-9 h-9 rounded-lg bg-blue-50 text-schedule flex items-center justify-center">
+<span class="material-symbols-outlined text-[22px]" data-icon="add_task">add_task</span>
+</div>
+<h2 class="font-heading text-[20px] leading-7 font-semibold text-slate-900 tracking-tight" id="modal-title">Nueva tarea</h2>
+</div>
+<button aria-label="Cerrar modal" class="w-8 h-8 rounded-lg flex items-center justify-center text-slate-500 hover:text-slate-800 hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-schedule focus:ring-offset-2 transition-colors" type="button">
+<span class="material-symbols-outlined text-[20px]" data-icon="close">close</span>
+</button>
+</div>
+<!-- CUERPO DEL FORMULARIO CON SCROLL SUAVE -->
+<form class="p-space-xl overflow-y-auto custom-scrollbar space-y-5" id="task-form" onsubmit="event.preventDefault();">
+<!-- 1. CAMPO: TÍTULO -->
+<div>
+<div class="flex items-center justify-between mb-1.5">
+<label class="font-body-strong text-sm text-slate-900" for="task-title">
+              Título <span aria-hidden="true" class="text-error font-bold">*</span>
+</label>
+<span aria-live="polite" class="font-caption text-xs text-slate-500" id="title-counter">0/200</span>
+</div>
+<input aria-describedby="title-counter" aria-required="true" class="w-full px-3.5 py-2.5 text-sm text-slate-900 bg-surface border border-[#CBD5E1] rounded-lg placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-schedule focus:border-schedule transition-shadow" id="task-title" maxlength="200" name="task-title" placeholder="Ej. Revisar informe de balance trimestral..." required="" type="text"/>
+</div>
+<!-- 2. CAMPO: DESCRIPCIÓN (OPCIONAL) -->
+<div>
+<div class="flex items-center justify-between mb-1.5">
+<label class="font-body-strong text-sm text-slate-900" for="task-description">
+              Descripción (Opcional)
+            </label>
+<span aria-live="polite" class="font-caption text-xs text-slate-500" id="desc-counter">0/2000</span>
+</div>
+<textarea aria-describedby="desc-counter" class="w-full px-3.5 py-2.5 text-sm text-slate-900 bg-surface border border-[#CBD5E1] rounded-lg placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-schedule focus:border-schedule transition-shadow resize-y min-h-[88px]" id="task-description" maxlength="2000" name="task-description" placeholder="Añade detalles, notas o enlaces de apoyo para contextualizar la tarea..." rows="3"></textarea>
+</div>
+<!-- 3. SECCIÓN: PRIORIZACIÓN EISENHOWER -->
+<div class="bg-slate-50/70 p-4 rounded-xl border border-slate-200/80 space-y-3.5">
+<div class="flex items-start gap-2">
+<span class="material-symbols-outlined text-schedule text-[20px] mt-0.5" data-icon="tune">tune</span>
+<div>
+<h3 class="font-body-strong text-sm text-slate-900">Priorización Eisenhower</h3>
+<p class="font-caption text-xs text-slate-600">Determina el cuadrante respondiendo a estos dos criterios:</p>
+</div>
+</div>
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+<!-- Toggle: ¿Es Urgente? (Off) -->
+<label class="flex items-center justify-between p-3 bg-surface border border-slate-200 rounded-lg cursor-pointer hover:border-slate-300 transition-colors">
+<div class="pr-2">
+<span class="block font-body-strong text-xs text-slate-900">¿Es Urgente?</span>
+<span class="block font-caption text-[11px] text-slate-500">Plazo inmediato o crítico</span>
+</div>
+<div class="relative inline-flex items-center">
+<input aria-label="Marcar como urgente" class="sr-only peer" id="toggle-urgent" type="checkbox"/>
+<!-- Switch Track (OFF) -->
+<div class="w-11 h-6 bg-slate-300 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-schedule peer-focus:ring-offset-2 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-do-now"></div>
+</div>
+</label>
+<!-- Toggle: ¿Es Importante? (On por defecto) -->
+<label class="flex items-center justify-between p-3 bg-surface border border-slate-200 rounded-lg cursor-pointer hover:border-slate-300 transition-colors">
+<div class="pr-2">
+<span class="block font-body-strong text-xs text-slate-900">¿Es Importante?</span>
+<span class="block font-caption text-[11px] text-slate-500">Alto impacto o valor estratégico</span>
+</div>
+<div class="relative inline-flex items-center">
+<input aria-label="Marcar como importante" checked="" class="sr-only peer" id="toggle-important" type="checkbox"/>
+<!-- Switch Track (ON) -->
+<div class="w-11 h-6 bg-slate-300 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-schedule peer-focus:ring-offset-2 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-schedule"></div>
+</div>
+</label>
+</div>
+<!-- 4. VISTA PREVIA EN VIVO DEL CUADRANTE RESULTANTE -->
+<div aria-live="polite" class="mt-2.5 p-3.5 bg-[#EFF6FF] border border-[#BFDBFE] rounded-lg transition-all" id="quadrant-preview-banner" role="status">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[#1D4ED8] text-lg" data-icon="event_note">event_note</span>
+<span class="inline-flex items-center font-body-strong text-xs font-semibold text-[#1D4ED8] tracking-wide">
+                DESTINO PREVISTO: Irá a: Planificar
+              </span>
+</div>
+<p class="mt-1 font-caption text-xs text-slate-700 pl-7 leading-relaxed">
+              Cuadrante II · No urgente, pero Importante — Asignar tiempo en agenda
+            </p>
+</div>
+</div>
+<!-- 5. CAMPO: ÁMBITO DE LA TAREA -->
+<div>
+<div class="flex items-center justify-between mb-1.5">
+<span class="font-body-strong text-sm text-slate-900" id="scope-group-label">
+              Ámbito de la tarea <span class="font-normal text-slate-500 text-xs">(Obligatorio)</span>
+</span>
+</div>
+<!-- Selector tipo pills/botones neutrales (sin selección) -->
+<div aria-describedby="scope-error-message" aria-invalid="true" aria-labelledby="scope-group-label" class="grid grid-cols-2 gap-3" role="radiogroup">
+<!-- Botón Laboral -->
+<button aria-checked="false" class="flex items-center justify-center gap-2.5 py-2.5 px-4 bg-surface border-2 border-slate-300 rounded-lg text-slate-700 hover:border-slate-400 hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-schedule focus:ring-offset-2 transition-all font-body text-sm font-medium" name="task-scope" role="radio" type="button" value="work">
+<span aria-hidden="true" class="w-2.5 h-2.5 rounded-full bg-scope-work flex-shrink-0"></span>
+<span class="material-symbols-outlined text-[18px] text-slate-600" data-icon="work">work</span>
+<span>Laboral</span>
+</button>
+<!-- Botón Personal -->
+<button aria-checked="false" class="flex items-center justify-center gap-2.5 py-2.5 px-4 bg-surface border-2 border-slate-300 rounded-lg text-slate-700 hover:border-slate-400 hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-schedule focus:ring-offset-2 transition-all font-body text-sm font-medium" name="task-scope" role="radio" type="button" value="personal">
+<span aria-hidden="true" class="w-2.5 h-2.5 rounded-full bg-scope-personal flex-shrink-0"></span>
+<span class="material-symbols-outlined text-[18px] text-slate-600" data-icon="home">home</span>
+<span>Personal</span>
+</button>
+</div>
+<!-- Error en línea visible (Cumple WCAG 2.1 AA contraste #B91C1C) -->
+<div class="flex items-center gap-1.5 mt-2 text-error" id="scope-error-message" role="alert">
+<span class="material-symbols-outlined text-base" data-icon="error">error</span>
+<span class="font-body text-xs font-semibold">Elige un ámbito.</span>
+</div>
+</div>
+</form>
+<!-- PIE DEL MODAL (FOOTER) -->
+<div class="px-space-xl py-4 bg-slate-50 border-t border-slate-200 flex items-center justify-end gap-3">
+<button class="px-4 py-2 text-sm font-medium text-slate-700 bg-surface border border-slate-300 rounded-lg hover:bg-slate-100 hover:text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 transition-all" type="button">
+          Cancelar
+        </button>
+<button class="px-5 py-2 text-sm font-semibold text-white bg-schedule rounded-lg hover:bg-[#1E40AF] focus:outline-none focus:ring-2 focus:ring-schedule focus:ring-offset-2 transition-all shadow-sm flex items-center gap-2" form="task-form" type="submit">
+<span class="material-symbols-outlined text-base" data-icon="save">save</span>
+<span>Guardar tarea</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Microinteracción opcional con Vanilla JS para contadores y cambio dinámico del banner -->
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // Contadores de caracteres
+      const titleInput = document.getElementById('task-title');
+      const titleCounter = document.getElementById('title-counter');
+      if (titleInput && titleCounter) {
+        titleInput.addEventListener('input', (e) => {
+          titleCounter.textContent = `${e.target.value.length}/200`;
+        });
+      }
+
+      const descInput = document.getElementById('task-description');
+      const descCounter = document.getElementById('desc-counter');
+      if (descInput && descCounter) {
+        descInput.addEventListener('input', (e) => {
+          descCounter.textContent = `${e.target.value.length}/2000`;
+        });
+      }
+
+      // Toggles y Vista Previa Eisenhower
+      const toggleUrgent = document.getElementById('toggle-urgent');
+      const toggleImportant = document.getElementById('toggle-important');
+      const previewBanner = document.getElementById('quadrant-preview-banner');
+
+      const quadrants = {
+        'urgent-important': {
+          title: 'DESTINO PREVISTO: Irá a: Hacer ahora',
+          desc: 'Cuadrante I · Urgente e Importante — Atender de inmediato',
+          bg: '#FEF2F2',
+          border: '#FECACA',
+          color: '#B91C1C',
+          icon: 'crisis_alert'
+        },
+        'not-urgent-important': {
+          title: 'DESTINO PREVISTO: Irá a: Planificar',
+          desc: 'Cuadrante II · No urgente, pero Importante — Asignar tiempo en agenda',
+          bg: '#EFF6FF',
+          border: '#BFDBFE',
+          color: '#1D4ED8',
+          icon: 'event_note'
+        },
+        'urgent-not-important': {
+          title: 'DESTINO PREVISTO: Irá a: Delegar',
+          desc: 'Cuadrante III · Urgente pero No Importante — Asignar o automatizar',
+          bg: '#FFFBEB',
+          border: '#FDE68A',
+          color: '#B45309',
+          icon: 'group'
+        },
+        'not-urgent-not-important': {
+          title: 'DESTINO PREVISTO: Irá a: Eliminar',
+          desc: 'Cuadrante IV · Ni Urgente ni Importante — Considerar descartar',
+          bg: '#F8FAFC',
+          border: '#CBD5E1',
+          color: '#475569',
+          icon: 'delete_sweep'
+        }
+      };
+
+      function updateQuadrantPreview() {
+        if (!toggleUrgent || !toggleImportant || !previewBanner) return;
+        const isUrgent = toggleUrgent.checked;
+        const isImportant = toggleImportant.checked;
+
+        let key = 'not-urgent-not-important';
+        if (isUrgent && isImportant) key = 'urgent-important';
+        else if (!isUrgent && isImportant) key = 'not-urgent-important';
+        else if (isUrgent && !isImportant) key = 'urgent-not-important';
+
+        const data = quadrants[key];
+        previewBanner.style.backgroundColor = data.bg;
+        previewBanner.style.borderColor = data.border;
+        previewBanner.innerHTML = `
+          <div class="flex items-center gap-2">
+            <span class="material-symbols-outlined text-lg" style="color: ${data.color};" data-icon="${data.icon}">${data.icon}</span>
+            <span class="inline-flex items-center font-body-strong text-xs font-semibold tracking-wide" style="color: ${data.color};">
+              ${data.title}
+            </span>
+          </div>
+          <p class="mt-1 font-caption text-xs text-slate-700 pl-7 leading-relaxed">
+            ${data.desc}
+          </p>
+        `;
+      }
+
+      if (toggleUrgent && toggleImportant) {
+        toggleUrgent.addEventListener('change', updateQuadrantPreview);
+        toggleImportant.addEventListener('change', updateQuadrantPreview);
+      }
+    });
+  </script>
+</body></html>

@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>S7 Selector de avatar y recortador oscuro - MyTasks (Escritorio)</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+          },
+          colors: {
+            brand: {
+              primary: '#60A5FA',
+              'primary-hover': '#93C5FD',
+              'primary-content': '#0F172A',
+              surface: '#0F172A',
+              card: '#1E293B',
+              border: '#475569',
+              muted: '#94A3B8',
+              text: '#F1F5F9',
+              error: '#F87171',
+              'error-bg': '#450A0A',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      vertical-align: middle;
+    }
+    .material-symbols-outlined.fill {
+      font-variation-settings: 'FILL' 1;
+    }
+    /* Estilos accesibles de foco */
+    button:focus-visible, a:focus-visible, input:focus-visible {
+      outline: 2px solid #60A5FA;
+      outline-offset: 2px;
+    }
+  </style>
+</head>
+<body class="bg-[#0B1120] text-[#F1F5F9] font-sans antialiased min-h-screen relative overflow-x-hidden selection:bg-[#60A5FA]/30 selection:text-white">
+
+  <!-- FONDO: Pantalla Perfil Oscurecida simulando el contexto de la aplicación MyTasks (como SCREEN_30) -->
+  <div class="filter brightness-[0.22] contrast-[0.88] blur-[1.5px] pointer-events-none select-none min-h-screen pb-16" aria-hidden="true">
+    <!-- Navbar superior simulada -->
+    <header class="w-full bg-[#0F172A] border-b border-[#334155] px-8 py-3.5 flex items-center justify-between">
+      <div class="flex items-center gap-8">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-lg bg-[#60A5FA] flex items-center justify-center text-[#0F172A] font-bold">
+            <span class="material-symbols-outlined text-[20px]">grid_view</span>
+          </div>
+          <span class="text-xl font-bold tracking-tight text-white">MyTasks</span>
+        </div>
+        <nav class="flex items-center gap-6 text-sm text-[#94A3B8]">
+          <span class="hover:text-white transition-colors cursor-pointer">Tablero</span>
+          <span class="hover:text-white transition-colors cursor-pointer">Historial</span>
+          <span class="hover:text-white transition-colors cursor-pointer">Papelera</span>
+        </nav>
+      </div>
+      <div class="flex items-center gap-4">
+        <div class="w-8 h-8 rounded-full bg-[#60A5FA] text-[#0F172A] font-semibold text-xs flex items-center justify-center">AC</div>
+        <span class="text-sm font-medium text-[#E2E8F0]">Ana Cruz</span>
+        <button class="text-[#94A3B8] hover:text-white ml-2 flex items-center gap-1 text-sm">
+          <span class="material-symbols-outlined text-[18px]">logout</span>
+          Cerrar sesión
+        </button>
+      </div>
+    </header>
+
+    <!-- Contenido de fondo Perfil -->
+    <main class="max-w-6xl mx-auto px-8 pt-8">
+      <div class="mb-8">
+        <h1 class="text-2xl font-bold text-white">Perfil</h1>
+        <p class="text-sm text-[#94A3B8]">Gestiona tu identidad, preferencias de visualización y configuración del tablero.</p>
+      </div>
+
+      <div class="grid grid-cols-12 gap-8">
+        <div class="col-span-4 bg-[#1E293B] border border-[#334155] rounded-xl p-6">
+          <h2 class="text-base font-semibold text-white mb-6 flex items-center gap-2">
+            <span class="material-symbols-outlined text-[#60A5FA]">person</span>
+            Identidad
+          </h2>
+          <div class="flex items-center gap-5 mb-6">
+            <div class="w-20 h-20 rounded-2xl bg-[#2563EB] text-white flex items-center justify-center text-2xl font-bold ring-4 ring-[#60A5FA]/30">
+              AC
+            </div>
+            <div class="space-y-2">
+              <button class="px-3.5 py-1.5 bg-[#334155] text-sm font-medium rounded-lg text-white">Elegir avatar</button>
+              <br>
+              <button class="text-xs text-[#F87171] hover:underline">Quitar avatar</button>
+            </div>
+          </div>
+          <div class="space-y-4">
+            <div>
+              <label class="block text-xs font-medium text-[#94A3B8] mb-1">Nombre para mostrar</label>
+              <input type="text" value="Ana Cruz" class="w-full bg-[#0F172A] border border-[#334155] rounded-lg px-3 py-2 text-sm text-white" readonly>
+            </div>
+            <div>
+              <label class="block text-xs font-medium text-[#94A3B8] mb-1">Correo electrónico</label>
+              <input type="text" value="ana@example.com" class="w-full bg-[#0F172A] border border-[#334155] rounded-lg px-3 py-2 text-sm text-[#94A3B8]" readonly>
+            </div>
+          </div>
+        </div>
+        <div class="col-span-8 bg-[#1E293B] border border-[#334155] rounded-xl p-6">
+          <h2 class="text-base font-semibold text-white mb-6 flex items-center gap-2">
+            <span class="material-symbols-outlined text-[#60A5FA]">palette</span>
+            Apariencia
+          </h2>
+          <div class="grid grid-cols-3 gap-4 mb-6">
+            <div class="p-4 rounded-xl border border-[#334155] bg-[#0F172A] text-center text-sm font-medium text-[#94A3B8]">Claro</div>
+            <div class="p-4 rounded-xl border-2 border-[#60A5FA] bg-[#1E293B] text-center text-sm font-medium text-white shadow-lg shadow-[#60A5FA]/10">Oscuro</div>
+            <div class="p-4 rounded-xl border border-[#334155] bg-[#0F172A] text-center text-sm font-medium text-[#94A3B8]">Sistema</div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- OVERLAY OSCURO CON FONDO SEMITRANSPARENTE (BACKDROP) -->
+  <div class="fixed inset-0 bg-[#0B1120]/80 backdrop-blur-sm z-40 overflow-y-auto flex flex-col items-center justify-start py-8 px-6">
+
+    <!-- Encabezado informativo de la vista técnica de estados -->
+    <div class="w-full max-w-7xl flex flex-col md:flex-row items-start md:items-center justify-between gap-3 mb-6 bg-[#1E293B]/90 border border-[#475569] rounded-xl px-5 py-3 shadow-xl backdrop-blur-md">
+      <div class="flex items-center gap-3">
+        <span class="inline-flex items-center justify-center p-2 rounded-lg bg-[#60A5FA]/15 text-[#60A5FA] border border-[#60A5FA]/30">
+          <span class="material-symbols-outlined text-[20px]">account_circle</span>
+        </span>
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="text-xs font-semibold uppercase tracking-wider text-[#60A5FA] bg-[#60A5FA]/10 px-2 py-0.5 rounded border border-[#60A5FA]/20">S7 Perfil</span>
+            <h1 class="text-base font-bold text-white tracking-tight">Selector de avatar y recortador en tema oscuro</h1>
+          </div>
+          <p class="text-xs text-[#94A3B8] mt-0.5">Especificación completa de los dos estados interactivos del diálogo modal (#1E293B, borde #475569) con contraste WCAG 2.1 AA.</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-2 text-xs">
+        <span class="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-[#0F172A] border border-[#334155] text-[#94A3B8]">
+          <span class="w-2 h-2 rounded-full bg-[#22C55E]"></span>
+          WCAG 2.1 AA ≥ 4.5:1
+        </span>
+        <span class="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-[#0F172A] border border-[#334155] text-[#94A3B8]">
+          <span class="w-2 h-2 rounded-full bg-[#60A5FA]"></span>
+          Primario: #60A5FA
+        </span>
+      </div>
+    </div>
+
+    <!-- CONTENEDOR DE LOS DOS DIÁLOGOS MODALES COMPARATIVOS (ESTADO A y ESTADO B) -->
+    <div class="w-full max-w-7xl grid grid-cols-1 xl:grid-cols-2 gap-8 items-start">
+
+      <!-- ========================================== -->
+      <!-- (A) DIÁLOGO "ELEGIR AVATAR" - PESTAÑA CATÁLOGO -->
+      <!-- ========================================== -->
+      <section class="flex flex-col" aria-labelledby="modal-catalogo-title">
+        <div class="flex items-center justify-between mb-2 px-1">
+          <div class="flex items-center gap-2">
+            <span class="w-6 h-6 rounded-full bg-[#60A5FA] text-[#0F172A] text-xs font-black flex items-center justify-center">A</span>
+            <span class="text-sm font-semibold text-white tracking-tight">Estado A: Pestaña "Catálogo" (Activa)</span>
+          </div>
+          <span class="text-xs text-[#94A3B8]">12 avatares ilustrados (64 px)</span>
+        </div>
+
+        <!-- Modal Card -->
+        <div class="bg-[#1E293B] border border-[#475569] rounded-2xl shadow-2xl shadow-black/60 overflow-hidden flex flex-col transition-all duration-150">
+          <!-- Modal Header -->
+          <div class="px-6 pt-5 pb-4 border-b border-[#334155] flex items-center justify-between">
+            <div class="flex items-center gap-2.5">
+              <span class="material-symbols-outlined text-[#60A5FA] text-[22px]">face</span>
+              <h2 id="modal-catalogo-title" class="text-lg font-semibold text-[#F1F5F9]">Elegir avatar</h2>
+            </div>
+            <button type="button" aria-label="Cerrar modal" class="w-8 h-8 rounded-lg text-[#94A3B8] hover:text-[#F1F5F9] hover:bg-[#334155]/60 flex items-center justify-center transition-colors">
+              <span class="material-symbols-outlined text-[20px]">close</span>
+            </button>
+          </div>
+
+          <!-- Pestañas de navegación -->
+          <div class="px-6 pt-4 border-b border-[#334155] bg-[#162032]/60">
+            <nav class="flex gap-6 -mb-px" aria-label="Opciones de avatar">
+              <button type="button" class="pb-3 text-sm font-semibold text-[#60A5FA] border-b-2 border-[#60A5FA] flex items-center gap-2 tracking-wide">
+                <span class="material-symbols-outlined text-[18px]">grid_view</span>
+                Catálogo
+                <span class="ml-1 text-[11px] font-bold px-1.5 py-0.5 rounded-full bg-[#60A5FA]/20 text-[#93C5FD]">12</span>
+              </button>
+              <button type="button" class="pb-3 text-sm font-medium text-[#94A3B8] hover:text-[#F1F5F9] hover:border-b-2 hover:border-[#64748B] flex items-center gap-2 transition-colors">
+                <span class="material-symbols-outlined text-[18px]">cloud_upload</span>
+                Subir imagen
+              </button>
+            </nav>
+          </div>
+
+          <!-- Modal Body: Rejilla de 12 avatares -->
+          <div class="p-6">
+            <p class="text-xs text-[#94A3B8] mb-4">Selecciona un avatar representativo para tu perfil de MyTasks. Podrás cambiarlo en cualquier momento.</p>
+
+            <!-- Rejilla 4 columnas x 3 filas -->
+            <div class="grid grid-cols-4 sm:grid-cols-4 gap-y-4 gap-x-3" role="radiogroup" aria-label="Catálogo de avatares">
+
+              <!-- 1. Búho (Seleccionado: borde grueso #60A5FA, fondo sutil y badge check) -->
+              <div class="flex flex-col items-center">
+                <button type="button" role="radio" aria-checked="true" class="group relative w-16 h-16 rounded-full bg-[#0F172A] border-[3px] border-[#60A5FA] ring-4 ring-[#60A5FA]/20 flex items-center justify-center transition-transform active:scale-95 shadow-md">
+                  <!-- SVG ilustrado Búho -->
+                  <svg class="w-10 h-10" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <circle cx="32" cy="32" r="28" fill="#312E81"/>
+                    <!-- Orejas/plumitas -->
+                    <path d="M20 18L26 26H18L20 18Z" fill="#818CF8"/>
+                    <path d="M44 18L38 26H46L44 18Z" fill="#818CF8"/>
+                    <!-- Cuerpo -->
+                    <ellipse cx="32" cy="36" rx="20" ry="18" fill="#4338CA"/>
+                    <!-- Pecho -->
+                    <ellipse cx="32" cy="40" rx="12" ry="11" fill="#C7D2FE"/>
+                    <path d="M30 36H34M28 41H36M30 46H34" stroke="#4338CA" stroke-width="1.5" stroke-linecap="round"/>
+                    <!-- Ojos grandes -->
+                    <circle cx="25" cy="30" r="7" fill="#FEF08A"/>
+                    <circle cx="39" cy="30" r="7" fill="#FEF08A"/>
+                    <circle cx="25" cy="30" r="3.5" fill="#1E1B4B"/>
+                    <circle cx="39" cy="30" r="3.5" fill="#1E1B4B"/>
+                    <circle cx="27" cy="28.5" r="1.2" fill="#FFFFFF"/>
+                    <circle cx="41" cy="28.5" r="1.2" fill="#FFFFFF"/>
+                    <!-- Pico -->
+                    <polygon points="32,32 29,38 35,38" fill="#F59E0B"/>
+                  </svg>
+                  <!-- Badge con Icono de Check en avatar seleccionado -->
+                  <span class="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-[#60A5FA] text-[#0F172A] flex items-center justify-center shadow-md ring-2 ring-[#1E293B]">
+                    <span class="material-symbols-outlined text-[14px] font-black">check</span>
+                  </span>
+                </button>
+                <span class="text-xs font-semibold text-[#60A5FA] mt-2">Búho</span>
+              </div>
+
+              <!-- 2. Zorro -->
+              <div class="flex flex-col items-center">
+                <button type="button" role="radio" aria-checked="false" class="group relative w-16 h-16 rounded-full bg-[#0F172A] border-2 border-[#475569] hover:border-[#94A3B8] flex items-center justify-center transition-all hover:bg-[#334155]/40 active:scale-95">
+                  <svg class="w-10 h-10" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <circle cx="32" cy="32" r="28" fill="#7C2D12"/>
+                    <!-- Orejas -->
+                    <path d="M18 16L29 28H17L18 16Z" fill="#EA580C"/>
+                    <path d="M46 16L35 28H47L46 16Z" fill="#EA580C"/>
+                    <path d="M21 20L26 27H20L21 20Z" fill="#FFEDD5"/>
+                    <path d="M43 20L38 27H44L43 20Z" fill="#FFEDD5"/>
+                    <!-- Cara -->
+                    <path d="M16 28C16 28 32 30 32 46C32 30 48 28 48 28C48 42 32 52 32 52C32 52 16 42 16 28Z" fill="#EA580C"/>
+                    <path d="M20 32C24 35 32 38 32 46C32 38 40 35 44 32C42 42 32 50 32 50C32 50 22 42 20 32Z" fill="#FFF7ED"/>
+                    <!-- Ojos y nariz -->
+                    <circle cx="25" cy="34" r="2.5" fill="#1C1917"/>
+                    <circle cx="39" cy="34" r="2.5" fill="#1C1917"/>
+                    <ellipse cx="32" cy="46" rx="3" ry="2.2" fill="#0C0A09"/>
+                  </svg>
+                </button>
+                <span class="text-xs font-medium text-[#CBD5E1] mt-2">Zorro</span>
+              </div>
+
+              <!-- 3. Oso -->
+              <div class="flex flex-col items-center">
+                <button type="button" role="radio" aria-checked="false" class="group relative w-16 h-16 rounded-full bg-[#0F172A] border-2 border-[#475569] hover:border-[#94A3B8] flex items-center justify-center transition-all hover:bg-[#334155]/40 active:scale-95">
+                  <svg class="w-10 h-10" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <circle cx="32" cy="32" r="28" fill="#451A03"/>
+                    <!-- Orejas -->
+                    <circle cx="20" cy="20" r="7" fill="#78350F"/>
+                    <circle cx="44" cy="20" r="7" fill="#78350F"/>
+                    <circle cx="20" cy="20" r="3.5" fill="#FDE68A"/>
+                    <circle cx="44" cy="20" r="3.5" fill="#FDE68A"/>
+                    <!-- Cabeza -->
+                    <circle cx="32" cy="35" r="18" fill="#92400E"/>
+                    <!-- Hocico -->
+                    <ellipse cx="32" cy="40" rx="9" ry="7" fill="#FDE68A"/>
+                    <ellipse cx="32" cy="37.5" rx="3.5" ry="2.5" fill="#292524"/>
+                    <!-- Ojos -->
+                    <circle cx="26" cy="31" r="2" fill="#1C1917"/>
+                    <circle cx="38" cy="31" r="2" fill="#1C1917"/>
+                  </svg>
+                </button>
+                <span class="text-xs font-medium text-[#CBD5E1] mt-2">Oso</span>
+              </div>
+
+              <!-- 4. Gato -->
+              <div class="flex flex-col items-center">
+                <button type="button" role="radio" aria-checked="false" class="group relative w-16 h-16 rounded-full bg-[#0F172A] border-2 border-[#475569] hover:border-[#94A3B8] flex items-center justify-center transition-all hover:bg-[#334155]/40 active:scale-95">
+                  <svg class="w-10 h-10" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <circle cx="32" cy="32" r="28" fill="#1E293B"/>
+                    <!-- Orejas puntiagudas -->
+                    <polygon points="18,17 29,28 16,30" fill="#94A3B8"/>
+                    <polygon points="46,17 48,30 35,28" fill="#94A3B8"/>
+                    <polygon points="20,20 27,27 18,28" fill="#F472B6"/>
+                    <polygon points="44,20 46,28 37,27" fill="#F472B6"/>
+                    <!-- Cara -->
+                    <circle cx="32" cy="36" r="17" fill="#CBD5E1"/>
+                    <!-- Ojos felinos verdes -->
+                    <ellipse cx="25" cy="33" rx="3.5" ry="4" fill="#34D399"/>
+                    <ellipse cx="39" cy="33" rx="3.5" ry="4" fill="#34D399"/>
+                    <ellipse cx="25" cy="33" rx="1.2" ry="3.5" fill="#064E3B"/>
+                    <ellipse cx="39" cy="33" rx="1.2" ry="3.5" fill="#064E3B"/>
+                    <!-- Naricita y bigotes -->
+                    <polygon points="32,38 30,40 34,40" fill="#F472B6"/>
+                    <path d="M22 41L15 40M22 43L14 44M42 41L49 40M42 43L50 44" stroke="#64748B" stroke-width="1.2" stroke-linecap="round"/>
+                  </svg>
+                </button>
+                <span class="text-xs font-medium text-[#CBD5E1] mt-2">Gato</span>
+              </div>
+
+              <!-- 5. Rana -->
+              <div class="flex flex-col items-center">
+                <button type="button" role="radio" aria-checked="false" class="group relative w-16 h-16 rounded-full bg-[#0F172A] border-2 border-[#475569] hover:border-[#94A3B8] flex items-center justify-center transition-all hover:bg-[#334155]/40 active:scale-95">
+                  <svg class="w-10 h-10" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <circle cx="32" cy="32" r="28" fill="#064E3B"/>
+                    <!-- Ojos saltones -->
+                    <circle cx="22" cy="22" r="7" fill="#10B981"/>
+                    <circle cx="42" cy="22" r="7" fill="#10B981"/>
+                    <circle cx="22" cy="22" r="3.5" fill="#022C22"/>
+                    <circle cx="42" cy="22" r="3.5" fill="#022C22"/>
+                    <circle cx="23.5" cy="20.5" r="1.2" fill="#FFFFFF"/>
+                    <circle cx="43.5" cy="20.5" r="1.2" fill="#FFFFFF"/>
+                    <!-- Cabeza y boca sonriente -->
+                    <ellipse cx="32" cy="36" rx="19" ry="15" fill="#34D399"/>
+                    <ellipse cx="32" cy="41" rx="13" ry="9" fill="#A7F3D0"/>
+                    <path d="M23 37C26 41 38 41 41 37" stroke="#065F46" stroke-width="2" stroke-linecap="round"/>
+                    <circle cx="20" cy="37" r="2.5" fill="#F87171" opacity="0.6"/>
+                    <circle cx="44" cy="37" r="2.5" fill="#F87171" opacity="0.6"/>
+                  </svg>
+                </button>
+                <span class="text-xs font-medium text-[#CBD5E1] mt-2">Rana</span>
+              </div>
+
+              <!-- 6. Pingüino -->
+              <div class="flex flex-col items-center">
+                <button type="button" role="radio" aria-checked="false" class="group relative w-16 h-16 rounded-full bg-[#0F172A] border-2 border-[#475569] hover:border-[#94A3B8] flex items-center justify-center transition-all hover:bg-[#334155]/40 active:scale-95">
+                  <svg class="w-10 h-10" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <circle cx="32" cy="32" r="28" fill="#0F172A"/>
+                    <!-- Cabeza/Cuerpo -->
+                    <ellipse cx="32" cy="35" rx="17" ry="19" fill="#1E293B"/>
+                    <!-- Pecho blanco -->
+                    <ellipse cx="32" cy="38" rx="11" ry="14" fill="#F8FAFC"/>
+                    <!-- Ojos -->
+                    <circle cx="26" cy="28" r="2.5" fill="#0F172A"/>
+                    <circle cx="38" cy="28" r="2.5" fill="#0F172A"/>
+                    <!-- Pico naranja -->
+                    <polygon points="32,31 28,36 36,36" fill="#F97316"/>
+                    <!-- Mejillas sonrosadas -->
+                    <circle cx="22" cy="33" r="2" fill="#FCA5A5"/>
+                    <circle cx="42" cy="33" r="2" fill="#FCA5A5"/>
+                  </svg>
+                </button>
+                <span class="text-xs font-medium text-[#CBD5E1] mt-2">Pingüino</span>
+              </div>
+
+              <!-- 7. Ballena -->
+              <div class="flex flex-col items-center">
+                <button type="button" role="radio" aria-checked="false" class="group relative w-16 h-16 rounded-full bg-[#0F172A] border-2 border-[#475569] hover:border-[#94A3B8] flex items-center justify-center transition-all hover:bg-[#334155]/40 active:scale-95">
+                  <svg class="w-10 h-10" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <circle cx="32" cy="32" r="28" fill="#0C4A6E"/>
+                    <!-- Chorro de agua -->
+                    <path d="M28 14C28 18 30 20 30 22M32 12V22M36 14C36 18 34 20 34 22" stroke="#7DD3FC" stroke-width="1.8" stroke-linecap="round"/>
+                    <!-- Cuerpo ballena -->
+                    <path d="M16 38C16 28 26 24 38 24C48 24 50 32 46 38C44 41 38 44 26 44C19 44 16 41 16 38Z" fill="#38BDF8"/>
+                    <!-- Vientre claro -->
+                    <path d="M18 38C22 41 28 43 38 43C42 43 45 40 45 38H18Z" fill="#E0F2FE"/>
+                    <!-- Ojo simpático -->
+                    <circle cx="24" cy="32" r="2" fill="#082F49"/>
+                    <!-- Cola -->
+                    <path d="M46 36L52 30V40L46 36Z" fill="#0284C7"/>
+                  </svg>
+                </button>
+                <span class="text-xs font-medium text-[#CBD5E1] mt-2">Ballena</span>
+              </div>
+
+              <!-- 8. Panda -->
+              <div class="flex flex-col items-center">
+                <button type="button" role="radio" aria-checked="false" class="group relative w-16 h-16 rounded-full bg-[#0F172A] border-2 border-[#475569] hover:border-[#94A3B8] flex items-center justify-center transition-all hover:bg-[#334155]/40 active:scale-95">
+                  <svg class="w-10 h-10" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <circle cx="32" cy="32" r="28" fill="#18181B"/>
+                    <!-- Orejas negras -->
+                    <circle cx="20" cy="18" r="6" fill="#27272A"/>
+                    <circle cx="44" cy="18" r="6" fill="#27272A"/>
+                    <!-- Cara blanca -->
+                    <circle cx="32" cy="35" r="18" fill="#F4F4F5"/>
+                    <!-- Manchas negras de los ojos -->
+                    <ellipse cx="25" cy="32" rx="4.5" ry="5.5" transform="rotate(-15 25 32)" fill="#27272A"/>
+                    <ellipse cx="39" cy="32" rx="4.5" ry="5.5" transform="rotate(15 39 32)" fill="#27272A"/>
+                    <!-- Ojos -->
+                    <circle cx="25" cy="32" r="1.5" fill="#FFFFFF"/>
+                    <circle cx="39" cy="32" r="1.5" fill="#FFFFFF"/>
+                    <!-- Naricita -->
+                    <ellipse cx="32" cy="40" rx="2.5" ry="1.8" fill="#27272A"/>
+                  </svg>
+                </button>
+                <span class="text-xs font-medium text-[#CBD5E1] mt-2">Panda</span>
+              </div>
+
+              <!-- 9. Conejo -->
+              <div class="flex flex-col items-center">
+                <button type="button" role="radio" aria-checked="false" class="group relative w-16 h-16 rounded-full bg-[#0F172A] border-2 border-[#475569] hover:border-[#94A3B8] flex items-center justify-center transition-all hover:bg-[#334155]/40 active:scale-95">
+                  <svg class="w-10 h-10" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <circle cx="32" cy="32" r="28" fill="#581C87"/>
+                    <!-- Orejas largas -->
+                    <ellipse cx="24" cy="17" rx="4.5" ry="11" fill="#E9D5FF"/>
+                    <ellipse cx="40" cy="17" rx="4.5" ry="11" fill="#E9D5FF"/>
+                    <ellipse cx="24" cy="17" rx="2.5" ry="8" fill="#F472B6"/>
+                    <ellipse cx="40" cy="17" rx="2.5" ry="8" fill="#F472B6"/>
+                    <!-- Cara -->
+                    <circle cx="32" cy="37" r="16" fill="#FAF5FF"/>
+                    <!-- Ojos y nariz -->
+                    <circle cx="26" cy="34" r="2" fill="#581C87"/>
+                    <circle cx="38" cy="34" r="2" fill="#581C87"/>
+                    <polygon points="32,38 30,40 34,40" fill="#EC4899"/>
+                    <!-- Mejillas -->
+                    <circle cx="22" cy="39" r="2" fill="#FBCFE8"/>
+                    <circle cx="42" cy="39" r="2" fill="#FBCFE8"/>
+                  </svg>
+                </button>
+                <span class="text-xs font-medium text-[#CBD5E1] mt-2">Conejo</span>
+              </div>
+
+              <!-- 10. Tortuga -->
+              <div class="flex flex-col items-center">
+                <button type="button" role="radio" aria-checked="false" class="group relative w-16 h-16 rounded-full bg-[#0F172A] border-2 border-[#475569] hover:border-[#94A3B8] flex items-center justify-center transition-all hover:bg-[#334155]/40 active:scale-95">
+                  <svg class="w-10 h-10" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <circle cx="32" cy="32" r="28" fill="#14532D"/>
+                    <!-- Patitas y cola -->
+                    <ellipse cx="17" cy="24" rx="3.5" ry="5" transform="rotate(-30 17 24)" fill="#86EFAC"/>
+                    <ellipse cx="47" cy="24" rx="3.5" ry="5" transform="rotate(30 47 24)" fill="#86EFAC"/>
+                    <ellipse cx="18" cy="44" rx="3.5" ry="5" transform="rotate(30 18 44)" fill="#86EFAC"/>
+                    <ellipse cx="46" cy="44" rx="3.5" ry="5" transform="rotate(-30 46 44)" fill="#86EFAC"/>
+                    <!-- Cabeza -->
+                    <ellipse cx="32" cy="18" rx="6" ry="7" fill="#86EFAC"/>
+                    <circle cx="29" cy="17" r="1.3" fill="#14532D"/>
+                    <circle cx="35" cy="17" r="1.3" fill="#14532D"/>
+                    <!-- Caparazón -->
+                    <circle cx="32" cy="36" r="16" fill="#22C55E"/>
+                    <circle cx="32" cy="36" r="11" fill="#16A34A"/>
+                    <path d="M32 25V47M21 36H43M24 28L40 44M24 44L40 28" stroke="#86EFAC" stroke-width="1.2"/>
+                  </svg>
+                </button>
+                <span class="text-xs font-medium text-[#CBD5E1] mt-2">Tortuga</span>
+              </div>
+
+              <!-- 11. Delfín -->
+              <div class="flex flex-col items-center">
+                <button type="button" role="radio" aria-checked="false" class="group relative w-16 h-16 rounded-full bg-[#0F172A] border-2 border-[#475569] hover:border-[#94A3B8] flex items-center justify-center transition-all hover:bg-[#334155]/40 active:scale-95">
+                  <svg class="w-10 h-10" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <circle cx="32" cy="32" r="28" fill="#1E3A8A"/>
+                    <!-- Ola de fondo -->
+                    <path d="M12 44C20 40 28 48 38 43C44 40 50 44 54 44" stroke="#60A5FA" stroke-width="2" stroke-linecap="round"/>
+                    <!-- Delfín saltando -->
+                    <path d="M18 36C22 24 36 20 46 28C48 30 52 32 50 34C44 35 40 33 34 31C28 29 24 32 20 40L18 36Z" fill="#38BDF8"/>
+                    <!-- Aleta dorsal -->
+                    <path d="M33 22L37 17C37 20 36 23 34 24" fill="#0284C7"/>
+                    <!-- Ojo -->
+                    <circle cx="43" cy="27" r="1.5" fill="#0F172A"/>
+                  </svg>
+                </button>
+                <span class="text-xs font-medium text-[#CBD5E1] mt-2">Delfín</span>
+              </div>
+
+              <!-- 12. Mariposa -->
+              <div class="flex flex-col items-center">
+                <button type="button" role="radio" aria-checked="false" class="group relative w-16 h-16 rounded-full bg-[#0F172A] border-2 border-[#475569] hover:border-[#94A3B8] flex items-center justify-center transition-all hover:bg-[#334155]/40 active:scale-95">
+                  <svg class="w-10 h-10" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <circle cx="32" cy="32" r="28" fill="#701A75"/>
+                    <!-- Alas superiores -->
+                    <ellipse cx="23" cy="26" rx="10" ry="12" transform="rotate(-25 23 26)" fill="#F472B6"/>
+                    <ellipse cx="41" cy="26" rx="10" ry="12" transform="rotate(25 41 26)" fill="#F472B6"/>
+                    <circle cx="23" cy="26" r="3" fill="#FDF2F8"/>
+                    <circle cx="41" cy="26" r="3" fill="#FDF2F8"/>
+                    <!-- Alas inferiores -->
+                    <ellipse cx="25" cy="40" rx="7" ry="8" transform="rotate(-10 25 40)" fill="#E879F9"/>
+                    <ellipse cx="39" cy="40" rx="7" ry="8" transform="rotate(10 39 40)" fill="#E879F9"/>
+                    <!-- Cuerpo y antenas -->
+                    <rect x="30.5" y="22" width="3" height="22" rx="1.5" fill="#3B0764"/>
+                    <path d="M31 22C28 17 24 18 24 18M33 22C36 17 40 18 40 18" stroke="#FDF2F8" stroke-width="1.2" stroke-linecap="round"/>
+                  </svg>
+                </button>
+                <span class="text-xs font-medium text-[#CBD5E1] mt-2">Mariposa</span>
+              </div>
+
+            </div>
+
+            <!-- Previsualización del avatar seleccionado -->
+            <div class="mt-6 pt-4 border-t border-[#334155] flex items-center justify-between bg-[#162032]/60 rounded-xl px-4 py-3">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full bg-[#312E81] border-2 border-[#60A5FA] flex items-center justify-center">
+                  <svg class="w-7 h-7" viewBox="0 0 64 64" fill="none">
+                    <circle cx="32" cy="32" r="28" fill="#312E81"/>
+                    <ellipse cx="32" cy="36" rx="20" ry="18" fill="#4338CA"/>
+                    <ellipse cx="32" cy="40" rx="12" ry="11" fill="#C7D2FE"/>
+                    <circle cx="25" cy="30" r="7" fill="#FEF08A"/>
+                    <circle cx="39" cy="30" r="7" fill="#FEF08A"/>
+                    <circle cx="25" cy="30" r="3.5" fill="#1E1B4B"/>
+                    <circle cx="39" cy="30" r="3.5" fill="#1E1B4B"/>
+                    <polygon points="32,32 29,38 35,38" fill="#F59E0B"/>
+                  </svg>
+                </div>
+                <div>
+                  <span class="text-xs text-[#94A3B8] block">Avatar seleccionado</span>
+                  <span class="text-sm font-semibold text-white">Búho sabio</span>
+                </div>
+              </div>
+              <span class="text-xs text-[#60A5FA] font-medium flex items-center gap-1">
+                <span class="material-symbols-outlined text-[16px]">check_circle</span>
+                Listo para aplicar
+              </span>
+            </div>
+          </div>
+
+          <!-- Modal Footer -->
+          <div class="px-6 py-4 bg-[#162032] border-t border-[#334155] flex items-center justify-end gap-3">
+            <button type="button" class="px-4 py-2 rounded-lg text-sm font-medium text-[#CBD5E1] hover:text-white hover:bg-[#334155] transition-colors">
+              Cancelar
+            </button>
+            <button type="button" class="px-5 py-2 rounded-lg text-sm font-semibold bg-[#60A5FA] text-[#0F172A] hover:bg-[#93C5FD] shadow-md shadow-[#60A5FA]/20 flex items-center gap-2 transition-all active:scale-[0.98]">
+              <span class="material-symbols-outlined text-[18px]">save</span>
+              Guardar avatar
+            </button>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- ========================================== -->
+      <!-- (B) DIÁLOGO "SUBIR IMAGEN" - RECORTADOR & ZOOM -->
+      <!-- ========================================== -->
+      <section class="flex flex-col" aria-labelledby="modal-subir-title">
+        <div class="flex items-center justify-between mb-2 px-1">
+          <div class="flex items-center gap-2">
+            <span class="w-6 h-6 rounded-full bg-[#60A5FA] text-[#0F172A] text-xs font-black flex items-center justify-center">B</span>
+            <span class="text-sm font-semibold text-white tracking-tight">Estado B: Pestaña "Subir imagen" con Recortador</span>
+          </div>
+          <span class="text-xs text-[#F87171] font-medium flex items-center gap-1">
+            <span class="material-symbols-outlined text-[14px]">error</span>
+            Validación de 2 MB
+          </span>
+        </div>
+
+        <!-- Modal Card -->
+        <div class="bg-[#1E293B] border border-[#475569] rounded-2xl shadow-2xl shadow-black/60 overflow-hidden flex flex-col transition-all duration-150">
+          <!-- Modal Header -->
+          <div class="px-6 pt-5 pb-4 border-b border-[#334155] flex items-center justify-between">
+            <div class="flex items-center gap-2.5">
+              <span class="material-symbols-outlined text-[#60A5FA] text-[22px]">crop</span>
+              <h2 id="modal-subir-title" class="text-lg font-semibold text-[#F1F5F9]">Elegir avatar</h2>
+            </div>
+            <button type="button" aria-label="Cerrar modal" class="w-8 h-8 rounded-lg text-[#94A3B8] hover:text-[#F1F5F9] hover:bg-[#334155]/60 flex items-center justify-center transition-colors">
+              <span class="material-symbols-outlined text-[20px]">close</span>
+            </button>
+          </div>
+
+          <!-- Pestañas de navegación -->
+          <div class="px-6 pt-4 border-b border-[#334155] bg-[#162032]/60">
+            <nav class="flex gap-6 -mb-px" aria-label="Opciones de avatar">
+              <button type="button" class="pb-3 text-sm font-medium text-[#94A3B8] hover:text-[#F1F5F9] hover:border-b-2 hover:border-[#64748B] flex items-center gap-2 transition-colors">
+                <span class="material-symbols-outlined text-[18px]">grid_view</span>
+                Catálogo
+              </button>
+              <button type="button" class="pb-3 text-sm font-semibold text-[#60A5FA] border-b-2 border-[#60A5FA] flex items-center gap-2 tracking-wide">
+                <span class="material-symbols-outlined text-[18px]">cloud_upload</span>
+                Subir imagen
+              </button>
+            </nav>
+          </div>
+
+          <!-- Modal Body: Carga, Recortador y Zoom -->
+          <div class="p-6 space-y-5">
+
+            <!-- Fila de acción para elegir archivo y requisitos -->
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 rounded-xl bg-[#0F172A] border border-[#334155]">
+              <div class="flex items-center gap-3">
+                <button type="button" class="px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-[#334155] hover:bg-[#475569] text-white border border-[#475569] flex items-center gap-2 transition-colors shadow-sm">
+                  <span class="material-symbols-outlined text-[16px]">folder_open</span>
+                  Elegir archivo
+                </button>
+                <span class="text-xs text-[#CBD5E1] truncate font-medium max-w-[170px]" title="foto_perfil_reciente.png">
+                  foto_perfil_reciente.png
+                </span>
+              </div>
+              <span class="text-xs text-[#94A3B8] flex items-center gap-1.5">
+                <span class="material-symbols-outlined text-[14px]">info</span>
+                JPEG, PNG o WebP, hasta 2 MB
+              </span>
+            </div>
+
+            <!-- Mensaje de error en línea de ejemplo requerido ("La imagen supera los 2 MB.") -->
+            <div class="flex items-start gap-2.5 px-3.5 py-2.5 rounded-lg bg-[#450A0A]/40 border border-[#F87171]/40 text-[#F87171] text-xs font-medium animate-fadeIn" role="alert">
+              <span class="material-symbols-outlined text-[#F87171] text-[18px] shrink-0 mt-0.5">error</span>
+              <div class="flex-1">
+                <span>La imagen supera los 2 MB. Por favor, comprime el archivo o elige otra imagen.</span>
+              </div>
+              <button type="button" class="text-[#F87171] hover:text-white" aria-label="Descartar aviso">
+                <span class="material-symbols-outlined text-[16px]">close</span>
+              </button>
+            </div>
+
+            <!-- Área del Recortador (Canvas y Preview) -->
+            <div class="grid grid-cols-1 sm:grid-cols-12 gap-5 items-center">
+
+              <!-- Lienzo de recorte interactivo (Square Crop Container) -->
+              <div class="sm:col-span-8 flex flex-col items-center">
+                <div class="relative w-full aspect-square max-w-[260px] bg-[#0F172A] border-2 border-dashed border-[#475569] rounded-xl overflow-hidden cursor-move flex items-center justify-center group select-none shadow-inner" tabindex="0" aria-label="Lienzo de recorte: arrastra para encuadrar">
+                  
+                  <!-- Imagen base simulada en lienzo -->
+                  <div class="absolute inset-0 bg-cover bg-center opacity-90 transition-transform duration-100" style="background-image: radial-gradient(circle at 50% 40%, #3B82F6 0%, #1E3A8A 50%, #0F172A 100%);">
+                    <!-- Silueta vectorial simulada de una persona para encuadre -->
+                    <div class="w-full h-full flex flex-col items-center justify-center text-white/70">
+                      <svg class="w-32 h-32" viewBox="0 0 100 100" fill="none">
+                        <circle cx="50" cy="38" r="20" fill="#93C5FD"/>
+                        <path d="M20 86C20 68 33 62 50 62C67 62 80 68 80 86" fill="#60A5FA"/>
+                        <!-- Gafas estilizadas -->
+                        <rect x="36" y="34" width="11" height="8" rx="2" stroke="#1E293B" stroke-width="2"/>
+                        <rect x="53" y="34" width="11" height="8" rx="2" stroke="#1E293B" stroke-width="2"/>
+                        <line x1="47" y1="38" x2="53" y2="38" stroke="#1E293B" stroke-width="2"/>
+                      </svg>
+                    </div>
+                  </div>
+
+                  <!-- Máscara exterior oscurecida para evidenciar el área recortable -->
+                  <div class="absolute inset-0 bg-[#0F172A]/65 pointer-events-none"></div>
+
+                  <!-- Marco de recorte cuadrado activo (con grid de tercios) -->
+                  <div class="absolute w-44 h-44 rounded-full border-2 border-[#60A5FA] shadow-[0_0_0_9999px_rgba(15,23,42,0.65)] pointer-events-none flex items-center justify-center ring-2 ring-[#60A5FA]/30">
+                    <!-- Cuadrícula sutil de composición -->
+                    <div class="w-full h-full border border-dashed border-white/25 rounded-full pointer-events-none"></div>
+                  </div>
+
+                  <!-- Indicador de acción "Arrastrar para reencuadrar" -->
+                  <div class="absolute bottom-2 bg-[#0F172A]/85 backdrop-blur-sm border border-[#475569] text-[#93C5FD] text-[11px] font-medium px-2 py-0.5 rounded-full pointer-events-none flex items-center gap-1 shadow-sm">
+                    <span class="material-symbols-outlined text-[13px]">drag_pan</span>
+                    Arrastra para centrar
+                  </div>
+
+                  <!-- Esquinas guía de ajuste -->
+                  <div class="absolute top-2 left-2 w-3 h-3 border-t-2 border-l-2 border-[#60A5FA] pointer-events-none"></div>
+                  <div class="absolute top-2 right-2 w-3 h-3 border-t-2 border-r-2 border-[#60A5FA] pointer-events-none"></div>
+                  <div class="absolute bottom-2 left-2 w-3 h-3 border-b-2 border-l-2 border-[#60A5FA] pointer-events-none"></div>
+                  <div class="absolute bottom-2 right-2 w-3 h-3 border-b-2 border-r-2 border-[#60A5FA] pointer-events-none"></div>
+                </div>
+
+                <!-- Control accesible de Zoom con "−" y "+" -->
+                <div class="w-full max-w-[260px] mt-4 flex items-center gap-3">
+                  <button type="button" aria-label="Reducir zoom" class="w-8 h-8 rounded-lg bg-[#0F172A] hover:bg-[#334155] text-white border border-[#475569] flex items-center justify-center font-bold text-base transition-colors shrink-0">
+                    <span class="material-symbols-outlined text-[18px]">remove</span>
+                  </button>
+
+                  <div class="flex-1 flex flex-col gap-1">
+                    <div class="flex justify-between items-center text-[11px] text-[#94A3B8]">
+                      <span>Zoom</span>
+                      <span class="font-medium text-[#60A5FA]">120%</span>
+                    </div>
+                    <input type="range" min="100" max="250" value="120" aria-label="Nivel de zoom del recorte" class="w-full h-1.5 bg-[#334155] rounded-lg appearance-none cursor-pointer accent-[#60A5FA]">
+                  </div>
+
+                  <button type="button" aria-label="Aumentar zoom" class="w-8 h-8 rounded-lg bg-[#0F172A] hover:bg-[#334155] text-white border border-[#475569] flex items-center justify-center font-bold text-base transition-colors shrink-0">
+                    <span class="material-symbols-outlined text-[18px]">add</span>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Vista previa redonda a 96 px con especificación -->
+              <div class="sm:col-span-4 flex flex-col items-center justify-center p-4 rounded-xl bg-[#0F172A]/70 border border-[#334155] text-center">
+                <span class="text-xs font-medium text-[#94A3B8] mb-3">Vista previa (96 px)</span>
+
+                <!-- Avatar redondo resultante a 96 px -->
+                <div class="relative w-24 h-24 rounded-full overflow-hidden border-[3px] border-[#60A5FA] shadow-xl shadow-black/50 bg-[#1E3A8A] flex items-center justify-center">
+                  <div class="w-full h-full flex flex-col items-center justify-center" style="background: radial-gradient(circle at 50% 40%, #3B82F6 0%, #1E3A8A 60%, #0F172A 100%);">
+                    <svg class="w-20 h-20" viewBox="0 0 100 100" fill="none">
+                      <circle cx="50" cy="38" r="20" fill="#93C5FD"/>
+                      <path d="M20 86C20 68 33 62 50 62C67 62 80 68 80 86" fill="#60A5FA"/>
+                      <rect x="36" y="34" width="11" height="8" rx="2" stroke="#1E293B" stroke-width="2"/>
+                      <rect x="53" y="34" width="11" height="8" rx="2" stroke="#1E293B" stroke-width="2"/>
+                      <line x1="47" y1="38" x2="53" y2="38" stroke="#1E293B" stroke-width="2"/>
+                    </svg>
+                  </div>
+                </div>
+
+                <div class="mt-3 space-y-0.5">
+                  <span class="text-xs font-semibold text-white block">Resultado final</span>
+                  <span class="text-[11px] text-[#94A3B8] block">Se aplicará a tu perfil</span>
+                </div>
+
+                <!-- Botón secundario para rotar o reajustar -->
+                <button type="button" class="mt-3 px-2.5 py-1 rounded-md bg-[#1E293B] hover:bg-[#334155] text-[11px] font-medium text-[#CBD5E1] border border-[#475569] flex items-center gap-1 transition-colors">
+                  <span class="material-symbols-outlined text-[14px]">rotate_right</span>
+                  Girar 90°
+                </button>
+              </div>
+
+            </div>
+
+          </div>
+
+          <!-- Modal Footer -->
+          <div class="px-6 py-4 bg-[#162032] border-t border-[#334155] flex items-center justify-between">
+            <span class="text-[11px] text-[#94A3B8]">
+              Formatos soportados: JPG, PNG, WebP
+            </span>
+            <div class="flex items-center gap-3">
+              <button type="button" class="px-4 py-2 rounded-lg text-sm font-medium text-[#CBD5E1] hover:text-white hover:bg-[#334155] transition-colors">
+                Cancelar
+              </button>
+              <button type="button" class="px-5 py-2 rounded-lg text-sm font-semibold bg-[#60A5FA] text-[#0F172A] hover:bg-[#93C5FD] shadow-md shadow-[#60A5FA]/20 flex items-center gap-2 transition-all active:scale-[0.98]">
+                <span class="material-symbols-outlined text-[18px]">crop_free</span>
+                Guardar avatar
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </div>
+
+    <!-- NOTA TÉCNICA DE ACCESIBILIDAD Y TOKENS WCAG 2.1 AA -->
+    <footer class="w-full max-w-7xl mt-8 pt-4 border-t border-[#334155]/60 flex flex-col md:flex-row items-center justify-between text-xs text-[#94A3B8] gap-4">
+      <div class="flex items-center gap-4">
+        <span><strong>MyTasks</strong> &bull; Sistema de diseño oscuro (DESIGN_SYSTEM_1)</span>
+        <span>Superficie modal: <code class="text-[#60A5FA]">#1E293B</code></span>
+        <span>Borde modal: <code class="text-[#60A5FA]">#475569</code></span>
+        <span>Texto primario: <code class="text-[#60A5FA]">#F1F5F9</code></span>
+      </div>
+      <div class="flex items-center gap-3">
+        <span class="text-[#22C55E] flex items-center gap-1 font-medium">
+          <span class="material-symbols-outlined text-[16px]">verified</span>
+          Foco visible con anillo de 2px #60A5FA
+        </span>
+      </div>
+    </footer>
+
+  </div>
+
+</body>
+</html>

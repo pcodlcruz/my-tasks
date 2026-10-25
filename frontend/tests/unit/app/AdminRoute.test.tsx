@@ -39,6 +39,12 @@ async function renderAdminRoute(initialEntry = '/admin/access'): Promise<void> {
   )
 }
 
+// The header also shows the avatar and name, which come from the profile: not under test here.
+vi.mock('../../../src/api/profile', () => ({
+  useProfile: () => ({ data: undefined, isPending: false, isError: false }),
+  useAvatarUrl: () => undefined,
+}))
+
 async function renderHeader(): Promise<void> {
   const { AppHeader } = await import('../../../src/app/AppHeader')
   render(

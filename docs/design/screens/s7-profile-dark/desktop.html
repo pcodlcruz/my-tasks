@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>S7 Perfil - MyTasks (Escritorio, tema oscuro)</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              bg: '#0F172A',         // Fondo de página
+              surface: '#1E293B',    // Tarjetas
+              surfaceAlt: '#334155', // Superficies secundarias/hover
+              border: '#334155',     // Bordes
+              borderActive: '#60A5FA',
+              text: '#F1F5F9',       // Texto principal
+              textMuted: '#94A3B8',  // Texto secundario
+              primary: '#60A5FA',    // Primario oscuro
+              primaryHover: '#93C5FD',
+              primaryText: '#0F172A',// Texto sobre primario
+              success: '#4ADE80',
+              successBg: 'rgba(74, 222, 128, 0.15)',
+            }
+          },
+          fontFamily: {
+            sans: ['Inter', 'Segoe UI', 'system-ui', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    /* Focus rings con contraste accesible WCAG AA */
+    *:focus-visible {
+      outline: 2px solid #60A5FA !important;
+      outline-offset: 2px !important;
+    }
+  </style>
+</head>
+<body class="bg-brand-bg text-brand-text font-sans antialiased min-h-screen flex flex-col">
+
+  <!-- Cabecera MyTasks (Consistente con S3 Tablero y S7) -->
+  <header class="w-full bg-brand-surface border-b border-brand-border sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+      <!-- Izquierda: Marca y navegación -->
+      <div class="flex items-center gap-8">
+        <a href="#tablero" class="flex items-center gap-2.5 text-brand-primary font-bold text-2xl tracking-tight hover:opacity-90 transition-opacity">
+          <svg class="w-7 h-7 text-brand-primary" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M4 4h7v7H4V4zm9 0h7v7h-7V4zm-9 9h7v7H4v-7zm9 0h7v7h-7v-7z"/>
+          </svg>
+          <span class="text-white">MyTasks</span>
+        </a>
+
+        <nav class="hidden md:flex items-center gap-1" aria-label="Navegación principal">
+          <a href="#tablero" class="px-3.5 py-2 text-sm font-medium text-brand-textMuted hover:text-brand-text hover:bg-brand-surfaceAlt/50 rounded-lg transition-colors">
+            Tablero
+          </a>
+          <a href="#historial" class="px-3.5 py-2 text-sm font-medium text-brand-textMuted hover:text-brand-text hover:bg-brand-surfaceAlt/50 rounded-lg transition-colors">
+            Historial
+          </a>
+          <a href="#papelera" class="px-3.5 py-2 text-sm font-medium text-brand-textMuted hover:text-brand-text hover:bg-brand-surfaceAlt/50 rounded-lg transition-colors">
+            Papelera
+          </a>
+        </nav>
+      </div>
+
+      <!-- Derecha: Perfil activo y Cerrar sesión -->
+      <div class="flex items-center gap-5">
+        <a href="#perfil" aria-current="page" class="flex items-center gap-2.5 px-3 py-1.5 rounded-lg border-b-2 border-brand-primary bg-brand-surfaceAlt/40 text-brand-text">
+          <div class="w-8 h-8 rounded-full bg-brand-primary text-brand-primaryText font-semibold text-xs flex items-center justify-center shadow-sm" aria-hidden="true">
+            AC
+          </div>
+          <span class="text-sm font-medium">Ana Cruz</span>
+        </a>
+
+        <button type="button" class="text-sm font-medium text-brand-textMuted hover:text-brand-text flex items-center gap-1.5 transition-colors px-2 py-1.5 rounded-lg hover:bg-brand-surfaceAlt/40">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+          </svg>
+          Cerrar sesión
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Contenedor Principal -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-6 py-8">
+    <!-- Título de pantalla -->
+    <div class="mb-8">
+      <h1 class="text-3xl font-bold tracking-tight text-white mb-2">Perfil</h1>
+      <p class="text-brand-textMuted text-base">Gestiona tu identidad, preferencias de visualización y configuración del tablero.</p>
+    </div>
+
+    <!-- Layout de dos columnas -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+
+      <!-- COLUMNA IZQUIERDA: Tarjeta Identidad (5 cols) -->
+      <section class="lg:col-span-5 bg-brand-surface rounded-xl border border-brand-border p-6 shadow-md" aria-labelledby="identidad-heading">
+        <div class="flex items-center justify-between border-b border-brand-border pb-4 mb-6">
+          <h2 id="identidad-heading" class="text-xl font-semibold text-white flex items-center gap-2">
+            <svg class="w-5 h-5 text-brand-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+            </svg>
+            Identidad
+          </h2>
+          <span class="text-xs px-2.5 py-1 rounded-full bg-brand-surfaceAlt text-brand-textMuted font-medium">Cuenta activa</span>
+        </div>
+
+        <!-- Avatar de 96px y botones de avatar -->
+        <div class="flex items-center gap-6 mb-7">
+          <div class="w-24 h-24 rounded-2xl bg-brand-primary text-brand-primaryText font-bold text-3xl flex items-center justify-center shadow-lg shrink-0 select-none" aria-label="Avatar actual con iniciales AC">
+            AC
+          </div>
+          <div class="flex flex-col gap-2.5">
+            <button type="button" class="px-4 py-2 bg-brand-surfaceAlt hover:bg-slate-600 text-white text-sm font-medium rounded-lg border border-brand-border transition-colors flex items-center justify-center gap-2 shadow-sm">
+              <svg class="w-4 h-4 text-brand-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
+              Elegir avatar
+            </button>
+            <button type="button" class="px-4 py-2 bg-transparent hover:bg-red-500/10 text-red-400 hover:text-red-300 text-sm font-medium rounded-lg border border-red-500/30 transition-colors flex items-center justify-center gap-2">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+              </svg>
+              Quitar avatar
+            </button>
+          </div>
+        </div>
+
+        <!-- Formulario: Nombre para mostrar -->
+        <div class="space-y-6">
+          <div>
+            <div class="flex items-center justify-between mb-2">
+              <label for="display-name" class="text-sm font-semibold text-brand-text">
+                Nombre para mostrar
+              </label>
+              <span class="text-xs font-mono text-brand-textMuted" id="char-counter">8/50</span>
+            </div>
+            <input
+              type="text"
+              id="display-name"
+              name="displayName"
+              value="Ana Cruz"
+              maxlength="50"
+              aria-describedby="display-name-help"
+              class="w-full px-3.5 py-2.5 bg-brand-bg border border-brand-border rounded-lg text-white placeholder-slate-500 focus:border-brand-primary focus:ring-1 focus:ring-brand-primary text-sm transition-colors"
+            />
+            <p id="display-name-help" class="mt-2 text-xs text-brand-textMuted flex items-start gap-1.5 leading-relaxed">
+              <svg class="w-4 h-4 text-brand-primary shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <span>Si lo dejas en blanco se usará el de tu cuenta de Google: <strong class="text-brand-text font-medium">Ana Cruz López</strong></span>
+            </p>
+          </div>
+
+          <!-- Botones de acción del nombre -->
+          <div class="flex flex-wrap items-center gap-3 pt-1">
+            <button type="button" class="px-5 py-2.5 bg-brand-primary hover:bg-brand-primaryHover text-brand-primaryText font-semibold text-sm rounded-lg shadow-sm transition-colors flex items-center gap-2">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+              </svg>
+              Guardar
+            </button>
+            <button type="button" class="px-4 py-2.5 bg-brand-surfaceAlt hover:bg-slate-600 text-brand-text font-medium text-sm rounded-lg border border-brand-border transition-colors">
+              Usar el de Google
+            </button>
+          </div>
+
+          <!-- Correo de solo lectura -->
+          <div class="pt-4 border-t border-brand-border">
+            <label for="account-email" class="block text-sm font-semibold text-brand-text mb-2">
+              Correo (no editable)
+            </label>
+            <div class="relative">
+              <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-brand-textMuted" aria-hidden="true">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                </svg>
+              </div>
+              <input
+                type="email"
+                id="account-email"
+                value="ana@example.com"
+                readonly
+                class="w-full pl-10 pr-3.5 py-2.5 bg-brand-bg/60 border border-brand-border/70 rounded-lg text-slate-400 text-sm cursor-not-allowed select-all"
+              />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- COLUMNA DERECHA: Tres tarjetas (7 cols) -->
+      <div class="lg:col-span-7 space-y-6">
+
+        <!-- 1) Tarjeta Apariencia -->
+        <section class="bg-brand-surface rounded-xl border border-brand-border p-6 shadow-md" aria-labelledby="apariencia-heading">
+          <div class="flex items-center justify-between border-b border-brand-border pb-4 mb-6">
+            <h2 id="apariencia-heading" class="text-xl font-semibold text-white flex items-center gap-2">
+              <svg class="w-5 h-5 text-brand-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
+              </svg>
+              Apariencia
+            </h2>
+            <!-- Aviso verde "Guardado" con check -->
+            <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-brand-successBg text-brand-success text-xs font-semibold border border-green-500/30" role="status" aria-live="polite">
+              <svg class="w-3.5 h-3.5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+              </svg>
+              <span>Guardado</span>
+            </div>
+          </div>
+
+          <!-- Tema visual (Segmented Control: Claro / Oscuro / Sistema) -->
+          <div class="mb-6">
+            <label class="block text-sm font-semibold text-brand-text mb-3">Tema</label>
+            <div class="grid grid-cols-3 gap-3" role="radiogroup" aria-label="Selección de tema visual">
+
+              <!-- Opción Claro (no seleccionada) -->
+              <button
+                type="button"
+                role="radio"
+                aria-checked="false"
+                class="flex flex-col items-center justify-center p-3.5 rounded-lg border border-brand-border bg-brand-bg/50 hover:bg-brand-surfaceAlt text-brand-textMuted hover:text-white transition-all text-sm font-medium"
+              >
+                <svg class="w-5 h-5 mb-2 text-brand-textMuted" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                </svg>
+                <span>Claro</span>
+              </button>
+
+              <!-- Opción Oscuro (SELECCIONADA: distinguida por borde, fondo e icono de check) -->
+              <button
+                type="button"
+                role="radio"
+                aria-checked="true"
+                class="flex flex-col items-center justify-center p-3.5 rounded-lg border-2 border-brand-borderActive bg-brand-primary/10 text-white font-semibold text-sm transition-all relative shadow-sm"
+              >
+                <!-- Checkmark indicador de selección accesible -->
+                <span class="absolute top-2 right-2 text-brand-primary" aria-hidden="true">
+                  <svg class="w-4 h-4" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                  </svg>
+                </span>
+                <svg class="w-5 h-5 mb-2 text-brand-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                </svg>
+                <span>Oscuro</span>
+              </button>
+
+              <!-- Opción Sistema (no seleccionada) -->
+              <button
+                type="button"
+                role="radio"
+                aria-checked="false"
+                class="flex flex-col items-center justify-center p-3.5 rounded-lg border border-brand-border bg-brand-bg/50 hover:bg-brand-surfaceAlt text-brand-textMuted hover:text-white transition-all text-sm font-medium"
+              >
+                <svg class="w-5 h-5 mb-2 text-brand-textMuted" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                </svg>
+                <span>Sistema</span>
+              </button>
+
+            </div>
+          </div>
+
+          <!-- Densidad de interfaz (Cómoda / Compacta con miniatura de dos tarjetas) -->
+          <div>
+            <label class="block text-sm font-semibold text-brand-text mb-3">Densidad</label>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3" role="radiogroup" aria-label="Densidad del tablero">
+
+              <!-- Cómoda (SELECCIONADA: con miniatura de 2 tarjetas espaciadas, check, borde azul, fondo destacado) -->
+              <button
+                type="button"
+                role="radio"
+                aria-checked="true"
+                class="flex items-center gap-3.5 p-3.5 rounded-lg border-2 border-brand-borderActive bg-brand-primary/10 text-left transition-all relative"
+              >
+                <!-- Miniatura 2 tarjetas cómodas (espaciado amplio) -->
+                <div class="w-12 h-10 rounded border border-brand-border bg-brand-bg p-1 flex flex-col justify-between shrink-0" aria-hidden="true">
+                  <div class="h-3 w-full bg-brand-surfaceAlt rounded-sm flex items-center px-1">
+                    <div class="h-1 w-4 bg-brand-primary rounded-full"></div>
+                  </div>
+                  <div class="h-3 w-full bg-brand-surfaceAlt rounded-sm flex items-center px-1">
+                    <div class="h-1 w-5 bg-brand-primary rounded-full"></div>
+                  </div>
+                </div>
+
+                <div class="flex-1 pr-6">
+                  <div class="text-sm font-semibold text-white">Cómoda</div>
+                  <div class="text-xs text-brand-textMuted">Espaciado amplio para lectura ágil</div>
+                </div>
+
+                <!-- Icono de check -->
+                <span class="absolute top-3.5 right-3 text-brand-primary" aria-hidden="true">
+                  <svg class="w-4 h-4" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                  </svg>
+                </span>
+              </button>
+
+              <!-- Compacta (no seleccionada: miniatura de 2 tarjetas juntas) -->
+              <button
+                type="button"
+                role="radio"
+                aria-checked="false"
+                class="flex items-center gap-3.5 p-3.5 rounded-lg border border-brand-border bg-brand-bg/50 hover:bg-brand-surfaceAlt text-left transition-all"
+              >
+                <!-- Miniatura 2 tarjetas compactas -->
+                <div class="w-12 h-10 rounded border border-brand-border bg-brand-bg p-1 flex flex-col gap-0.5 justify-center shrink-0" aria-hidden="true">
+                  <div class="h-2 w-full bg-slate-600 rounded-sm"></div>
+                  <div class="h-2 w-full bg-slate-600 rounded-sm"></div>
+                  <div class="h-2 w-full bg-slate-600 rounded-sm"></div>
+                </div>
+
+                <div>
+                  <div class="text-sm font-medium text-brand-text">Compacta</div>
+                  <div class="text-xs text-brand-textMuted">Mayor densidad en pantalla</div>
+                </div>
+              </button>
+
+            </div>
+          </div>
+        </section>
+
+        <!-- 2) Tarjeta Tablero e historial -->
+        <section class="bg-brand-surface rounded-xl border border-brand-border p-6 shadow-md" aria-labelledby="tablero-historial-heading">
+          <div class="flex items-center justify-between border-b border-brand-border pb-4 mb-6">
+            <h2 id="tablero-historial-heading" class="text-xl font-semibold text-white flex items-center gap-2">
+              <svg class="w-5 h-5 text-brand-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
+              </svg>
+              Tablero e historial
+            </h2>
+            <span class="text-xs text-brand-textMuted font-mono">Eisenhower Matrix</span>
+          </div>
+
+          <div class="space-y-6">
+            <!-- A) Tablero por defecto al iniciar: Todas (seleccionada) / Laboral / Personal -->
+            <div>
+              <label class="block text-sm font-semibold text-brand-text mb-2.5">
+                Tablero por defecto
+              </label>
+              <div class="grid grid-cols-3 gap-3" role="radiogroup" aria-label="Tablero por defecto al iniciar">
+
+                <!-- Todas (SELECCIONADA) -->
+                <button
+                  type="button"
+                  role="radio"
+                  aria-checked="true"
+                  class="flex items-center justify-center gap-2 py-2.5 px-3 rounded-lg border-2 border-brand-borderActive bg-brand-primary/10 text-white font-semibold text-sm transition-all"
+                >
+                  <svg class="w-4 h-4 text-brand-primary" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                  </svg>
+                  <span>Todas</span>
+                </button>
+
+                <!-- Laboral -->
+                <button
+                  type="button"
+                  role="radio"
+                  aria-checked="false"
+                  class="flex items-center justify-center gap-2 py-2.5 px-3 rounded-lg border border-brand-border bg-brand-bg/50 hover:bg-brand-surfaceAlt text-brand-textMuted hover:text-white text-sm font-medium transition-all"
+                >
+                  <span class="w-2 h-2 rounded-full bg-purple-400" aria-hidden="true"></span>
+                  <span>Laboral</span>
+                </button>
+
+                <!-- Personal -->
+                <button
+                  type="button"
+                  role="radio"
+                  aria-checked="false"
+                  class="flex items-center justify-center gap-2 py-2.5 px-3 rounded-lg border border-brand-border bg-brand-bg/50 hover:bg-brand-surfaceAlt text-brand-textMuted hover:text-white text-sm font-medium transition-all"
+                >
+                  <span class="w-2 h-2 rounded-full bg-emerald-400" aria-hidden="true"></span>
+                  <span>Personal</span>
+                </button>
+
+              </div>
+            </div>
+
+            <!-- B) Orden de las tareas en cada cuadrante: Más antiguas primero (seleccionada) / Más recientes primero -->
+            <div class="pt-2">
+              <label class="block text-sm font-semibold text-brand-text mb-2.5">
+                Orden de las tareas
+              </label>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3" role="radiogroup" aria-label="Orden de las tareas en cada cuadrante">
+
+                <!-- Más antiguas primero (SELECCIONADA) -->
+                <button
+                  type="button"
+                  role="radio"
+                  aria-checked="true"
+                  class="flex items-center justify-between p-3 rounded-lg border-2 border-brand-borderActive bg-brand-primary/10 text-white font-semibold text-sm transition-all"
+                >
+                  <div class="flex items-center gap-2.5">
+                    <svg class="w-4 h-4 text-brand-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span>Más antiguas primero</span>
+                  </div>
+                  <svg class="w-4 h-4 text-brand-primary shrink-0" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                  </svg>
+                </button>
+
+                <!-- Más recientes primero -->
+                <button
+                  type="button"
+                  role="radio"
+                  aria-checked="false"
+                  class="flex items-center justify-start gap-2.5 p-3 rounded-lg border border-brand-border bg-brand-bg/50 hover:bg-brand-surfaceAlt text-brand-textMuted hover:text-white text-sm font-medium transition-all"
+                >
+                  <svg class="w-4 h-4 text-brand-textMuted" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                  </svg>
+                  <span>Más recientes primero</span>
+                </button>
+
+              </div>
+              <p class="mt-2 text-xs text-brand-textMuted flex items-center gap-1.5">
+                <svg class="w-3.5 h-3.5 text-brand-primary" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+                  <path d="M5 4a2 2 0 012-2h6a2 2 0 012 2v14l-5-2.5L5 18V4z" />
+                </svg>
+                <span>Las tareas fijadas siempre aparecen arriba</span>
+              </p>
+            </div>
+
+            <!-- C) Historial: Últimos 30 días / Últimos 90 días / Todo (seleccionada) -->
+            <div class="pt-2">
+              <label class="block text-sm font-semibold text-brand-text mb-2.5">
+                Historial
+              </label>
+              <div class="grid grid-cols-3 gap-3" role="radiogroup" aria-label="Rango visible de tareas en Historial">
+
+                <!-- Últimos 30 días -->
+                <button
+                  type="button"
+                  role="radio"
+                  aria-checked="false"
+                  class="flex items-center justify-center py-2.5 px-3 rounded-lg border border-brand-border bg-brand-bg/50 hover:bg-brand-surfaceAlt text-brand-textMuted hover:text-white text-sm font-medium transition-all"
+                >
+                  <span>Últimos 30 días</span>
+                </button>
+
+                <!-- Últimos 90 días -->
+                <button
+                  type="button"
+                  role="radio"
+                  aria-checked="false"
+                  class="flex items-center justify-center py-2.5 px-3 rounded-lg border border-brand-border bg-brand-bg/50 hover:bg-brand-surfaceAlt text-brand-textMuted hover:text-white text-sm font-medium transition-all"
+                >
+                  <span>Últimos 90 días</span>
+                </button>
+
+                <!-- Todo (SELECCIONADA) -->
+                <button
+                  type="button"
+                  role="radio"
+                  aria-checked="true"
+                  class="flex items-center justify-center gap-2 py-2.5 px-3 rounded-lg border-2 border-brand-borderActive bg-brand-primary/10 text-white font-semibold text-sm transition-all"
+                >
+                  <svg class="w-4 h-4 text-brand-primary" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                  </svg>
+                  <span>Todo</span>
+                </button>
+
+              </div>
+            </div>
+
+          </div>
+        </section>
+
+        <!-- 3) Tarjeta Restablecer valores por defecto -->
+        <section class="bg-brand-surface rounded-xl border border-brand-border p-5 shadow-md flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4" aria-label="Restablecer configuración">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-lg bg-brand-surfaceAlt flex items-center justify-center text-brand-textMuted shrink-0" aria-hidden="true">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
+            </div>
+            <div>
+              <p class="text-sm font-semibold text-white">¿Deseas restaurar las preferencias estándar?</p>
+              <p class="text-xs text-brand-textMuted">No cambia tu nombre ni tu avatar</p>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            class="px-4 py-2.5 bg-brand-surfaceAlt hover:bg-slate-600 text-brand-text font-medium text-sm rounded-lg border border-brand-border hover:border-slate-400 transition-colors shrink-0 flex items-center justify-center gap-2"
+          >
+            <svg class="w-4 h-4 text-brand-textMuted" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            </svg>
+            Restablecer valores por defecto
+          </button>
+        </section>
+
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Footer accesible -->
+  <footer class="border-t border-brand-border bg-brand-surface/40 mt-12 py-4">
+    <div class="max-w-7xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between text-xs text-brand-textMuted gap-2">
+      <p>© 2025 <strong>MyTasks</strong>. Enfoque estructurado con la matriz de Dwight D. Eisenhower.</p>
+      <div class="flex items-center gap-4">
+        <a href="#privacidad" class="hover:text-brand-text transition-colors">Privacidad</a>
+        <span>·</span>
+        <a href="#terminos" class="hover:text-brand-text transition-colors">Términos</a>
+        <span>·</span>
+        <a href="#ayuda" class="hover:text-brand-text transition-colors">Ayuda</a>
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>

@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+
+<html class="h-full bg-background text-text" lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>S6 Papelera v2 - MyTasks</title>
+<!-- Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Google Fonts: Inter -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS CDN -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Tailwind Configuration verbatim from token specifications -->
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "text-muted": "#475569",
+            "surface-tint": "#2151da",
+            "on-primary-fixed": "#001551",
+            "surface-variant": "#e2e1ed",
+            "surface-bright": "#faf8ff",
+            "secondary": "#006a61",
+            "tertiary": "#7f2500",
+            "surface-container-lowest": "#ffffff",
+            "on-secondary-container": "#006f66",
+            "on-primary-fixed-variant": "#0039b5",
+            "primary-fixed-dim": "#b7c4ff",
+            "scope-personal": "#0D9488",
+            "surface-alt": "#F8FAFC",
+            "inverse-surface": "#2e3039",
+            "scope-work": "#7C3AED",
+            "on-secondary-fixed-variant": "#005049",
+            "tertiary-fixed": "#ffdbcf",
+            "on-tertiary-fixed-variant": "#832700",
+            "delegate": "#B45309",
+            "primary-container": "#1d4ed8",
+            "surface-container": "#ededf9",
+            "on-primary": "#ffffff",
+            "inverse-on-surface": "#f0f0fb",
+            "border": "#CBD5E1",
+            "on-error-container": "#93000a",
+            "surface-container-low": "#f3f2fe",
+            "error": "#B91C1C",
+            "on-background": "#1a1b23",
+            "eliminate": "#475569",
+            "on-tertiary-fixed": "#390c00",
+            "tertiary-container": "#a73400",
+            "on-error": "#ffffff",
+            "outline": "#747686",
+            "on-surface": "#1a1b23",
+            "primary-fixed": "#dce1ff",
+            "secondary-fixed-dim": "#6bd8cb",
+            "on-tertiary-container": "#ffc9b7",
+            "secondary-fixed": "#89f5e7",
+            "on-tertiary": "#ffffff",
+            "on-secondary": "#ffffff",
+            "secondary-container": "#86f2e4",
+            "on-secondary-fixed": "#00201d",
+            "text": "#0F172A",
+            "inverse-primary": "#b7c4ff",
+            "surface-dim": "#d9d9e5",
+            "success": "#15803D",
+            "background": "#faf8ff",
+            "do-now": "#B91C1C",
+            "primary": "#0037b0",
+            "surface-container-high": "#e8e7f3",
+            "on-primary-container": "#cad3ff",
+            "outline-variant": "#c4c5d7",
+            "surface-container-highest": "#e2e1ed",
+            "error-container": "#ffdad6",
+            "surface": "#FFFFFF",
+            "tertiary-fixed-dim": "#ffb59c",
+            "on-surface-variant": "#434655",
+            "schedule": "#1D4ED8"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.125rem",
+            "lg": "0.25rem",
+            "xl": "0.5rem",
+            "full": "0.75rem"
+          },
+          "spacing": {
+            "margin": "24px",
+            "gutter": "24px",
+            "space-xl": "32px",
+            "space-2xl": "48px",
+            "space-sm": "8px",
+            "space-xs": "4px",
+            "space-md": "12px",
+            "space-lg": "16px"
+          },
+          "fontFamily": {
+            "display": ["Inter", "sans-serif"],
+            "heading": ["Inter", "sans-serif"],
+            "caption": ["Inter", "sans-serif"],
+            "body-strong": ["Inter", "sans-serif"],
+            "body": ["Inter", "sans-serif"]
+          },
+          "fontSize": {
+            "display": ["28px", { "lineHeight": "36px", "fontWeight": "700" }],
+            "heading": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+            "caption": ["13px", { "lineHeight": "18px", "fontWeight": "400" }],
+            "body-strong": ["16px", { "lineHeight": "24px", "fontWeight": "600" }],
+            "body": ["16px", { "lineHeight": "24px", "fontWeight": "400" }]
+          }
+        }
+      }
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      display: inline-block;
+      vertical-align: middle;
+      line-height: 1;
+    }
+    .custom-scroll::-webkit-scrollbar {
+      width: 6px;
+    }
+    .custom-scroll::-webkit-scrollbar-thumb {
+      background-color: #CBD5E1;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body class="min-h-full flex flex-col bg-background text-text antialiased font-body text-body">
+<!-- ==================== TOP NAVIGATION BAR ==================== -->
+<!-- Executed using JSON TopNavBar parameters and classes -->
+<header class="flex items-center justify-between px-margin py-space-md w-full border-b border-outline-variant bg-surface-container-low shadow-sm sticky top-0 z-40">
+<div class="flex items-center space-x-8">
+<!-- Brand Logo / Product Name -->
+<a class="flex items-center space-x-2.5 focus:outline-none focus:ring-2 focus:ring-primary rounded-lg py-1 px-1.5 transition-colors" href="#">
+<span aria-hidden="true" class="w-8 h-8 rounded-lg bg-schedule flex items-center justify-center text-on-primary shadow-sm">
+<span class="material-symbols-outlined text-[20px]" data-icon="grid_view">grid_view</span>
+</span>
+<span class="text-heading font-heading font-bold text-schedule tracking-tight">MyTasks</span>
+</a>
+<!-- Primary Horizontal Navigation -->
+<nav aria-label="Navegación principal" class="hidden md:flex items-center space-x-6">
+<!-- Tablero (Inactivo) -->
+<a class="text-on-surface-variant hover:text-on-surface font-body text-body pb-1 transition-colors" href="#">Tablero</a>
+<!-- Historial (Inactivo) -->
+<a class="text-on-surface-variant hover:text-on-surface font-body text-body pb-1 transition-colors" href="#">Historial</a>
+<!-- Papelera (Activo exact match according to active state logic) -->
+<a aria-current="page" class="text-schedule border-b-2 border-schedule font-body-strong text-body-strong pb-1 flex items-center gap-1.5" href="#">
+<span class="material-symbols-outlined text-[18px]" data-icon="delete">delete</span>
+<span>Papelera</span>
+</a>
+</nav>
+</div>
+<!-- Right Trailing Profile & Actions -->
+<div class="flex items-center space-x-4">
+<!-- Profile Action Item -->
+<a aria-label="Perfil de Ana Cruz" class="flex items-center space-x-2.5 py-1 px-2 rounded-lg hover:bg-surface-container-high transition-colors focus:outline-none focus:ring-2 focus:ring-primary" href="#" title="Perfil de Ana Cruz">
+<div aria-hidden="true" class="w-8 h-8 rounded-full bg-schedule text-on-primary flex items-center justify-center text-caption font-body-strong ring-2 ring-white">
+          AC
+        </div>
+<span class="text-body font-body-strong text-on-surface hidden sm:inline">Ana Cruz</span>
+</a>
+<!-- Subtle Vertical Divider -->
+<div aria-hidden="true" class="h-5 w-[1px] bg-outline-variant"></div>
+<!-- Logout Action -->
+<button aria-label="Cerrar sesión en MyTasks" class="flex items-center space-x-1.5 text-on-surface-variant hover:text-error text-body font-body py-1.5 px-2.5 rounded-lg hover:bg-error-container/30 transition-colors focus:outline-none focus:ring-2 focus:ring-error" type="button">
+<span class="material-symbols-outlined text-[20px]" data-icon="logout">logout</span>
+<span class="hidden sm:inline">Cerrar sesión</span>
+</button>
+</div>
+</header>
+<!-- ==================== MAIN CONTENT CANVAS ==================== -->
+<main class="flex-grow max-w-7xl w-full mx-auto px-margin py-space-xl">
+<!-- Page Header: Title, Counter & Clear All Action -->
+<div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-space-lg">
+<div class="flex items-center gap-3">
+<h1 class="text-display font-display text-text">Papelera</h1>
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-caption font-body-strong bg-surface-container-high text-on-surface-variant border border-border">
+          6 tareas en la papelera
+        </span>
+</div>
+<!-- Global Empty Trash Trigger (Simulated with dialog trigger) -->
+<div>
+<button class="inline-flex items-center space-x-2 px-4 py-2 border border-error text-error hover:bg-error hover:text-on-error font-body-strong text-body rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-error focus:ring-offset-2" onclick="openModal('todas las tareas de la papelera')" type="button">
+<span class="material-symbols-outlined text-[20px]" data-icon="delete_forever">delete_forever</span>
+<span>Vaciar papelera</span>
+</button>
+</div>
+</div>
+<!-- Informational Banner (Automatic 30-day purge notice) -->
+<div aria-label="Aviso de retención" class="mb-space-xl bg-surface-container-low border border-border rounded-xl p-space-md flex items-start sm:items-center space-x-3 text-on-surface-variant shadow-sm" role="note">
+<span class="material-symbols-outlined text-schedule text-[22px] flex-shrink-0" data-icon="schedule">schedule</span>
+<p class="text-caption font-body leading-relaxed">
+<strong class="font-body-strong text-on-surface">Política de conservación:</strong> Las tareas se eliminan automáticamente a los 30 días de haber sido enviadas a la papelera. Las tareas borradas permanentemente no se pueden restablecer.
+      </p>
+</div>
+<!-- Toolbar: Search, Filters & Ordering -->
+<div class="bg-surface border border-border rounded-xl p-space-md mb-space-xl shadow-sm flex flex-col lg:flex-row gap-4 items-stretch lg:items-center justify-between">
+<!-- Search Input Field with Accessible Label -->
+<div class="relative flex-1 max-w-md">
+<label class="sr-only" for="trash-search">Buscar tareas en la papelera</label>
+<div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-text-muted">
+<span class="material-symbols-outlined text-[20px]" data-icon="search">search</span>
+</div>
+<input class="w-full pl-10 pr-4 py-2 bg-surface-bright border border-border rounded-lg text-body text-text placeholder-text-muted focus:ring-2 focus:ring-primary focus:border-primary transition-colors text-sm" id="trash-search" placeholder="Buscar en la papelera..." type="search"/>
+</div>
+<!-- Filter Chips & Ordering Selector -->
+<div class="flex flex-wrap items-center gap-3">
+<!-- Scope Filters -->
+<div aria-label="Filtrar por ámbito" class="flex items-center space-x-1 bg-surface-container-low p-1 rounded-lg border border-border" role="group">
+<!-- All Tasks -->
+<button class="px-3 py-1.5 rounded-lg text-caption font-body-strong bg-surface text-primary shadow-sm border border-border/50 focus:outline-none focus:ring-2 focus:ring-primary" type="button">
+            Todas <span class="ml-1 text-text-muted">(6)</span>
+</button>
+<!-- Work Scope Chip -->
+<button class="px-3 py-1.5 rounded-lg text-caption font-body-strong text-scope-work hover:bg-surface-container-high transition-colors focus:outline-none focus:ring-2 focus:ring-scope-work flex items-center gap-1.5" type="button">
+<span aria-hidden="true" class="w-2 h-2 rounded-full bg-scope-work"></span>
+            Laboral <span class="text-text-muted">(4)</span>
+</button>
+<!-- Personal Scope Chip -->
+<button class="px-3 py-1.5 rounded-lg text-caption font-body-strong text-scope-personal hover:bg-surface-container-high transition-colors focus:outline-none focus:ring-2 focus:ring-scope-personal flex items-center gap-1.5" type="button">
+<span aria-hidden="true" class="w-2 h-2 rounded-full bg-scope-personal"></span>
+            Personal <span class="text-text-muted">(2)</span>
+</button>
+</div>
+<div aria-hidden="true" class="h-6 w-[1px] bg-border hidden sm:block"></div>
+<!-- Sort Ordering Dropdown -->
+<div class="flex items-center space-x-2">
+<label class="text-caption font-body-strong text-text-muted whitespace-nowrap" for="sort-select">Ordenar por:</label>
+<div class="relative">
+<select class="bg-surface border border-border text-text text-caption font-body rounded-lg pl-3 pr-8 py-1.5 focus:ring-2 focus:ring-primary focus:border-primary" id="sort-select">
+<option selected="">Tiempo restante</option>
+<option>Más recientes primero</option>
+<option>Nombre (A-Z)</option>
+<option>Ámbito</option>
+</select>
+</div>
+</div>
+</div>
+</div>
+<!-- ==================== TASK LIST CONTAINER ==================== -->
+<div aria-label="Tareas eliminadas" class="space-y-3" role="list">
+<!-- ITEM 1: Revisar presupuesto de mantenimiento doméstico -->
+<div class="bg-surface border border-border rounded-xl p-4 sm:p-5 shadow-sm hover:shadow-md transition-shadow flex flex-col md:flex-row md:items-center justify-between gap-4 border-l-4 border-l-delegate" role="listitem">
+<div class="space-y-2 flex-1">
+<!-- Title & Previous State -->
+<div class="flex flex-wrap items-center gap-2">
+<h2 class="text-body-strong font-body-strong text-text">Revisar presupuesto de mantenimiento doméstico</h2>
+<span class="inline-flex items-center px-2 py-0.5 rounded text-caption font-body bg-surface-container-high text-on-surface-variant border border-outline-variant/60">
+              Activa
+            </span>
+</div>
+<!-- Metadata & Tags -->
+<div class="flex flex-wrap items-center gap-3 text-caption font-body text-text-muted">
+<!-- Scope Badge -->
+<span class="inline-flex items-center gap-1 font-body-strong text-scope-personal bg-teal-50 px-2 py-0.5 rounded border border-scope-personal/20">
+<span aria-hidden="true" class="w-1.5 h-1.5 rounded-full bg-scope-personal"></span>
+              Personal
+            </span>
+<!-- Origin Quadrant -->
+<span class="inline-flex items-center gap-1 text-on-surface-variant">
+<span class="material-symbols-outlined text-[16px] text-delegate" data-icon="alt_route">alt_route</span>
+              Cuadrante III: Delegar
+            </span>
+<!-- Expiration Countdown -->
+<span class="inline-flex items-center gap-1 text-text-muted">
+<span class="material-symbols-outlined text-[16px]" data-icon="hourglass_top">hourglass_top</span>
+              Se eliminará en 27 días
+            </span>
+</div>
+</div>
+<!-- Row Actions -->
+<div class="flex items-center space-x-2.5 pt-2 md:pt-0 border-t md:border-t-0 border-border">
+<button class="inline-flex items-center space-x-1.5 px-3 py-1.5 text-caption font-body-strong text-text border border-border rounded-lg bg-surface hover:bg-surface-container-low focus:ring-2 focus:ring-primary focus:outline-none transition-colors" title="Restaurar tarea al tablero" type="button">
+<span class="material-symbols-outlined text-[18px] text-primary" data-icon="restore_from_trash">restore_from_trash</span>
+<span>Restaurar</span>
+</button>
+<button class="inline-flex items-center space-x-1.5 px-3 py-1.5 text-caption font-body-strong text-error hover:bg-error-container/40 border border-transparent rounded-lg focus:ring-2 focus:ring-error focus:outline-none transition-colors" onclick="openModal('Revisar presupuesto de mantenimiento doméstico')" title="Eliminar de forma irreversible" type="button">
+<span class="material-symbols-outlined text-[18px]" data-icon="delete_forever">delete_forever</span>
+<span>Eliminar definitivamente</span>
+</button>
+</div>
+</div>
+<!-- ITEM 2: Enviar reporte financiero mensual a dirección -->
+<div class="bg-surface border border-border rounded-xl p-4 sm:p-5 shadow-sm hover:shadow-md transition-shadow flex flex-col md:flex-row md:items-center justify-between gap-4 border-l-4 border-l-do-now" role="listitem">
+<div class="space-y-2 flex-1">
+<!-- Title with Line-through & Completed Tag -->
+<div class="flex flex-wrap items-center gap-2">
+<h2 class="text-body-strong font-body-strong text-text line-through opacity-85">Enviar reporte financiero mensual a dirección</h2>
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-caption font-body bg-green-50 text-success border border-success/30 font-body-strong">
+<span class="material-symbols-outlined text-[14px]" data-icon="check_circle">check_circle</span>
+              Completada
+            </span>
+</div>
+<!-- Metadata & Tags -->
+<div class="flex flex-wrap items-center gap-3 text-caption font-body text-text-muted">
+<!-- Scope Badge -->
+<span class="inline-flex items-center gap-1 font-body-strong text-scope-work bg-purple-50 px-2 py-0.5 rounded border border-scope-work/20">
+<span aria-hidden="true" class="w-1.5 h-1.5 rounded-full bg-scope-work"></span>
+              Laboral
+            </span>
+<!-- Origin Quadrant -->
+<span class="inline-flex items-center gap-1 text-on-surface-variant">
+<span class="material-symbols-outlined text-[16px] text-do-now" data-icon="priority_high">priority_high</span>
+              Cuadrante I: Hacer ahora
+            </span>
+<!-- Expiration Countdown -->
+<span class="inline-flex items-center gap-1 text-text-muted">
+<span class="material-symbols-outlined text-[16px]" data-icon="hourglass_top">hourglass_top</span>
+              Se eliminará en 12 días
+            </span>
+</div>
+</div>
+<!-- Row Actions -->
+<div class="flex items-center space-x-2.5 pt-2 md:pt-0 border-t md:border-t-0 border-border">
+<button class="inline-flex items-center space-x-1.5 px-3 py-1.5 text-caption font-body-strong text-text border border-border rounded-lg bg-surface hover:bg-surface-container-low focus:ring-2 focus:ring-primary focus:outline-none transition-colors" type="button">
+<span class="material-symbols-outlined text-[18px] text-primary" data-icon="restore_from_trash">restore_from_trash</span>
+<span>Restaurar</span>
+</button>
+<button class="inline-flex items-center space-x-1.5 px-3 py-1.5 text-caption font-body-strong text-error hover:bg-error-container/40 border border-transparent rounded-lg focus:ring-2 focus:ring-error focus:outline-none transition-colors" onclick="openModal('Enviar reporte financiero mensual a dirección')" type="button">
+<span class="material-symbols-outlined text-[18px]" data-icon="delete_forever">delete_forever</span>
+<span>Eliminar definitivamente</span>
+</button>
+</div>
+</div>
+<!-- ITEM 3: Comprar receta médica en farmacia de turno -->
+<div class="bg-surface border border-border rounded-xl p-4 sm:p-5 shadow-sm hover:shadow-md transition-shadow flex flex-col md:flex-row md:items-center justify-between gap-4 border-l-4 border-l-do-now" role="listitem">
+<div class="space-y-2 flex-1">
+<!-- Title & Active State -->
+<div class="flex flex-wrap items-center gap-2">
+<h2 class="text-body-strong font-body-strong text-text">Comprar receta médica en farmacia de turno</h2>
+<span class="inline-flex items-center px-2 py-0.5 rounded text-caption font-body bg-surface-container-high text-on-surface-variant border border-outline-variant/60">
+              Activa
+            </span>
+</div>
+<!-- Metadata & Tags -->
+<div class="flex flex-wrap items-center gap-3 text-caption font-body text-text-muted">
+<!-- Scope Badge -->
+<span class="inline-flex items-center gap-1 font-body-strong text-scope-personal bg-teal-50 px-2 py-0.5 rounded border border-scope-personal/20">
+<span aria-hidden="true" class="w-1.5 h-1.5 rounded-full bg-scope-personal"></span>
+              Personal
+            </span>
+<!-- Origin Quadrant -->
+<span class="inline-flex items-center gap-1 text-on-surface-variant">
+<span class="material-symbols-outlined text-[16px] text-do-now" data-icon="priority_high">priority_high</span>
+              Cuadrante I: Hacer ahora
+            </span>
+<!-- Urgent Countdown Badge -->
+<span class="inline-flex items-center gap-1 font-body-strong text-error bg-error-container/50 px-2 py-0.5 rounded border border-error/30">
+<span class="material-symbols-outlined text-[16px] text-error" data-icon="warning">warning</span>
+              Se eliminará en 3 días
+            </span>
+</div>
+</div>
+<!-- Row Actions -->
+<div class="flex items-center space-x-2.5 pt-2 md:pt-0 border-t md:border-t-0 border-border">
+<button class="inline-flex items-center space-x-1.5 px-3 py-1.5 text-caption font-body-strong text-text border border-border rounded-lg bg-surface hover:bg-surface-container-low focus:ring-2 focus:ring-primary focus:outline-none transition-colors" type="button">
+<span class="material-symbols-outlined text-[18px] text-primary" data-icon="restore_from_trash">restore_from_trash</span>
+<span>Restaurar</span>
+</button>
+<button class="inline-flex items-center space-x-1.5 px-3 py-1.5 text-caption font-body-strong text-error hover:bg-error-container/40 border border-transparent rounded-lg focus:ring-2 focus:ring-error focus:outline-none transition-colors" onclick="openModal('Comprar receta médica en farmacia de turno')" type="button">
+<span class="material-symbols-outlined text-[18px]" data-icon="delete_forever">delete_forever</span>
+<span>Eliminar definitivamente</span>
+</button>
+</div>
+</div>
+<!-- ITEM 4: Definir arquitectura de microservicios Q3 -->
+<div class="bg-surface border border-border rounded-xl p-4 sm:p-5 shadow-sm hover:shadow-md transition-shadow flex flex-col md:flex-row md:items-center justify-between gap-4 border-l-4 border-l-schedule" role="listitem">
+<div class="space-y-2 flex-1">
+<div class="flex flex-wrap items-center gap-2">
+<h2 class="text-body-strong font-body-strong text-text line-through opacity-85">Definir arquitectura de microservicios Q3</h2>
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-caption font-body bg-green-50 text-success border border-success/30 font-body-strong">
+<span class="material-symbols-outlined text-[14px]" data-icon="check_circle">check_circle</span>
+              Completada
+            </span>
+</div>
+<div class="flex flex-wrap items-center gap-3 text-caption font-body text-text-muted">
+<span class="inline-flex items-center gap-1 font-body-strong text-scope-work bg-purple-50 px-2 py-0.5 rounded border border-scope-work/20">
+<span aria-hidden="true" class="w-1.5 h-1.5 rounded-full bg-scope-work"></span>
+              Laboral
+            </span>
+<span class="inline-flex items-center gap-1 text-on-surface-variant">
+<span class="material-symbols-outlined text-[16px] text-schedule" data-icon="calendar_month">calendar_month</span>
+              Cuadrante II: Planificar
+            </span>
+<span class="inline-flex items-center gap-1 text-text-muted">
+<span class="material-symbols-outlined text-[16px]" data-icon="hourglass_top">hourglass_top</span>
+              Se eliminará en 18 días
+            </span>
+</div>
+</div>
+<div class="flex items-center space-x-2.5 pt-2 md:pt-0 border-t md:border-t-0 border-border">
+<button class="inline-flex items-center space-x-1.5 px-3 py-1.5 text-caption font-body-strong text-text border border-border rounded-lg bg-surface hover:bg-surface-container-low focus:ring-2 focus:ring-primary focus:outline-none transition-colors" type="button">
+<span class="material-symbols-outlined text-[18px] text-primary" data-icon="restore_from_trash">restore_from_trash</span>
+<span>Restaurar</span>
+</button>
+<button class="inline-flex items-center space-x-1.5 px-3 py-1.5 text-caption font-body-strong text-error hover:bg-error-container/40 border border-transparent rounded-lg focus:ring-2 focus:ring-error focus:outline-none transition-colors" onclick="openModal('Definir arquitectura de microservicios Q3')" type="button">
+<span class="material-symbols-outlined text-[18px]" data-icon="delete_forever">delete_forever</span>
+<span>Eliminar definitivamente</span>
+</button>
+</div>
+</div>
+<!-- ITEM 5: Coordinar catering para evento corporativo -->
+<div class="bg-surface border border-border rounded-xl p-4 sm:p-5 shadow-sm hover:shadow-md transition-shadow flex flex-col md:flex-row md:items-center justify-between gap-4 border-l-4 border-l-eliminate" role="listitem">
+<div class="space-y-2 flex-1">
+<div class="flex flex-wrap items-center gap-2">
+<h2 class="text-body-strong font-body-strong text-text">Coordinar catering para evento corporativo</h2>
+<span class="inline-flex items-center px-2 py-0.5 rounded text-caption font-body bg-surface-container-high text-on-surface-variant border border-outline-variant/60">
+              Activa
+            </span>
+</div>
+<div class="flex flex-wrap items-center gap-3 text-caption font-body text-text-muted">
+<span class="inline-flex items-center gap-1 font-body-strong text-scope-work bg-purple-50 px-2 py-0.5 rounded border border-scope-work/20">
+<span aria-hidden="true" class="w-1.5 h-1.5 rounded-full bg-scope-work"></span>
+              Laboral
+            </span>
+<span class="inline-flex items-center gap-1 text-on-surface-variant">
+<span class="material-symbols-outlined text-[16px] text-eliminate" data-icon="cancel">cancel</span>
+              Cuadrante IV: Descartar
+            </span>
+<span class="inline-flex items-center gap-1 text-text-muted">
+<span class="material-symbols-outlined text-[16px]" data-icon="hourglass_top">hourglass_top</span>
+              Se eliminará en 21 días
+            </span>
+</div>
+</div>
+<div class="flex items-center space-x-2.5 pt-2 md:pt-0 border-t md:border-t-0 border-border">
+<button class="inline-flex items-center space-x-1.5 px-3 py-1.5 text-caption font-body-strong text-text border border-border rounded-lg bg-surface hover:bg-surface-container-low focus:ring-2 focus:ring-primary focus:outline-none transition-colors" type="button">
+<span class="material-symbols-outlined text-[18px] text-primary" data-icon="restore_from_trash">restore_from_trash</span>
+<span>Restaurar</span>
+</button>
+<button class="inline-flex items-center space-x-1.5 px-3 py-1.5 text-caption font-body-strong text-error hover:bg-error-container/40 border border-transparent rounded-lg focus:ring-2 focus:ring-error focus:outline-none transition-colors" onclick="openModal('Coordinar catering para evento corporativo')" type="button">
+<span class="material-symbols-outlined text-[18px]" data-icon="delete_forever">delete_forever</span>
+<span>Eliminar definitivamente</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Pagination / Load More Button -->
+<div class="mt-space-xl flex justify-center">
+<button class="inline-flex items-center space-x-2 px-5 py-2.5 bg-surface border border-border hover:bg-surface-container-low text-text font-body-strong text-caption rounded-lg shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-primary" type="button">
+<span>Cargar más tareas</span>
+<span class="material-symbols-outlined text-[18px]" data-icon="expand_more">expand_more</span>
+</button>
+</div>
+</main>
+<!-- ==================== ACCESSIBLE MODAL DIALOG ==================== -->
+<!-- Confirmation dialog for permanent deletion -->
+<div aria-labelledby="modal-title" aria-modal="true" class="fixed inset-0 z-50 hidden" id="delete-modal" role="dialog">
+<!-- Backdrop overlay -->
+<div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity" onclick="closeModal()"></div>
+<div class="fixed inset-0 z-10 overflow-y-auto flex items-center justify-center p-4">
+<div class="relative bg-surface rounded-xl max-w-lg w-full p-6 text-left shadow-2xl border border-border transform transition-all">
+<!-- Icon & Header -->
+<div class="flex items-start space-x-4">
+<div class="flex-shrink-0 w-12 h-12 rounded-full bg-error-container flex items-center justify-center text-error">
+<span class="material-symbols-outlined text-[28px]" data-icon="warning">warning</span>
+</div>
+<div class="space-y-1">
+<h3 class="text-heading font-heading text-text" id="modal-title">
+              ¿Eliminar definitivamente?
+            </h3>
+<p class="text-caption font-body-strong text-primary" id="modal-task-target">
+              Tarea seleccionada
+            </p>
+</div>
+</div>
+<!-- Description -->
+<div class="mt-4 text-body font-body text-text-muted leading-relaxed">
+          Esta acción es <strong class="text-text font-body-strong">irreversible</strong> y no se podrá recuperar. Se eliminarán permanentemente todas las notas, etiquetas y métricas vinculadas a esta tarea.
+        </div>
+<!-- Actions -->
+<div class="mt-6 flex flex-col-reverse sm:flex-row sm:justify-end gap-3">
+<button class="w-full sm:w-auto px-4 py-2 border border-border rounded-lg text-caption font-body-strong text-text bg-surface hover:bg-surface-container-low transition-colors focus:outline-none focus:ring-2 focus:ring-primary" onclick="closeModal()" type="button">
+            Cancelar
+          </button>
+<button class="w-full sm:w-auto px-4 py-2 bg-error hover:bg-red-800 text-on-error rounded-lg text-caption font-body-strong shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-error focus:ring-offset-2 flex items-center justify-center gap-1.5" onclick="confirmDelete()" type="button">
+<span class="material-symbols-outlined text-[18px]" data-icon="delete_forever">delete_forever</span>
+<span>Eliminar de forma permanente</span>
+</button>
+</div>
+<!-- Close 'X' Button -->
+<button aria-label="Cerrar modal" class="absolute top-4 right-4 text-text-muted hover:text-text p-1 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary" onclick="closeModal()" type="button">
+<span class="material-symbols-outlined text-[20px]" data-icon="close">close</span>
+</button>
+</div>
+</div>
+</div>
+<!-- ==================== FOOTER ==================== -->
+<!-- Conforms to JSON Footer definitions with exact casing and styling -->
+<footer class="flex flex-col md:flex-row items-center justify-between px-margin py-space-lg w-full border-t border-outline-variant bg-surface-container-lowest mt-auto">
+<!-- Brand / Legal Info -->
+<div class="mb-4 md:mb-0 text-center md:text-left">
+<p class="text-caption font-caption text-on-surface-variant">
+        © 2024 MyTasks. Todos los derechos reservados.
+      </p>
+<p class="text-[12px] text-text-muted mt-0.5">
+        Enfoque estructurado con la matriz de Dwight D. Eisenhower.
+      </p>
+</div>
+<!-- Institutional Footer Links -->
+<nav aria-label="Enlaces legales y ayuda" class="flex items-center space-x-6">
+<a class="text-on-surface-variant hover:text-on-surface text-caption font-caption transition-colors" href="#">Privacidad</a>
+<a class="text-on-surface-variant hover:text-on-surface text-caption font-caption transition-colors" href="#">Términos</a>
+<a class="text-on-surface-variant hover:text-on-surface text-caption font-caption transition-colors" href="#">Ayuda</a>
+</nav>
+</footer>
+<!-- Light interactive script for modal demo state -->
+<script>
+    function openModal(taskTitle) {
+      const modal = document.getElementById('delete-modal');
+      const targetLabel = document.getElementById('modal-task-target');
+      if (taskTitle) {
+        targetLabel.textContent = `"${taskTitle}"`;
+      }
+      modal.classList.remove('hidden');
+      document.body.classList.add('overflow-hidden');
+    }
+
+    function closeModal() {
+      const modal = document.getElementById('delete-modal');
+      modal.classList.add('hidden');
+      document.body.classList.remove('overflow-hidden');
+    }
+
+    function confirmDelete() {
+      closeModal();
+      // Visual feedback demonstration
+      const banner = document.createElement('div');
+      banner.className = 'fixed bottom-5 right-5 bg-text text-white px-4 py-3 rounded-lg shadow-xl text-caption font-body flex items-center space-x-2 z-50 transition-all';
+      banner.innerHTML = '<span class="material-symbols-outlined text-green-400 text-[18px]">check_circle</span><span>Elemento eliminado permanentemente de la papelera.</span>';
+      document.body.appendChild(banner);
+      setTimeout(() => {
+        banner.remove();
+      }, 3500);
+    }
+
+    // Close on escape key
+    document.addEventListener('keydown', function(event) {
+      if (event.key === "Escape") {
+        closeModal();
+      }
+    });
+  </script>
+</body></html>

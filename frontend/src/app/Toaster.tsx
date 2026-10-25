@@ -12,7 +12,7 @@ function ToastItem({ toast }: { toast: Toast }): JSX.Element {
   }, [toast.id, dismiss])
 
   return (
-    <div className="flex items-center gap-3 rounded-lg bg-text px-4 py-3 text-caption text-white shadow-modal">
+    <div className="flex items-center gap-3 rounded-lg bg-text px-4 py-3 text-caption text-surface shadow-modal">
       <span>{toast.message}</span>
       {toast.actionLabel && (
         <button
@@ -21,7 +21,7 @@ function ToastItem({ toast }: { toast: Toast }): JSX.Element {
             toast.onAction?.()
             dismiss(toast.id)
           }}
-          className="font-semibold underline hover:text-white/80"
+          className="font-semibold underline hover:text-surface/80"
         >
           {toast.actionLabel}
         </button>
@@ -30,7 +30,7 @@ function ToastItem({ toast }: { toast: Toast }): JSX.Element {
         type="button"
         aria-label="Cerrar aviso"
         onClick={() => dismiss(toast.id)}
-        className="rounded p-0.5 hover:bg-white/10"
+        className="rounded p-0.5 hover:bg-surface/10"
       >
         ✕
       </button>

@@ -4,7 +4,7 @@ from typing import Literal
 from fastapi import APIRouter, Depends, Path, Query, Response, status
 
 from mytasks_api.auth import CurrentUser, get_active_user
-from mytasks_api.domain.task import Scope, TaskNotFoundError
+from mytasks_api.domain.task import BoardOrder, HistoryDays, Scope, TaskNotFoundError
 from mytasks_api.schemas.task import ErrorOut, TaskCreate, TaskOut, TaskPage, TaskUpdate
 from mytasks_api.services.task_service import TaskService, get_task_service
 
@@ -39,15 +39,20 @@ async def list_tasks(
     scope: Scope | None = Query(default=None),
     cursor: str | None = Query(default=None, max_length=512),
     limit: int = Query(default=50, ge=1, le=100),
+    # Each one only applies to its own view and is ignored with any other.
+    order: BoardOrder = Query(default=BoardOrder.OLDEST),
+    within_days: HistoryDays | None = Query(default=None),
     current_user: CurrentUser = Depends(get_active_user),
     service: TaskService = Depends(get_task_service),
 ) -> TaskPage:
     if view == "history":
-        tasks, next_cursor = await service.list_history(current_user.uid, cursor, limit)
+        tasks, next_cursor = await service.list_history(
+            current_user.uid, cursor, limit, within_days
+        )
     elif view == "trash":
         tasks, next_cursor = await service.list_trash(current_user.uid, cursor, limit)
     else:
-        tasks, next_cursor = await service.list_board(current_user.uid, scope), None
+        tasks, next_cursor = await service.list_board(current_user.uid, scope, order), None
     return TaskPage(items=[TaskOut.from_task(task) for task in tasks], next_cursor=next_cursor)
 
 

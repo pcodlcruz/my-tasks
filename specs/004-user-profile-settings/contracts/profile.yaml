@@ -1,0 +1,260 @@
+openapi: 3.1.0
+info:
+  title: MyTasks API — perfil y preferencias (feature 004)
+  version: 1.0.0
+  description: >-
+    Añade a `specs/001-eisenhower-task-manager/contracts/openapi.yaml` (v1.2.0) los endpoints del
+    perfil de la persona autenticada y dos parámetros opcionales al listado de tareas. Todos los
+    endpoints exigen `Authorization: Bearer <ID token de Firebase>` y una **cuenta activa**
+    (feature 003): una cuenta revocada o sin acceso recibe el mismo 403 `access_denied` que en el
+    resto de la API. El `uid` sale siempre del token; ningún endpoint acepta el de otra persona.
+    **Ya integrado** en `specs/001-eisenhower-task-manager/contracts/openapi.yaml` (v1.3.0), que es
+    ahora la referencia única y completa; este fichero se conserva solo como registro del diseño de
+    la feature. En la integración se añadieron las respuestas 503 `auth_unavailable` (como en el
+    resto de la API) y el 422 de `GET /api/v1/me/avatar` por un `v` no válido.
+
+paths:
+  /api/v1/me/profile:
+    get:
+      operationId: getProfile
+      summary: Preferencias de la persona (con los valores por defecto aplicados si no hay ninguna)
+      responses:
+        "200":
+          description: Perfil efectivo.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ProfileOut" }
+        "401": { $ref: "#/components/responses/Unauthenticated" }
+        "403": { $ref: "#/components/responses/AccessDenied" }
+    patch:
+      operationId: updateProfile
+      summary: Cambia uno o varios campos; los no enviados no se tocan
+      description: >-
+        Atómico: si algún campo no es válido no se guarda ninguno. `display_name: null` (o una
+        cadena que queda vacía tras recortar espacios) vuelve al nombre de Google. En `avatar`
+        solo se admite `initials` o `preset`; `upload` solo lo fija `PUT /api/v1/me/avatar`.
+        Elegir `initials` o `preset` elimina la imagen subida, si la había.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ProfileUpdateIn" }
+      responses:
+        "200":
+          description: Perfil efectivo tras el cambio.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ProfileOut" }
+        "401": { $ref: "#/components/responses/Unauthenticated" }
+        "403": { $ref: "#/components/responses/AccessDenied" }
+        "422": { $ref: "#/components/responses/ValidationError" }
+    delete:
+      operationId: resetProfile
+      summary: Restablece tema, densidad, ámbito por defecto, orden y periodo del historial
+      description: No cambia el nombre para mostrar ni el avatar.
+      responses:
+        "200":
+          description: Perfil efectivo tras el restablecimiento.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ProfileOut" }
+        "401": { $ref: "#/components/responses/Unauthenticated" }
+        "403": { $ref: "#/components/responses/AccessDenied" }
+
+  /api/v1/me/avatar:
+    get:
+      operationId: getAvatar
+      summary: Imagen de avatar subida por la persona autenticada
+      description: >-
+        Solo existe mientras `avatar.kind = upload`. Se sirve con `X-Content-Type-Options: nosniff`
+        y `Cache-Control: private, max-age=31536000, immutable`; el cliente la pide con
+        `?v=<avatar.version>` para invalidar la caché al cambiarla.
+      parameters:
+        - name: v
+          in: query
+          required: false
+          description: Versión del avatar, solo para la caché del navegador. El servidor la ignora.
+          schema: { type: integer, minimum: 0 }
+      responses:
+        "200":
+          description: Imagen reprocesada (WebP cuadrado de 256×256).
+          content:
+            image/webp:
+              schema: { type: string, format: binary }
+        "401": { $ref: "#/components/responses/Unauthenticated" }
+        "403": { $ref: "#/components/responses/AccessDenied" }
+        "404":
+          description: La persona no tiene imagen subida (`avatar_not_found`).
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorOut" }
+    put:
+      operationId: uploadAvatar
+      summary: Sube o sustituye la imagen de avatar
+      description: >-
+        El cuerpo es la imagen en bruto. Se identifica por su contenido (no por `Content-Type` ni
+        extensión), se rechaza si supera 2 MB o un tope de píxeles, y se reprocesa (orientación
+        EXIF aplicada, metadatos eliminados, recorte cuadrado centrado, 256×256, WebP). La imagen
+        anterior se sustituye. Máximo 10 subidas por hora y persona.
+      requestBody:
+        required: true
+        content:
+          image/jpeg:
+            schema: { type: string, format: binary, maxLength: 2097152 }
+          image/png:
+            schema: { type: string, format: binary, maxLength: 2097152 }
+          image/webp:
+            schema: { type: string, format: binary, maxLength: 2097152 }
+      responses:
+        "200":
+          description: Perfil efectivo con `avatar.kind = upload`.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ProfileOut" }
+        "401": { $ref: "#/components/responses/Unauthenticated" }
+        "403": { $ref: "#/components/responses/AccessDenied" }
+        "413":
+          description: La imagen supera 2 MB (`avatar_too_large`).
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorOut" }
+        "415":
+          description: >-
+            No es JPEG, PNG ni WebP, o está corrupta, o excede el tope de píxeles
+            (`avatar_unsupported`). El avatar anterior no cambia.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorOut" }
+        "429":
+          description: >-
+            Más de 10 subidas en la última hora (`avatar_rate_limited`). La cabecera
+            `Retry-After` indica los segundos restantes.
+          headers:
+            Retry-After:
+              schema: { type: integer, minimum: 1 }
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorOut" }
+    delete:
+      operationId: deleteAvatar
+      summary: Quita el avatar (imagen subida o predefinido) y vuelve a las iniciales
+      description: Idempotente. No cuenta para el límite de subidas.
+      responses:
+        "200":
+          description: Perfil efectivo con `avatar.kind = initials`.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ProfileOut" }
+        "401": { $ref: "#/components/responses/Unauthenticated" }
+        "403": { $ref: "#/components/responses/AccessDenied" }
+
+  /api/v1/tasks:
+    get:
+      operationId: listTasks
+      summary: Parámetros nuevos del listado de tareas (el resto, igual que en 001)
+      parameters:
+        - name: order
+          in: query
+          required: false
+          description: >-
+            Solo con `view=board`. Orden dentro de cada cuadrante; las fijadas van siempre
+            primero. Por defecto `oldest`. Con otra `view` se ignora.
+          schema: { type: string, enum: [oldest, newest], default: oldest }
+        - name: within_days
+          in: query
+          required: false
+          description: >-
+            Solo con `view=history`. Limita el historial a lo completado en los últimos N días.
+            Sin el parámetro, se devuelve todo. Con otra `view` se ignora.
+          schema: { type: integer, enum: [30, 90] }
+      responses:
+        "422": { $ref: "#/components/responses/ValidationError" }
+
+components:
+  schemas:
+    ProfileOut:
+      type: object
+      required: [theme, density, default_scope, board_order, history_days, display_name, avatar]
+      properties:
+        theme: { type: string, enum: [light, dark, system] }
+        density: { type: string, enum: [comfortable, compact] }
+        default_scope: { type: string, enum: [all, work, personal] }
+        board_order: { type: string, enum: [oldest, newest] }
+        history_days:
+          type: [integer, "null"]
+          enum: [30, 90, null]
+          description: "`null` significa todo el historial."
+        display_name:
+          type: [string, "null"]
+          minLength: 1
+          maxLength: 50
+          description: "`null` significa usar el nombre de Google o, en su defecto, el correo."
+        avatar: { $ref: "#/components/schemas/AvatarOut" }
+
+    AvatarOut:
+      type: object
+      required: [kind, preset, version]
+      properties:
+        kind: { type: string, enum: [initials, preset, upload] }
+        preset:
+          type: [string, "null"]
+          pattern: "^avatar-(0[1-9]|1[0-2])$"
+          description: Solo con `kind = preset`.
+        version:
+          type: integer
+          minimum: 0
+          description: Sube con cada cambio de avatar; sirve para invalidar la caché.
+
+    ProfileUpdateIn:
+      type: object
+      additionalProperties: false
+      minProperties: 1
+      properties:
+        theme: { type: string, enum: [light, dark, system] }
+        density: { type: string, enum: [comfortable, compact] }
+        default_scope: { type: string, enum: [all, work, personal] }
+        board_order: { type: string, enum: [oldest, newest] }
+        history_days:
+          type: [integer, "null"]
+          enum: [30, 90, null]
+        display_name:
+          type: [string, "null"]
+          maxLength: 200
+          description: >-
+            Se recorta con `strip` y debe quedar en 1–50 caracteres sin caracteres de control. Si
+            queda vacío o es `null`, vuelve al nombre de Google. (El tope de 200 solo evita
+            cuerpos enormes; el límite efectivo es 50.)
+        avatar:
+          type: object
+          additionalProperties: false
+          required: [kind]
+          properties:
+            kind: { type: string, enum: [initials, preset] }
+            preset:
+              type: string
+              pattern: "^avatar-(0[1-9]|1[0-2])$"
+              description: Obligatorio con `kind = preset`; prohibido con `kind = initials`.
+
+    ErrorOut:
+      type: object
+      required: [code, message]
+      properties:
+        code: { type: string }
+        message: { type: string }
+
+  responses:
+    Unauthenticated:
+      description: Falta el token o no es válido (`unauthenticated`).
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/ErrorOut" }
+    AccessDenied:
+      description: La cuenta no existe, está revocada o no tiene acceso (`access_denied`).
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/ErrorOut" }
+    ValidationError:
+      description: Algún valor no es válido o hay campos desconocidos (`validation_error`). No se guarda nada.
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/ErrorOut" }

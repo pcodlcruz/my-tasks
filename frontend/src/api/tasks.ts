@@ -7,7 +7,15 @@ import {
 } from '@tanstack/react-query'
 import { apiFetch, isStaleTaskError, isUserFacingError } from '../lib/apiClient'
 import { useToastStore } from '../stores/toastStore'
-import type { Scope, Task, TaskCreate, TaskPage, TaskUpdate } from './types'
+import type {
+  BoardOrder,
+  HistoryDays,
+  Scope,
+  Task,
+  TaskCreate,
+  TaskPage,
+  TaskUpdate,
+} from './types'
 import { quadrantFor } from './types'
 
 const TASKS_QUERY_KEY = ['tasks'] as const
@@ -33,17 +41,27 @@ function handleMutationError(queryClient: QueryClient, error: unknown): void {
   void queryClient.invalidateQueries({ queryKey: TASKS_QUERY_KEY })
 }
 
-export function boardQueryKey(scope?: Scope): readonly [string, string, string] {
-  return [...BOARD_QUERY_KEY, scope ?? 'all']
+export function boardQueryKey(
+  scope?: Scope,
+  order: BoardOrder = 'oldest',
+): readonly [string, string, string, string] {
+  return [...BOARD_QUERY_KEY, scope ?? 'all', order]
 }
 
-export function useBoardTasks(scope?: Scope) {
+// `enabled` lets the board wait for the profile (its default scope and order) so it never asks
+// for, and shows, a board with the wrong filter. The default order is not sent: the request is
+// then the same one that was made before the profile existed.
+export function useBoardTasks(scope?: Scope, order: BoardOrder = 'oldest', enabled = true) {
   return useQuery({
-    queryKey: boardQueryKey(scope),
+    queryKey: boardQueryKey(scope, order),
+    enabled,
     queryFn: () => {
       const params = new URLSearchParams({ view: 'board' })
       if (scope) {
         params.set('scope', scope)
+      }
+      if (order !== 'oldest') {
+        params.set('order', order)
       }
       return apiFetch<TaskPage>(`/api/v1/tasks?${params.toString()}`)
     },
@@ -117,14 +135,27 @@ export function useTogglePin() {
   }
 }
 
-function usePagedTasks(view: 'history' | 'trash', queryKey: readonly string[]) {
+interface PagedOptions {
+  withinDays?: HistoryDays
+  enabled?: boolean
+}
+
+function usePagedTasks(
+  view: 'history' | 'trash',
+  queryKey: readonly string[],
+  { withinDays = null, enabled = true }: PagedOptions = {},
+) {
   return useInfiniteQuery({
-    queryKey,
+    queryKey: [...queryKey, withinDays ?? 'all'],
+    enabled,
     initialPageParam: undefined as string | undefined,
     queryFn: ({ pageParam }) => {
       const params = new URLSearchParams({ view, limit: String(PAGE_SIZE) })
       if (pageParam) {
         params.set('cursor', pageParam)
+      }
+      if (withinDays !== null) {
+        params.set('within_days', String(withinDays))
       }
       return apiFetch<TaskPage>(`/api/v1/tasks?${params.toString()}`)
     },
@@ -132,8 +163,8 @@ function usePagedTasks(view: 'history' | 'trash', queryKey: readonly string[]) {
   })
 }
 
-export function useHistory() {
-  return usePagedTasks('history', HISTORY_QUERY_KEY)
+export function useHistory(withinDays: HistoryDays = null, enabled = true) {
+  return usePagedTasks('history', HISTORY_QUERY_KEY, { withinDays, enabled })
 }
 
 export function useTrash() {

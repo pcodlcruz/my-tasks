@@ -101,6 +101,11 @@ expect_file_contains "CSP allows the API origin" "$WORK/security-headers.conf" \
 expect_file_contains "CSP allows the Firebase auth domain frame" "$WORK/security-headers.conf" \
   "frame-src https://mytasks-stg.firebaseapp.com"
 expect_file_contains "CSP forbids framing" "$WORK/security-headers.conf" "frame-ancestors 'none'"
+expect_file_contains "CSP lets images come from blob: URLs (the avatar), besides self and data:" \
+  "$WORK/security-headers.conf" "img-src 'self' data: blob:;"
+expect_file_contains "CSP is exactly the expected policy: only img-src gained blob:" \
+  "$WORK/security-headers.conf" \
+  "add_header Content-Security-Policy \"default-src 'self'; script-src 'self' https://apis.google.com; style-src 'self'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self' https://mytasks-api-123.europe-southwest1.run.app https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://www.googleapis.com; frame-src https://mytasks-stg.firebaseapp.com https://accounts.google.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'\" always;"
 expect_file_contains "headers disable MIME sniffing" "$WORK/security-headers.conf" \
   "X-Content-Type-Options"
 expect_file_contains "headers set a referrer policy" "$WORK/security-headers.conf" "Referrer-Policy"

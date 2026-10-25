@@ -259,7 +259,7 @@ export function TaskForm({ onClose, task }: TaskFormProps): JSX.Element {
             <button
               type="submit"
               disabled={isPending}
-              className="rounded-lg bg-primary px-5 py-2.5 text-sm font-semibold text-white hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-60"
+              className="rounded-lg bg-primary px-5 py-2.5 text-sm font-semibold text-on-primary hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-60"
             >
               Guardar
             </button>

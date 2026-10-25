@@ -21,6 +21,19 @@ conserva sus tareas y las recupera si se la vuelve a invitar). Cómo se designa 
 cada entorno, cómo invitar y cómo recuperar el acceso si se pierde la cuenta está en el
 [runbook](infra/RUNBOOK.md#12-acceso-por-invitación-y-administración-feature-003-t053).
 
+Cada persona tiene una pantalla **Perfil** (`/perfil`) con sus preferencias: tema (claro, oscuro
+o el del sistema), densidad (cómoda o compacta), ámbito por defecto del tablero, orden de las
+tareas dentro de cada cuadrante, periodo del historial (30 días, 90 días o todo), nombre para
+mostrar y avatar (iniciales, uno de 12 predefinidos o una imagen propia que se encuadra al
+subirla). Las preferencias son de cada cuenta y viajan con ella a cualquier dispositivo: viven en
+Firestore, en `users/{uid}/settings/profile`, y las lee y escribe solo la API. El navegador guarda
+además una copia del tema y la densidad en `localStorage` únicamente para pintar la pantalla sin
+parpadeo antes de recibirlas. La imagen subida **no se guarda tal cual**: el servidor la
+reprocesa (WebP cuadrado de 256×256, sin metadatos) y la guarda en `users/{uid}/settings/avatar`;
+solo la ve su dueña. **No hay variables de entorno nuevas ni cambios de infraestructura**: la
+feature añade la dependencia de backend `pillow` y amplía la CSP del contenedor web con `blob:`
+solo en `img-src`.
+
 Se desarrolla con [Spec Kit](https://github.com/github/spec-kit) y agentes de IA. La fuente de
 verdad de las reglas del proyecto es la constitución
 ([`.specify/memory/constitution.md`](.specify/memory/constitution.md)); la primera feature está

@@ -102,3 +102,78 @@ para el botón neutro (tema claro):
 - Móvil (`< 768px`): columna única, orden Hacer ahora · Planificar · Delegar ·
   Eliminar (SC-004).
 - Separación entre cuadrantes: `24px` (escritorio) / `16px` (móvil).
+
+## Tema oscuro (feature 004)
+
+**Fuente**: [specs/004-user-profile-settings/contracts/ui-screens.md](../../specs/004-user-profile-settings/contracts/ui-screens.md).
+Los valores claros de arriba **no cambian**. El tema oscuro es una segunda paleta con los
+mismos nombres semánticos, más dos tokens nuevos (`on-primary` y `on-accent`) que en claro valen
+`#FFFFFF` y por tanto no alteran nada.
+
+**Por qué dos tokens nuevos**: en claro, el botón principal y los acentos de cuadrante son
+oscuros y llevan texto blanco; en oscuro son claros (para destacar sobre el fondo) y necesitan
+texto oscuro. Sin un token propio para ese texto, una clase `text-white` fija daría un contraste
+de 2,5:1.
+
+**Estrategia de contraste**: se sube la luminosidad de los acentos (un paso 400 de la misma
+familia, en lugar del 600/700 del tema claro) y las superficies de cuadrante son tintes oscuros
+del acento, de modo que el texto principal (`#F1F5F9`) y el secundario (`#CBD5E1`) cumplan AA
+sobre cada una. Ningún cuadrante ni ámbito se distingue solo por color.
+
+| Token | Claro | Oscuro | Notas |
+|---|---|---|---|
+| `text` | `#0F172A` | `#F1F5F9` | |
+| `text-muted` | `#475569` | `#CBD5E1` | |
+| `surface` | `#FFFFFF` | `#1E293B` | Tarjetas y modales |
+| `surface-alt` | `#F8FAFC` | `#0F172A` | Fondo de página |
+| `border` | `#CBD5E1` | `#475569` | Decorativo, con la misma relación que en claro |
+| `primary` | `#1D4ED8` | `#60A5FA` | Enlaces, navegación activa, foco y fondo del botón principal |
+| `primary-hover` | `#1E40AF` | `#93C5FD` | |
+| `on-primary` (**nuevo**) | `#FFFFFF` | `#0F172A` | Texto sobre `primary` |
+| `error` | `#B91C1C` | `#F87171` | |
+| `error-surface` | `#FEF2F2` | `#3B1D1D` | |
+| `success` | `#15803D` | `#4ADE80` | |
+| `disabled-bg` | `#E2E8F0` | `#334155` | |
+| `disabled-text` | `#94A3B8` | `#64748B` | Exento de AA |
+| `scope-work` | `#7C3AED` | `#A78BFA` | |
+| `scope-personal` | `#0F766E` | `#2DD4BF` | |
+| `do-now` · acento / superficie | `#B91C1C` / `#FEF2F2` | `#F87171` / `#2E1A1D` | Hacer ahora |
+| `schedule` · acento / superficie | `#1D4ED8` / `#EFF6FF` | `#60A5FA` / `#172237` | Planificar |
+| `delegate` · acento / superficie | `#B45309` / `#FFFBEB` | `#FBBF24` / `#2B2315` | Delegar |
+| `eliminate` · acento / superficie | `#475569` / `#F8FAFC` | `#94A3B8` / `#1C2536` | Eliminar |
+| `on-accent` (**nuevo**) | `#FFFFFF` | `#0F172A` | Texto sobre un acento de cuadrante |
+
+**Verificación**: `python3 docs/design/check-contrast.py` calcula el ratio de 32 pares por tema
+(texto, acentos sobre sus superficies, textos sobre acentos, botón principal, foco) y falla si
+alguno baja de AA (4,5:1 texto; 3:1 texto grande, iconos y foco). Resultado del 2026-10-23: **0
+pares por debajo de AA** en el tema claro (guarda de regresión) y en el oscuro. Los mínimos son:
+`text` 13,35:1 (el más bajo de texto sobre tarjeta), `primary` 5,75:1, `error` 5,29:1.
+
+**Para la implementación (Fase 3)**: las clases de Tailwind que hoy usan colores literales y no
+tokens (`bg-white`, `text-white`, `bg-text`, `border-blue-200`, `border-slate-200`,
+`border-red-200`, `border-amber-200`, `border-purple-200`, `border-teal-200` y `bg-teal-50`)
+**no cambiarían de color en oscuro**. Hay que sustituirlas por tokens (`on-primary`, `on-accent`,
+`surface`, `border`…) al convertir la paleta a variables CSS.
+
+### Tokens añadidos en la implementación (Fase 3, 2026-10-24)
+
+Al pasar la paleta a variables CSS hubo que dar nombre a colores que el código escribía como
+clases literales de Tailwind (`border-red-200`, `bg-purple-50`…). Los valores **claros** son los
+literales de siempre (no cambia ningún píxel); los oscuros son decorativos (bordes y tintes), sin
+requisito de contraste propio, y su texto sigue las parejas ya validadas.
+
+| Token | Claro | Oscuro | Sustituye a |
+|---|---|---|---|
+| `do-now-border` | `#FECACA` | `#5C2B2E` | `border-red-200` |
+| `schedule-border` | `#BFDBFE` | `#2B4A7A` | `border-blue-200` |
+| `delegate-border` | `#FDE68A` | `#6B5420` | `border-amber-200` |
+| `eliminate-border` | `#E2E8F0` | `#3B475C` | `border-slate-200` |
+| `scope-work-surface` / `-border` | `#FAF5FF` / `#E9D5FF` | `#2E2650` / `#4C3D8F` | `bg-purple-50` / `border-purple-200` |
+| `scope-personal-surface` / `-border` | `#F0FDFA` / `#99F6E4` | `#12302E` / `#1F6B63` | `bg-teal-50` / `border-teal-200` |
+| `page` | `#FFFFFF` | `#0F172A` | Fondo del lienzo (era el del navegador) |
+| `ink` | `#000000` | `#F1F5F9` | Tinta base del texto sin clase (era la del navegador) |
+
+El tablero toma su relleno de variables de densidad (`--card-padding`, `--card-gap`,
+`--card-inner-gap`, `--card-footer-gap`, `--quadrant-padding`; cómoda 1 / 0,75 / 0,75 / 0,5 / 1 rem,
+compacta 0,5 / 0,375 / 0,375 / 0,25 / 0,5 rem) y, en compacta, la tarjeta se maqueta en una fila
+(título y acciones, luego ámbito y «Completar»).

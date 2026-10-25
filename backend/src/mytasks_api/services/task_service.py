@@ -5,6 +5,8 @@ from fastapi import Depends
 from mytasks_api.domain.task import (
     MAX_ACTIVE_TASKS,
     ActiveTaskLimitError,
+    BoardOrder,
+    HistoryDays,
     Scope,
     Status,
     Task,
@@ -72,9 +74,11 @@ class TaskService:
             self._log_missing(uid, task_id, "update")
             raise
 
-    async def list_board(self, uid: str, scope: Scope | None = None) -> list[Task]:
+    async def list_board(
+        self, uid: str, scope: Scope | None = None, order: BoardOrder = BoardOrder.OLDEST
+    ) -> list[Task]:
         tasks = await self._repository.list_board(uid, scope)
-        return sort_board(tasks)
+        return sort_board(tasks, order)
 
     async def complete_task(self, uid: str, task_id: str) -> Task:
         return await self._transition(uid, task_id, "complete", complete)
@@ -105,9 +109,9 @@ class TaskService:
         )
 
     async def list_history(
-        self, uid: str, cursor: str | None, limit: int
+        self, uid: str, cursor: str | None, limit: int, within_days: HistoryDays | None = None
     ) -> tuple[list[Task], str | None]:
-        return await self._repository.list_history(uid, cursor, limit)
+        return await self._repository.list_history(uid, cursor, limit, within_days)
 
     async def list_trash(
         self, uid: str, cursor: str | None, limit: int

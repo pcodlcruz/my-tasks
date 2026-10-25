@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>S7 Perfil oscuro - MyTasks (Móvil)</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+          },
+          colors: {
+            brandDarkBg: '#0F172A',
+            brandDarkCard: '#1E293B',
+            brandDarkBorder: '#334155',
+            brandDarkText: '#F1F5F9',
+            brandDarkMuted: '#94A3B8',
+            brandPrimary: '#60A5FA',
+            brandPrimaryHover: '#3B82F6',
+            brandSuccessText: '#34D399',
+            brandSuccessBg: 'rgba(16, 185, 129, 0.12)',
+            brandSuccessBorder: '#059669',
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 20;
+    }
+    .material-symbols-outlined.filled {
+      font-variation-settings: 'FILL' 1;
+    }
+    /* Touch target min 44px */
+    .touch-target {
+      min-height: 44px;
+      min-width: 44px;
+    }
+  </style>
+</head>
+<body class="bg-brandDarkBg text-brandDarkText font-sans antialiased min-h-screen pb-24 selection:bg-brandPrimary selection:text-brandDarkBg">
+
+  <!-- Cabecera Superior Móvil -->
+  <header class="sticky top-0 z-40 bg-[#0F172A]/90 backdrop-blur border-b border-brandDarkBorder px-4 h-14 flex items-center justify-between">
+    <div class="flex items-center gap-2">
+      <div class="w-7 h-7 rounded-lg bg-brandPrimary flex items-center justify-center text-brandDarkBg">
+        <span class="material-symbols-outlined text-[18px] font-bold">grid_view</span>
+      </div>
+      <span class="font-bold text-lg tracking-tight text-white">MyTasks</span>
+    </div>
+
+    <!-- Acciones cabecera: Avatar redondo 32px (sin nombre) + botón compacto Cerrar sesión -->
+    <div class="flex items-center gap-3">
+      <button type="button" aria-label="Ver perfil de usuario Ana Cruz" class="touch-target w-8 h-8 rounded-full bg-blue-600 border border-blue-400 flex items-center justify-center text-white font-semibold text-xs focus:outline-none focus:ring-2 focus:ring-brandPrimary focus:ring-offset-2 focus:ring-offset-brandDarkBg">
+        AC
+      </button>
+      <button type="button" class="touch-target flex items-center gap-1 text-xs font-medium text-brandDarkMuted hover:text-white px-2 py-1 rounded transition-colors focus:outline-none focus:ring-2 focus:ring-brandPrimary focus:ring-offset-2 focus:ring-offset-brandDarkBg">
+        <span class="material-symbols-outlined text-base">logout</span>
+        <span>Cerrar sesión</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Contenedor Principal (Una sola columna) -->
+  <main class="max-w-md mx-auto px-4 pt-5 space-y-5">
+    
+    <!-- Título de pantalla -->
+    <div class="space-y-1">
+      <h1 class="text-2xl font-bold tracking-tight text-white">Perfil</h1>
+      <p class="text-xs text-brandDarkMuted">Gestiona tu identidad, preferencias de visualización y configuración del tablero.</p>
+    </div>
+
+    <!-- Tarjeta 1: Identidad -->
+    <section class="bg-brandDarkCard border border-brandDarkBorder rounded-xl p-4 shadow-sm space-y-4" aria-labelledby="heading-identidad">
+      <div class="flex items-center justify-between border-b border-brandDarkBorder/60 pb-3">
+        <div class="flex items-center gap-2">
+          <span class="material-symbols-outlined text-brandPrimary text-xl">account_circle</span>
+          <h2 id="heading-identidad" class="font-semibold text-base text-white">Identidad</h2>
+        </div>
+      </div>
+
+      <!-- Avatar 96px e interactivos -->
+      <div class="flex flex-col items-center sm:flex-row sm:items-center gap-4 pt-1">
+        <div class="w-24 h-24 rounded-2xl bg-blue-600 border-2 border-blue-400/40 flex items-center justify-center text-white text-3xl font-bold tracking-wide shadow-md flex-shrink-0" aria-label="Avatar actual con iniciales AC">
+          AC
+        </div>
+        <div class="flex flex-col w-full gap-2.5">
+          <button type="button" class="touch-target w-full flex items-center justify-center gap-2 px-3 py-2 bg-slate-800 hover:bg-slate-700 active:bg-slate-900 border border-brandDarkBorder rounded-lg text-sm font-medium text-white transition focus:outline-none focus:ring-2 focus:ring-brandPrimary">
+            <span class="material-symbols-outlined text-base">photo_camera</span>
+            <span>Elegir avatar</span>
+          </button>
+          <button type="button" class="touch-target w-full flex items-center justify-center gap-2 px-3 py-2 text-rose-400 hover:text-rose-300 hover:bg-rose-950/30 active:bg-rose-950/50 rounded-lg text-sm font-medium transition focus:outline-none focus:ring-2 focus:ring-rose-400">
+            <span class="material-symbols-outlined text-base">delete</span>
+            <span>Quitar avatar</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Campo Nombre para mostrar (sin asterisco) -->
+      <div class="space-y-1.5 pt-1">
+        <div class="flex justify-between items-center text-xs">
+          <label for="display-name" class="font-medium text-brandDarkText">Nombre para mostrar</label>
+          <span class="text-brandDarkMuted font-mono" aria-label="8 caracteres de 50 permitidos">8/50</span>
+        </div>
+        <div class="relative">
+          <input 
+            type="text" 
+            id="display-name" 
+            value="Ana Cruz" 
+            class="touch-target w-full bg-[#0F172A] border border-brandDarkBorder rounded-lg px-3.5 py-2.5 text-sm text-white placeholder-brandDarkMuted focus:outline-none focus:ring-2 focus:ring-brandPrimary focus:border-brandPrimary transition"
+            aria-describedby="name-helper"
+          />
+        </div>
+        <p id="name-helper" class="text-xs text-brandDarkMuted leading-relaxed pt-0.5">
+          Si lo dejas en blanco se usará el de tu cuenta de Google: <span class="text-slate-300 font-medium">Ana Cruz López</span>
+        </p>
+      </div>
+
+      <!-- Botones Guardar y Usar el de Google -->
+      <div class="flex flex-col sm:flex-row gap-2.5 pt-1">
+        <button type="button" class="touch-target flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-brandPrimary hover:bg-brandPrimaryHover active:bg-blue-400 text-brandDarkBg font-semibold text-sm rounded-lg shadow-sm transition focus:outline-none focus:ring-2 focus:ring-brandPrimary focus:ring-offset-2 focus:ring-offset-brandDarkCard">
+          <span class="material-symbols-outlined text-base font-bold">check</span>
+          <span>Guardar</span>
+        </button>
+        <button type="button" class="touch-target flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-slate-800 hover:bg-slate-700 active:bg-slate-900 border border-brandDarkBorder text-slate-200 font-medium text-sm rounded-lg transition focus:outline-none focus:ring-2 focus:ring-brandPrimary">
+          <span class="material-symbols-outlined text-base">sync</span>
+          <span>Usar el de Google</span>
+        </button>
+      </div>
+
+      <!-- Correo de solo lectura -->
+      <div class="space-y-1.5 pt-2 border-t border-brandDarkBorder/60">
+        <label for="user-email" class="text-xs font-medium text-brandDarkMuted flex items-center gap-1.5">
+          <span class="material-symbols-outlined text-sm">lock</span>
+          <span>Correo (no editable)</span>
+        </label>
+        <div class="relative">
+          <input 
+            type="email" 
+            id="user-email" 
+            value="ana@example.com" 
+            readonly 
+            class="touch-target w-full bg-[#0F172A]/70 border border-brandDarkBorder/80 rounded-lg px-3.5 py-2.5 text-sm text-slate-400 cursor-not-allowed select-all"
+            aria-readonly="true"
+          />
+          <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-brandDarkMuted">
+            <span class="material-symbols-outlined text-base">mail</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Tarjeta 2: Apariencia -->
+    <section class="bg-brandDarkCard border border-brandDarkBorder rounded-xl p-4 shadow-sm space-y-4" aria-labelledby="heading-apariencia">
+      <div class="flex items-center justify-between border-b border-brandDarkBorder/60 pb-3">
+        <div class="flex items-center gap-2">
+          <span class="material-symbols-outlined text-brandPrimary text-xl">palette</span>
+          <h2 id="heading-apariencia" class="font-semibold text-base text-white">Apariencia</h2>
+        </div>
+        <!-- Aviso verde "Guardado" con check -->
+        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold text-brandSuccessText bg-brandSuccessBg border border-brandSuccessBorder/50">
+          <span class="material-symbols-outlined text-[15px] font-bold">check_circle</span>
+          <span>Guardado</span>
+        </span>
+      </div>
+
+      <!-- Selector: Tema (Claro / Oscuro / Sistema) -->
+      <fieldset class="space-y-2">
+        <legend class="text-xs font-semibold text-slate-300">Tema</legend>
+        <div class="grid grid-cols-3 gap-2" role="radiogroup" aria-label="Opciones de tema visual">
+          <!-- Claro -->
+          <label class="touch-target relative flex flex-col items-center justify-center p-2.5 rounded-lg border border-brandDarkBorder bg-[#0F172A] text-brandDarkMuted hover:border-slate-500 cursor-pointer transition focus-within:ring-2 focus-within:ring-brandPrimary">
+            <input type="radio" name="theme-option" value="claro" class="sr-only">
+            <span class="material-symbols-outlined text-xl mb-1">light_mode</span>
+            <span class="text-xs font-medium">Claro</span>
+          </label>
+
+          <!-- Oscuro (Seleccionado: borde, fondo e icono de check) -->
+          <label class="touch-target relative flex flex-col items-center justify-center p-2.5 rounded-lg border-2 border-brandPrimary bg-blue-950/40 text-white cursor-pointer shadow-sm focus-within:ring-2 focus-within:ring-brandPrimary">
+            <input type="radio" name="theme-option" value="oscuro" checked class="sr-only">
+            <span class="absolute top-1.5 right-1.5 text-brandPrimary">
+              <span class="material-symbols-outlined text-sm font-bold">check_circle</span>
+            </span>
+            <span class="material-symbols-outlined text-xl text-brandPrimary mb-1">dark_mode</span>
+            <span class="text-xs font-semibold text-brandPrimary">Oscuro</span>
+          </label>
+
+          <!-- Sistema -->
+          <label class="touch-target relative flex flex-col items-center justify-center p-2.5 rounded-lg border border-brandDarkBorder bg-[#0F172A] text-brandDarkMuted hover:border-slate-500 cursor-pointer transition focus-within:ring-2 focus-within:ring-brandPrimary">
+            <input type="radio" name="theme-option" value="sistema" class="sr-only">
+            <span class="material-symbols-outlined text-xl mb-1">devices</span>
+            <span class="text-xs font-medium">Sistema</span>
+          </label>
+        </div>
+      </fieldset>
+
+      <!-- Selector: Densidad (Cómoda / Compacta) -->
+      <fieldset class="space-y-2 pt-2 border-t border-brandDarkBorder/60">
+        <legend class="text-xs font-semibold text-slate-300">Densidad</legend>
+        <div class="grid grid-cols-2 gap-2" role="radiogroup" aria-label="Opciones de densidad">
+          <!-- Cómoda (Seleccionada: borde, fondo e icono de check) -->
+          <label class="touch-target relative flex items-center gap-3 p-3 rounded-lg border-2 border-brandPrimary bg-blue-950/40 text-white cursor-pointer shadow-sm focus-within:ring-2 focus-within:ring-brandPrimary">
+            <input type="radio" name="density-option" value="comoda" checked class="sr-only">
+            <span class="material-symbols-outlined text-brandPrimary text-xl">view_agenda</span>
+            <div class="flex-1 min-w-0">
+              <p class="text-xs font-semibold text-brandPrimary">Cómoda</p>
+              <p class="text-[11px] text-slate-400 truncate">Espaciado amplio</p>
+            </div>
+            <span class="material-symbols-outlined text-sm font-bold text-brandPrimary">check_circle</span>
+          </label>
+
+          <!-- Compacta -->
+          <label class="touch-target relative flex items-center gap-3 p-3 rounded-lg border border-brandDarkBorder bg-[#0F172A] text-brandDarkMuted hover:border-slate-500 cursor-pointer transition focus-within:ring-2 focus-within:ring-brandPrimary">
+            <input type="radio" name="density-option" value="compacta" class="sr-only">
+            <span class="material-symbols-outlined text-xl">density_medium</span>
+            <div class="flex-1 min-w-0">
+              <p class="text-xs font-medium text-slate-300">Compacta</p>
+              <p class="text-[11px] text-slate-500 truncate">Más densidad</p>
+            </div>
+          </label>
+        </div>
+      </fieldset>
+    </section>
+
+    <!-- Tarjeta 3: Tablero e historial -->
+    <section class="bg-brandDarkCard border border-brandDarkBorder rounded-xl p-4 shadow-sm space-y-4" aria-labelledby="heading-tablero-historial">
+      <div class="flex items-center justify-between border-b border-brandDarkBorder/60 pb-3">
+        <div class="flex items-center gap-2">
+          <span class="material-symbols-outlined text-brandPrimary text-xl">tune</span>
+          <h2 id="heading-tablero-historial" class="font-semibold text-base text-white">Tablero e historial</h2>
+        </div>
+      </div>
+
+      <!-- Tablero por defecto (Todas / Laboral / Personal) -->
+      <fieldset class="space-y-2">
+        <legend class="text-xs font-semibold text-slate-300">Tablero por defecto</legend>
+        <div class="grid grid-cols-3 gap-2" role="radiogroup" aria-label="Tablero por defecto">
+          <!-- Todas (Seleccionada) -->
+          <label class="touch-target relative flex items-center justify-center gap-1.5 p-2.5 rounded-lg border-2 border-brandPrimary bg-blue-950/40 text-brandPrimary cursor-pointer shadow-sm focus-within:ring-2 focus-within:ring-brandPrimary">
+            <input type="radio" name="board-filter" value="todas" checked class="sr-only">
+            <span class="material-symbols-outlined text-sm font-bold">check</span>
+            <span class="text-xs font-semibold">Todas</span>
+          </label>
+
+          <!-- Laboral -->
+          <label class="touch-target relative flex items-center justify-center gap-1.5 p-2.5 rounded-lg border border-brandDarkBorder bg-[#0F172A] text-brandDarkMuted hover:border-slate-500 cursor-pointer transition focus-within:ring-2 focus-within:ring-brandPrimary">
+            <input type="radio" name="board-filter" value="laboral" class="sr-only">
+            <span class="w-2 h-2 rounded-full bg-purple-400"></span>
+            <span class="text-xs font-medium text-slate-300">Laboral</span>
+          </label>
+
+          <!-- Personal -->
+          <label class="touch-target relative flex items-center justify-center gap-1.5 p-2.5 rounded-lg border border-brandDarkBorder bg-[#0F172A] text-brandDarkMuted hover:border-slate-500 cursor-pointer transition focus-within:ring-2 focus-within:ring-brandPrimary">
+            <input type="radio" name="board-filter" value="personal" class="sr-only">
+            <span class="w-2 h-2 rounded-full bg-teal-400"></span>
+            <span class="text-xs font-medium text-slate-300">Personal</span>
+          </label>
+        </div>
+      </fieldset>
+
+      <!-- Orden de las tareas (Más antiguas primero / Más recientes primero) -->
+      <fieldset class="space-y-2 pt-2 border-t border-brandDarkBorder/60">
+        <legend class="text-xs font-semibold text-slate-300">Orden de las tareas</legend>
+        <div class="grid grid-cols-1 gap-2" role="radiogroup" aria-label="Criterio de orden de tareas">
+          <!-- Más antiguas primero (Seleccionada) -->
+          <label class="touch-target relative flex items-center justify-between p-3 rounded-lg border-2 border-brandPrimary bg-blue-950/40 text-white cursor-pointer shadow-sm focus-within:ring-2 focus-within:ring-brandPrimary">
+            <input type="radio" name="sort-order" value="oldest" checked class="sr-only">
+            <div class="flex items-center gap-2.5">
+              <span class="material-symbols-outlined text-brandPrimary text-lg">history</span>
+              <span class="text-xs font-semibold text-brandPrimary">Más antiguas primero</span>
+            </div>
+            <span class="material-symbols-outlined text-sm font-bold text-brandPrimary">check_circle</span>
+          </label>
+
+          <!-- Más recientes primero -->
+          <label class="touch-target relative flex items-center justify-between p-3 rounded-lg border border-brandDarkBorder bg-[#0F172A] text-brandDarkMuted hover:border-slate-500 cursor-pointer transition focus-within:ring-2 focus-within:ring-brandPrimary">
+            <input type="radio" name="sort-order" value="newest" class="sr-only">
+            <div class="flex items-center gap-2.5">
+              <span class="material-symbols-outlined text-lg">schedule</span>
+              <span class="text-xs font-medium text-slate-300">Más recientes primero</span>
+            </div>
+          </label>
+        </div>
+        <p class="text-xs text-brandDarkMuted flex items-center gap-1 pt-1">
+          <span class="material-symbols-outlined text-sm text-brandPrimary">push_pin</span>
+          <span>Las tareas fijadas siempre aparecen arriba</span>
+        </p>
+      </fieldset>
+
+      <!-- Historial (Últimos 30 días / Últimos 90 días / Todo) -->
+      <fieldset class="space-y-2 pt-2 border-t border-brandDarkBorder/60">
+        <legend class="text-xs font-semibold text-slate-300">Historial</legend>
+        <div class="grid grid-cols-3 gap-2" role="radiogroup" aria-label="Rango temporal del historial">
+          <!-- Últimos 30 días -->
+          <label class="touch-target relative flex items-center justify-center p-2.5 rounded-lg border border-brandDarkBorder bg-[#0F172A] text-brandDarkMuted hover:border-slate-500 cursor-pointer transition focus-within:ring-2 focus-within:ring-brandPrimary">
+            <input type="radio" name="history-range" value="30d" class="sr-only">
+            <span class="text-xs font-medium text-slate-300 text-center">Últimos 30 días</span>
+          </label>
+
+          <!-- Últimos 90 días -->
+          <label class="touch-target relative flex items-center justify-center p-2.5 rounded-lg border border-brandDarkBorder bg-[#0F172A] text-brandDarkMuted hover:border-slate-500 cursor-pointer transition focus-within:ring-2 focus-within:ring-brandPrimary">
+            <input type="radio" name="history-range" value="90d" class="sr-only">
+            <span class="text-xs font-medium text-slate-300 text-center">Últimos 90 días</span>
+          </label>
+
+          <!-- Todo (Seleccionada) -->
+          <label class="touch-target relative flex items-center justify-center gap-1.5 p-2.5 rounded-lg border-2 border-brandPrimary bg-blue-950/40 text-brandPrimary cursor-pointer shadow-sm focus-within:ring-2 focus-within:ring-brandPrimary">
+            <input type="radio" name="history-range" value="all" checked class="sr-only">
+            <span class="material-symbols-outlined text-sm font-bold">check</span>
+            <span class="text-xs font-semibold">Todo</span>
+          </label>
+        </div>
+      </fieldset>
+    </section>
+
+    <!-- 4) Botón secundario Restablecer valores por defecto -->
+    <div class="pt-1 pb-4 text-center space-y-2">
+      <button type="button" class="touch-target w-full flex items-center justify-center gap-2 px-4 py-3 bg-slate-800/80 hover:bg-slate-800 active:bg-slate-900 border border-brandDarkBorder rounded-xl text-sm font-medium text-slate-200 transition focus:outline-none focus:ring-2 focus:ring-brandPrimary">
+        <span class="material-symbols-outlined text-base text-slate-400">restart_alt</span>
+        <span>Restablecer valores por defecto</span>
+      </button>
+      <p class="text-xs text-brandDarkMuted">
+        No cambia tu nombre ni tu avatar
+      </p>
+    </div>
+
+  </main>
+
+  <!-- Navegación Inferior Móvil: Tablero · Historial · Papelera (3 items según instrucción) -->
+  <nav aria-label="Navegación principal" class="fixed bottom-0 left-0 right-0 z-50 bg-[#0F172A]/95 backdrop-blur border-t border-brandDarkBorder px-6 py-1.5 flex justify-around items-center h-16">
+    <!-- Tablero -->
+    <a href="#" class="touch-target flex flex-col items-center justify-center text-brandDarkMuted hover:text-white transition-colors focus:outline-none focus:ring-2 focus:ring-brandPrimary rounded-lg px-2">
+      <span class="material-symbols-outlined text-2xl">grid_view</span>
+      <span class="text-[11px] font-medium tracking-tight mt-0.5">Tablero</span>
+    </a>
+
+    <!-- Historial -->
+    <a href="#" class="touch-target flex flex-col items-center justify-center text-brandDarkMuted hover:text-white transition-colors focus:outline-none focus:ring-2 focus:ring-brandPrimary rounded-lg px-2">
+      <span class="material-symbols-outlined text-2xl">history</span>
+      <span class="text-[11px] font-medium tracking-tight mt-0.5">Historial</span>
+    </a>
+
+    <!-- Papelera -->
+    <a href="#" class="touch-target flex flex-col items-center justify-center text-brandDarkMuted hover:text-white transition-colors focus:outline-none focus:ring-2 focus:ring-brandPrimary rounded-lg px-2">
+      <span class="material-symbols-outlined text-2xl">delete</span>
+      <span class="text-[11px] font-medium tracking-tight mt-0.5">Papelera</span>
+    </a>
+  </nav>
+
+</body>
+</html>

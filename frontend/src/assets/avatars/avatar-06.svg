@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+<title>Pingüino</title>
+<circle cx="32" cy="34" r="20" fill="#1E293B"/>
+<ellipse cx="32" cy="37" rx="13" ry="15" fill="#FFFFFF"/>
+<circle cx="26" cy="27" r="2.5" fill="#0F172A"/>
+<circle cx="38" cy="27" r="2.5" fill="#0F172A"/>
+<polygon points="32,30 27,36 37,36" fill="#F59E0B"/>
+</svg>

@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>S5 Historial oscuro - MyTasks</title>
+<!-- Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Google Fonts: Inter -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "on-primary-fixed": "#001c39",
+            "surface-container": "#152031",
+            "on-primary-fixed-variant": "#004883",
+            "surface-container-lowest": "#040e1f",
+            "tertiary-fixed": "#e8ddff",
+            "on-tertiary-fixed-variant": "#4f319c",
+            "on-surface": "#d8e3fb",
+            "inverse-primary": "#0060ac",
+            "on-tertiary-fixed": "#21005e",
+            "surface-container-low": "#111c2d",
+            "on-error-container": "#ffdad6",
+            "inverse-on-surface": "#263143",
+            "error-container": "#93000a",
+            "tertiary-container": "#ad91ff",
+            "on-secondary-fixed": "#00201c",
+            "on-background": "#d8e3fb",
+            "tertiary": "#cebdff",
+            "surface-dim": "#081425",
+            "inverse-surface": "#d8e3fb",
+            "primary-container": "#60a5fa",
+            "on-tertiary-container": "#40208d",
+            "on-secondary-container": "#004d44",
+            "surface": "#081425",
+            "surface-bright": "#2f3a4c",
+            "error": "#ffb4ab",
+            "primary": "#a4c9ff",
+            "tertiary-fixed-dim": "#cebdff",
+            "surface-container-highest": "#2a3548",
+            "on-error": "#690005",
+            "secondary-fixed": "#62fae3",
+            "primary-fixed-dim": "#a4c9ff",
+            "outline-variant": "#414751",
+            "on-tertiary": "#381385",
+            "primary-fixed": "#d4e3ff",
+            "secondary": "#44e2cd",
+            "secondary-fixed-dim": "#3cddc7",
+            "background": "#081425",
+            "surface-tint": "#a4c9ff",
+            "secondary-container": "#03c6b2",
+            "on-primary": "#00315d",
+            "on-secondary-fixed-variant": "#005047",
+            "on-surface-variant": "#c1c7d3",
+            "on-primary-container": "#003a6b",
+            "surface-variant": "#2a3548",
+            "surface-container-high": "#1f2a3c",
+            "outline": "#8b919d",
+            "on-secondary": "#003731"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.125rem",
+            "lg": "0.25rem",
+            "xl": "0.5rem",
+            "full": "0.75rem"
+          },
+          "spacing": {
+            "space-xs": "0.25rem",
+            "margin": "1.5rem",
+            "space-sm": "0.5rem",
+            "space-md": "0.75rem",
+            "space-2xl": "3rem",
+            "space-xl": "2rem",
+            "space-lg": "1rem",
+            "gutter": "1.5rem"
+          },
+          "fontFamily": {
+            "caption": ["Inter", "sans-serif"],
+            "display": ["Inter", "sans-serif"],
+            "body-strong": ["Inter", "sans-serif"],
+            "body": ["Inter", "sans-serif"],
+            "heading": ["Inter", "sans-serif"]
+          },
+          "fontSize": {
+            "caption": ["13px", { "lineHeight": "18px", "fontWeight": "400" }],
+            "display": ["28px", { "lineHeight": "36px", "fontWeight": "700" }],
+            "body-strong": ["16px", { "lineHeight": "24px", "fontWeight": "600" }],
+            "body": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+            "heading": ["20px", { "lineHeight": "28px", "fontWeight": "600" }]
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-[#0F172A] text-[#F1F5F9] font-body text-body min-h-screen flex flex-col antialiased selection:bg-[#60A5FA] selection:text-[#0F172A]">
+<!-- TopNavBar (Shared Component from JSON) -->
+<header class="flex items-center justify-between px-margin py-space-md w-full border-b border-outline-variant bg-surface-container-low shadow-sm sticky top-0 z-50">
+<div class="flex items-center gap-space-xl">
+<!-- Brand Logo -->
+<a class="flex items-center gap-space-sm group" href="#">
+<div class="w-8 h-8 rounded bg-[#60A5FA]/15 flex items-center justify-center text-[#60A5FA]">
+<span class="material-symbols-outlined text-[20px]" data-icon="task_alt">task_alt</span>
+</div>
+<span class="text-heading font-heading font-bold text-primary tracking-tight">MyTasks</span>
+</a>
+<!-- Navigation Links -->
+<nav aria-label="Navegación principal" class="hidden md:flex items-center gap-space-lg">
+<a class="text-on-surface-variant hover:text-on-surface font-body text-body pb-1 transition-colors" href="#">Tablero</a>
+<!-- Active link: Historial -->
+<a aria-current="page" class="text-primary border-b-2 border-primary font-body-strong text-body-strong pb-1" href="#">Historial</a>
+<a class="text-on-surface-variant hover:text-on-surface font-body text-body pb-1 transition-colors" href="#">Papelera</a>
+</nav>
+</div>
+<!-- Trailing Actions: Perfil & Cerrar sesión -->
+<div class="flex items-center gap-space-md">
+<!-- Profile Action -->
+<a aria-label="Perfil de Ana Cruz" class="flex items-center gap-space-sm py-1 px-2 rounded hover:bg-surface-container-high transition-colors text-on-surface" href="#">
+<div aria-hidden="true" class="w-8 h-8 rounded-full bg-[#60A5FA] text-[#0F172A] font-body-strong text-caption flex items-center justify-center font-bold shadow-sm">
+          AC
+        </div>
+<span class="hidden sm:inline font-body-strong text-caption text-[#F1F5F9]">Ana Cruz</span>
+</a>
+<div aria-hidden="true" class="h-4 w-px bg-outline-variant"></div>
+<!-- Sign out Action -->
+<button class="flex items-center gap-space-xs text-on-surface-variant hover:text-primary transition-colors py-1 px-2 rounded text-caption font-caption" title="Cerrar sesión">
+<span class="material-symbols-outlined text-[18px]" data-icon="logout">logout</span>
+<span class="hidden sm:inline">Cerrar sesión</span>
+</button>
+</div>
+</header>
+<!-- Main Canvas Container -->
+<main class="flex-1 w-full max-w-7xl mx-auto px-margin py-space-xl flex flex-col gap-space-xl">
+<!-- Page Header Section -->
+<section class="flex flex-col md:flex-row md:items-center justify-between gap-space-lg">
+<div class="flex flex-col gap-space-xs">
+<div class="flex items-center gap-space-md flex-wrap">
+<h1 class="text-display font-display tracking-tight text-[#F1F5F9]">Historial</h1>
+<div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#1E293B] border border-outline-variant text-caption font-caption text-slate-300">
+<span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+<span>24 tareas completadas</span>
+</div>
+</div>
+<p class="text-caption font-caption text-[#94A3B8]">
+          Registro cronológico de tareas finalizadas organizadas con su cuadrante y ámbito de origen.
+        </p>
+</div>
+<!-- Export Action -->
+<div class="flex items-center gap-space-sm self-start md:self-auto">
+<button class="inline-flex items-center gap-space-xs px-3 py-2 rounded bg-transparent border border-outline-variant text-[#F1F5F9] hover:bg-surface-container-high hover:border-outline transition-colors text-caption font-body-strong" type="button">
+<span class="material-symbols-outlined text-[18px] text-[#60A5FA]" data-icon="download">download</span>
+<span>Exportar CSV</span>
+</button>
+</div>
+</section>
+<!-- Range Info Banner -->
+<section class="rounded-lg bg-[#1E293B]/60 border border-outline-variant/70 p-space-md flex flex-col sm:flex-row sm:items-center justify-between gap-space-sm shadow-sm">
+<div class="flex items-center gap-space-sm text-caption text-[#94A3B8]">
+<span class="material-symbols-outlined text-[#60A5FA] text-[20px]" data-icon="schedule">schedule</span>
+<span>Mostrando solo los últimos 30 días</span>
+</div>
+<button class="text-caption font-body-strong text-[#60A5FA] hover:underline self-start sm:self-auto transition-all" type="button">
+        Ver todo
+      </button>
+</section>
+<!-- Filters & Search Toolbar -->
+<section class="flex flex-col lg:flex-row lg:items-center justify-between gap-space-md bg-[#1E293B] p-space-md rounded-lg border border-outline-variant shadow-sm">
+<!-- Search input -->
+<div class="relative flex-1 max-w-md">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-[20px] pointer-events-none" data-icon="search">search</span>
+<input class="w-full pl-10 pr-4 py-2 bg-[#0F172A] border border-outline-variant rounded text-caption text-[#F1F5F9] placeholder-[#94A3B8] focus:outline-none focus:ring-2 focus:ring-[#60A5FA] focus:border-transparent transition-all" placeholder="Buscar en el historial de tareas..." type="text"/>
+</div>
+<!-- Pills & Sort -->
+<div class="flex flex-wrap items-center justify-between lg:justify-end gap-space-md">
+<!-- Scope Pills -->
+<div class="inline-flex items-center p-1 rounded bg-[#0F172A] border border-outline-variant gap-1">
+<button class="px-3 py-1 rounded bg-[#60A5FA] text-[#0F172A] font-body-strong text-caption shadow-sm transition-all" type="button">
+            Todas (24)
+          </button>
+<button class="inline-flex items-center gap-1.5 px-3 py-1 rounded text-[#94A3B8] hover:text-[#F1F5F9] hover:bg-surface-container-high transition-colors text-caption font-caption" type="button">
+<span class="w-2 h-2 rounded-full bg-[#A78BFA]"></span>
+<span>Laboral (16)</span>
+</button>
+<button class="inline-flex items-center gap-1.5 px-3 py-1 rounded text-[#94A3B8] hover:text-[#F1F5F9] hover:bg-surface-container-high transition-colors text-caption font-caption" type="button">
+<span class="w-2 h-2 rounded-full bg-[#2DD4BF]"></span>
+<span>Personal (8)</span>
+</button>
+</div>
+<!-- Sort Select -->
+<div class="flex items-center gap-2">
+<label class="sr-only" for="sort-select">Ordenar por</label>
+<div class="relative">
+<select class="appearance-none bg-[#0F172A] border border-outline-variant rounded pl-3 pr-8 py-1.5 text-caption text-[#F1F5F9] focus:outline-none focus:ring-2 focus:ring-[#60A5FA] cursor-pointer" id="sort-select">
+<option selected="">Ordenar por: Más recientes primero</option>
+<option>Ordenar por: Más antiguas primero</option>
+<option>Ordenar por: Cuadrante de urgencia</option>
+</select>
+<span class="material-symbols-outlined absolute right-2 top-1/2 -translate-y-1/2 text-outline pointer-events-none text-[18px]" data-icon="expand_more">expand_more</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Chronological History List -->
+<div class="space-y-space-xl">
+<!-- Group 1: Hoy, 28 de marzo -->
+<section aria-labelledby="heading-today" class="space-y-space-md">
+<div class="flex items-center gap-space-sm pb-1 border-b border-outline-variant/60">
+<span class="material-symbols-outlined text-[#60A5FA] text-[18px]" data-icon="calendar_today">calendar_today</span>
+<h2 class="text-caption font-body-strong uppercase tracking-wider text-slate-300" id="heading-today">
+            Hoy, 28 de marzo
+          </h2>
+<span class="text-caption text-outline font-caption">(2 tareas)</span>
+</div>
+<div class="space-y-space-sm">
+<!-- Task Item 1 -->
+<article class="group flex flex-col md:flex-row md:items-center justify-between gap-space-md p-space-md bg-[#1E293B] border border-outline-variant border-l-4 border-l-[#F87171] rounded shadow-sm hover:border-slate-500 transition-all">
+<div class="flex items-start gap-space-md flex-1 min-w-0">
+<div aria-label="Tarea completada" class="mt-0.5 w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-[16px] font-bold" data-icon="check">check</span>
+</div>
+<div class="flex flex-col gap-1 min-w-0">
+<p class="font-body text-[#F1F5F9] line-through decoration-slate-500/80 decoration-1 text-slate-300 truncate">
+                  Enviar reporte financiero mensual a dirección
+                </p>
+<div class="flex flex-wrap items-center gap-space-xs text-caption">
+<!-- Eisenhower Badge Q1 -->
+<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[12px] font-medium bg-[#F87171]/15 text-[#F87171] border border-[#F87171]/30">
+                    Hacer ahora
+                  </span>
+<!-- Scope Badge Laboral -->
+<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[12px] font-medium bg-[#A78BFA]/15 text-[#A78BFA] border border-[#A78BFA]/30">
+                    Laboral
+                  </span>
+<span class="text-outline mx-1">•</span>
+<span class="text-[#94A3B8] font-caption">Completada hoy, 10:42</span>
+</div>
+</div>
+</div>
+<!-- Actions -->
+<div class="flex items-center gap-space-xs shrink-0 self-end md:self-center">
+<button class="inline-flex items-center gap-1 px-2.5 py-1 rounded text-caption text-[#94A3B8] hover:text-[#60A5FA] hover:bg-surface-container-high transition-colors" title="Reabrir tarea" type="button">
+<span class="material-symbols-outlined text-[18px]" data-icon="replay">replay</span>
+<span class="hidden sm:inline">Reabrir</span>
+</button>
+<button class="inline-flex items-center gap-1 px-2.5 py-1 rounded text-caption text-[#94A3B8] hover:text-[#F87171] hover:bg-surface-container-high transition-colors" title="Mover a la papelera" type="button">
+<span class="material-symbols-outlined text-[18px]" data-icon="delete">delete</span>
+<span class="hidden sm:inline">Mover a la papelera</span>
+</button>
+</div>
+</article>
+<!-- Task Item 2 -->
+<article class="group flex flex-col md:flex-row md:items-center justify-between gap-space-md p-space-md bg-[#1E293B] border border-outline-variant border-l-4 border-l-[#F87171] rounded shadow-sm hover:border-slate-500 transition-all">
+<div class="flex items-start gap-space-md flex-1 min-w-0">
+<div aria-label="Tarea completada" class="mt-0.5 w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-[16px] font-bold" data-icon="check">check</span>
+</div>
+<div class="flex flex-col gap-1 min-w-0">
+<p class="font-body text-[#F1F5F9] line-through decoration-slate-500/80 decoration-1 text-slate-300 truncate">
+                  Revisar y pagar factura de servicios del hogar
+                </p>
+<div class="flex flex-wrap items-center gap-space-xs text-caption">
+<!-- Eisenhower Badge Q1 -->
+<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[12px] font-medium bg-[#F87171]/15 text-[#F87171] border border-[#F87171]/30">
+                    Hacer ahora
+                  </span>
+<!-- Scope Badge Personal -->
+<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[12px] font-medium bg-[#2DD4BF]/15 text-[#2DD4BF] border border-[#2DD4BF]/30">
+                    Personal
+                  </span>
+<span class="text-outline mx-1">•</span>
+<span class="text-[#94A3B8] font-caption">Completada hoy, 08:30</span>
+</div>
+</div>
+</div>
+<!-- Actions -->
+<div class="flex items-center gap-space-xs shrink-0 self-end md:self-center">
+<button class="inline-flex items-center gap-1 px-2.5 py-1 rounded text-caption text-[#94A3B8] hover:text-[#60A5FA] hover:bg-surface-container-high transition-colors" title="Reabrir tarea" type="button">
+<span class="material-symbols-outlined text-[18px]" data-icon="replay">replay</span>
+<span class="hidden sm:inline">Reabrir</span>
+</button>
+<button class="inline-flex items-center gap-1 px-2.5 py-1 rounded text-caption text-[#94A3B8] hover:text-[#F87171] hover:bg-surface-container-high transition-colors" title="Mover a la papelera" type="button">
+<span class="material-symbols-outlined text-[18px]" data-icon="delete">delete</span>
+<span class="hidden sm:inline">Mover a la papelera</span>
+</button>
+</div>
+</article>
+</div>
+</section>
+<!-- Group 2: Ayer, 27 de marzo -->
+<section aria-labelledby="heading-yesterday" class="space-y-space-md">
+<div class="flex items-center gap-space-sm pb-1 border-b border-outline-variant/60">
+<span class="material-symbols-outlined text-[#60A5FA] text-[18px]" data-icon="history">history</span>
+<h2 class="text-caption font-body-strong uppercase tracking-wider text-slate-300" id="heading-yesterday">
+            Ayer, 27 de marzo
+          </h2>
+<span class="text-caption text-outline font-caption">(2 tareas)</span>
+</div>
+<div class="space-y-space-sm">
+<!-- Task Item 3 -->
+<article class="group flex flex-col md:flex-row md:items-center justify-between gap-space-md p-space-md bg-[#1E293B] border border-outline-variant border-l-4 border-l-[#60A5FA] rounded shadow-sm hover:border-slate-500 transition-all">
+<div class="flex items-start gap-space-md flex-1 min-w-0">
+<div aria-label="Tarea completada" class="mt-0.5 w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-[16px] font-bold" data-icon="check">check</span>
+</div>
+<div class="flex flex-col gap-1 min-w-0">
+<p class="font-body text-[#F1F5F9] line-through decoration-slate-500/80 decoration-1 text-slate-300 truncate">
+                  Sesión de entrenamiento de fuerza y cardio
+                </p>
+<div class="flex flex-wrap items-center gap-space-xs text-caption">
+<!-- Eisenhower Badge Q2 -->
+<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[12px] font-medium bg-[#60A5FA]/15 text-[#60A5FA] border border-[#60A5FA]/30">
+                    Planificar
+                  </span>
+<!-- Scope Badge Personal -->
+<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[12px] font-medium bg-[#2DD4BF]/15 text-[#2DD4BF] border border-[#2DD4BF]/30">
+                    Personal
+                  </span>
+<span class="text-outline mx-1">•</span>
+<span class="text-[#94A3B8] font-caption">Completada ayer, 09:15</span>
+</div>
+</div>
+</div>
+<!-- Actions -->
+<div class="flex items-center gap-space-xs shrink-0 self-end md:self-center">
+<button class="inline-flex items-center gap-1 px-2.5 py-1 rounded text-caption text-[#94A3B8] hover:text-[#60A5FA] hover:bg-surface-container-high transition-colors" title="Reabrir tarea" type="button">
+<span class="material-symbols-outlined text-[18px]" data-icon="replay">replay</span>
+<span class="hidden sm:inline">Reabrir</span>
+</button>
+<button class="inline-flex items-center gap-1 px-2.5 py-1 rounded text-caption text-[#94A3B8] hover:text-[#F87171] hover:bg-surface-container-high transition-colors" title="Mover a la papelera" type="button">
+<span class="material-symbols-outlined text-[18px]" data-icon="delete">delete</span>
+<span class="hidden sm:inline">Mover a la papelera</span>
+</button>
+</div>
+</article>
+<!-- Task Item 4 -->
+<article class="group flex flex-col md:flex-row md:items-center justify-between gap-space-md p-space-md bg-[#1E293B] border border-outline-variant border-l-4 border-l-[#60A5FA] rounded shadow-sm hover:border-slate-500 transition-all">
+<div class="flex items-start gap-space-md flex-1 min-w-0">
+<div aria-label="Tarea completada" class="mt-0.5 w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-[16px] font-bold" data-icon="check">check</span>
+</div>
+<div class="flex flex-col gap-1 min-w-0">
+<p class="font-body text-[#F1F5F9] line-through decoration-slate-500/80 decoration-1 text-slate-300 truncate">
+                  Actualizar documentación del sprint y dependencias
+                </p>
+<div class="flex flex-wrap items-center gap-space-xs text-caption">
+<!-- Eisenhower Badge Q2 -->
+<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[12px] font-medium bg-[#60A5FA]/15 text-[#60A5FA] border border-[#60A5FA]/30">
+                    Planificar
+                  </span>
+<!-- Scope Badge Laboral -->
+<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[12px] font-medium bg-[#A78BFA]/15 text-[#A78BFA] border border-[#A78BFA]/30">
+                    Laboral
+                  </span>
+<span class="text-outline mx-1">•</span>
+<span class="text-[#94A3B8] font-caption">Completada ayer, 17:40</span>
+</div>
+</div>
+</div>
+<!-- Actions -->
+<div class="flex items-center gap-space-xs shrink-0 self-end md:self-center">
+<button class="inline-flex items-center gap-1 px-2.5 py-1 rounded text-caption text-[#94A3B8] hover:text-[#60A5FA] hover:bg-surface-container-high transition-colors" title="Reabrir tarea" type="button">
+<span class="material-symbols-outlined text-[18px]" data-icon="replay">replay</span>
+<span class="hidden sm:inline">Reabrir</span>
+</button>
+<button class="inline-flex items-center gap-1 px-2.5 py-1 rounded text-caption text-[#94A3B8] hover:text-[#F87171] hover:bg-surface-container-high transition-colors" title="Mover a la papelera" type="button">
+<span class="material-symbols-outlined text-[18px]" data-icon="delete">delete</span>
+<span class="hidden sm:inline">Mover a la papelera</span>
+</button>
+</div>
+</article>
+</div>
+</section>
+<!-- Group 3: Esta semana -->
+<section aria-labelledby="heading-this-week" class="space-y-space-md">
+<div class="flex items-center gap-space-sm pb-1 border-b border-outline-variant/60">
+<span class="material-symbols-outlined text-[#60A5FA] text-[18px]" data-icon="date_range">date_range</span>
+<h2 class="text-caption font-body-strong uppercase tracking-wider text-slate-300" id="heading-this-week">
+            Esta semana
+          </h2>
+<span class="text-caption text-outline font-caption">(2 tareas)</span>
+</div>
+<div class="space-y-space-sm">
+<!-- Task Item 5 -->
+<article class="group flex flex-col md:flex-row md:items-center justify-between gap-space-md p-space-md bg-[#1E293B] border border-outline-variant border-l-4 border-l-[#FBBF24] rounded shadow-sm hover:border-slate-500 transition-all">
+<div class="flex items-start gap-space-md flex-1 min-w-0">
+<div aria-label="Tarea completada" class="mt-0.5 w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-[16px] font-bold" data-icon="check">check</span>
+</div>
+<div class="flex flex-col gap-1 min-w-0">
+<p class="font-body text-[#F1F5F9] line-through decoration-slate-500/80 decoration-1 text-slate-300 truncate">
+                  Coordinar logística y catering para evento de innovación
+                </p>
+<div class="flex flex-wrap items-center gap-space-xs text-caption">
+<!-- Eisenhower Badge Q3 -->
+<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[12px] font-medium bg-[#FBBF24]/15 text-[#FBBF24] border border-[#FBBF24]/30">
+                    Delegar
+                  </span>
+<!-- Scope Badge Laboral -->
+<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[12px] font-medium bg-[#A78BFA]/15 text-[#A78BFA] border border-[#A78BFA]/30">
+                    Laboral
+                  </span>
+<span class="text-outline mx-1">•</span>
+<span class="text-[#94A3B8] font-caption">Completada lun 24, 16:45</span>
+</div>
+</div>
+</div>
+<!-- Actions -->
+<div class="flex items-center gap-space-xs shrink-0 self-end md:self-center">
+<button class="inline-flex items-center gap-1 px-2.5 py-1 rounded text-caption text-[#94A3B8] hover:text-[#60A5FA] hover:bg-surface-container-high transition-colors" title="Reabrir tarea" type="button">
+<span class="material-symbols-outlined text-[18px]" data-icon="replay">replay</span>
+<span class="hidden sm:inline">Reabrir</span>
+</button>
+<button class="inline-flex items-center gap-1 px-2.5 py-1 rounded text-caption text-[#94A3B8] hover:text-[#F87171] hover:bg-surface-container-high transition-colors" title="Mover a la papelera" type="button">
+<span class="material-symbols-outlined text-[18px]" data-icon="delete">delete</span>
+<span class="hidden sm:inline">Mover a la papelera</span>
+</button>
+</div>
+</article>
+<!-- Task Item 6 -->
+<article class="group flex flex-col md:flex-row md:items-center justify-between gap-space-md p-space-md bg-[#1E293B] border border-outline-variant border-l-4 border-l-[#94A3B8] rounded shadow-sm hover:border-slate-500 transition-all">
+<div class="flex items-start gap-space-md flex-1 min-w-0">
+<div aria-label="Tarea completada" class="mt-0.5 w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-[16px] font-bold" data-icon="check">check</span>
+</div>
+<div class="flex flex-col gap-1 min-w-0">
+<p class="font-body text-[#F1F5F9] line-through decoration-slate-500/80 decoration-1 text-slate-300 truncate">
+                  Dar de baja suscripción de prueba no utilizada
+                </p>
+<div class="flex flex-wrap items-center gap-space-xs text-caption">
+<!-- Eisenhower Badge Q4 -->
+<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[12px] font-medium bg-[#94A3B8]/15 text-[#94A3B8] border border-[#94A3B8]/30">
+                    Eliminar
+                  </span>
+<!-- Scope Badge Personal -->
+<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[12px] font-medium bg-[#2DD4BF]/15 text-[#2DD4BF] border border-[#2DD4BF]/30">
+                    Personal
+                  </span>
+<span class="text-outline mx-1">•</span>
+<span class="text-[#94A3B8] font-caption">Completada lun 24, 11:20</span>
+</div>
+</div>
+</div>
+<!-- Actions -->
+<div class="flex items-center gap-space-xs shrink-0 self-end md:self-center">
+<button class="inline-flex items-center gap-1 px-2.5 py-1 rounded text-caption text-[#94A3B8] hover:text-[#60A5FA] hover:bg-surface-container-high transition-colors" title="Reabrir tarea" type="button">
+<span class="material-symbols-outlined text-[18px]" data-icon="replay">replay</span>
+<span class="hidden sm:inline">Reabrir</span>
+</button>
+<button class="inline-flex items-center gap-1 px-2.5 py-1 rounded text-caption text-[#94A3B8] hover:text-[#F87171] hover:bg-surface-container-high transition-colors" title="Mover a la papelera" type="button">
+<span class="material-symbols-outlined text-[18px]" data-icon="delete">delete</span>
+<span class="hidden sm:inline">Mover a la papelera</span>
+</button>
+</div>
+</article>
+</div>
+</section>
+</div>
+<!-- Pagination / Load more -->
+<div class="flex flex-col items-center justify-center gap-space-xs pt-space-md pb-space-lg">
+<button class="inline-flex items-center gap-space-xs px-5 py-2.5 rounded bg-[#1E293B] border border-outline-variant text-[#F1F5F9] hover:bg-surface-container-high hover:border-outline font-body-strong text-caption transition-all shadow-sm" type="button">
+<span>Cargar más tareas</span>
+<span class="material-symbols-outlined text-[18px] text-[#60A5FA]" data-icon="expand_more">expand_more</span>
+</button>
+<p class="text-caption font-caption text-[#94A3B8]">
+        Mostrando 6 de 24 tareas completadas
+      </p>
+</div>
+</main>
+<!-- Footer (Shared Component from JSON) -->
+<footer class="flex flex-col md:flex-row items-center justify-between px-margin py-space-lg w-full border-t border-outline-variant bg-surface-container-lowest mt-auto text-caption font-caption">
+<div class="flex items-center gap-space-xs mb-space-sm md:mb-0">
+<span class="text-on-surface">© 2024 MyTasks. Todos los derechos reservados.</span>
+<span class="hidden lg:inline text-outline mx-1">•</span>
+<span class="hidden lg:inline text-[#94A3B8]">Enfoque estructurado con la matriz de Dwight D. Eisenhower</span>
+</div>
+<div class="flex items-center gap-space-lg text-caption font-caption">
+<a class="text-on-surface-variant hover:text-on-surface hover:text-primary transition-colors" href="#">Privacidad</a>
+<a class="text-on-surface-variant hover:text-on-surface hover:text-primary transition-colors" href="#">Términos</a>
+<a class="text-on-surface-variant hover:text-on-surface hover:text-primary transition-colors" href="#">Ayuda</a>
+</div>
+</footer>
+</body></html>

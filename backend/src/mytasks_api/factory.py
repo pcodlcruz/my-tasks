@@ -19,6 +19,8 @@ from mytasks_api.domain.account import (
     InvitationNotFoundError,
     PendingInvitationLimitError,
 )
+from mytasks_api.domain.avatar_image import AvatarTooLargeError, AvatarUnsupportedError
+from mytasks_api.domain.profile import AvatarNotFoundError, AvatarRateLimitedError
 from mytasks_api.domain.task import (
     MAX_ACTIVE_TASKS,
     ActiveTaskLimitError,
@@ -31,12 +33,14 @@ from mytasks_api.readiness import ReadinessProbe
 from mytasks_api.repositories.task_repository import get_firestore_client
 from mytasks_api.routers.admin import router as admin_router
 from mytasks_api.routers.me import router as me_router
+from mytasks_api.routers.profile import avatar_router
+from mytasks_api.routers.profile import router as profile_router
 from mytasks_api.routers.tasks import router as tasks_router
 from mytasks_api.schemas.task import ErrorOut, ReadinessOut
 from mytasks_api.services.access_service import MAX_PENDING_INVITATIONS
 
 # The API only uses these methods and headers (contract in openapi.yaml).
-ALLOWED_METHODS = ["GET", "POST", "PATCH", "DELETE"]
+ALLOWED_METHODS = ["GET", "POST", "PATCH", "PUT", "DELETE"]
 ALLOWED_HEADERS = ["Authorization", "Content-Type"]
 
 SECURITY_HEADERS = {
@@ -94,10 +98,16 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             request_id_var.reset(token)
         response.headers["X-Request-ID"] = request_id
         for header, value in SECURITY_HEADERS.items():
+            # A response that sets its own caching (the avatar image) keeps it; everything else
+            # is `no-store`.
+            if header == "Cache-Control" and header in response.headers:
+                continue
             response.headers[header] = value
         return response
 
     app.include_router(me_router)
+    app.include_router(profile_router)
+    app.include_router(avatar_router)
     app.include_router(admin_router)
     app.include_router(tasks_router)
 
@@ -219,5 +229,35 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             ),
         )
         return _error_response(status.HTTP_409_CONFLICT, error)
+
+    @app.exception_handler(AvatarTooLargeError)
+    async def avatar_too_large_handler(_: Request, __: AvatarTooLargeError) -> JSONResponse:
+        error = ErrorOut(code="avatar_too_large", message="La imagen supera los 2 MB.")
+        return _error_response(status.HTTP_413_CONTENT_TOO_LARGE, error)
+
+    @app.exception_handler(AvatarUnsupportedError)
+    async def avatar_unsupported_handler(_: Request, __: AvatarUnsupportedError) -> JSONResponse:
+        error = ErrorOut(
+            code="avatar_unsupported",
+            message="La imagen no es válida. Usa un archivo JPEG, PNG o WebP.",
+        )
+        return _error_response(status.HTTP_415_UNSUPPORTED_MEDIA_TYPE, error)
+
+    @app.exception_handler(AvatarRateLimitedError)
+    async def avatar_rate_limited_handler(_: Request, exc: AvatarRateLimitedError) -> JSONResponse:
+        error = ErrorOut(
+            code="avatar_rate_limited",
+            message=(
+                "Has subido demasiadas imágenes. Espera unos minutos antes de volver a intentarlo."
+            ),
+        )
+        response = _error_response(status.HTTP_429_TOO_MANY_REQUESTS, error)
+        response.headers["Retry-After"] = str(exc.retry_after_seconds)
+        return response
+
+    @app.exception_handler(AvatarNotFoundError)
+    async def avatar_not_found_handler(_: Request, __: AvatarNotFoundError) -> JSONResponse:
+        error = ErrorOut(code="avatar_not_found", message="No hay una imagen de avatar subida.")
+        return _error_response(status.HTTP_404_NOT_FOUND, error)
 
     return app
