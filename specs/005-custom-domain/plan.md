@@ -21,9 +21,9 @@ Enfoque (detalle y alternativas en [research.md](./research.md)):
    servicio y validado antes de crear los de producción (FR-020).
 3. **DNS en Cloud DNS** (decisión del propietario, R16): una zona pública por entorno, `inserttask.es`
    en producción y `staging.inserttask.es` en staging, con los registros de Hosting (`TXT` y `A`, nunca
-   `AAAA`) declarados en Terraform. El propietario solo delega: `NS` de `staging` en el registrador
-   durante el ensayo y, en la release, cambio de los servidores de nombres del dominio a los de la zona
-   de producción.
+   `AAAA`) declarados en Terraform. El propietario solo cambia, en la release, los servidores de nombres
+   del dominio a los de la zona de producción, que también delega `staging` (el registrador no admite
+   un `NS` de subdominio).
 4. **Autorizar el origen nuevo**: dominio autorizado de Identity Platform, *referrer* de la clave de API
    web y lista de orígenes CORS de la API. `authDomain` no cambia (el login usa *popup* contra
    `firebaseapp.com`).
@@ -109,7 +109,7 @@ confirmar; no bloquea.
 El diseño no introdujo nada nuevo respecto a lo anterior. El riesgo principal de la spec (región) se
 resolvió con la documentación oficial. Puntos a vigilar: los recursos beta (R4), con el procedimiento de
 mitigación descrito, y que Hosting acepte a la vez la propiedad del apex (producción) y del subdominio
-(staging) en dos proyectos (R7), que el ensayo de staging comprueba antes de producción.
+(staging) en dos proyectos (R7), que el ensayo de staging comprueba justo después de crear los dominios de producción, antes de servir tráfico.
 
 **Revisión tras `/speckit-analyze`**: el propietario resolvió el hallazgo C1 (el recurso de dominio no
 pasaba por staging) añadiendo el subdominio de ensayo `staging.inserttask.es`. El Principio IV queda
@@ -190,14 +190,14 @@ Las fases 1 y 2 pueden ir en paralelo salvo por la dependencia indicada.
 | **2. Pipeline y CORS** | `CORS_ORIGINS` compuesto, comprobaciones previa/posterior y pruebas de scripts | `mytasks-iac-developer` (justificar) | — (puede ir con la 1) | Escenarios 5–8 de staging |
 | **3. Dominios propios (`staging.inserttask.es`, `inserttask.es`, `www`)** | Dominios personalizados en ambos entornos con `wait_dns_verification = false`, salidas de estado y DNS, `prevent_destroy`, RUNBOOK §14, README | `mytasks-iac-developer` | Fase 1 fusionada | `plan` de staging y de producción revisados |
 | **4. Cloud DNS y dominio `.es`** | API y permisos de Cloud DNS (propietario); sustituir `staging.inserttask.com` por `staging.inserttask.es`; zona y registros de Hosting por entorno; variable con los `NS` de la delegación de `staging` en producción; renombrar el dominio en código, pruebas y variables | Propietario + `mytasks-iac-developer` | Fase 3 fusionada | `plan` de staging y de producción revisados; zona de staging con sus `NS` legibles |
-| **5. Revisión de seguridad y cierre** | Informe del auditor, Definition of Done, validación en staging (escenarios 1–9) y **ensayo del dominio de staging (E1–E6)** | `mytasks-security-auditor`, `mytasks-project-manager` | Fases 1–4 | Informe sin críticos ni altos; `staging.inserttask.es` con certificado activo |
-| **6. Release y puesta en servicio** | Release a producción por el flujo habitual (solo con el ensayo de staging validado); `apply` aprobado; el propietario cambia los servidores de nombres del dominio; escenarios 10–19 | Propietario + pipeline | Fase 5 | `validacion-produccion.md` |
+| **5. Revisión de seguridad y cierre** | Informe del auditor, Definition of Done, validación en staging (escenarios 1–9) y relleno de los `NS` de `staging` en producción (T074) | `mytasks-security-auditor`, `mytasks-project-manager` | Fases 1–4 | Informe sin críticos ni altos; `NS` de `staging` en el código de producción |
+| **6. Release y puesta en servicio** | Release a producción por el flujo habitual; `apply` aprobado; el propietario cambia los servidores de nombres del dominio; **ensayo del dominio de staging (E1–E6)** y escenarios 10–19 | Propietario + pipeline | Fase 5 | `validacion-produccion.md` |
 
 **Camino de despliegue**: las fases 1–4 viajan en una misma release. Primero se aplican en **staging**
 (al fusionar en `develop`): Terraform crea la zona de `staging.inserttask.es` y sus registros, el
-propietario delega `staging` desde el registrador con los servidores de nombres de las salidas y se
-valida el ensayo. Solo entonces se crea la release; tras el `apply` de producción (zona `inserttask.es`
-con los `NS` de `staging`), la web ya responde en `pdlco-mytasks.web.app` y el propietario cambia los
+los servidores de nombres de esa zona se pasan como variable al root de producción (T074). Se crea la
+release; tras el `apply` de producción (zona `inserttask.es` con los `NS` de `staging`), la web ya
+responde en `pdlco-mytasks.web.app` y el propietario cambia los
 servidores de nombres del dominio a su ritmo, dentro de los 30 días de la propiedad (R16).
 
 ## Fichas de implementación
@@ -301,9 +301,9 @@ huérfana, `AAAA` residuales, alcance de `mytasksDnsAdmin`).
 | El *popup* de inicio de sesión funciona desde un origen servido por Hosting | Escenario 4 |
 | Tarifa propia de los *rewrites* de Hosting a Cloud Run | Factura de staging tras una semana |
 | Propiedad DNS en menos de 30 días | Guía y recordatorio del propietario |
-| Hosting acepta la propiedad del apex (producción) y del subdominio `staging` (staging) en dos proyectos distintos | Ensayo E3 del quickstart, antes de la release |
+| Hosting acepta la propiedad del apex (producción) y del subdominio `staging` (staging) en dos proyectos distintos | Ensayo E3 del quickstart, tras el cambio de servidores de nombres y antes de servir tráfico |
 | Registros `CAA` o parking del registrador que impidan el certificado | Guía de DNS (R7) y tabla de diagnóstico (R12) |
 | Otros registros del dominio en el registrador (correo, por ejemplo) que se perderían al cambiar los servidores de nombres | El propietario lo confirma antes del cambio (FR-023) |
 | Coste real de Cloud DNS | Página de precios y factura de staging (R16, SC-010) |
-| El registrador permite añadir un `NS` de `staging` mientras dure el ensayo | El propietario lo confirma antes de la Fase 4; si no, el ensayo tendría que esperar a la zona de producción |
+| El registrador no admite un `NS` de subdominio (confirmado por el propietario el 2026-10-26) | El ensayo de `staging` se hace tras el `apply` de producción y el cambio de servidores de nombres (R16) |
 | Los permisos de Cloud DNS de lectura del plan | Primer `plan` real (como pasó con Hosting) |

@@ -194,8 +194,8 @@ puede conceder otro proyecto sobre un subdominio añadiendo registros `TXT` espe
 
 El `A` de `staging` apunta a Hosting igual que el del apex. **A verificar en el ensayo de
 staging**: que Hosting acepta a la vez la propiedad del apex para producción y la del subdominio para
-staging sin conflicto (`OWNERSHIP_CONFLICT`/`MISMATCH`). Si no la aceptara, el ensayo lo revela antes de
-producción y se revisa el diseño con el propietario (la alternativa sería un dominio de ensayo distinto).
+staging sin conflicto (`OWNERSHIP_CONFLICT`/`MISMATCH`). Si no la aceptara, el ensayo lo revela antes de servir
+tráfico en producción: se retira el dominio afectado y se revisa el diseño con el propietario (la alternativa sería un dominio de ensayo distinto).
 
 ## R8 — Inicio de sesión: solo hay que autorizar el dominio
 
@@ -251,8 +251,7 @@ emisión del certificado se ensayan en staging **antes** de producción, que era
 primera versión del diseño (hallazgo C1 de `/speckit-analyze`). La prueba `test_env_roots_parity.py` se
 amplía para que solo puedan diferir el dimensionado, los identificadores y los valores de esa lista.
 
-**Orden**: el `apply` de staging ocurre al fusionar en `develop`, el propietario delega `staging` desde
-el registrador (`NS` hacia la zona de Cloud DNS) y se valida; solo entonces se crea la release a producción (FR-020, SC-009).
+**Orden** (enmendado el 2026-10-26, R16): el `apply` de staging ocurre al fusionar en `develop`; el registrador no admite un `NS` de subdominio, así que `staging` se delega desde la zona de producción y el ensayo se valida tras el `apply` de producción y el cambio de servidores de nombres, antes de dar por buena la validación de `inserttask.es` (FR-020, SC-009).
 Staging mantiene también `<proyecto>.web.app`, que sigue funcionando.
 
 ## R11 — Permisos de Terraform (los concede el propietario)
@@ -344,15 +343,20 @@ fuente de verdad (el problema de la tabla vacía tras el alta deja de existir). 
 **Delegación y orden** (la zona hija tiene que existir antes de delegarla; la delegación va en un `NS`
 de la zona padre con los servidores de nombres que Cloud DNS asigna a la zona hija):
 
-1. El ensayo ocurre **antes** de que exista nada en producción (FR-020) y producción solo se aplica
-   con la release. Por eso, durante el ensayo, la delegación `staging → zona de staging` la hace el
-   propietario **en el registrador** (registro `NS` de `staging`), con los servidores de nombres que
-   leerá de las salidas de staging. El resto del dominio sigue donde está.
+1. **Enmienda del 2026-10-26**: el propietario confirmó que el registrador **no admite un `NS` para un
+   subdominio**. La opción de delegar `staging` desde el registrador durante un ensayo previo a la release
+   queda descartada. `staging` solo puede delegarse desde la zona de producción, que existe únicamente
+   tras el `apply` de la release (producción solo se aplica con ella).
 2. En la release se crea la zona `inserttask.es` en producción **con** los `NS` de `staging` (variable
-   del root de producción, con los valores públicos que dio staging: ninguna identidad de un entorno
-   lee el otro) y solo entonces el propietario cambia los servidores de nombres del dominio en el
-   registrador a los de la zona de producción. A partir de ahí el `NS` de `staging` del registrador
-   ya no se usa y se retira.
+   del root de producción, rellenada en una PR previa con los valores públicos que dio el `apply` de
+   staging: ninguna identidad de un entorno lee el otro, T074) y solo entonces el propietario cambia los
+   servidores de nombres del dominio en el registrador a los de la zona de producción. Con ese único
+   cambio resuelven `inserttask.es`, `www` y `staging`.
+   El **ensayo** (E1–E6) se hace justo después, antes de dar por buena la validación de producción: se
+   comprueba primero `staging.inserttask.es` (propiedad compartida entre proyectos, certificado, inicio de
+   sesión) y después `inserttask.es`. Pierde la ventaja de fallar antes de crear nada en producción, pero
+   el dominio no tiene tráfico ni registros que proteger y, si hubiera un conflicto de propiedad, se
+   retira el dominio afectado sin consecuencias para usuarios.
 3. Antes del cambio de servidores de nombres, el propietario confirma si el dominio tiene otros
    registros que conservar (FR-023); si los tiene, se declaran en la zona antes del cambio.
 

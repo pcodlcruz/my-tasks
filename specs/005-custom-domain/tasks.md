@@ -42,9 +42,11 @@ Hosting exista en staging, la API ya acepte su origen y la validación pueda hac
   `/speckit-analyze`, FR-020). Crearlos es inocuo hasta que el propietario ponga el DNS.
 - La **Phase 5** (enmienda) sustituye el nombre `.com` por `.es` y lleva el DNS a **Cloud DNS**, con una
   zona por entorno y los registros de Hosting escritos por Terraform (research R16); el propietario
-  solo delega en el registrador. Retira `staging.inserttask.com`, que la Phase 4 dejó aplicado.
-- El **ensayo de staging** (Phase 6, T055–T060) debe terminar **antes** de crear la release: la
-  propiedad DNS y el certificado se prueban primero con el subdominio.
+  solo cambia los servidores de nombres en el registrador. Retira `staging.inserttask.com`, que la Phase 4 dejó aplicado.
+- El **ensayo de staging** (T055–T060, dentro de la Phase 7) se hace **tras el `apply` de producción y el
+  cambio de servidores de nombres**, porque el registrador no admite un `NS` de subdominio y `staging` solo
+  puede delegarse desde la zona de producción (research R16). Se valida primero el subdominio y después
+  `inserttask.es`.
 - Las fases 2–5 viajan **en la misma release**; la **Phase 7** la ejecuta el propietario con el pipeline.
 
 ## Formato: `[ID] [P?] [Story] Descripción`
@@ -249,33 +251,21 @@ abiertos salvo los de la puesta en servicio (Phase 7).
 - [ ] T042 [P] [US5] Comprobar que `infra/README.md`, `infra/RUNBOOK.md` y `README.md` describen lo implementado (proveedor beta, sección 14, direcciones) y que `specs/005-custom-domain/contracts/*.md` coinciden con lo construido; corregir lo que haya cambiado durante la implementación
 - [ ] T043 (propietario) Con las Phases 2–5 fusionadas y el CI de `develop` en verde, ejecutar en staging los escenarios 1–9 completos del quickstart si falta alguno y comunicar el resultado al agente (se registra en T061)
 
-### Ensayo del dominio en staging (FR-020, SC-009; tareas añadidas tras el análisis)
-
-> Se numeran a continuación de las existentes, como se hizo con T109–T114 en la feature 004. Se ejecutan
-> **después** de que la Phase 4 esté fusionada y aplicada en staging, y **antes** de la Phase 7. Su
-> registro (`validacion-staging.md`) viaja en una PR documental de cierre posterior (T061), como en la 003 y la 004.
-
-- [ ] T055 [US3] Leer del resumen del `apply` de staging (T035, T069) los servidores de nombres de la zona `staging.inserttask.es`, comprobar con una consulta DNS directa a uno de ellos que el `TXT` y el `A` están publicados y que no hay `AAAA`, y comunicárselos al propietario con el orden de la guía de `infra/RUNBOOK.md` §14 (escenario E1)
-- [ ] T056 (propietario) Escenario E2: en el registrador, retirar cualquier registro previo de `staging` y añadir el `NS` de `staging` con los servidores de nombres de la zona de staging (no tocar todavía el apex ni `www` ni los servidores de nombres del dominio)
-- [ ] T057 [US3] Escenarios E3 y E4: seguir `ownership_state` hasta `OWNERSHIP_ACTIVE` sin `OWNERSHIP_CONFLICT`/`MISMATCH` y `cert.state` hasta `CERT_ACTIVE`, y comprobar con `curl -sI https://staging.inserttask.es/` el certificado y las cabeceras de seguridad. **Si hay conflicto de propiedad con el apex, parar y revisar el diseño con el propietario antes de seguir** (research R7)
-- [ ] T058 (propietario) Escenario E5: iniciar sesión con la cuenta invitada y con la no invitada desde `https://staging.inserttask.es`, recorrer tablero, tareas, perfil y avatar sin errores de CORS ni de CSP, y comprobar que `http://` redirige a `https://`
-- [ ] T059 [US2] Escenario E6: comprobar con el MCP en solo lectura que la API de staging tiene `CORS_ORIGINS` con los tres orígenes (`run.app`, `web.app`, `https://staging.inserttask.es`) y que el siguiente despliegue de staging mantiene la prueba de humo en verde
-- [ ] T060 [US5] Reunir el resultado del ensayo (valores comunicados por el propietario, sin inventar detalle): fecha en que `staging.inserttask.es` quedó con certificado activo, tiempo de trabajo efectivo del propietario con la guía y si necesitó ayuda adicional (SC-008), y la comparación de rendimiento (SC-005); es la condición para empezar la Phase 7. Se registra en T061
-- [ ] T061 [US5] Abrir la PR documental de cierre de staging (`feature/005-custom-domain-cierre`, a `develop`, tras fusionar las fases 1–6) con `specs/005-custom-domain/validacion-staging.md`: resultados de T029, T030, T043 y T060; marcar T060 y T061 y actualizar `definition-of-done.md`. La fusiona el propietario **antes** de crear la release (así la release la incluye)
+- [ ] T061 [US5] Abrir la PR documental de cierre de staging (`feature/005-custom-domain-cierre`, a `develop`, tras fusionar las fases 1–6) con `specs/005-custom-domain/validacion-staging.md`: resultados de T029, T030 y T043; marcar T061 y actualizar `definition-of-done.md`. La fusiona el propietario **antes** de crear la release (así la release la incluye). El ensayo del dominio de staging no se registra aquí: ocurre tras la release (T055–T060) y va con T053
 
 - [ ] T073 [US5] Restaurar `prevent_destroy` en el recurso de dominio de `hosting.tf` (retirado deliberadamente en T067 para sustituir el `.com`) en una PR propia, con el plan de solo lectura sin cambios en recursos; debe fusionarse antes de crear la release
-- [ ] T074 [US4] Con el `apply` de staging de la Phase 5 hecho (T055), rellenar la variable de producción con los servidores de nombres de la zona `staging.inserttask.es` (valores públicos leídos del resumen del `apply`) en una PR propia, con el plan de solo lectura de producción mostrando solo el alta del `NS` de `staging`; en la misma PR se amplía el test de paridad (T064) para exigir que la variable no quede vacía. Debe fusionarse antes de crear la release: sin ella, al cambiar los servidores de nombres en T048 `staging.inserttask.es` dejaría de resolver
+- [ ] T074 [US4] Con el `apply` de staging de la Phase 5 hecho, rellenar la variable de producción con los servidores de nombres de la zona `staging.inserttask.es` (valores públicos leídos del resumen del `apply`) en una PR propia, con el plan de solo lectura de producción mostrando solo el alta del `NS` de `staging`; en la misma PR se amplía el test de paridad (T064) para exigir que la variable no quede vacía. Debe fusionarse antes de crear la release: sin ella, al cambiar los servidores de nombres en T048 `staging.inserttask.es` dejaría de resolver
 
-**Checkpoint**: la feature queda lista para release **con el ensayo de staging validado**.
+**Checkpoint**: la feature queda lista para release con el `NS` de `staging` ya en el código de producción.
 
 ---
 
 ## Phase 7: Release y puesta en servicio del dominio (propietario + pipeline)
 
 **Purpose**: llevar la feature a producción y activar el dominio. Mayoría de tareas son del propietario;
-el agente ayuda con las comprobaciones de solo lectura. Requiere la Phase 6 fusionada, el ensayo de
-staging validado (T060) y su PR de cierre fusionada (T061): no se crea la release mientras
-`staging.inserttask.es` no tenga certificado activo.
+el agente ayuda con las comprobaciones de solo lectura. Requiere la Phase 6 fusionada, su PR de cierre
+fusionada (T061), `prevent_destroy` restaurado (T073) y el `NS` de `staging` en producción (T074). El
+ensayo de staging se hace dentro de esta fase, tras el cambio de servidores de nombres (T055–T060).
 
 **Cómo se ejecuta esta fase** (no es una fase de código):
 
@@ -293,17 +283,33 @@ staging validado (T060) y su PR de cierre fusionada (T061): no se crea la releas
 **Independent Test**: escenarios 10–19 del quickstart en verde y registrados en
 `specs/005-custom-domain/validacion-produccion.md`.
 
-- [ ] T044 [US5] Solo con T060, T061, T073 y T074 cumplidas (ensayo de staging validado y registrado en `develop`, `prevent_destroy` restaurado y `NS` de `staging` rellenado en producción), crear la rama `release/1.3.0` desde `origin/develop` **sin commits propios** (el *ruleset* exige los 9 checks al crearla; si el último commit de `develop` los trae en rojo por un test flaky conocido, relanzar el job antes) y abrir la PR a `main` en español, con la lista de cambios, la validación de staging y las instrucciones posteriores a la fusión
+- [ ] T044 [US5] Solo con T061, T073 y T074 cumplidas (cierre de staging registrado en `develop`, `prevent_destroy` restaurado y `NS` de `staging` rellenado en producción), crear la rama `release/1.3.0` desde `origin/develop` **sin commits propios** (el *ruleset* exige los 9 checks al crearla; si el último commit de `develop` los trae en rojo por un test flaky conocido, relanzar el job antes) y abrir la PR a `main` en español, con la lista de cambios, la validación de staging (escenarios 1–9) y las instrucciones posteriores a la fusión
 - [ ] T045 (propietario) Fusionar la PR de la release; leer el plan de `plan-production` en `infra.yml` (altas de Hosting, de la zona de Cloud DNS con sus registros y de los dos dominios; cambios de `authorized_domains` y *referrers*; nada sobre Cloud Run, Firestore ni Firebase Auth más allá de eso) y aprobar el `apply` en el entorno `infra-production`
 - [ ] T046 (propietario) Aprobar/esperar `deploy-production` y avisar cuando termine; si falla por «versión no validada», no relanzar y avisar al agente
 - [ ] T047 [US1] Escenario 10 del quickstart: comprobar con `curl` que `https://pdlco-mytasks.web.app/` sirve la aplicación de producción (certificado, cabeceras, `/config.js` con la API y el proyecto de producción) y que `GET /health` de la API y `APP_VERSION` coinciden; comprobar la lista `CORS_ORIGINS` de la API de producción con el MCP en solo lectura
-- [ ] T048 (propietario) Escenario 11–12: leer los servidores de nombres de la zona `inserttask.es` en el resumen del `apply`, confirmar que no hay otros registros que conservar (FR-023) y cambiar en el registrador los servidores de nombres del dominio a esos; retirar entonces el `NS` de `staging` del registrador (la zona ya delega). **Plazo: antes de 30 días desde el `apply`**
+- [ ] T048 (propietario) Escenario 11–12: leer los servidores de nombres de la zona `inserttask.es` en el resumen del `apply`, confirmar que no hay otros registros que conservar (FR-023) y cambiar en el registrador los servidores de nombres del dominio a esos; la zona de producción ya delega `staging` hacia la de staging, así que el registrador no necesita ningún `NS`. **Plazo: antes de 30 días desde el `apply`**
 - [ ] T049 [US3] Escenario 13: seguir el estado del dominio (salidas de Terraform en un `plan` posterior o consola de Firebase) hasta `OWNERSHIP_ACTIVE` y certificado activo; si queda en «Pending» o «Needs setup» más de 24 h, aplicar la tabla de diagnóstico de la RUNBOOK §14
 - [ ] T050 [US1] Escenario 14 y 15: abrir `https://inserttask.es` en Chrome, Safari, Firefox y Edge actuales (candado, certificado emitido para el dominio, sin avisos) y comprobar las redirecciones `http://` y `www` con `curl -sI`; medir además el rendimiento (SC-005): mediana de tres cargas en frío de `https://inserttask.es/` frente a la de la URL `run.app` de la web, desde la misma red y a la misma hora, y anotar ambas medianas
 - [ ] T051 (propietario) Escenarios 16, 17 y 18: iniciar sesión con la cuenta invitada y con la no invitada desde `inserttask.es`, recorrer tablero, tareas, perfil, avatar y administración de accesos sin errores de CSP ni de CORS, y confirmar que `/config.js` apunta a producción
 - [ ] T052 [US3] Anotar la fecha de caducidad del certificado y, pasadas unas semanas, comprobar que se renovó solo y que la factura no tiene concepto de certificado (escenario 19); comprobar también en la factura de staging, tras una semana de zona activa, el coste de Cloud DNS y anotarlo (SC-010); si se hace tras el cierre, dejarlo como recordatorio en `validacion-produccion.md`
 - [ ] T053 [US5] Registrar el resultado en `specs/005-custom-domain/validacion-produccion.md` (valores comunicados por el propietario, sin inventar detalle), marcar T041 como cerrada en `definition-of-done.md` y dejar la feature como terminada; abrir la PR documental `feature/005-custom-domain-cierre-produccion` a `develop` (no una rama de fase; la fusiona el propietario)
 - [ ] T054 (propietario) Decidir sobre el retro-merge de `main` a `develop` (GitFlow) y, si procede, pedir al agente que abra la PR; el agente no la fusiona
+
+### Ensayo del dominio de staging (FR-020, SC-009; reubicado el 2026-10-26)
+
+> El registrador no admite un `NS` para un subdominio (respuesta del propietario a T062(b)), así que
+> `staging.inserttask.es` no se puede delegar antes de que exista la zona de producción. El ensayo se hace
+> **justo después de T048**: la zona `inserttask.es` ya delega `staging` hacia la de staging (T074). Se
+> valida **primero** el subdominio y solo después se da por buena la validación de `inserttask.es`
+> (T050–T051). Si el ensayo revela un conflicto de propiedad, se retira el dominio de producción antes de
+> servir tráfico (research R16).
+
+- [ ] T055 [US3] Antes de T048: leer del resumen del `apply` de staging los servidores de nombres de la zona `staging.inserttask.es` y comprobar con una consulta DNS directa a uno de ellos que el `TXT` y el `A` están publicados y que no hay `AAAA` (escenario E1). Tras T048, comprobar con una consulta pública que `staging.inserttask.es` resuelve a Hosting a través de la delegación de la zona de producción
+- [ ] T056 (propietario) Escenario E2: nada que hacer en el registrador además de T048 (la delegación de `staging` la lleva la zona de producción). Anotar el tiempo de trabajo efectivo de T048 y si necesitó ayuda adicional (SC-008)
+- [ ] T057 [US3] Escenarios E3 y E4: seguir `ownership_state` hasta `OWNERSHIP_ACTIVE` sin `OWNERSHIP_CONFLICT`/`MISMATCH` y `cert.state` hasta `CERT_ACTIVE`, y comprobar con `curl -sI https://staging.inserttask.es/` el certificado y las cabeceras de seguridad. **Si hay conflicto de propiedad con el apex, parar y revisar el diseño con el propietario antes de seguir** (research R7)
+- [ ] T058 (propietario) Escenario E5: iniciar sesión con la cuenta invitada y con la no invitada desde `https://staging.inserttask.es`, recorrer tablero, tareas, perfil y avatar sin errores de CORS ni de CSP, y comprobar que `http://` redirige a `https://`
+- [ ] T059 [US2] Escenario E6: comprobar con el MCP en solo lectura que la API de staging tiene `CORS_ORIGINS` con los tres orígenes (`run.app`, `web.app`, `https://staging.inserttask.es`) y que el siguiente despliegue de staging mantiene la prueba de humo en verde
+- [ ] T060 [US5] Reunir el resultado del ensayo (valores comunicados por el propietario, sin inventar detalle): fecha en que `staging.inserttask.es` quedó con certificado activo, tiempo de trabajo efectivo (SC-008) y la comparación de rendimiento (SC-005); se registra en `validacion-produccion.md` con T053
 
 **Checkpoint**: dominio en servicio, validado y documentado.
 
@@ -318,8 +324,8 @@ staging validado (T060) y su PR de cierre fusionada (T061): no se crea la releas
 - **Phase 3**: necesita la Phase 1 completa (permisos). Bloquea la Phase 4.
 - **Phase 4**: necesita la Phase 3 fusionada y aplicada en staging.
 - **Phase 5**: necesita la Phase 4 fusionada; T062 (propietario) bloquea el `apply` de staging y T065 (rol de lectura) debe estar aplicado antes de fusionar para que el plan de solo lectura no dé 403.
-- **Phase 6**: necesita las Phases 2–5 fusionadas; el ensayo (T055–T060) necesita además el `apply` de staging de la Phase 5.
-- **Phase 7**: necesita la Phase 6 fusionada, el ensayo de staging validado (T060), su PR de cierre fusionada (T061) y el CI de `develop` en verde. No es una fase de código (ver su cabecera).
+- **Phase 6**: necesita las Phases 2–5 fusionadas y el `apply` de staging de la Phase 5 (para conocer los servidores de nombres de T074).
+- **Phase 7**: necesita la Phase 6 fusionada, su PR de cierre fusionada (T061), T073, T074 y el CI de `develop` en verde. No es una fase de código (ver su cabecera).
 
 ### Dentro de cada fase
 
@@ -340,9 +346,9 @@ staging validado (T060) y su PR de cierre fusionada (T061): no se crea la releas
 |---|---|---|
 | US1 Abrir con el dominio propio | 3, 4, 6 | T029, T032–T033, T047, T050 |
 | US2 Iniciar sesión desde él | 2, 3, 5, 6 | T006–T012, T023, T030, T059, T051 |
-| US3 Certificado gratuito que se renueva | 4, 5, 6 | T034–T036, T055, T057, T049, T052 |
+| US3 Certificado gratuito que se renueva | 4, 5, 7 | T034–T036, T055, T057, T049, T052 |
 | US4 Canónico y redirecciones | 4, 6 | T031, T033, T050 |
-| US5 Gobierno por IaC y guías | 1, 2, 5, 6 | T001–T004, T014–T015, T040–T043, T060–T061, T044–T054 |
+| US5 Gobierno por IaC y guías | 1, 2, 5, 6 | T001–T004, T014–T015, T040–T043, T061, T044–T060 |
 
 ---
 
@@ -358,8 +364,8 @@ y, tras la release, en `inserttask.es`. No tiene sentido entregar la Phase 4 sin
 
 1. Phase 1 y Phase 2 en paralelo → fusionar la 2 (inocua) → desplegar en staging.
 2. Phase 3 → `apply` de staging aprobado → validar con `web.app`.
-3. Phase 4 → `apply` de staging (ya hecho con `.com`). Phase 5 → `apply` de staging con la zona y `staging.inserttask.es` → delegación en el registrador → **ensayo validado (T055–T060)**.
-4. Phase 6 (revisión de seguridad y DoD) → release 1.3.0 → `apply` de producción aprobado → DNS → validación.
+3. Phase 4 → `apply` de staging (ya hecho con `.com`). Phase 5 → `apply` de staging con la zona y `staging.inserttask.es` → leer los servidores de nombres de staging (T074).
+4. Phase 6 (revisión de seguridad y DoD) → release 1.3.0 → `apply` de producción aprobado → cambio de servidores de nombres (T048) → **ensayo de staging (T055–T060)** → validación de `inserttask.es`.
 
 ### Riesgos conocidos
 
@@ -373,8 +379,8 @@ y, tras la release, en `inserttask.es`. No tiene sentido entregar la Phase 4 sin
 - **Propiedad del dominio en 30 días**: si el propietario no cambia los servidores de nombres a tiempo, Hosting borra el
   dominio y habría que volver a crearlo (un nuevo `apply`); T048 lo deja a la vista.
 - **Propiedad compartida entre dos proyectos**: que Hosting acepte el apex para producción y
-  `staging.` para staging a la vez es la hipótesis que el ensayo comprueba (T057). Si no la acepta, se
-  para y se revisa el diseño con el propietario (por ejemplo, otro dominio de ensayo) antes de la release.
+  `staging.` para staging a la vez es la hipótesis que el ensayo comprueba (T057), ahora **después** de crear el dominio de producción. Si no la acepta, se
+  retira `staging.inserttask.es` o el dominio de producción antes de servir tráfico y se revisa el diseño con el propietario.
 - **Flaky conocido de la 003** (`test_invite_the_same_address_twice_at_once…`): puede ponerse rojo el
   CI de `develop`; relanzar el job antes de crear `release/1.3.0` (T044). No tocar su código en esta
   feature.
