@@ -54,8 +54,9 @@ def module_arguments(path: Path) -> dict[str, str]:
     assert match, f"no module block in {path}"
     arguments = {}
     for line in match.group(1).splitlines():
-        stripped = line.split("#", 1)[0].strip()
-        found = re.match(r"^([a-z_]+)\s*=\s*(.+)$", stripped)
+        # Only the arguments of the module itself (two spaces); the lines of a multi-line value are deeper.
+        stripped = line.split("#", 1)[0].rstrip()
+        found = re.match(r"^  ([a-z_]+)\s*=\s*(.+)$", stripped)
         if found:
             arguments[found.group(1)] = found.group(2).strip()
     return arguments
@@ -243,6 +244,16 @@ for name, module in modules.items():
     check(f"the {name} zone is the canonical domain it serves", canonical == [EXPECTED_ZONES[name]], str(canonical))
 
 check("staging does not delegate any subdomain", staging_module.get("dns_delegations") == "{}", str(staging_module.get("dns_delegations")))
+# T074: production delegates staging to the name servers of the zone of staging (public values read
+# after its apply). Without them the zone of production would not delegate and staging would not resolve.
+delegations = re.search(r"dns_delegations\s*=\s*\{(.*?)\n  \}", re.sub(r"#.*", "", (PRODUCTION / "main.tf").read_text(encoding="utf-8")), re.DOTALL)
+servers = re.findall(r'"([^"]+)"', delegations.group(1)) if delegations else []
+check(
+    "production delegates staging to the name servers of its zone (with trailing dots)",
+    bool(delegations) and re.match(r"\s*staging\s*=\s*\[", delegations.group(1)) is not None and len(servers) >= 2 and all(server.endswith(".") for server in servers),
+    str(servers),
+)
+check("production delegates only the staging subdomain", delegations is not None and len(re.findall(r"^\s*[a-z0-9-]+\s*=\s*\[", delegations.group(1), re.MULTILINE)) == 1)
 check("staging adds no A record besides the apex", staging_module.get("dns_a_subdomains") == "[]", str(staging_module.get("dns_a_subdomains")))
 check("production adds the A record of www", production_module.get("dns_a_subdomains") == '["www"]', str(production_module.get("dns_a_subdomains")))
 

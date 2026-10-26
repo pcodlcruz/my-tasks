@@ -46,11 +46,19 @@ module "environment" {
   ]
 
   # Public Cloud DNS zone of the domain. www also points at Hosting. The staging subdomain is
-  # delegated to the zone of staging; its name servers are only known after the staging apply, so the
-  # map stays empty until they are filled in (T074, before the release).
+  # delegated to the zone of staging, whose name servers are public and were read after its apply
+  # (2026-10-26). The registrar does not accept an NS record for a subdomain, so this zone is what
+  # makes staging.inserttask.es resolve once the owner points the domain at it.
   dns_zone_domain  = "inserttask.es"
   dns_a_subdomains = ["www"]
-  dns_delegations  = {}
+  dns_delegations = {
+    staging = [
+      "ns-cloud-d1.googledomains.com.",
+      "ns-cloud-d2.googledomains.com.",
+      "ns-cloud-d3.googledomains.com.",
+      "ns-cloud-d4.googledomains.com.",
+    ]
+  }
 }
 
 # Identity Platform already exists in production (created by the owner on 2025-12-03, with the
