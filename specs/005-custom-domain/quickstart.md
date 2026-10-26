@@ -4,17 +4,18 @@
 [pipeline-env](./contracts/pipeline-env.md)
 
 Guía para demostrar de extremo a extremo que la feature funciona. Cada escenario indica **dónde** se
-ejecuta. Todo el camino (Hosting, inicio de sesión, CORS y, con el subdominio `staging.inserttask.com`,
+ejecuta. Todo el camino (Hosting, inicio de sesión, CORS y, con el subdominio `staging.inserttask.es`,
 también la propiedad DNS y el certificado) se prueba antes en **staging**, que usa los mismos recursos
-que producción (Principio IV). Solo `inserttask.com` y `www` existen únicamente en producción.
+que producción (Principio IV). Solo `inserttask.es` y `www` existen únicamente en producción.
 
 ## Prerrequisitos
 
 - Permisos concedidos a `terraform-<env>` y API activada (contrato `pipeline-env.md` §3), verificados en
   solo lectura.
-- Variable `CUSTOM_WEB_ORIGINS` en cada entorno de GitHub: `https://staging.inserttask.com` en
-  `staging` y `https://inserttask.com` en `production`.
-- Acceso al proveedor de DNS donde está registrado `inserttask.com`.
+- Variable `CUSTOM_WEB_ORIGINS` en cada entorno de GitHub: `https://staging.inserttask.es` en
+  `staging` y `https://inserttask.es` en `production`.
+- Acceso al registrador de `inserttask.es` (solo para delegar `NS`; el DNS vive en Cloud DNS, FR-021) y la
+  confirmación de si el dominio tiene otros registros que conservar (FR-023).
 - Una cuenta de Google invitada y otra no invitada en cada entorno.
 
 ## A. Staging (tras fusionar en `develop` y desplegar el pipeline)
@@ -39,24 +40,24 @@ que producción (Principio IV). Solo `inserttask.com` y `www` existen únicament
 9. **Rendimiento (SC-005)**: tres cargas en frío de `web.app` y de `run.app` desde la misma red y a la
    misma hora (evento `Load` de DevTools con la caché desactivada, alternando las dos URL); la mediana de
    `web.app` no debe superar en más de 150 ms la de `run.app`. Repetir con
-   `staging.inserttask.com` en el ensayo (E4) y con `inserttask.com` en el escenario 14.
+   `staging.inserttask.es` en el ensayo (E4) y con `inserttask.es` en el escenario 14.
 
-## A2. Ensayo del dominio en staging: `staging.inserttask.com` (antes de la release; FR-020, SC-009)
+## A2. Ensayo del dominio en staging: `staging.inserttask.es` (antes de la release; FR-020, SC-009)
 
 Mismo mecanismo que producción, con otro proyecto. Si algo falla aquí, se corrige antes de crear
 ningún dominio de producción.
 
-- **E1. Leer lo que pide Hosting en staging**: de las salidas de Terraform de staging (o de la consola de
-  Firebase de `pdlco-mytasks-stg`), los registros exactos de `staging.inserttask.com`
-  (`required_dns_updates`).
-- **E2. Registros DNS (el propietario)**: `TXT` de propiedad **en el subdominio** y `A`/`AAAA` hacia
-  Hosting (`edge.md` §3). Retirar antes cualquier registro de `staging.inserttask.com` previo. Seguir
-  solo la guía de la RUNBOOK §14 y anotar el tiempo de trabajo efectivo y si hizo falta ayuda adicional
-  (SC-008).
+- **E1. Leer la zona de staging**: de las salidas de Terraform de staging, los servidores de nombres de la
+  zona `staging.inserttask.es`, y comprobar con una consulta DNS directa a uno de ellos que el `TXT` y el
+  `A` están publicados (y que no hay `AAAA`).
+- **E2. Delegación (el propietario)**: en el registrador, añadir el registro `NS` de `staging` con esos
+  servidores de nombres, retirando antes cualquier registro previo de `staging`. Seguir solo la guía de
+  la RUNBOOK §14 y anotar el tiempo de trabajo efectivo y si hizo falta ayuda adicional (SC-008).
+  Comprobar con una consulta DNS pública que `staging.inserttask.es` resuelve a Hosting.
 - **E3. Propiedad compartida entre proyectos**: `ownership_state` de staging llega a `OWNERSHIP_ACTIVE`
   sin `OWNERSHIP_CONFLICT`/`MISMATCH`, aunque el apex acabe perteneciendo al proyecto de producción
   (research R7). Si hay conflicto, parar y revisar el diseño con el propietario.
-- **E4. Certificado**: `cert.state` pasa a `CERT_ACTIVE`; abrir `https://staging.inserttask.com/` en un
+- **E4. Certificado**: `cert.state` pasa a `CERT_ACTIVE`; abrir `https://staging.inserttask.es/` en un
   navegador: candado y certificado emitido para el subdominio.
 - **E5. Inicio de sesión y funciones**: cuenta invitada → tablero; no invitada → «Necesitas una
   invitación»; tarea, perfil y avatar sin errores de CORS ni de CSP; `http://` redirige a `https://`.
@@ -66,24 +67,26 @@ ningún dominio de producción.
 ## B. Producción (tras la release y el `apply` de `infra` aprobado)
 
 10. **Antes del DNS**: la web ya responde en `https://pdlco-mytasks.web.app/` (mismas comprobaciones 1–5).
-    Todavía no existe `inserttask.com` para el público.
-11. **Leer lo que pide Hosting**: sacar de las salidas de Terraform (o de la consola de Firebase) los
-    registros exactos de `required_dns_updates` (`edge.md` §3).
-12. **Registros DNS (el propietario)**: retirar `A`/`AAAA`/`CNAME` previos del proveedor; añadir `TXT`
-    de propiedad y `A`/`AAAA` del apex y de `www`; añadir `CAA` solo si ya había `CAA`. Comprobar con una
-    herramienta de consulta DNS que los registros resuelven.
+    Todavía no existe `inserttask.es` para el público.
+11. **Leer la zona de producción**: de las salidas de Terraform, los servidores de nombres de la zona
+    `inserttask.es`; con una consulta DNS directa a uno de ellos, comprobar `TXT`, `A` de apex y `www`, el
+    `NS` de `staging` y que no hay `AAAA`.
+12. **Cambio de servidores de nombres (el propietario)**: confirmar que no hay otros registros que
+    conservar (FR-023) y cambiar en el registrador los servidores de nombres del dominio a los de la
+    zona de producción; retirar entonces la delegación de `staging` que el registrador tenía durante el
+    ensayo. Comprobar con una consulta DNS pública (`NS` y `A` de `inserttask.es`).
 13. **Esperar y consultar el estado**: `ownership_state` pasa a `OWNERSHIP_ACTIVE` y `cert.state` a
     `CERT_ACTIVE` (hasta 24 h; normalmente horas). No debe pasarse de 30 días sin propiedad activa.
-14. **Dominio en servicio (US1, SC-001)**: abrir `https://inserttask.com/` en Chrome, Safari, Firefox y
-    Edge actuales: candado, certificado emitido para `inserttask.com`, sin avisos. Medir también el
+14. **Dominio en servicio (US1, SC-001)**: abrir `https://inserttask.es/` en Chrome, Safari, Firefox y
+    Edge actuales: candado, certificado emitido para `inserttask.es`, sin avisos. Medir también el
     rendimiento (SC-005): mediana de tres cargas en frío frente a la URL `run.app`, máximo +150 ms.
-15. **Redirecciones (US4, SC-007)**: `http://inserttask.com`, `http://www.inserttask.com` y
-    `https://www.inserttask.com/<ruta>?<q>` acaban en `https://inserttask.com/<ruta>?<q>`.
+15. **Redirecciones (US4, SC-007)**: `http://inserttask.es`, `http://www.inserttask.es` y
+    `https://www.inserttask.es/<ruta>?<q>` acaban en `https://inserttask.es/<ruta>?<q>`.
 16. **Inicio de sesión (US2, SC-004)**: cuenta invitada → tablero en menos de 1 minuto; recargar mantiene
     la sesión; cuenta no invitada → «Necesitas una invitación»; cerrar sesión.
 17. **Funcionalidad completa (SC-006)**: tablero, tareas, perfil, tema, avatar subido y administración de
     accesos con la cuenta administradora; consola sin errores de CSP ni de CORS.
-18. **Aislamiento de entornos**: `https://inserttask.com/config.js` apunta a la API y al proyecto de
+18. **Aislamiento de entornos**: `https://inserttask.es/config.js` apunta a la API y al proyecto de
     producción; staging no responde en ese dominio.
 19. **Coste y certificado (US3, SC-002)**: tras unos días, confirmar en la factura que no hay concepto de
     certificado; anotar la fecha de caducidad del certificado para comprobar luego que se renovó solo.

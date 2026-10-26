@@ -17,7 +17,7 @@ Valores que se usan en toda la guía:
 | Cuenta de Terraform | `terraform-staging@pdlco-mytasks-stg.iam.gserviceaccount.com` | `terraform-production@pdlco-mytasks.iam.gserviceaccount.com` |
 | Rol a conceder | `roles/firebasehosting.admin` (*Firebase Hosting Admin*) | `roles/firebasehosting.admin` (*Firebase Hosting Admin*) |
 | Entorno de GitHub | `staging` | `production` |
-| Valor de `CUSTOM_WEB_ORIGINS` | `https://staging.inserttask.com` | `https://inserttask.com` |
+| Valor de `CUSTOM_WEB_ORIGINS` | `https://staging.inserttask.es` | `https://inserttask.es` |
 | Dirección de Hosting por defecto | `pdlco-mytasks-stg.web.app` | `pdlco-mytasks.web.app` |
 
 **Estado de partida** (leído por el agente en solo lectura el 2026-10-25): la API
@@ -61,7 +61,7 @@ orígenes CORS de la API.
 | Campo | `staging` | `production` |
 |---|---|---|
 | Name | `CUSTOM_WEB_ORIGINS` | `CUSTOM_WEB_ORIGINS` |
-| Value | `https://staging.inserttask.com` | `https://inserttask.com` |
+| Value | `https://staging.inserttask.es` | `https://inserttask.es` |
 
 Reglas del valor (el pipeline las comprueba y falla antes de tocar nada si no se cumplen):
 

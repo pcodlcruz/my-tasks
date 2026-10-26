@@ -7,10 +7,10 @@ implementación debe cumplir y que la validación comprueba.
 
 | Petición | Respuesta esperada |
 |---|---|
-| `GET https://inserttask.com/<cualquier ruta>` | La misma respuesta que daría `mytasks-web` de producción para esa ruta (SPA, activos, `/config.js`), por una conexión con certificado válido |
-| `GET https://www.inserttask.com/<ruta>?<query>` | `301` a `https://inserttask.com/<ruta>?<query>` |
-| `GET http://inserttask.com/<ruta>` y `http://www…` | Redirección a `https://` y, en el caso de `www`, al canónico. Se asume que Hosting redirige HTTP a HTTPS por sí solo (no figura en la documentación consultada): **a verificar en staging** (escenario 2) y, si no fuera así, declarar la redirección en la configuración de Hosting |
-| `GET https://staging.inserttask.com/<ruta>` | La misma respuesta que `mytasks-web` de staging, con certificado válido. Es el **ensayo** del dominio de producción (FR-014, FR-020) |
+| `GET https://inserttask.es/<cualquier ruta>` | La misma respuesta que daría `mytasks-web` de producción para esa ruta (SPA, activos, `/config.js`), por una conexión con certificado válido |
+| `GET https://www.inserttask.es/<ruta>?<query>` | `301` a `https://inserttask.es/<ruta>?<query>` |
+| `GET http://inserttask.es/<ruta>` y `http://www…` | Redirección a `https://` y, en el caso de `www`, al canónico. Se asume que Hosting redirige HTTP a HTTPS por sí solo (no figura en la documentación consultada): **a verificar en staging** (escenario 2) y, si no fuera así, declarar la redirección en la configuración de Hosting |
+| `GET https://staging.inserttask.es/<ruta>` | La misma respuesta que `mytasks-web` de staging, con certificado válido. Es el **ensayo** del dominio de producción (FR-014, FR-020) |
 | `GET https://<proyecto>.web.app/<ruta>` | Igual que el canónico de su entorno (sirve la misma versión). Sigue funcionando en ambos |
 | `GET https://mytasks-web-<nº>.europe-southwest1.run.app/<ruta>` | Sigue respondiendo con la aplicación, sin redirección (FR-011) |
 
@@ -32,31 +32,41 @@ El contenedor ya las emite; Hosting no debe perder ni alterar ninguna en las res
 Si una cabecera se perdiera a través de Hosting, se declara en la configuración de Hosting (misma
 política, sin relajar nada) y se anota en la revisión de seguridad.
 
-## 3. Registros DNS que debe poner el propietario
+## 3. Registros DNS: zonas de Cloud DNS (R16)
 
-Los valores concretos los entrega Hosting tras el `apply` (se leen de las salidas de Terraform o de la
-consola de Firebase). Forma de lo que se pide:
+El DNS vive en Cloud DNS, una zona pública por entorno, y los registros los escribe Terraform. La
+documentación de Hosting fija los valores: `TXT hosting-site=<siteId>` y `A 199.36.158.100`, y **ningún
+`AAAA`**. Lo que sigue es lo que debe resolverse; lo único que hace el propietario es delegar (final
+de esta sección). Forma de lo que se publica:
 
-| Nombre | Tipo | Valor | Cuándo |
-|---|---|---|---|
-| `inserttask.com` | `TXT` | `hosting-site=pdlco-mytasks` (confirmar con las salidas) | Siempre y **permanente** |
-| `inserttask.com` | `A`, `AAAA` | IP indicadas por Hosting | Para dirigir el tráfico |
-| `www.inserttask.com` | `A`, `AAAA` | IP indicadas por Hosting | Para dirigir el tráfico |
-| `inserttask.com` | `CAA` | `0 issue "pki.goog"` y `0 issue "letsencrypt.org"` | Solo si ya existen `CAA` en el dominio |
-| `staging.inserttask.com` | `TXT` | `hosting-site=pdlco-mytasks-stg` (confirmar con las salidas de **staging**) | Propiedad del subdominio para el proyecto de staging; **permanente** |
-| `staging.inserttask.com` | `A`, `AAAA` | IP indicadas por Hosting (salidas de staging) | Para dirigir el tráfico del ensayo |
+| Zona | Nombre | Tipo | Valor | Notas |
+|---|---|---|---|---|
+| `inserttask.es` (producción) | `inserttask.es` | `TXT` | `hosting-site=pdlco-mytasks` | Propiedad. **Permanente**: Hosting lo usa para renovar el certificado |
+| `inserttask.es` (producción) | `inserttask.es` | `A` | `199.36.158.100` | Dirige el tráfico |
+| `inserttask.es` (producción) | `www.inserttask.es` | `A` | `199.36.158.100` | La redirección al canónico la hace Hosting |
+| `inserttask.es` (producción) | `staging.inserttask.es` | `NS` | Servidores de nombres de la zona de staging | Delegación; valores públicos pasados como variable del root de producción |
+| `staging.inserttask.es` (staging) | `staging.inserttask.es` | `TXT` | `hosting-site=pdlco-mytasks-stg` | Propiedad del subdominio para el proyecto de staging. **Permanente** |
+| `staging.inserttask.es` (staging) | `staging.inserttask.es` | `A` | `199.36.158.100` | Dirige el tráfico del ensayo |
 
-Los registros de staging se ponen **antes** que los de producción (FR-020). Los `CAA` del apex, si
-existen, también cubren el subdominio por herencia.
+Reglas: **ningún `AAAA`** en ninguna zona; ningún registro `CNAME` ni `A` ajeno en un nombre servido por
+Hosting. Los `CAA`, si el dominio los tenía en el registrador, se trasladan a la zona (FR-023) y deben
+permitir `pki.goog` y `letsencrypt.org`; si no había ninguno, no se declara ninguno.
 
-Antes de añadirlos: retirar los `A`, `AAAA` y `CNAME` previos del proveedor (registros de «aparcado»).
-Dejar otros distintos a los de Hosting impide emitir el certificado.
+**Lo que hace el propietario (FR-016)**, siempre con los valores de las salidas de Terraform:
+
+1. **Ensayo (antes de la release)**: en el registrador, un registro `NS` de `staging` con los
+   servidores de nombres de la zona de staging; antes, retirar cualquier registro previo de `staging`.
+2. **Release**: confirmar que no hay otros registros que conservar (FR-023) y cambiar los servidores de
+   nombres del dominio a los de la zona de producción; entonces retirar el `NS` de `staging` del
+   registrador (la zona de producción ya delega).
+
+Los registros de staging existen antes que los de producción (FR-020).
 
 ## 4. Inicio de sesión desde el dominio propio
 
 - El *popup* de Google se abre contra el dominio de autenticación del proyecto
   (`pdlco-mytasks.firebaseapp.com`); `FIREBASE_AUTH_DOMAIN` no cambia.
-- `inserttask.com` (producción) y `staging.inserttask.com` (staging) están en los dominios autorizados
+- `inserttask.es` (producción) y `staging.inserttask.es` (staging) están en los dominios autorizados
   de Identity Platform y en los *referrers* de la clave de API web de su proyecto.
 - Las reglas de invitación son las de la feature 003, sin cambios.
 

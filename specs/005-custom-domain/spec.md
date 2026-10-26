@@ -102,7 +102,7 @@ canónica; abrir la dirección antigua de producción y comprobar que sigue resp
 2. **Given** la dirección técnica antigua de producción, **When** se abre, **Then** sigue
    mostrando la aplicación (no se corta el acceso a quien la tenía guardada).
 3. **Given** la dirección de Hosting `pdlco-mytasks.web.app`, **When** se abre, **Then** muestra la
-   misma aplicación sin redirigir; solo `https://inserttask.com` es la dirección canónica anunciada.
+   misma aplicación sin redirigir; solo `https://inserttask.es` es la dirección canónica anunciada.
 
 ---
 
@@ -147,10 +147,10 @@ la aprobación del propietario, y que no se ejecutó ningún comando manual de d
   permitiendo el inicio de sesión, el avatar subido y las llamadas a la API desde el dominio nuevo,
   sin errores en la consola.
 - **Staging**: no recibe el dominio de producción ni sus redirecciones; tiene su propio subdominio
-  de ensayo, `staging.inserttask.com`, que ejercita el mismo mecanismo (propiedad DNS, certificado,
+  de ensayo, `staging.inserttask.es`, que ejercita el mismo mecanismo (propiedad DNS, certificado,
   inicio de sesión) antes de tocar producción (Principio IV).
-- **Propiedad del dominio compartida entre proyectos**: `inserttask.com` pertenece al proyecto de
-  producción y `staging.inserttask.com` al de staging; Hosting debe aceptar ambas propiedades a la
+- **Propiedad del dominio compartida entre proyectos**: `inserttask.es` pertenece al proyecto de
+  producción y `staging.inserttask.es` al de staging; Hosting debe aceptar ambas propiedades a la
   vez. Si no lo hiciera, el ensayo lo detecta antes de producción y se revisa el diseño.
 - **Certificado que no se puede emitir** (p. ej. por restricciones de registros CAA en el
   dominio): la guía debe indicar cómo reconocer la causa.
@@ -161,9 +161,9 @@ la aprobación del propietario, y que no se ejecutó ningún comando manual de d
 
 ### Functional Requirements
 
-- **FR-001**: La aplicación de producción MUST ser accesible desde el dominio `inserttask.com`
-  (raíz) y desde `www.inserttask.com`. La dirección canónica es `https://inserttask.com`;
-  `www.inserttask.com` redirige a ella (FR-006).
+- **FR-001**: La aplicación de producción MUST ser accesible desde el dominio `inserttask.es`
+  (raíz) y desde `www.inserttask.es`. La dirección canónica es `https://inserttask.es`;
+  `www.inserttask.es` redirige a ella (FR-006).
 - **FR-002**: La conexión al dominio propio MUST usar HTTPS con un certificado válido para ese
   dominio, de confianza pública, sin avisos del navegador.
 - **FR-003**: El certificado MUST ser gratuito: la feature no puede introducir ningún coste
@@ -171,8 +171,8 @@ la aprobación del propietario, y que no se ejecutó ningún comando manual de d
 - **FR-004**: El certificado MUST emitirse y renovarse automáticamente, sin intervención manual
   del propietario durante la vida del dominio.
 - **FR-005**: Las solicitudes `http://` al dominio propio MUST redirigirse a `https://`.
-- **FR-006**: `https://www.inserttask.com` MUST redirigir de forma permanente a
-  `https://inserttask.com` conservando ruta y parámetros.
+- **FR-006**: `https://www.inserttask.es` MUST redirigir de forma permanente a
+  `https://inserttask.es` conservando ruta y parámetros.
 - **FR-007**: La aplicación MUST seguir funcionando de forma idéntica en el dominio propio: mismo
   contenido, misma API y mismos datos que en producción hoy; ninguna función puede degradarse.
 - **FR-008**: El inicio de sesión con Google MUST funcionar desde el dominio propio, con las mismas
@@ -190,7 +190,7 @@ la aprobación del propietario, y que no se ejecutó ningún comando manual de d
   los servicios están en la región de Madrid y el mapeo de dominios nativo de Cloud Run no está
   disponible allí. No se cambia de región ni se contrata otro servicio para evitarlo.
 - **FR-014**: Staging MUST mantener la misma topología que producción (Principio IV) y MUST tener
-  su propio dominio de ensayo, `staging.inserttask.com`, con certificado gratuito y gestionado, sin
+  su propio dominio de ensayo, `staging.inserttask.es`, con certificado gratuito y gestionado, sin
   recibir el dominio de producción ni la redirección de `www`.
 - **FR-020**: El dominio de ensayo de staging MUST ponerse en servicio y validarse (propiedad
   activa, certificado activo, inicio de sesión y funciones habituales) **antes** de crear los
@@ -199,9 +199,10 @@ la aprobación del propietario, y que no se ejecutó ningún comando manual de d
   como código, con plan revisable y aprobación explícita del propietario antes de aplicar
   (Principios V, VI y VII); el agente no ejecuta operaciones reales sobre Google Cloud fuera del
   MCP oficial.
-- **FR-016**: Los pasos que solo puede hacer el propietario (alta de registros DNS y verificación
-  de propiedad en su proveedor de dominio) MUST documentarse con valores exactos, el orden y cómo
-  comprobar cada uno.
+- **FR-016**: Los pasos que solo puede hacer el propietario (cambiar los servidores de nombres en
+  el registrador del dominio y, mientras dure el ensayo, delegar `staging` desde él) MUST
+  documentarse con valores exactos, el orden y cómo comprobar cada uno. El alta de los registros
+  de Hosting ya no es un paso manual (FR-022).
 - **FR-017**: La documentación operativa MUST incluir cómo detectar y resolver un certificado
   pendiente o con fallo de renovación, y cómo retirar el dominio dejando la dirección técnica
   operativa.
@@ -210,11 +211,27 @@ la aprobación del propietario, y que no se ejecutó ningún comando manual de d
 - **FR-019**: Si el cambio afecta a la autenticación o a los orígenes permitidos, MUST pasar la
   revisión de seguridad con `mytasks-security-auditor` antes de fusionarse (Principio III).
 
+- **FR-021**: El DNS del dominio MUST gestionarse en **Cloud DNS**, por decisión del propietario
+  (no en el proveedor donde compró el dominio): una zona pública por entorno, en el proyecto de
+  Google Cloud de ese entorno: `inserttask.es` en producción y `staging.inserttask.es` en staging,
+  esta delegada desde la primera. El registrador solo conserva la delegación de servidores de
+  nombres (`NS`).
+- **FR-022**: Los registros que Firebase Hosting exige para cada dominio (propiedad con `TXT` y
+  dirección con `A`) MUST declararse como infraestructura como código en la zona del entorno, sin
+  copiarlos a mano. No MUST existir ningún registro `AAAA` en un dominio servido por Hosting, porque
+  impide emitir el certificado.
+- **FR-023**: Antes de cambiar los servidores de nombres del registrador, cualquier otro registro
+  que el propietario necesite conservar (correo u otros) MUST haberse trasladado a la zona; si el
+  dominio no tiene ninguno, se documenta que se ha comprobado.
+- **FR-024**: Las identidades de Terraform y la de solo lectura de los planes MUST recibir solo
+  los permisos de Cloud DNS necesarios, concedidos por el propietario (Principio V); el agente no
+  usa credenciales personales.
+
 ### Key Entities
 
-- **Dominio propio**: `inserttask.com`, comprado por el propietario; es la variante canónica de
-  producción, y `www.inserttask.com` redirige a ella.
-- **Dominio de ensayo**: `staging.inserttask.com`, subdominio del anterior que sirve la web de
+- **Dominio propio**: `inserttask.es`, comprado por el propietario; es la variante canónica de
+  producción, y `www.inserttask.es` redirige a ella.
+- **Dominio de ensayo**: `staging.inserttask.es`, subdominio del anterior que sirve la web de
   staging; no tiene variante `www`.
 - **Certificado de seguridad**: acredita el dominio ante los navegadores; gratuito, emitido y
   renovado automáticamente; tiene fecha de caducidad y estado (pendiente, activo, fallo de
@@ -248,15 +265,27 @@ la aprobación del propietario, y que no se ejecutó ningún comando manual de d
 - **SC-008**: El propietario, siguiendo solo la guía de la RUNBOOK y sin ayuda adicional, deja el
   dominio de ensayo de staging con los registros DNS puestos en menos de 1 hora de trabajo efectivo
   (sin contar la propagación DNS); el tiempo y si necesitó ayuda se anotan en el registro del ensayo.
-- **SC-009**: `staging.inserttask.com` llega a certificado activo y pasa la validación de
+- **SC-009**: `staging.inserttask.es` llega a certificado activo y pasa la validación de
   funciones y de inicio de sesión antes de que exista ningún dominio de producción.
+
+- **SC-010**: Un resolvedor público devuelve, para `inserttask.es` y `staging.inserttask.es`, los
+  servidores de nombres de Cloud DNS del entorno correspondiente y los registros declarados en
+  Terraform, sin que quede ningún registro de Hosting puesto a mano; el coste mensual de Cloud DNS
+  se verifica en la factura de staging tras la primera semana (research R16).
 
 ## Assumptions
 
-- El propietario es el titular del dominio y puede editar sus registros DNS en el proveedor donde
-  lo compró; esa parte queda fuera de Google Cloud y la hace él.
-- `inserttask.com` y `www.inserttask.com` se aplican **solo a producción** (`pdlco-mytasks`).
-  Staging (`pdlco-mytasks-stg`) recibe únicamente el subdominio de ensayo `staging.inserttask.com`,
+- El propietario es el titular del dominio y puede cambiar sus servidores de nombres en el
+  registrador donde lo compró (y, durante el ensayo, añadir ahí una delegación `NS` de `staging`);
+  esa parte queda fuera de Google Cloud y la hace él. El resto del DNS vive en Cloud DNS (FR-021).
+- Si el dominio tiene o tuvo ya otros registros en el registrador (correo, por ejemplo), el
+  propietario lo indica antes del cambio de servidores de nombres (FR-023). No se asume que no los
+  haya.
+- DNSSEC no forma parte de esta feature: se deja como decisión pendiente del propietario (el
+  registro `.es` lo admite y Cloud DNS lo ofrece, pero exige publicar el registro `DS` en el
+  registrador y dejar de usarlo mal puede romper la resolución del dominio).
+- `inserttask.es` y `www.inserttask.es` se aplican **solo a producción** (`pdlco-mytasks`).
+  Staging (`pdlco-mytasks-stg`) recibe únicamente el subdominio de ensayo `staging.inserttask.es`,
   decidido por el propietario para probar el mecanismo antes de producción (Principio IV). Los
   registros DNS de ambos los pone el propietario en el mismo proveedor.
 - El propietario ha decidido que el dominio se atiende a través de Firebase (Hosting) porque Cloud
@@ -276,11 +305,11 @@ la aprobación del propietario, y que no se ejecutó ningún comando manual de d
   (`pdlco-mytasks.web.app` y `pdlco-mytasks-stg.web.app`). Sirve la misma versión, **no redirige** a la
   canónica y no se anuncia: se necesita para validar el camino de Hosting antes de que exista el DNS y
   ya figura entre los dominios autorizados del inicio de sesión. La única dirección canónica anunciada
-  es `https://inserttask.com`; `run.app` y `web.app` son alias técnicos (la sesión y las preferencias
+  es `https://inserttask.es`; `run.app` y `web.app` son alias técnicos (la sesión y las preferencias
   locales son por dirección, así que quien las use verá su sesión separada de la del dominio propio).
 - Se cumple el flujo habitual: la feature pasa por staging y por la release a producción. El
-  dominio de ensayo (`staging.inserttask.com`) se pone en servicio y se valida en staging antes de la
-  release; la validación final de `inserttask.com` es en producción, por el propietario, tras el
+  dominio de ensayo (`staging.inserttask.es`) se pone en servicio y se valida en staging antes de la
+  release; la validación final de `inserttask.es` es en producción, por el propietario, tras el
   despliegue del pipeline.
 - Las personas usuarias son las ya invitadas; no se prevé tráfico que requiera dimensionado
   adicional.

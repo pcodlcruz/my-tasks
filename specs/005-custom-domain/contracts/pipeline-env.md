@@ -16,8 +16,8 @@ Composición (en este orden, sin duplicados, sin barra final):
 
 | Entorno | `CUSTOM_WEB_ORIGINS` | Resultado |
 |---|---|---|
-| `staging` | `https://staging.inserttask.com` | `run.app`, `<proyecto>.web.app`, `https://staging.inserttask.com` |
-| `production` | `https://inserttask.com` | `run.app`, `<proyecto>.web.app`, `https://inserttask.com` |
+| `staging` | `https://staging.inserttask.es` | `run.app`, `<proyecto>.web.app`, `https://staging.inserttask.es` |
+| `production` | `https://inserttask.es` | `run.app`, `<proyecto>.web.app`, `https://inserttask.es` |
 
 ### Reglas de la variable `CUSTOM_WEB_ORIGINS`
 
@@ -48,8 +48,8 @@ Ampliar `.github/scripts/tests/test_deploy_variable_check.py` (o una prueba herm
 | Caso | Resultado |
 |---|---|
 | Variable no definida (cualquier entorno): lista de dos orígenes | Pasa |
-| Staging con `https://staging.inserttask.com` | Pasa; lista de tres |
-| Producción con `https://inserttask.com` | Pasa; lista de tres |
+| Staging con `https://staging.inserttask.es` | Pasa; lista de tres |
+| Producción con `https://inserttask.es` | Pasa; lista de tres |
 | Staging con un origen que no empiece por `https://staging.`, o producción con uno que sí | Falla nombrando el valor (evita que un entorno herede el dominio del otro) |
 | Valor con `http://`, `*`, ruta, mayúsculas o espacio interno | Falla nombrando el valor |
 | Servicio de otro entorno (no contiene su `run.app`) | Falla (previa) |
@@ -62,11 +62,12 @@ Ampliar `.github/scripts/tests/test_deploy_variable_check.py` (o una prueba herm
 |---|---|---|
 | API `firebasehosting.googleapis.com` en `apis` | Sí | Sí |
 | Sitio de Hosting, versión y *release* (proveedor `google-beta` fijado) | Sí | Sí |
-| Dominios personalizados (variable del módulo) | `staging.inserttask.com` (ensayo, sin redirección) | `inserttask.com` + `www.inserttask.com` (redirige) |
-| `authorized_domains` | + `staging.inserttask.com` (`.web.app` ya incluido) | + `inserttask.com` |
-| `allowed_referrers` de la clave de API | + `https://<proyecto>.web.app/*` y `https://staging.inserttask.com/*` | + `https://<proyecto>.web.app/*` y `https://inserttask.com/*` |
+| Dominios personalizados (variable del módulo) | `staging.inserttask.es` (ensayo, sin redirección) | `inserttask.es` + `www.inserttask.es` (redirige) |
+| `authorized_domains` | + `staging.inserttask.es` (`.web.app` ya incluido) | + `inserttask.es` |
+| `allowed_referrers` de la clave de API | + `https://<proyecto>.web.app/*` y `https://staging.inserttask.es/*` | + `https://<proyecto>.web.app/*` y `https://inserttask.es/*` |
 | Protección contra borrado | `prevent_destroy` en sitio y dominios | Igual |
-| *Outputs* | Estado de cada dominio (`host_state`, `ownership_state`, `cert.state`, `issues`) y `required_dns_updates` | Igual |
+| Zona de Cloud DNS y registros (`TXT`, `A`; sin `AAAA`) | Zona `staging.inserttask.es` | Zona `inserttask.es` + `NS` de `staging` (variable) |
+| *Outputs* | Estado de cada dominio (`host_state`, `ownership_state`, `cert.state`, `issues`) y servidores de nombres de la zona | Igual |
 
 `test_env_roots_parity.py` debe seguir pasando: solo pueden diferir el dimensionado, los identificadores
 y la lista de dominios personalizados.
@@ -77,6 +78,8 @@ y la lista de dominios personalizados.
 |---|---|---|
 | `terraform-staging`, `terraform-production` | `roles/firebasehosting.admin` en su proyecto | Consola, siguiendo la guía de `infra/RUNBOOK.md`; verificación en solo lectura con el MCP |
 | `terraform-plan-staging`, `terraform-plan-production` | Permisos de lectura de Hosting añadidos al rol personalizado `mytasksPlanReader` (lista fijada por el primer `plan` real) | Actualizar `infra/iam/roles/plan-reader.yaml` y que el propietario lo aplique |
+| `terraform-staging`, `terraform-production` | API `dns.googleapis.com` en su proyecto y permisos para gestionar zonas y registros (`dns.managedZones.*`, `dns.resourceRecordSets.*`, `dns.changes.create` y `get`) | Consola, siguiendo la guía de `infra/RUNBOOK.md`; rol personalizado mínimo `mytasksDnsAdmin` (`infra/iam/roles/dns-admin.yaml`), creado por el propietario en cada proyecto; no se usa `roles/dns.admin` |
+| `terraform-plan-staging`, `terraform-plan-production` | Lecturas de DNS en `mytasksPlanReader`: `dns.managedZones.get`, `dns.managedZones.list`, `dns.resourceRecordSets.list`, `dns.changes.get` | Actualizar `infra/iam/roles/plan-reader.yaml` y que el propietario lo aplique en los dos proyectos |
 | `deployer-*` | **Sin cambios**: el pipeline de imágenes no toca Hosting | — |
 | `mytasks-ai-agent` | Sin cambios | — |
 
