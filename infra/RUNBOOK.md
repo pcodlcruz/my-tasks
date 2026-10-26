@@ -669,7 +669,7 @@ Tras desplegar por el pipeline, repetir en staging los escenarios 1, 4, 7, 9, 12
 
 ## 14. Dominio propio con Firebase Hosting (feature 005)
 
-Diseño en `specs/005-custom-domain/`. Esta sección recoge los permisos de partida (Phase 1) y, desde la Phase 4 (T036), el procedimiento completo: qué registros DNS poner y en qué orden, los plazos, el diagnóstico del certificado, cómo leer su estado, la renovación y cómo retirar un dominio.
+Diseño en `specs/005-custom-domain/`. Esta sección recoge los permisos de partida (Phase 1) y el procedimiento completo: el DNS vive en **Cloud DNS** (una zona por entorno, Phase 5), qué debe hacer el propietario en el registrador y en qué orden, los plazos, el diagnóstico del certificado, cómo leer su estado, la renovación y cómo retirar un dominio. El dominio es `inserttask.es` (un primer diseño usó `.com` por error; ver «Retirada de `staging.inserttask.com`»).
 
 ### Permisos de Hosting (T001, T003, T004)
 
@@ -680,7 +680,7 @@ Leído en solo lectura por el agente con el MCP de Google Cloud el 2026-10-25, a
 | API `firebasehosting.googleapis.com` | Activa | Activa |
 | `roles/firebasehosting.admin` en `terraform-<entorno>` | No concedido | No concedido |
 
-Lo que concede el propietario (guía: `specs/005-custom-domain/guia-propietario-hosting.md`): `roles/firebasehosting.admin` a `terraform-staging` y a `terraform-production` en su proyecto, y la variable no secreta `CUSTOM_WEB_ORIGINS` en los entornos de GitHub `staging` (`https://staging.inserttask.com`) y `production` (`https://inserttask.com`). No se concede nada a `deployer-*` ni a `mytasks-ai-agent`.
+Lo que concede el propietario (guía: `specs/005-custom-domain/guia-propietario-hosting.md`): `roles/firebasehosting.admin` a `terraform-staging` y a `terraform-production` en su proyecto, y la variable no secreta `CUSTOM_WEB_ORIGINS` en los entornos de GitHub `staging` (`https://staging.inserttask.es`) y `production` (`https://inserttask.es`). No se concede nada a `deployer-*` ni a `mytasks-ai-agent`.
 
 **Verificación posterior a la concesión (T004, 2026-10-25, solo lectura con el MCP)**:
 
@@ -693,70 +693,74 @@ En cada proyecto, `roles/firebasehosting.admin` lo tiene **únicamente** la cuen
 
 **Sitio de Hosting por defecto**: el propietario no lo ve en la consola de Firebase en ninguno de los dos proyectos (`pdlco-mytasks.web.app`, `pdlco-mytasks-stg.web.app`), pero la documentación de Firebase dice que ese sitio se crea solo (proyectos anteriores al 2026-10-15 y cualquier proyecto con la API de Identity Platform activa) y que no se puede cambiar ni borrar, y desde fuera no se distingue de uno inexistente. **Terraform no lo declara ni lo adopta**: versión, *release* y dominios apuntan a él por `hosting_site_id` (el id del proyecto). Comprobación previa a aprobar el primer `apply` (propietario, con sus credenciales): `firebase hosting:sites:list --project <proyecto>` en los dos proyectos; debe aparecer un sitio `DEFAULT_SITE` con el id del proyecto. Si no aparece, o lleva un sufijo, el `apply` falla en la versión de Hosting antes de cambiar nada más y se corrige en una PR (T022).
 
-### Qué declara el código (T032–T034)
+### Qué declara el código (T032–T034, T066–T067)
 
-Una lista `custom_domains` por entorno en `infra/envs/<entorno>/main.tf`; el módulo crea un `google_firebase_hosting_custom_domain` por elemento, con `wait_dns_verification = false` (el `apply` no espera al DNS) y `prevent_destroy`.
+Una lista `custom_domains` por entorno en `infra/envs/<entorno>/main.tf`; el módulo crea un `google_firebase_hosting_custom_domain` por elemento, con `wait_dns_verification = false` (el `apply` no espera al DNS). Además, `infra/modules/environment/dns.tf` crea la **zona pública de Cloud DNS** del entorno y los registros que Hosting necesita, que son deterministas y públicos:
 
-| Entorno | Dominios |
-|---|---|
-| Staging (`pdlco-mytasks-stg`) | `staging.inserttask.com` (ensayo, sin redirección) |
-| Producción (`pdlco-mytasks`) | `inserttask.com` (canónico, sirve la web) y `www.inserttask.com` (redirige con 301 al canónico) |
-
-Solo los dominios que sirven la web (no los que redirigen) se añaden a los dominios autorizados de Identity Platform y a los *referrers* de la clave de API web. El código no cambia nada de lo que ve un usuario hasta que exista el DNS.
-
-### Leer lo que pide Hosting (propietario)
-
-Tras aprobar el `apply` de un entorno, el resumen del job (`apply-staging` o `apply-production`, paso *Custom domains and DNS records*) muestra, por dominio, `host_state`, `ownership_state`, el estado del certificado, el número de `issues` y los registros DNS que Hosting pide (tipo, nombre, valor y acción). Son valores públicos. Si la tabla de registros sale vacía, la API aún no los ha calculado: léelos en la consola de Firebase (*Hosting → Dominios*, proyecto del entorno).
-
-### Registros DNS que debe poner el propietario
-
-1. **Primero staging, después producción** (el ensayo no es opcional: FR-020). Los registros de producción no se ponen hasta que `staging.inserttask.com` tenga el certificado activo.
-2. **Antes de añadir nada**, retira del proveedor de DNS los `A`, `AAAA` y `CNAME` previos del nombre (registros de «aparcado»). Si queda alguno distinto a los de Hosting, el certificado no se emite.
-3. Pon exactamente los registros que muestra el resumen:
-
-| Nombre | Tipo | Valor | Notas |
+| Entorno | Dominios de Hosting | Zona de Cloud DNS (proyecto) | Registros que escribe Terraform |
 |---|---|---|---|
-| `staging.inserttask.com` | `TXT` | `hosting-site=pdlco-mytasks-stg` (confirmar con el resumen de staging) | Propiedad del subdominio para el proyecto de staging. **Permanente** |
-| `staging.inserttask.com` | `A`, `AAAA` | Los que indique el resumen de staging | Dirigen el tráfico del ensayo |
-| `inserttask.com` | `TXT` | `hosting-site=pdlco-mytasks` (confirmar con el resumen de producción) | **Permanente** |
-| `inserttask.com` | `A`, `AAAA` | Los que indique el resumen de producción | |
-| `www.inserttask.com` | `A`, `AAAA` | Los que indique el resumen de producción | La redirección la hace Hosting |
-| `inserttask.com` | `CAA` | `0 issue "pki.goog"` y `0 issue "letsencrypt.org"` | **Solo si ya existen registros `CAA`**; si no hay ninguno, no se toca |
+| Staging | `staging.inserttask.es` (ensayo, sin redirección) | `staging.inserttask.es` (`pdlco-mytasks-stg`) | `TXT hosting-site=pdlco-mytasks-stg` y `A 199.36.158.100` en el apex de la zona |
+| Producción | `inserttask.es` (canónico) y `www.inserttask.es` (redirige con 301) | `inserttask.es` (`pdlco-mytasks`) | `TXT hosting-site=pdlco-mytasks`, `A 199.36.158.100` en el apex y en `www`, y el `NS` de `staging` (cuando se rellena, T074) |
 
-4. Comprueba que han propagado antes de esperar al certificado: `dig +short TXT inserttask.com`, `dig +short A inserttask.com` (y lo mismo con `staging.` y `www.`).
+**Nunca hay un registro `AAAA`**: Hosting sirve por IPv4 y, con un `AAAA` en la zona, no emite el certificado. Solo los dominios que sirven la web (no los que redirigen) se añaden a los dominios autorizados de Identity Platform y a los *referrers* de la clave de API web. El código no cambia nada de lo que ve un usuario hasta que el propietario delegue en el registrador.
+
+### Permisos de Cloud DNS (propietario, FR-024)
+
+- API `dns.googleapis.com` activa en los dos proyectos (Terraform la habilita con `apis`; el rol de abajo permite usarla).
+- Rol personalizado **`mytasksDnsAdmin`** (`infra/iam/roles/dns-admin.yaml`), creado por el propietario en cada proyecto y concedido a `terraform-staging` / `terraform-production` en su proyecto. No se usa `roles/dns.admin`, que alcanza además zonas privadas, políticas y la política IAM.
+- Lecturas de DNS añadidas a `mytasksPlanReader` (`dns.managedZones.get`, `dns.managedZones.list`, `dns.resourceRecordSets.list`, `dns.changes.get`): **sin ellas el plan de solo lectura da 403** (como pasó con Hosting). Hay que actualizar el rol en los dos proyectos antes de fusionar la PR de la fase.
+- Los comandos están en `specs/005-custom-domain/guia-propietario-hosting.md`. Verificación posterior en solo lectura con el MCP (T063): ver más abajo.
+
+### Leer lo que hay que delegar (propietario)
+
+Tras aprobar el `apply` de un entorno, el resumen del job (`apply-staging` o `apply-production`, paso *Custom domains and DNS records*) muestra, por dominio, `host_state`, `ownership_state`, el estado del certificado y el número de `issues`, y la lista de **servidores de nombres de la zona** (`dns_name_servers`). Los registros que Hosting pide (`required_dns_updates`) llegan vacíos justo tras el alta y solo sirven de contraste: la fuente de verdad es la zona.
+
+### Procedimiento del propietario en el registrador
+
+1. **Antes de nada**, confirma si `inserttask.es` tiene otros registros en el registrador que deban conservarse (correo `MX`/`TXT`/`SPF`/`DKIM`, verificaciones). Todo lo que haya que conservar debe añadirse a la zona de producción **antes** del paso 4 (FR-023); si no, se pierde al cambiar los servidores de nombres.
+2. **Ensayo en staging (el primer paso real, FR-020)**: en el registrador, retira cualquier registro previo de `staging` y añade un registro `NS` para `staging` con los servidores de nombres de la zona `staging.inserttask.es` (los del resumen de `apply-staging`). No toques el apex, `www` ni los servidores de nombres del dominio.
+3. Comprueba la delegación: `dig +short NS staging.inserttask.es`, `dig +short TXT staging.inserttask.es` y `dig +short A staging.inserttask.es`. No debe haber `AAAA`: `dig +short AAAA staging.inserttask.es` debe salir vacío. Espera a `OWNERSHIP_ACTIVE` y `CERT_ACTIVE` y valida el ensayo.
+4. **Release (producción)**: tras el `apply` de producción, cambia en el registrador los **servidores de nombres del dominio** `inserttask.es` a los de la zona de producción (resumen de `apply-production`) y retira entonces el `NS` de `staging` que el registrador tenía durante el ensayo (la zona de producción ya delega `staging`). Comprueba con `dig +short NS inserttask.es` y `dig +short A inserttask.es` (y `www.`).
 5. Anota el tiempo de trabajo efectivo y si necesitaste ayuda adicional (SC-008).
+
+Si el registrador no permite añadir un `NS` para un subdominio mientras el resto sigue en él, para y avísame: el ensayo tendría que hacerse de otra forma (research R16).
 
 ### Plazos
 
 - Propagación del DNS y emisión del certificado: de minutos a **24 horas**.
 - Propiedad: si no pasa a `OWNERSHIP_ACTIVE` en **30 días** desde que se creó el dominio, Hosting lo elimina. Si ocurre, el siguiente `plan` vuelve a proponer su alta.
+- Cambio de servidores de nombres: puede tardar hasta 48 h en propagar según el registrador (el TTL de los `NS` del dominio lo fija el registro `.es`, no la zona).
 
 ### Diagnóstico (research R12)
 
 | Síntoma | Causa típica | Acción |
 |---|---|---|
-| «Needs setup» | `A`/`AAAA` sin propagar o desafío SSL caducado | Esperar hasta 24 h; si persiste, repasar los registros |
+| «Needs setup» | Delegación o `A` sin propagar, o desafío SSL caducado | Esperar hasta 24 h; si persiste, repasar `dig NS/TXT/A` y que no haya `AAAA` |
 | «Pending» | `CAA` demasiado restrictivo o demasiados subdominios | Permitir `pki.goog` y `letsencrypt.org` |
-| `HOST_CONFLICT` / `HOST_MISMATCH` | Quedan `A`/`AAAA` de otro proveedor | Retirarlos |
-| `OWNERSHIP_MISSING` / `OWNERSHIP_MISMATCH` | Falta o sobra un `TXT` | Dejar solo el del proyecto del entorno |
+| `HOST_CONFLICT` / `HOST_MISMATCH` | Queda algún `AAAA` o un `A` de otro sitio (el registrador sigue sirviendo registros antiguos) | Comprobar que los servidores de nombres son los de la zona y que no hay `AAAA` |
+| `OWNERSHIP_MISSING` / `OWNERSHIP_MISMATCH` | La zona no está delegada todavía, o falta o sobra un `TXT` | Comprobar la delegación (`dig NS`); dejar solo el `TXT` del proyecto del entorno |
 | `OWNERSHIP_CONFLICT` en staging o en producción | Hosting no admite a la vez la propiedad del apex y la del subdominio en dos proyectos | **Parar** y revisar el diseño con el agente (el dominio de ensayo tendría que cambiar) |
 | Estado del certificado `CERT_EXPIRING_SOON` durante días | Se retiró el `TXT` o cambió el DNS | Restituir los registros |
 
 ### Renovación
 
-El certificado se renueva solo, sin intervención. Lo rompe retirar el `TXT` de propiedad o cambiar los `A`/`AAAA` a otro proveedor: nunca se tocan estos registros sin retirar antes el dominio de Hosting (siguiente apartado). Vigila `CERT_EXPIRING_SOON` en el resumen del job o en la consola.
+El certificado se renueva solo, sin intervención. Lo rompe retirar el `TXT` de propiedad o cambiar los servidores de nombres a otro proveedor: nunca se tocan estos registros ni la zona sin retirar antes el dominio de Hosting (siguiente apartado). Vigila `CERT_EXPIRING_SOON` en el resumen del job o en la consola.
 
 ### Retirar un dominio
 
 1. PR que quita el elemento de `custom_domains` del entorno **y** el `prevent_destroy` de `hosting.tf` en la misma PR (el borrado debe ser deliberado). El `apply` pide tu aprobación.
 2. La aplicación sigue en `https://<proyecto>.web.app` y en su dirección `run.app`, que no se tocan (FR-011).
-3. Después, y solo después, retira los registros del proveedor de DNS.
+3. Después, y solo después, retira los registros de la zona (la zona tiene `prevent_destroy`: es otro cambio deliberado).
 4. Restituye `prevent_destroy` en una PR posterior si quedan dominios.
 
 ### Aviso a las personas usuarias
 
-La sesión y las preferencias locales (como la apariencia) son **por origen**: la primera vez que alguien entra por `inserttask.com` tiene que iniciar sesión de nuevo, y la apariencia se reconstruye desde su perfil guardado. No se pierde ningún dato.
+La sesión y las preferencias locales (como la apariencia) son **por origen**: la primera vez que alguien entra por `inserttask.es` tiene que iniciar sesión de nuevo, y la apariencia se reconstruye desde su perfil guardado. No se pierde ningún dato.
 
 ### Permisos de lectura de Hosting en `mytasksPlanReader` (2026-10-26)
 
 Con la versión de Hosting ya en el estado de staging (Phase 3), el plan de solo lectura de la PR de la Phase 4 falló con `403 … FirebaseHostingVersion`: los permisos de Hosting son de nivel de sitio y `mytasksPlanReader` no incluía `firebasehosting.sites.get` ni `firebasehosting.sites.list`. Añadidos a `infra/iam/roles/plan-reader.yaml` (solo lectura; no dan acceso a datos) y actualizado el rol por el propietario con `gcloud iam roles update` en los dos proyectos. Estado: **pendiente de que el propietario lo ejecute** (guía: `specs/005-custom-domain/guia-propietario-hosting.md`).
+
+### Retirada de `staging.inserttask.com` (2026-10-26)
+
+La Phase 4 aplicó en staging el dominio `staging.inserttask.com`, escrito con el dominio de primer nivel equivocado. Nunca llegó a tener DNS. La Phase 5 lo retira quitándolo de la lista y levantando `prevent_destroy` del recurso de dominio en la misma PR (el borrado es deliberado); `prevent_destroy` se restaura en una PR propia (T073) antes de la release. El plan de solo lectura de esa PR debe mostrar la baja de `staging.inserttask.com` y el alta de la zona, los registros y `staging.inserttask.es`.

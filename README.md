@@ -56,12 +56,13 @@ project id ficticio `demo-mytasks`: no hace falta ninguna credencial ni se toca 
 
 | | Staging | Producción |
 |---|---|---|
-| Dirección pública | `https://staging.inserttask.com` (ensayo) | `https://inserttask.com` (`www.inserttask.com` redirige a ella) |
+| Dirección pública | `https://staging.inserttask.es` (ensayo) | `https://inserttask.es` (`www.inserttask.es` redirige a ella) |
 | Firebase Hosting | `https://pdlco-mytasks-stg.web.app` | `https://pdlco-mytasks.web.app` |
 | Cloud Run (web) | `https://mytasks-web-838389521553.europe-southwest1.run.app` | `https://mytasks-web-2195266360.europe-southwest1.run.app` |
 
-Los dominios propios solo responden cuando el propietario ha puesto los registros DNS y Hosting ha
-emitido el certificado; hasta entonces la aplicación sigue en las direcciones de Hosting y de Cloud
+El DNS vive en Cloud DNS (una zona por entorno, gestionada por Terraform). Los dominios propios solo
+responden cuando el propietario ha delegado la zona en el registrador y Hosting ha emitido el
+certificado; hasta entonces la aplicación sigue en las direcciones de Hosting y de Cloud
 Run, que no dejan de funcionar nunca. El procedimiento está en el
 [runbook](infra/RUNBOOK.md#14-dominio-propio-con-firebase-hosting-feature-005).
 
