@@ -61,11 +61,11 @@ Ampliar `.github/scripts/tests/test_deploy_variable_check.py` (o una prueba herm
 | Elemento | Staging | Producción |
 |---|---|---|
 | API `firebasehosting.googleapis.com` en `apis` | Sí | Sí |
-| Sitio de Hosting, versión y *release* (proveedor `google-beta` fijado) | Sí | Sí |
+| Versión y *release* de Hosting sobre el sitio por defecto, que no se declara (proveedor `google-beta` fijado) | Sí | Sí |
 | Dominios personalizados (variable del módulo) | `staging.inserttask.es` (ensayo, sin redirección) | `inserttask.es` + `www.inserttask.es` (redirige) |
 | `authorized_domains` | + `staging.inserttask.es` (`.web.app` ya incluido) | + `inserttask.es` |
 | `allowed_referrers` de la clave de API | + `https://<proyecto>.web.app/*` y `https://staging.inserttask.es/*` | + `https://<proyecto>.web.app/*` y `https://inserttask.es/*` |
-| Protección contra borrado | `prevent_destroy` en sitio y dominios | Igual |
+| Protección contra borrado | `prevent_destroy` en la zona de Cloud DNS y en los dominios (el de los dominios se levantó a propósito en la Fase 5 y lo restaura T073) | Igual |
 | Zona de Cloud DNS y registros (`TXT`, `A`; sin `AAAA`) | Zona `staging.inserttask.es` | Zona `inserttask.es` + `NS` de `staging` (variable) |
 | *Outputs* | Estado de cada dominio (`host_state`, `ownership_state`, `cert.state`, `issues`) y servidores de nombres de la zona | Igual |
 

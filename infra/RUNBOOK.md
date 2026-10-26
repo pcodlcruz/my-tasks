@@ -761,6 +761,7 @@ El certificado se renueva solo, sin intervención. Lo rompe retirar el `TXT` de 
 1. PR que quita el elemento de `custom_domains` del entorno **y** el `prevent_destroy` de `hosting.tf` en la misma PR (el borrado debe ser deliberado). El `apply` pide tu aprobación.
 2. La aplicación sigue en `https://<proyecto>.web.app` y en su dirección `run.app`, que no se tocan (FR-011).
 3. Después, y solo después, retira los registros de la zona (la zona tiene `prevent_destroy`: es otro cambio deliberado).
+   **Delegación de `staging`**: antes de borrar la zona `staging.inserttask.es` (o retirar el proyecto de staging), quita `dns_delegations` del root de producción y aplícalo; solo después levanta `prevent_destroy` de la zona de staging. Si no, la zona de producción seguiría delegando `staging` a servidores que ya no responden por él y un tercero podría crear una zona del mismo nombre y servir contenido bajo un subdominio del dominio de producción (MED-001 de `specs/005-custom-domain/security-review-final.md`).
 4. Restituye `prevent_destroy` en una PR posterior si quedan dominios.
 
 ### Aviso a las personas usuarias
