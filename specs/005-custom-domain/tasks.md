@@ -253,7 +253,7 @@ abiertos salvo los de la puesta en servicio (Phase 7).
 
 - [ ] T061 [US5] Abrir la PR documental de cierre de staging (`feature/005-custom-domain-cierre`, a `develop`, tras fusionar las fases 1–6) con `specs/005-custom-domain/validacion-staging.md`: resultados de T029, T030 y T043; marcar T061 y actualizar `definition-of-done.md`. La fusiona el propietario **antes** de crear la release (así la release la incluye). El ensayo del dominio de staging no se registra aquí: ocurre tras la release (T055–T060) y va con T053
 
-- [ ] T073 [US5] Restaurar `prevent_destroy` en el recurso de dominio de `hosting.tf` (retirado deliberadamente en T067 para sustituir el `.com`) en una PR propia, con el plan de solo lectura sin cambios en recursos; debe fusionarse antes de crear la release
+- [X] T073 [US5] Restaurar `prevent_destroy` en el recurso de dominio de `hosting.tf` (retirado deliberadamente en T067 para sustituir el `.com`) en una PR propia, con el plan de solo lectura sin cambios en recursos; debe fusionarse antes de crear la release
 - [X] T074 [US4] Con el `apply` de staging de la Phase 5 hecho, rellenar la variable de producción con los servidores de nombres de la zona `staging.inserttask.es` (valores públicos leídos del resumen del `apply`) en una PR propia, con el plan de solo lectura de producción mostrando solo el alta del `NS` de `staging`; en la misma PR se amplía el test de paridad (T064) para exigir que la variable no quede vacía. Debe fusionarse antes de crear la release: sin ella, al cambiar los servidores de nombres en T048 `staging.inserttask.es` dejaría de resolver
 
 **Checkpoint**: la feature queda lista para release con el `NS` de `staging` ya en el código de producción.

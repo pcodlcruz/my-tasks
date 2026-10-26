@@ -218,7 +218,7 @@ check("the custom domain resource iterates over var.custom_domains", "for_each" 
 check("the custom domain resource uses the beta provider", bool(re.search(r"provider\s*=\s*google-beta", resource_text)))
 check("the custom domain resource does not wait for the DNS", bool(re.search(r"wait_dns_verification\s*=\s*false", resource_text)))
 check("the custom domain resource follows the redirect_to of each domain", "redirect_target" in resource_text and "redirect_to" in resource_text)
-# prevent_destroy of the custom domain is lifted while the .com domain is withdrawn and restored by T073.
+check("the custom domain resource is protected against destroy", bool(re.search(r"prevent_destroy\s*=\s*true", resource_text)))
 outputs_tf = (MODULE / "outputs.tf").read_text(encoding="utf-8")
 check(
     "the module outputs the state and the required DNS records of each domain",
