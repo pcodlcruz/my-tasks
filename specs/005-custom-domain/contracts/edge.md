@@ -36,7 +36,7 @@ política, sin relajar nada) y se anota en la revisión de seguridad.
 
 El DNS vive en Cloud DNS, una zona pública por entorno, y los registros los escribe Terraform. La
 documentación de Hosting fija los valores: `TXT hosting-site=<siteId>` y `A 199.36.158.100`, y **ningún
-`AAAA`**. Lo que sigue es lo que debe resolverse; lo único que hace el propietario es delegar (final
+`AAAA`**. Lo que sigue es lo que debe resolverse; lo único que hace el propietario es cambiar los servidores de nombres (final
 de esta sección). Forma de lo que se publica:
 
 | Zona | Nombre | Tipo | Valor | Notas |
@@ -54,13 +54,12 @@ permitir `pki.goog` y `letsencrypt.org`; si no había ninguno, no se declara nin
 
 **Lo que hace el propietario (FR-016)**, siempre con los valores de las salidas de Terraform:
 
-1. **Ensayo (antes de la release)**: en el registrador, un registro `NS` de `staging` con los
-   servidores de nombres de la zona de staging; antes, retirar cualquier registro previo de `staging`.
-2. **Release**: confirmar que no hay otros registros que conservar (FR-023) y cambiar los servidores de
-   nombres del dominio a los de la zona de producción; entonces retirar el `NS` de `staging` del
-   registrador (la zona de producción ya delega).
+1. **Release**: confirmar que no hay otros registros que conservar (FR-023) y cambiar los servidores de
+   nombres del dominio a los de la zona de producción. La zona de producción ya delega `staging`, así que
+   no se añade ningún `NS` en el registrador (no admite `NS` de subdominio).
 
-Los registros de staging existen antes que los de producción (FR-020).
+Los registros de staging existen antes que los de producción, pero `staging.inserttask.es` solo resuelve
+en público tras ese cambio; se valida primero y después `inserttask.es` (FR-020).
 
 ## 4. Inicio de sesión desde el dominio propio
 

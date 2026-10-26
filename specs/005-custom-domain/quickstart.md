@@ -5,8 +5,10 @@
 
 Guía para demostrar de extremo a extremo que la feature funciona. Cada escenario indica **dónde** se
 ejecuta. Todo el camino (Hosting, inicio de sesión, CORS y, con el subdominio `staging.inserttask.es`,
-también la propiedad DNS y el certificado) se prueba antes en **staging**, que usa los mismos recursos
-que producción (Principio IV). Solo `inserttask.es` y `www` existen únicamente en producción.
+también la propiedad DNS y el certificado) se prueba en **staging**, que usa los mismos recursos que
+producción (Principio IV). Hosting, inicio de sesión y CORS, antes de la release; el subdominio
+`staging.inserttask.es` solo puede resolver tras el cambio de servidores de nombres de producción, así que
+su ensayo (A2) va justo después, antes de dar por buena la validación de `inserttask.es`.
 
 ## Prerrequisitos
 
@@ -14,7 +16,7 @@ que producción (Principio IV). Solo `inserttask.es` y `www` existen únicamente
   solo lectura.
 - Variable `CUSTOM_WEB_ORIGINS` en cada entorno de GitHub: `https://staging.inserttask.es` en
   `staging` y `https://inserttask.es` en `production`.
-- Acceso al registrador de `inserttask.es` (solo para delegar `NS`; el DNS vive en Cloud DNS, FR-021) y la
+- Acceso al registrador de `inserttask.es` (solo para cambiar los servidores de nombres; no admite `NS` de subdominio, y el DNS vive en Cloud DNS, FR-021) y la
   confirmación de si el dominio tiene otros registros que conservar (FR-023).
 - Una cuenta de Google invitada y otra no invitada en cada entorno.
 
@@ -42,18 +44,20 @@ que producción (Principio IV). Solo `inserttask.es` y `www` existen únicamente
    `web.app` no debe superar en más de 150 ms la de `run.app`. Repetir con
    `staging.inserttask.es` en el ensayo (E4) y con `inserttask.es` en el escenario 14.
 
-## A2. Ensayo del dominio en staging: `staging.inserttask.es` (antes de la release; FR-020, SC-009)
+## A2. Ensayo del dominio en staging: `staging.inserttask.es` (tras el cambio de servidores de nombres de producción; FR-020, SC-009)
 
-Mismo mecanismo que producción, con otro proyecto. Si algo falla aquí, se corrige antes de crear
-ningún dominio de producción.
+Mismo mecanismo que producción, con otro proyecto. El registrador no admite un `NS` de subdominio, así que
+`staging` se delega desde la zona de producción y este ensayo va **después** del paso 12 y **antes** de dar
+por buena la validación de `inserttask.es` (paso 14 en adelante). Si algo falla aquí, se retira el dominio
+afectado antes de servir tráfico.
 
 - **E1. Leer la zona de staging**: de las salidas de Terraform de staging, los servidores de nombres de la
   zona `staging.inserttask.es`, y comprobar con una consulta DNS directa a uno de ellos que el `TXT` y el
-  `A` están publicados (y que no hay `AAAA`).
-- **E2. Delegación (el propietario)**: en el registrador, añadir el registro `NS` de `staging` con esos
-  servidores de nombres, retirando antes cualquier registro previo de `staging`. Seguir solo la guía de
-  la RUNBOOK §14 y anotar el tiempo de trabajo efectivo y si hizo falta ayuda adicional (SC-008).
-  Comprobar con una consulta DNS pública que `staging.inserttask.es` resuelve a Hosting.
+  `A` están publicados (y que no hay `AAAA`). Se puede hacer antes de la release.
+- **E2. Delegación**: tras el cambio de servidores de nombres del paso 12, comprobar con una consulta
+  DNS pública que `staging.inserttask.es` resuelve a Hosting a través de la zona de producción. El
+  propietario no hace nada más en el registrador; anotar el tiempo de trabajo efectivo y si necesitó
+  ayuda adicional (SC-008).
 - **E3. Propiedad compartida entre proyectos**: `ownership_state` de staging llega a `OWNERSHIP_ACTIVE`
   sin `OWNERSHIP_CONFLICT`/`MISMATCH`, aunque el apex acabe perteneciendo al proyecto de producción
   (research R7). Si hay conflicto, parar y revisar el diseño con el propietario.
@@ -73,8 +77,7 @@ ningún dominio de producción.
     `NS` de `staging` y que no hay `AAAA`.
 12. **Cambio de servidores de nombres (el propietario)**: confirmar que no hay otros registros que
     conservar (FR-023) y cambiar en el registrador los servidores de nombres del dominio a los de la
-    zona de producción; retirar entonces la delegación de `staging` que el registrador tenía durante el
-    ensayo. Comprobar con una consulta DNS pública (`NS` y `A` de `inserttask.es`).
+    zona de producción; la delegación de `staging` ya la lleva la zona de producción. Comprobar con una consulta DNS pública (`NS` y `A` de `inserttask.es`).
 13. **Esperar y consultar el estado**: `ownership_state` pasa a `OWNERSHIP_ACTIVE` y `cert.state` a
     `CERT_ACTIVE` (hasta 24 h; normalmente horas). No debe pasarse de 30 días sin propiedad activa.
 14. **Dominio en servicio (US1, SC-001)**: abrir `https://inserttask.es/` en Chrome, Safari, Firefox y
@@ -108,6 +111,6 @@ terraform -chdir=infra/envs/production fmt -check
 
 ## Resultado esperado
 
-Los escenarios 1–9 y E1–E6 en verde en staging antes de la release, y los 10–19 en verde en producción
-antes de dar la feature por lista. Los escenarios 4, 5, 14, 16 y 17 se registran en
+Los escenarios 1–9 en verde en staging antes de la release; tras ella y el cambio de servidores de nombres, E1–E6 en
+staging y luego los 10–19 en producción antes de dar la feature por lista. Los escenarios 4, 5, 14, 16 y 17 se registran en
 `specs/005-custom-domain/validacion-produccion.md` por el propietario (como en las features 003 y 004).

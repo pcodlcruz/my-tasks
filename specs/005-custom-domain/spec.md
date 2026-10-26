@@ -148,10 +148,10 @@ la aprobación del propietario, y que no se ejecutó ningún comando manual de d
   sin errores en la consola.
 - **Staging**: no recibe el dominio de producción ni sus redirecciones; tiene su propio subdominio
   de ensayo, `staging.inserttask.es`, que ejercita el mismo mecanismo (propiedad DNS, certificado,
-  inicio de sesión) antes de tocar producción (Principio IV).
+  inicio de sesión) y se valida antes de dar por buena la validación de producción (Principio IV).
 - **Propiedad del dominio compartida entre proyectos**: `inserttask.es` pertenece al proyecto de
   producción y `staging.inserttask.es` al de staging; Hosting debe aceptar ambas propiedades a la
-  vez. Si no lo hiciera, el ensayo lo detecta antes de producción y se revisa el diseño.
+  vez. Si no lo hiciera, el ensayo lo detecta antes de servir tráfico y se retira el dominio afectado.
 - **Certificado que no se puede emitir** (p. ej. por restricciones de registros CAA en el
   dominio): la guía debe indicar cómo reconocer la causa.
 - **Retirada futura del dominio**: debe poder quitarse sin dejar la aplicación inaccesible por su
@@ -193,14 +193,16 @@ la aprobación del propietario, y que no se ejecutó ningún comando manual de d
   su propio dominio de ensayo, `staging.inserttask.es`, con certificado gratuito y gestionado, sin
   recibir el dominio de producción ni la redirección de `www`.
 - **FR-020**: El dominio de ensayo de staging MUST ponerse en servicio y validarse (propiedad
-  activa, certificado activo, inicio de sesión y funciones habituales) **antes** de crear los
-  dominios de producción, de modo que el recurso y el flujo de DNS se prueben primero en staging.
+  activa, certificado activo, inicio de sesión y funciones habituales) **antes** de dar por validado
+  `inserttask.es`. Como el registrador no admite un `NS` para un subdominio (2026-10-26), `staging` se
+  delega desde la zona de producción y el ensayo ocurre tras el cambio de servidores de nombres, no
+  antes de crear los dominios de producción.
 - **FR-015**: La declaración del dominio y su configuración MUST gestionarse como infraestructura
   como código, con plan revisable y aprobación explícita del propietario antes de aplicar
   (Principios V, VI y VII); el agente no ejecuta operaciones reales sobre Google Cloud fuera del
   MCP oficial.
 - **FR-016**: Los pasos que solo puede hacer el propietario (cambiar los servidores de nombres en
-  el registrador del dominio y, mientras dure el ensayo, delegar `staging` desde él) MUST
+  el registrador del dominio; `staging` se delega desde la zona de producción) MUST
   documentarse con valores exactos, el orden y cómo comprobar cada uno. El alta de los registros
   de Hosting ya no es un paso manual (FR-022).
 - **FR-017**: La documentación operativa MUST incluir cómo detectar y resolver un certificado
@@ -263,10 +265,10 @@ la aprobación del propietario, y que no se ejecutó ningún comando manual de d
 - **SC-007**: Tras la publicación, el 100 % de las solicitudes `http://` y de la variante no
   canónica acaban en la dirección canónica `https://`.
 - **SC-008**: El propietario, siguiendo solo la guía de la RUNBOOK y sin ayuda adicional, deja el
-  dominio de ensayo de staging con los registros DNS puestos en menos de 1 hora de trabajo efectivo
+  dominio con sus servidores de nombres cambiados en menos de 1 hora de trabajo efectivo
   (sin contar la propagación DNS); el tiempo y si necesitó ayuda se anotan en el registro del ensayo.
 - **SC-009**: `staging.inserttask.es` llega a certificado activo y pasa la validación de
-  funciones y de inicio de sesión antes de que exista ningún dominio de producción.
+  funciones y de inicio de sesión antes de dar por validado `inserttask.es` (ambos tras el cambio de servidores de nombres).
 
 - **SC-010**: Un resolvedor público devuelve, para `inserttask.es` y `staging.inserttask.es`, los
   servidores de nombres de Cloud DNS del entorno correspondiente y los registros declarados en
@@ -276,8 +278,8 @@ la aprobación del propietario, y que no se ejecutó ningún comando manual de d
 ## Assumptions
 
 - El propietario es el titular del dominio y puede cambiar sus servidores de nombres en el
-  registrador donde lo compró (y, durante el ensayo, añadir ahí una delegación `NS` de `staging`);
-  esa parte queda fuera de Google Cloud y la hace él. El resto del DNS vive en Cloud DNS (FR-021).
+  registrador donde lo compró (el registrador **no** admite un `NS` de subdominio, así que `staging`
+  se delega desde la zona de producción); esa parte queda fuera de Google Cloud y la hace él. El resto del DNS vive en Cloud DNS (FR-021).
 - Si el dominio tiene o tuvo ya otros registros en el registrador (correo, por ejemplo), el
   propietario lo indica antes del cambio de servidores de nombres (FR-023). No se asume que no los
   haya.
@@ -286,8 +288,8 @@ la aprobación del propietario, y que no se ejecutó ningún comando manual de d
   registrador y dejar de usarlo mal puede romper la resolución del dominio).
 - `inserttask.es` y `www.inserttask.es` se aplican **solo a producción** (`pdlco-mytasks`).
   Staging (`pdlco-mytasks-stg`) recibe únicamente el subdominio de ensayo `staging.inserttask.es`,
-  decidido por el propietario para probar el mecanismo antes de producción (Principio IV). Los
-  registros DNS de ambos los pone el propietario en el mismo proveedor.
+  decidido por el propietario para probar el mecanismo (Principio IV). Los registros DNS de ambos
+  los escribe Terraform en Cloud DNS.
 - El propietario ha decidido que el dominio se atiende a través de Firebase (Hosting) porque Cloud
   Run está en `europe-southwest1` (Madrid), donde el mapeo de dominios nativo no está disponible.
   La forma exacta (qué región de Cloud Run admite el encaminamiento, si hay que cambiar la
@@ -308,8 +310,8 @@ la aprobación del propietario, y que no se ejecutó ningún comando manual de d
   es `https://inserttask.es`; `run.app` y `web.app` son alias técnicos (la sesión y las preferencias
   locales son por dirección, así que quien las use verá su sesión separada de la del dominio propio).
 - Se cumple el flujo habitual: la feature pasa por staging y por la release a producción. El
-  dominio de ensayo (`staging.inserttask.es`) se pone en servicio y se valida en staging antes de la
-  release; la validación final de `inserttask.es` es en producción, por el propietario, tras el
+  dominio de ensayo (`staging.inserttask.es`) se valida en staging tras el cambio de servidores de nombres,
+  antes de la validación final de `inserttask.es`, que es en producción, por el propietario, tras el
   despliegue del pipeline.
 - Las personas usuarias son las ya invitadas; no se prevé tráfico que requiera dimensionado
   adicional.
