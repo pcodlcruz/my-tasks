@@ -25,7 +25,7 @@ hace a mano.
 | Ruta | Qué contiene |
 |---|---|
 | `platform/` | Plataforma del proyecto de producción: federación de identidad, Artifact Registry, bucket de estado y cuentas `terraform-*`, `terraform-plan-*` y `deployer-production` |
-| `modules/environment/` | Módulo de entorno reutilizado por staging y producción: Firestore, Identity Platform, servicios de Cloud Run y sus cuentas de ejecución |
+| `modules/environment/` | Módulo de entorno reutilizado por staging y producción: Firestore, Identity Platform, servicios de Cloud Run y sus cuentas de ejecución, Firebase Hosting con sus dominios propios y la zona de Cloud DNS (`dns.tf`) |
 | `envs/staging/` | Instancia el módulo con los valores de staging y adopta sus cuentas del pipeline |
 | `envs/production/` | Lo mismo para producción |
 | `iam/roles/` | Definiciones de los roles personalizados que concede el propietario (no los aplica Terraform) |
@@ -72,7 +72,8 @@ otro producto). Solo existen en `hashicorp/google-beta`, por eso el módulo `env
 al GA y cada raíz lo configura igual que a él (`providers.tf`). Reglas para no ampliar su uso sin querer:
 
 - Se usa **únicamente** en `modules/environment/hosting.tf` (con `provider = google-beta`): la versión y el
-  *release* de Hosting y, en la fase 4 de la feature 005, los dominios personalizados. Todo lo demás sigue
+  *release* de Hosting y los dominios personalizados (feature 005). La zona de Cloud DNS y sus registros
+  (`dns.tf`) van en el proveedor GA. Todo lo demás sigue
   en el proveedor GA.
 - Va fijado a la **misma línea que el GA** (`~> 8.6.0`). Su *lockfile* es idéntico en `staging` y
   `production` (lo exige `.github/scripts/tests/test_env_roots_parity.py`) y coincide con el de
