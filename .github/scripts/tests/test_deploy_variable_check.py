@@ -76,8 +76,8 @@ results = [
     # that write, so a service that still has the old single value must pass, and so must one
     # that already has the longer list; one that does not list this environment's web must not.
     run({**GOOD_API, "CORS_ORIGINS": f"{WEB},https://pdlco-mytasks-stg.web.app"}, GOOD_WEB, "API with the list already written", True),
-    run({**GOOD_API, "CORS_ORIGINS": f"https://pdlco-mytasks-stg.web.app,{WEB},https://staging.inserttask.com"}, GOOD_WEB, "API with the web in the middle of the list", True),
-    run({**GOOD_API, "CORS_ORIGINS": "https://pdlco-mytasks-stg.web.app,https://staging.inserttask.com"}, GOOD_WEB, "API whose list lacks the web of this environment", False, "CORS_ORIGINS (expected"),
+    run({**GOOD_API, "CORS_ORIGINS": f"https://pdlco-mytasks-stg.web.app,{WEB},https://staging.inserttask.es"}, GOOD_WEB, "API with the web in the middle of the list", True),
+    run({**GOOD_API, "CORS_ORIGINS": "https://pdlco-mytasks-stg.web.app,https://staging.inserttask.es"}, GOOD_WEB, "API whose list lacks the web of this environment", False, "CORS_ORIGINS (expected"),
     run({**GOOD_API, "CORS_ORIGINS": f"{WEB}.evil.example"}, GOOD_WEB, "API whose entry only starts like the web", False, "CORS_ORIGINS (expected"),
     run({**GOOD_API, "CORS_ORIGINS": "https://mytasks-web-2195266360.europe-southwest1.run.app,https://pdlco-mytasks.web.app"}, GOOD_WEB, "API holding the production list", False, "CORS_ORIGINS (expected"),
     run({k: v for k, v in GOOD_API.items() if k != "CORS_ORIGINS"}, GOOD_WEB, "API without CORS_ORIGINS", False, "missing required variable(s): CORS_ORIGINS"),

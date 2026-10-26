@@ -127,3 +127,72 @@ gcloud iam roles update mytasksPlanReader --project=pdlco-mytasks --file=infra/i
 ```
 
 No hay que volver a conceder el rol. Después, relanza el job `terraform-validate` de la PR (*Re-run failed jobs*).
+
+---
+
+## Fase 5 (2026-10-26): Cloud DNS y dominio `inserttask.es` (T062, T065)
+
+El dominio es **`inserttask.es`** y el DNS pasa a **Cloud DNS** (una zona por entorno, escrita por Terraform). Tú solo tocas el registrador una vez por entorno. Los pasos 1–4 son **antes de fusionar** la PR de la Fase 5; el 5 es en la release.
+
+Valores:
+
+| Dato | Staging | Producción |
+|---|---|---|
+| Proyecto | `pdlco-mytasks-stg` | `pdlco-mytasks` |
+| Cuenta de Terraform | `terraform-staging@pdlco-mytasks-stg.iam.gserviceaccount.com` | `terraform-production@pdlco-mytasks.iam.gserviceaccount.com` |
+| Zona de Cloud DNS | `staging.inserttask.es` | `inserttask.es` |
+| `CUSTOM_WEB_ORIGINS` | `https://staging.inserttask.es` | `https://inserttask.es` |
+
+### Paso 1 · Cambiar `CUSTOM_WEB_ORIGINS` a `.es` (3 min por entorno)
+
+*Repositorio → Settings → Environments → (staging | production) → Environment variables → editar* `CUSTOM_WEB_ORIGINS` con el valor de la tabla.
+
+- [ ] `staging`
+- [ ] `production`
+
+### Paso 2 · Activar la API y crear el rol `mytasksDnsAdmin` (5 min por proyecto)
+
+Con tus credenciales, desde la raíz del repositorio y en una rama que tenga `infra/iam/roles/dns-admin.yaml` (la de esta PR). Sustituye `<proyecto>` y `<cuenta>` por los de la tabla:
+
+```
+gcloud services enable dns.googleapis.com --project=<proyecto>
+gcloud iam roles create mytasksDnsAdmin --project=<proyecto> --file=infra/iam/roles/dns-admin.yaml
+gcloud projects add-iam-policy-binding <proyecto> --member=serviceAccount:<cuenta> --role=projects/<proyecto>/roles/mytasksDnsAdmin
+```
+
+El rol solo permite gestionar zonas y registros públicos de Cloud DNS; no incluye la política IAM, zonas privadas, políticas de DNS ni claves DNSSEC. **No concedas `roles/dns.admin`.**
+
+- [ ] Staging
+- [ ] Producción
+
+### Paso 3 · Actualizar `mytasksPlanReader` con las lecturas de DNS (1 min por proyecto)
+
+Sin esto el plan de solo lectura de la PR da 403 (como pasó con Hosting):
+
+```
+gcloud iam roles update mytasksPlanReader --project=pdlco-mytasks-stg --file=infra/iam/roles/plan-reader.yaml
+gcloud iam roles update mytasksPlanReader --project=pdlco-mytasks --file=infra/iam/roles/plan-reader.yaml
+```
+
+- [ ] Los dos proyectos
+
+### Paso 4 · Mirar el registrador (hecho el 2026-10-26)
+
+- [x] Registros a conservar en `inserttask.es`: **ninguno**.
+- [x] ¿Admite un `NS` para `staging`? **No.** Por eso `staging` se delega desde la zona de producción y el ensayo se hace después de la release.
+
+### Paso 5 · Cambiar los servidores de nombres del dominio (en la release, una sola vez)
+
+Tras el `apply` de producción, pon en el registrador los servidores de nombres de la zona `inserttask.es` (resumen de `apply-production`, paso *Custom domains and DNS records*) y nada más. La zona ya delega `staging`, así que **no añadas ningún `NS` en el registrador**. Comprueba con `dig +short NS inserttask.es` y `dig +short A inserttask.es`. Después, el agente hace el ensayo de `staging.inserttask.es` y la validación de `inserttask.es`. **Plazo: antes de 30 días desde el `apply`** (si no, Hosting retira el dominio).
+
+### Qué me tienes que decir al terminar los pasos 1–3
+
+1. «Variable cambiada en `staging` y en `production`.» (hecho)
+2. «Rol `mytasksDnsAdmin` creado y concedido, y `mytasksPlanReader` actualizado, en los dos proyectos.» (hecho y verificado en solo lectura)
+
+Y en el paso 5, cuándo has cambiado los servidores de nombres y cuánto trabajo te llevó.
+
+### Si hay que deshacerlo
+
+- **Rol**: quitar el binding de `mytasksDnsAdmin` a `terraform-<entorno>` y borrar el rol. Sin él, el `apply` de la zona falla con 403 y no cambia nada.
+- **Servidores de nombres**: volver a poner en el registrador los que tenía antes (anótalos antes de cambiarlos).
