@@ -237,7 +237,10 @@ la aprobación del propietario, y que no se ejecutó ningún comando manual de d
 - **SC-004**: Una persona invitada puede iniciar sesión y llegar a su tablero desde el dominio
   propio en menos de 1 minuto, el 100 % de las veces con una cuenta invitada.
 - **SC-005**: La mediana de tres cargas iniciales en frío desde el dominio propio no supera en más de
-  un 25 % la mediana desde la dirección técnica `run.app`, medidas desde la misma red y a la misma hora.
+  150 ms la mediana desde la dirección técnica `run.app`, medidas (evento `Load` del navegador, con la
+  caché desactivada) desde la misma red y a la misma hora, alternando ambas direcciones. El umbral es
+  absoluto porque, con cargas de unos 450 ms, un porcentaje exige una precisión de pocos milisegundos
+  que tres muestras no dan.
 - **SC-006**: Los escenarios de validación de producción (tablero, perfil, avatar, administración
   de accesos) pasan al 100 % desde el dominio propio sin errores de seguridad en la consola.
 - **SC-007**: Tras la publicación, el 100 % de las solicitudes `http://` y de la variante no

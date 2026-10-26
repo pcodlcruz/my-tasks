@@ -37,7 +37,8 @@ que producción (Principio IV). Solo `inserttask.com` y `www` existen únicament
 8. **Pipeline intacto**: forzar un despliegue de staging (cambio trivial) y comprobar que la prueba de
    humo pasa y que la lista `CORS_ORIGINS` queda con los dos orígenes esperados.
 9. **Rendimiento (SC-005)**: tres cargas en frío de `web.app` y de `run.app` desde la misma red y a la
-   misma hora; la mediana de `web.app` no debe superar en más de un 25 % la de `run.app`. Repetir con
+   misma hora (evento `Load` de DevTools con la caché desactivada, alternando las dos URL); la mediana de
+   `web.app` no debe superar en más de 150 ms la de `run.app`. Repetir con
    `staging.inserttask.com` en el ensayo (E4) y con `inserttask.com` en el escenario 14.
 
 ## A2. Ensayo del dominio en staging: `staging.inserttask.com` (antes de la release; FR-020, SC-009)
@@ -75,7 +76,7 @@ ningún dominio de producción.
     `CERT_ACTIVE` (hasta 24 h; normalmente horas). No debe pasarse de 30 días sin propiedad activa.
 14. **Dominio en servicio (US1, SC-001)**: abrir `https://inserttask.com/` en Chrome, Safari, Firefox y
     Edge actuales: candado, certificado emitido para `inserttask.com`, sin avisos. Medir también el
-    rendimiento (SC-005): mediana de tres cargas en frío frente a la URL `run.app`, máximo +25 %.
+    rendimiento (SC-005): mediana de tres cargas en frío frente a la URL `run.app`, máximo +150 ms.
 15. **Redirecciones (US4, SC-007)**: `http://inserttask.com`, `http://www.inserttask.com` y
     `https://www.inserttask.com/<ruta>?<q>` acaban en `https://inserttask.com/<ruta>?<q>`.
 16. **Inicio de sesión (US2, SC-004)**: cuenta invitada → tablero en menos de 1 minuto; recargar mantiene

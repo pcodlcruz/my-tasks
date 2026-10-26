@@ -68,8 +68,8 @@ global) como entrada. Navegadores actuales (Chrome, Safari, Firefox, Edge).
 **Project Type**: Infraestructura y pipeline de una aplicación web existente (sin código de aplicación
 nuevo).
 
-**Performance Goals**: la carga desde el dominio propio no es más lenta que desde `run.app` dentro de la
-variabilidad normal (SC-005). Los activos con *hash* se sirven desde la CDN.
+**Performance Goals**: la carga desde el dominio propio no es más lenta que desde `run.app` en más de
+150 ms de mediana (SC-005). Los activos con *hash* se sirven desde la CDN.
 
 **Constraints**: certificado gratuito y sin intervención (FR-003/004); sin cambio de región (FR-013);
 nada manual en Google Cloud (Principios V/VI); propiedad DNS activa en menos de 30 días o Hosting borra
