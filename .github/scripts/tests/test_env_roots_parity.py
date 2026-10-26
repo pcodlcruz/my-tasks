@@ -32,7 +32,7 @@ MODULE_ARGUMENTS_THAT_MAY_DIFFER = {
 # Values of terraform.tfvars that may differ: identifiers and sizing.
 TFVARS_THAT_DIFFER = {"project_id", "project_number", "api_max_instances", "web_max_instances"}
 # Files that must be identical.
-IDENTICAL_FILES = ["versions.tf", "providers.tf", ".terraform.lock.hcl"]
+IDENTICAL_FILES = ["versions.tf", "providers.tf", "outputs.tf", ".terraform.lock.hcl"]
 
 failures: list[str] = []
 
@@ -166,6 +166,59 @@ check(
 check(
     "both roots pass the custom domains to the module",
     "custom_domains" in staging_module and "custom_domains" in production_module,
+)
+
+# --- Feature 005, phase 4: the domains each environment serves. Same shape in both roots, only the
+# values differ: staging serves a rehearsal subdomain, production the canonical domain and www.
+CUSTOM_DOMAIN_FIELDS = {"domain", "redirect_to"}
+EXPECTED_DOMAINS = {
+    "staging": {"staging.inserttask.com": None},
+    "production": {"inserttask.com": None, "www.inserttask.com": "inserttask.com"},
+}
+
+
+def custom_domains(path: Path) -> list[dict[str, str]]:
+    text = path.read_text(encoding="utf-8")
+    block = re.search(r"^\s*custom_domains\s*=\s*\[(.*?)\]", re.sub(r"#.*", "", text), re.DOTALL | re.MULTILINE)
+    assert block, f"no custom_domains list in {path}"
+    items = []
+    for body in re.findall(r"\{([^{}]*)\}", re.sub(r"#.*", "", block.group(1))):
+        items.append(dict(re.findall(r'([a-z_]+)\s*=\s*"([^"]*)"', body)))
+    return items
+
+
+domains = {root.name: custom_domains(root / "main.tf") for root in (STAGING, PRODUCTION)}
+for name, items in domains.items():
+    check(
+        f"the {name} root declares only the fields the module accepts",
+        bool(items) and all(set(item) <= CUSTOM_DOMAIN_FIELDS and "domain" in item for item in items),
+        str(items),
+    )
+    check(
+        f"the {name} root serves exactly its own domains",
+        {item.get("domain"): item.get("redirect_to") for item in items} == EXPECTED_DOMAINS[name],
+        str(items),
+    )
+check(
+    "no domain is declared in both environments",
+    not ({item["domain"] for item in domains["staging"]} & {item["domain"] for item in domains["production"]}),
+)
+
+# The module declares one custom domain resource per item, on the beta provider, without waiting for
+# the DNS (the owner puts the records after the apply), and exposes the state of each one.
+hosting_tf = (MODULE / "hosting.tf").read_text(encoding="utf-8")
+domain_resource = re.search(r'resource "google_firebase_hosting_custom_domain" "web" \{(.*?)^\}', hosting_tf, re.DOTALL | re.MULTILINE)
+check("hosting.tf declares the custom domain resource", domain_resource is not None)
+resource_text = domain_resource.group(1) if domain_resource else ""
+check("the custom domain resource iterates over var.custom_domains", "for_each" in resource_text and "var.custom_domains" in resource_text)
+check("the custom domain resource uses the beta provider", bool(re.search(r"provider\s*=\s*google-beta", resource_text)))
+check("the custom domain resource does not wait for the DNS", bool(re.search(r"wait_dns_verification\s*=\s*false", resource_text)))
+check("the custom domain resource follows the redirect_to of each domain", "redirect_target" in resource_text and "redirect_to" in resource_text)
+check("the custom domain resource is protected against destroy", bool(re.search(r"prevent_destroy\s*=\s*true", resource_text)))
+outputs_tf = (MODULE / "outputs.tf").read_text(encoding="utf-8")
+check(
+    "the module outputs the state and the required DNS records of each domain",
+    all(word in outputs_tf for word in ("host_state", "ownership_state", "required_dns_updates", "issues")),
 )
 
 sys.exit(1 if failures else 0)

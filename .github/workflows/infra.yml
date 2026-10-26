@@ -261,6 +261,11 @@ jobs:
           for root in $PENDING; do
             terraform -chdir="infra/$root" apply -input=false "$RUNNER_TEMP/plans/$(basename "$root").tfplan"
           done
+      # Only the custom domains output, so the owner reads the DNS records without the console.
+      - name: Custom domains and DNS records
+        env:
+          PENDING: ${{ steps.plan.outputs.pending }}
+        run: .github/scripts/custom-domains-summary.sh $PENDING
 
   # --- production and platform: main ---
 
@@ -337,3 +342,7 @@ jobs:
           for root in $PENDING; do
             terraform -chdir="infra/$root" apply -input=false "$RUNNER_TEMP/plans/$(basename "$root").tfplan"
           done
+      - name: Custom domains and DNS records
+        env:
+          PENDING: ${{ steps.plan.outputs.pending }}
+        run: .github/scripts/custom-domains-summary.sh $PENDING

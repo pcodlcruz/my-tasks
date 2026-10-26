@@ -507,6 +507,8 @@ Resumen de operación para quien llega sin contexto. El detalle y la historia de
 | Proyecto | `pdlco-mytasks-stg` (nº 838389521553) | `pdlco-mytasks` (nº 2195266360) |
 | Región | `europe-southwest1` | `europe-southwest1` |
 | Web | `https://mytasks-web-838389521553.europe-southwest1.run.app` | `https://mytasks-web-2195266360.europe-southwest1.run.app` |
+| Web por Firebase Hosting | `https://pdlco-mytasks-stg.web.app` | `https://pdlco-mytasks.web.app` |
+| Dominio propio (feature 005, sección 14) | `https://staging.inserttask.com` (ensayo) | `https://inserttask.com` (`www` redirige a él) |
 | API | `https://mytasks-api-838389521553.europe-southwest1.run.app` | `https://mytasks-api-2195266360.europe-southwest1.run.app` |
 | Rama que lo despliega | `develop` (también `release/*` y `hotfix/*`) | `main` |
 | Identidad del despliegue | `deployer-staging` | `deployer-production` |
@@ -667,7 +669,7 @@ Tras desplegar por el pipeline, repetir en staging los escenarios 1, 4, 7, 9, 12
 
 ## 14. Dominio propio con Firebase Hosting (feature 005)
 
-Diseño en `specs/005-custom-domain/`. Esta sección se completa por fases: aquí está el estado de partida y los permisos (Phase 1); el procedimiento de DNS, el diagnóstico del certificado y la retirada del dominio los añade la Phase 4 (T036).
+Diseño en `specs/005-custom-domain/`. Esta sección recoge los permisos de partida (Phase 1) y, desde la Phase 4 (T036), el procedimiento completo: qué registros DNS poner y en qué orden, los plazos, el diagnóstico del certificado, cómo leer su estado, la renovación y cómo retirar un dominio.
 
 ### Permisos de Hosting (T001, T003, T004)
 
@@ -690,3 +692,71 @@ Lo que concede el propietario (guía: `specs/005-custom-domain/guia-propietario-
 En cada proyecto, `roles/firebasehosting.admin` lo tiene **únicamente** la cuenta de Terraform de ese proyecto. Las variables `CUSTOM_WEB_ORIGINS` de los entornos de GitHub no se pueden leer sin credenciales: constan por confirmación del propietario.
 
 **Sitio de Hosting por defecto**: el propietario no lo ve en la consola de Firebase en ninguno de los dos proyectos (`pdlco-mytasks.web.app`, `pdlco-mytasks-stg.web.app`), pero la documentación de Firebase dice que ese sitio se crea solo (proyectos anteriores al 2026-10-15 y cualquier proyecto con la API de Identity Platform activa) y que no se puede cambiar ni borrar, y desde fuera no se distingue de uno inexistente. **Terraform no lo declara ni lo adopta**: versión, *release* y dominios apuntan a él por `hosting_site_id` (el id del proyecto). Comprobación previa a aprobar el primer `apply` (propietario, con sus credenciales): `firebase hosting:sites:list --project <proyecto>` en los dos proyectos; debe aparecer un sitio `DEFAULT_SITE` con el id del proyecto. Si no aparece, o lleva un sufijo, el `apply` falla en la versión de Hosting antes de cambiar nada más y se corrige en una PR (T022).
+
+### Qué declara el código (T032–T034)
+
+Una lista `custom_domains` por entorno en `infra/envs/<entorno>/main.tf`; el módulo crea un `google_firebase_hosting_custom_domain` por elemento, con `wait_dns_verification = false` (el `apply` no espera al DNS) y `prevent_destroy`.
+
+| Entorno | Dominios |
+|---|---|
+| Staging (`pdlco-mytasks-stg`) | `staging.inserttask.com` (ensayo, sin redirección) |
+| Producción (`pdlco-mytasks`) | `inserttask.com` (canónico, sirve la web) y `www.inserttask.com` (redirige con 301 al canónico) |
+
+Solo los dominios que sirven la web (no los que redirigen) se añaden a los dominios autorizados de Identity Platform y a los *referrers* de la clave de API web. El código no cambia nada de lo que ve un usuario hasta que exista el DNS.
+
+### Leer lo que pide Hosting (propietario)
+
+Tras aprobar el `apply` de un entorno, el resumen del job (`apply-staging` o `apply-production`, paso *Custom domains and DNS records*) muestra, por dominio, `host_state`, `ownership_state`, el estado del certificado, el número de `issues` y los registros DNS que Hosting pide (tipo, nombre, valor y acción). Son valores públicos. Si la tabla de registros sale vacía, la API aún no los ha calculado: léelos en la consola de Firebase (*Hosting → Dominios*, proyecto del entorno).
+
+### Registros DNS que debe poner el propietario
+
+1. **Primero staging, después producción** (el ensayo no es opcional: FR-020). Los registros de producción no se ponen hasta que `staging.inserttask.com` tenga el certificado activo.
+2. **Antes de añadir nada**, retira del proveedor de DNS los `A`, `AAAA` y `CNAME` previos del nombre (registros de «aparcado»). Si queda alguno distinto a los de Hosting, el certificado no se emite.
+3. Pon exactamente los registros que muestra el resumen:
+
+| Nombre | Tipo | Valor | Notas |
+|---|---|---|---|
+| `staging.inserttask.com` | `TXT` | `hosting-site=pdlco-mytasks-stg` (confirmar con el resumen de staging) | Propiedad del subdominio para el proyecto de staging. **Permanente** |
+| `staging.inserttask.com` | `A`, `AAAA` | Los que indique el resumen de staging | Dirigen el tráfico del ensayo |
+| `inserttask.com` | `TXT` | `hosting-site=pdlco-mytasks` (confirmar con el resumen de producción) | **Permanente** |
+| `inserttask.com` | `A`, `AAAA` | Los que indique el resumen de producción | |
+| `www.inserttask.com` | `A`, `AAAA` | Los que indique el resumen de producción | La redirección la hace Hosting |
+| `inserttask.com` | `CAA` | `0 issue "pki.goog"` y `0 issue "letsencrypt.org"` | **Solo si ya existen registros `CAA`**; si no hay ninguno, no se toca |
+
+4. Comprueba que han propagado antes de esperar al certificado: `dig +short TXT inserttask.com`, `dig +short A inserttask.com` (y lo mismo con `staging.` y `www.`).
+5. Anota el tiempo de trabajo efectivo y si necesitaste ayuda adicional (SC-008).
+
+### Plazos
+
+- Propagación del DNS y emisión del certificado: de minutos a **24 horas**.
+- Propiedad: si no pasa a `OWNERSHIP_ACTIVE` en **30 días** desde que se creó el dominio, Hosting lo elimina. Si ocurre, el siguiente `plan` vuelve a proponer su alta.
+
+### Diagnóstico (research R12)
+
+| Síntoma | Causa típica | Acción |
+|---|---|---|
+| «Needs setup» | `A`/`AAAA` sin propagar o desafío SSL caducado | Esperar hasta 24 h; si persiste, repasar los registros |
+| «Pending» | `CAA` demasiado restrictivo o demasiados subdominios | Permitir `pki.goog` y `letsencrypt.org` |
+| `HOST_CONFLICT` / `HOST_MISMATCH` | Quedan `A`/`AAAA` de otro proveedor | Retirarlos |
+| `OWNERSHIP_MISSING` / `OWNERSHIP_MISMATCH` | Falta o sobra un `TXT` | Dejar solo el del proyecto del entorno |
+| `OWNERSHIP_CONFLICT` en staging o en producción | Hosting no admite a la vez la propiedad del apex y la del subdominio en dos proyectos | **Parar** y revisar el diseño con el agente (el dominio de ensayo tendría que cambiar) |
+| Estado del certificado `CERT_EXPIRING_SOON` durante días | Se retiró el `TXT` o cambió el DNS | Restituir los registros |
+
+### Renovación
+
+El certificado se renueva solo, sin intervención. Lo rompe retirar el `TXT` de propiedad o cambiar los `A`/`AAAA` a otro proveedor: nunca se tocan estos registros sin retirar antes el dominio de Hosting (siguiente apartado). Vigila `CERT_EXPIRING_SOON` en el resumen del job o en la consola.
+
+### Retirar un dominio
+
+1. PR que quita el elemento de `custom_domains` del entorno **y** el `prevent_destroy` de `hosting.tf` en la misma PR (el borrado debe ser deliberado). El `apply` pide tu aprobación.
+2. La aplicación sigue en `https://<proyecto>.web.app` y en su dirección `run.app`, que no se tocan (FR-011).
+3. Después, y solo después, retira los registros del proveedor de DNS.
+4. Restituye `prevent_destroy` en una PR posterior si quedan dominios.
+
+### Aviso a las personas usuarias
+
+La sesión y las preferencias locales (como la apariencia) son **por origen**: la primera vez que alguien entra por `inserttask.com` tiene que iniciar sesión de nuevo, y la apariencia se reconstruye desde su perfil guardado. No se pierde ningún dato.
+
+### Permisos de lectura de Hosting en `mytasksPlanReader` (2026-10-26)
+
+Con la versión de Hosting ya en el estado de staging (Phase 3), el plan de solo lectura de la PR de la Phase 4 falló con `403 … FirebaseHostingVersion`: los permisos de Hosting son de nivel de sitio y `mytasksPlanReader` no incluía `firebasehosting.sites.get` ni `firebasehosting.sites.list`. Añadidos a `infra/iam/roles/plan-reader.yaml` (solo lectura; no dan acceso a datos) y actualizado el rol por el propietario con `gcloud iam roles update` en los dos proyectos. Estado: **pendiente de que el propietario lo ejecute** (guía: `specs/005-custom-domain/guia-propietario-hosting.md`).

@@ -18,6 +18,19 @@ output "hosting_url" {
   value       = "https://${local.hosting_site_id}.web.app"
 }
 
+output "custom_domains" {
+  description = "State of each custom domain and the DNS records Hosting still needs for it (feature 005). Public values only: the records are what the owner has to put in the DNS."
+  value = {
+    for domain, resource in google_firebase_hosting_custom_domain.web : domain => {
+      host_state           = resource.host_state
+      ownership_state      = resource.ownership_state
+      certificate_state    = try(resource.cert[0].state, null)
+      issues               = resource.issues
+      required_dns_updates = resource.required_dns_updates
+    }
+  }
+}
+
 output "firebase_auth_domain" {
   description = "Authentication domain the web uses."
   value       = local.auth_domain
