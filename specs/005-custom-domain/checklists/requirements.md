@@ -13,7 +13,7 @@
 
 ## Requirement Completeness
 
-- [x] No [NEEDS CLARIFICATION] markers remain — resuelto: `inserttask.com` canónica, `www` redirige a ella (opción A)
+- [x] No [NEEDS CLARIFICATION] markers remain — resuelto: `inserttask.es` canónica, `www` redirige a ella (opción A)
 - [x] Requirements are testable and unambiguous
 - [x] Success criteria are measurable
 - [x] Success criteria are technology-agnostic (no implementation details)

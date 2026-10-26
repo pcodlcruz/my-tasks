@@ -154,9 +154,9 @@ La API ya activa no cambia el plan: `google_project_service` adoptará el servic
 ## R6 — Dominio propio: apex canónico y `www` con redirección
 
 **Decisión**: dos dominios personalizados en el sitio de **producción**:
-`inserttask.com` (canónico, sirve la web) y `www.inserttask.com` con `redirect_target = inserttask.com`
+`inserttask.es` (canónico, sirve la web) y `www.inserttask.es` con `redirect_target = inserttask.es`
 (Hosting responde 301 conservando la ruta). Y uno en el sitio de **staging**:
-`staging.inserttask.com`, sin redirección, como **ensayo** (decisión del propietario, R10).
+`staging.inserttask.es`, sin redirección, como **ensayo** (decisión del propietario, R10).
 `wait_dns_verification = false` en todos: el `apply` no debe quedarse esperando al DNS del propietario;
 el estado se consulta después (R12).
 
@@ -170,15 +170,15 @@ migración sin cortes.
 **Plazo a tener en cuenta**: si la propiedad del dominio no pasa a activa en 30 días desde su creación,
 Hosting elimina el dominio personalizado. La guía debe fijar ese plazo al propietario.
 
-## R7 — Qué hace el propietario en su proveedor de DNS (fuera de Google Cloud)
+## R7 — Registros DNS que exige Hosting (enmendado: ya no los pone el propietario, ver R16)
 
 Los valores exactos los entrega Hosting tras el `apply` (atributo `required_dns_updates`, solo valores
 públicos). Estructura esperada:
 
 | Registro | Para qué | Notas |
 |---|---|---|
-| `TXT` con `hosting-site=<site_id>` | Propiedad del dominio | **Debe permanecer siempre**: Hosting lo usa para autorizar y renovar el certificado |
-| `A` y `AAAA` del apex y de `www` hacia las IP de Hosting | Dirigir el tráfico | Retirar antes cualquier `A`/`AAAA`/`CNAME` del proveedor (típicos de «aparcado»): si hay otros, no se emite el certificado |
+| `TXT` con `hosting-site=<site_id>` (formato de la documentación de Hosting) | Propiedad del dominio | **Debe permanecer siempre**: Hosting lo usa para autorizar y renovar el certificado |
+| `A` del apex y de `www` hacia `199.36.158.100` | Dirigir el tráfico | **Sin ningún `AAAA`** (la documentación de Hosting dice que, si existe alguno, no se emite el certificado). Retirar antes cualquier `A`/`AAAA`/`CNAME` ajeno (típicos de «aparcado») |
 | `CAA` (solo si ya existen registros `CAA`) | Permitir la emisión | Deben autorizar `pki.goog` y `letsencrypt.org`; si no existe ninguno, no se toca |
 
 La documentación avisa de que propagar y emitir puede tardar horas y hasta 24 h.
@@ -189,10 +189,10 @@ puede conceder otro proyecto sobre un subdominio añadiendo registros `TXT` espe
 
 | Nombre | Proyecto propietario | Registro de propiedad |
 |---|---|---|
-| `inserttask.com` (y `www`, por herencia) | `pdlco-mytasks` | `TXT` `hosting-site=pdlco-mytasks` en el apex |
-| `staging.inserttask.com` | `pdlco-mytasks-stg` | `TXT` `hosting-site=pdlco-mytasks-stg` en `staging.inserttask.com` |
+| `inserttask.es` (y `www`, por herencia) | `pdlco-mytasks` | `TXT` `hosting-site=pdlco-mytasks` en el apex |
+| `staging.inserttask.es` | `pdlco-mytasks-stg` | `TXT` `hosting-site=pdlco-mytasks-stg` en `staging.inserttask.es` |
 
-Los `A`/`AAAA` de `staging` apuntan a Hosting igual que los del apex. **A verificar en el ensayo de
+El `A` de `staging` apunta a Hosting igual que el del apex. **A verificar en el ensayo de
 staging**: que Hosting acepta a la vez la propiedad del apex para producción y la del subdominio para
 staging sin conflicto (`OWNERSHIP_CONFLICT`/`MISMATCH`). Si no la aceptara, el ensayo lo revela antes de
 producción y se revisa el diseño con el propietario (la alternativa sería un dominio de ensayo distinto).
@@ -204,9 +204,9 @@ producción y se revisa el diseño con el propietario (la alternativa sería un 
 Por tanto **no se cambia `FIREBASE_AUTH_DOMAIN`** ni el cliente OAuth de Google.
 
 **Qué sí cambia** (todo ya gestionado por Terraform en `identity.tf`):
-- añadir `inserttask.com` (en producción) y `staging.inserttask.com` (en staging) a
+- añadir `inserttask.es` (en producción) y `staging.inserttask.es` (en staging) a
   `authorized_domains` de Identity Platform (FR-009; conservar los existentes);
-- añadir `https://inserttask.com/*` (producción) y `https://staging.inserttask.com/*` (staging) a los
+- añadir `https://inserttask.es/*` (producción) y `https://staging.inserttask.es/*` (staging) a los
   *referrers* permitidos de la clave de API web (si no, la clave rechaza las llamadas desde el dominio
   nuevo aunque esté autorizado);
 - `www` **no** hace falta en ninguno: nunca carga la aplicación, solo redirige.
@@ -226,8 +226,8 @@ backend ya acepta una lista separada por comas (`cors_origin_list`).
 2. `https://<proyecto>.web.app` (siempre; es el origen del sitio de Hosting, en ambos entornos para
    mantener la paridad de topología),
 3. los orígenes de dominios propios que declare una variable **no secreta** del entorno de GitHub
-   (`CUSTOM_WEB_ORIGINS`: `https://inserttask.com` en `production` y
-   `https://staging.inserttask.com` en `staging`), igual que ya ocurre con `BOOTSTRAP_ADMIN_EMAIL`.
+   (`CUSTOM_WEB_ORIGINS`: `https://inserttask.es` en `production` y
+   `https://staging.inserttask.es` en `staging`), igual que ya ocurre con `BOOTSTRAP_ADMIN_EMAIL`.
 
 Se aplica con `--update-env-vars` en el despliegue (patrón existente). Detalles que el desarrollador debe
 respetar:
@@ -245,14 +245,14 @@ razón que sigue vigente (cada despliegue reescribiría `APP_VERSION`).
 
 **Decisión** (revisada por el propietario tras el análisis): el módulo `environment` crea el sitio, la
 versión, el *release* **y los dominios personalizados** en **los dos** entornos con el mismo código. La
-lista de dominios es una variable del módulo: `staging.inserttask.com` en staging; `inserttask.com` y
-`www.inserttask.com` (redirige) en producción. Así el recurso beta de dominio, la propiedad DNS y la
+lista de dominios es una variable del módulo: `staging.inserttask.es` en staging; `inserttask.es` y
+`www.inserttask.es` (redirige) en producción. Así el recurso beta de dominio, la propiedad DNS y la
 emisión del certificado se ensayan en staging **antes** de producción, que era el hueco que dejaba la
 primera versión del diseño (hallazgo C1 de `/speckit-analyze`). La prueba `test_env_roots_parity.py` se
 amplía para que solo puedan diferir el dimensionado, los identificadores y los valores de esa lista.
 
-**Orden**: el `apply` de staging ocurre al fusionar en `develop`, el propietario pone el DNS de
-`staging.inserttask.com` y se valida; solo entonces se crea la release a producción (FR-020, SC-009).
+**Orden**: el `apply` de staging ocurre al fusionar en `develop`, el propietario delega `staging` desde
+el registrador (`NS` hacia la zona de Cloud DNS) y se valida; solo entonces se crea la release a producción (FR-020, SC-009).
 Staging mantiene también `<proyecto>.web.app`, que sigue funcionando.
 
 ## R11 — Permisos de Terraform (los concede el propietario)
@@ -284,9 +284,9 @@ consola de Firebase, sirvan de panel. Estados relevantes y qué hacer, según la
 
 | Síntoma | Causa típica | Acción |
 |---|---|---|
-| «Needs setup» | `A`/`AAAA` sin propagar o desafío SSL caducado | Esperar hasta 24 h; si persiste, repasar los registros |
+| «Needs setup» | `A` sin propagar, `AAAA` sobrante o desafío SSL caducado | Esperar hasta 24 h; si persiste, repasar los registros |
 | «Pending» | `CAA` demasiado restrictivo o demasiados subdominios | Permitir `pki.goog` y `letsencrypt.org` |
-| `HOST_CONFLICT` / `HOST_MISMATCH` | Quedan `A`/`AAAA` de otro proveedor | Retirarlos |
+| `HOST_CONFLICT` / `HOST_MISMATCH` | Queda un `A`/`AAAA`/`CNAME` ajeno en el nombre | Retirarlos |
 | `OWNERSHIP_MISSING`/`MISMATCH` | Falta o sobra un `TXT` | Dejar solo el del proyecto |
 | `cert.state` = `CERT_EXPIRING_SOON` durante días | Se retiró el `TXT` o cambió el DNS | Restituir los registros |
 
@@ -314,11 +314,72 @@ retira el propietario.
 ## R15 — Efectos en el navegador que no requieren código
 
 - Las sesiones y las preferencias locales son **por origen**: la primera vez que alguien entra por
-  `inserttask.com` inicia sesión de nuevo y la apariencia se reconstruye desde su perfil guardado en
+  `inserttask.es` inicia sesión de nuevo y la apariencia se reconstruye desde su perfil guardado en
   Firestore (feature 004). Sin pérdida de datos. Se avisa en la guía.
 - La política de contenidos (CSP) del contenedor ya usa `'self'` para la web y fija `connect-src` a
   `API_BASE_URL` y `frame-src` al dominio de autenticación; ninguno cambia, así que **no hay cambios en
   nginx ni en el frontend**.
+
+## R16 — DNS en Cloud DNS, una zona por entorno (decisión del propietario, 2026-10-26)
+
+**Contexto**: el dominio real es `inserttask.es` (el propietario dio `.com` por error al principio) y
+no quiere mantener el DNS en el registrador. Documentación consultada:
+`firebase.google.com/docs/hosting/custom-domain`, `docs.cloud.google.com/dns/docs/zones`,
+`…/dns/docs/dnssec-config`, `…/dns/docs/access-control`, `…/iam/docs/roles-permissions/dns`.
+
+**Decisión**: una zona pública **por entorno**, en el proyecto de ese entorno (paridad, Principio IV):
+
+| Zona | Proyecto | Contiene |
+|---|---|---|
+| `inserttask.es` | `pdlco-mytasks` | `TXT hosting-site=pdlco-mytasks` y `A 199.36.158.100` en el apex; `A` de `www`; los `NS` que delegan `staging` |
+| `staging.inserttask.es` | `pdlco-mytasks-stg` | `TXT hosting-site=pdlco-mytasks-stg` y `A 199.36.158.100` en el apex de la zona |
+
+**Los registros son deterministas**: Hosting documenta el valor del `TXT` (`hosting-site=<siteId>`) y
+una única IP para el `A`. Terraform los escribe sin leer `required_dns_updates`, que desaparece como
+fuente de verdad (el problema de la tabla vacía tras el alta deja de existir). Las salidas de estado
+(`host_state`, `ownership_state`, certificado) se conservan para el diagnóstico.
+
+**Nunca `AAAA`** en un dominio servido por Hosting. Corrige R7 y la guía anterior, que pedían `A`/`AAAA`.
+
+**Delegación y orden** (la zona hija tiene que existir antes de delegarla; la delegación va en un `NS`
+de la zona padre con los servidores de nombres que Cloud DNS asigna a la zona hija):
+
+1. El ensayo ocurre **antes** de que exista nada en producción (FR-020) y producción solo se aplica
+   con la release. Por eso, durante el ensayo, la delegación `staging → zona de staging` la hace el
+   propietario **en el registrador** (registro `NS` de `staging`), con los servidores de nombres que
+   leerá de las salidas de staging. El resto del dominio sigue donde está.
+2. En la release se crea la zona `inserttask.es` en producción **con** los `NS` de `staging` (variable
+   del root de producción, con los valores públicos que dio staging: ninguna identidad de un entorno
+   lee el otro) y solo entonces el propietario cambia los servidores de nombres del dominio en el
+   registrador a los de la zona de producción. A partir de ahí el `NS` de `staging` del registrador
+   ya no se usa y se retira.
+3. Antes del cambio de servidores de nombres, el propietario confirma si el dominio tiene otros
+   registros que conservar (FR-023); si los tiene, se declaran en la zona antes del cambio.
+
+**Estado actual a sustituir**: `staging.inserttask.com` ya está declarado y aplicado en Hosting de
+staging, con `prevent_destroy`. Se retira en el `apply` de la fase de Cloud DNS (quitando el
+dominio y el `prevent_destroy` en la misma PR, RUNBOOK §14) y se declara `staging.inserttask.es`.
+Nunca llegó a tener DNS, así que no hay tráfico que migrar.
+
+**Permisos (FR-024), concedidos por el propietario**: API `dns.googleapis.com` habilitada en los dos
+proyectos; a `terraform-<entorno>`, gestión de zonas y registros (`dns.managedZones.*`,
+`dns.resourceRecordSets.*`, `dns.changes.create` y `get`; rol personalizado mínimo `mytasksDnsAdmin`,
+decidido en la enmienda: `infra/iam/roles/dns-admin.yaml`, creado por el propietario en cada proyecto); a `mytasksPlanReader`, solo
+`dns.managedZones.get`, `dns.managedZones.list`, `dns.resourceRecordSets.list` y `dns.changes.get`
+(sin ellos el plan de solo lectura da 403, como pasó con Hosting).
+
+**DNSSEC**: fuera de alcance. Cloud DNS lo ofrece y, con la zona padre en el registrador, exige
+publicar el `DS` allí; una configuración mal cerrada deja el dominio sin resolver. Decisión
+pendiente del propietario, a abrir como mejora posterior.
+
+**Coste**: no figura en la documentación consultada. Una zona pública gestionada y sus consultas
+tienen un coste pequeño pero no nulo: **a verificar** en la página de precios de Cloud DNS y, después,
+en la factura de staging tras la primera semana (SC-010). Hace falta una tercera zona solo si se
+quisiera una para `www`, que no se plantea.
+
+**Alternativas descartadas**: una sola zona en producción con todo el DNS (acopla el ensayo de staging
+al proyecto de producción y obliga a producción a conocer valores de Hosting de staging); mantener el
+DNS en el registrador (descartado por el propietario).
 
 ## Resumen de decisiones
 
@@ -329,13 +390,14 @@ retira el propietario.
 | R3 | La API no pasa por Hosting |
 | R4 | Recursos de Hosting en `google-beta` fijado (el GA no los tiene) |
 | R5 | Sitio por defecto de cada proyecto |
-| R6 | `inserttask.com` canónico; `www` redirige con 301; `staging.inserttask.com` de ensayo; certificado gratuito gestionado |
-| R7 | El propietario pone `TXT` + `A`/`AAAA` (+`CAA` si procede) en su DNS |
+| R6 | `inserttask.es` canónico; `www` redirige con 301; `staging.inserttask.es` de ensayo; certificado gratuito gestionado |
+| R7 | Registros que exige Hosting: `TXT hosting-site=<site>` y `A 199.36.158.100`; nunca `AAAA` (los escribe Terraform, R16) |
 | R8 | Solo se autoriza el dominio (Identity Platform + clave de API); el `authDomain` no cambia |
 | R9 | CORS como lista compuesta por el pipeline; variable `CUSTOM_WEB_ORIGINS` en ambos entornos |
-| R10 | Hosting y dominios personalizados en ambos entornos; staging ensaya `staging.inserttask.com` antes de producción |
+| R10 | Hosting y dominios personalizados en ambos entornos; staging ensaya `staging.inserttask.es` antes de producción |
 | R11 | `roles/firebasehosting.admin` al `terraform-<env>` (lo concede el propietario) + API + lectura en el plan |
 | R12 | Estado del certificado visible en las salidas de Terraform y en la consola |
 | R13 | Coste esperado 0 €; a revisar en factura |
 | R14 | Reversible sin tocar la dirección `run.app` |
 | R15 | Sin cambios de nginx ni de frontend |
+| R16 | DNS en Cloud DNS: una zona pública por entorno (`inserttask.es` y `staging.inserttask.es`), registros por Terraform, delegación de `staging` y cambio de servidores de nombres hechos por el propietario |
