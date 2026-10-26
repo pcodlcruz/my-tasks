@@ -35,8 +35,14 @@ module "environment" {
   # Custom domains Firebase Hosting serves in this environment (feature 005). Staging serves a
   # rehearsal subdomain, so the whole procedure is proven here before production gets any domain.
   custom_domains = [
-    { domain = "staging.inserttask.com" },
+    { domain = "staging.inserttask.es" },
   ]
+
+  # Public Cloud DNS zone of the rehearsal subdomain. The owner delegates it from the registrar with
+  # an NS record that points at the name servers in the outputs (infra/RUNBOOK.md, section 14).
+  dns_zone_domain  = "staging.inserttask.es"
+  dns_a_subdomains = []
+  dns_delegations  = {}
 }
 
 # Identity Platform is enabled by hand once per environment, because enabling it in a project that

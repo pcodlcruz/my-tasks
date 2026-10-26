@@ -41,9 +41,16 @@ module "environment" {
   # Custom domains Firebase Hosting serves in this environment (feature 005): the canonical domain,
   # and www, which answers with a permanent redirect to it.
   custom_domains = [
-    { domain = "inserttask.com" },
-    { domain = "www.inserttask.com", redirect_to = "inserttask.com" },
+    { domain = "inserttask.es" },
+    { domain = "www.inserttask.es", redirect_to = "inserttask.es" },
   ]
+
+  # Public Cloud DNS zone of the domain. www also points at Hosting. The staging subdomain is
+  # delegated to the zone of staging; its name servers are only known after the staging apply, so the
+  # map stays empty until they are filled in (T074) and the registrar holds the delegation meanwhile.
+  dns_zone_domain  = "inserttask.es"
+  dns_a_subdomains = ["www"]
+  dns_delegations  = {}
 }
 
 # Identity Platform already exists in production (created by the owner on 2025-12-03, with the

@@ -31,6 +31,11 @@ output "custom_domains" {
   }
 }
 
+output "dns_name_servers" {
+  description = "Name servers of the Cloud DNS zone (feature 005): what the owner delegates to (staging) or sets at the registrar (production). Public values; null when the environment has no zone."
+  value       = local.dns_enabled ? google_dns_managed_zone.main[0].name_servers : null
+}
+
 output "firebase_auth_domain" {
   description = "Authentication domain the web uses."
   value       = local.auth_domain

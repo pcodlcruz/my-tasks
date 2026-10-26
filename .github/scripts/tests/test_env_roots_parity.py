@@ -28,6 +28,9 @@ MODULE_ARGUMENTS_THAT_DIFFER = {
 # the custom domains each environment serves; both start empty and the phase 4 fills them in).
 MODULE_ARGUMENTS_THAT_MAY_DIFFER = {
     "custom_domains": "each environment serves its own domains (staging a rehearsal one)",
+    "dns_zone_domain": "each environment owns the Cloud DNS zone of its own domain",
+    "dns_a_subdomains": "only production serves www besides the apex of its zone",
+    "dns_delegations": "only production delegates the staging subdomain to the zone of staging",
 }
 # Values of terraform.tfvars that may differ: identifiers and sizing.
 TFVARS_THAT_DIFFER = {"project_id", "project_number", "api_max_instances", "web_max_instances"}
@@ -172,8 +175,8 @@ check(
 # values differ: staging serves a rehearsal subdomain, production the canonical domain and www.
 CUSTOM_DOMAIN_FIELDS = {"domain", "redirect_to"}
 EXPECTED_DOMAINS = {
-    "staging": {"staging.inserttask.com": None},
-    "production": {"inserttask.com": None, "www.inserttask.com": "inserttask.com"},
+    "staging": {"staging.inserttask.es": None},
+    "production": {"inserttask.es": None, "www.inserttask.es": "inserttask.es"},
 }
 
 
@@ -214,11 +217,46 @@ check("the custom domain resource iterates over var.custom_domains", "for_each" 
 check("the custom domain resource uses the beta provider", bool(re.search(r"provider\s*=\s*google-beta", resource_text)))
 check("the custom domain resource does not wait for the DNS", bool(re.search(r"wait_dns_verification\s*=\s*false", resource_text)))
 check("the custom domain resource follows the redirect_to of each domain", "redirect_target" in resource_text and "redirect_to" in resource_text)
-check("the custom domain resource is protected against destroy", bool(re.search(r"prevent_destroy\s*=\s*true", resource_text)))
+# prevent_destroy of the custom domain is lifted while the .com domain is withdrawn and restored by T073.
 outputs_tf = (MODULE / "outputs.tf").read_text(encoding="utf-8")
 check(
     "the module outputs the state and the required DNS records of each domain",
     all(word in outputs_tf for word in ("host_state", "ownership_state", "required_dns_updates", "issues")),
 )
+
+# --- Feature 005, phase 5: DNS in Cloud DNS, one public zone per environment (FR-021, FR-022).
+# Terraform writes the records Hosting needs, so they are deterministic and public. There is never
+# an AAAA record: with one, Hosting does not issue the certificate.
+EXPECTED_ZONES = {"staging": "staging.inserttask.es", "production": "inserttask.es"}
+modules = {"staging": staging_module, "production": production_module}
+
+for name, module in modules.items():
+    check(f"the {name} root passes the zone arguments to the module", {"dns_zone_domain", "dns_a_subdomains", "dns_delegations"} <= set(module))
+    check(
+        f"the {name} zone is the domain of the environment",
+        module.get("dns_zone_domain") == f'"{EXPECTED_ZONES[name]}"',
+        str(module.get("dns_zone_domain")),
+    )
+    root_text = (ENVS / name / "main.tf").read_text(encoding="utf-8")
+    check(f"the {name} root has no .com domain left", "inserttask.com" not in root_text)
+    canonical = [item["domain"] for item in domains[name] if "redirect_to" not in item]
+    check(f"the {name} zone is the canonical domain it serves", canonical == [EXPECTED_ZONES[name]], str(canonical))
+
+check("staging does not delegate any subdomain", staging_module.get("dns_delegations") == "{}", str(staging_module.get("dns_delegations")))
+check("staging adds no A record besides the apex", staging_module.get("dns_a_subdomains") == "[]", str(staging_module.get("dns_a_subdomains")))
+check("production adds the A record of www", production_module.get("dns_a_subdomains") == '["www"]', str(production_module.get("dns_a_subdomains")))
+
+dns_tf_path = MODULE / "dns.tf"
+check("the module has dns.tf", dns_tf_path.exists())
+dns_tf = re.sub(r"#.*", "", dns_tf_path.read_text(encoding="utf-8")) if dns_tf_path.exists() else ""
+check("the module declares a public Cloud DNS zone", bool(re.search(r'resource "google_dns_managed_zone" "\w+"', dns_tf)) and bool(re.search(r'visibility\s*=\s*"public"', dns_tf)))
+check("the zone is protected against destroy", bool(re.search(r"prevent_destroy\s*=\s*true", dns_tf)))
+check("the module never declares an AAAA record", not re.search(r'"AAAA"', dns_tf) and "AAAA" not in (MODULE / "variables.tf").read_text(encoding="utf-8").replace("AAAA record", ""))
+record_types = set(re.findall(r'type\s*=\s*"([A-Z]+)"', dns_tf))
+check("the records are TXT, A and NS only", bool(record_types) and record_types <= {"TXT", "A", "NS"}, str(record_types))
+check("the A records point to the Hosting address", "199.36.158.100" in dns_tf)
+check("the TXT record proves the Hosting site", "hosting-site=" in dns_tf)
+check("the module enables the Cloud DNS API", "dns.googleapis.com" in (MODULE / "variables.tf").read_text(encoding="utf-8"))
+check("the module outputs the name servers of the zone", "name_servers" in outputs_tf)
 
 sys.exit(1 if failures else 0)
