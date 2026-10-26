@@ -132,7 +132,7 @@ No hay que volver a conceder el rol. Después, relanza el job `terraform-validat
 
 ## Fase 5 (2026-10-26): Cloud DNS y dominio `inserttask.es` (T062, T065)
 
-El dominio es **`inserttask.es`** y el DNS pasa a **Cloud DNS** (una zona por entorno, escrita por Terraform). Tú solo tocas el registrador una vez por entorno. Los pasos 1–4 son **antes de fusionar** la PR de la Fase 5; el 5 es durante el ensayo, y el 6 en la release.
+El dominio es **`inserttask.es`** y el DNS pasa a **Cloud DNS** (una zona por entorno, escrita por Terraform). Tú solo tocas el registrador una vez por entorno. Los pasos 1–4 son **antes de fusionar** la PR de la Fase 5; el 5 es en la release.
 
 Valores:
 
@@ -176,29 +176,23 @@ gcloud iam roles update mytasksPlanReader --project=pdlco-mytasks --file=infra/i
 
 - [ ] Los dos proyectos
 
-### Paso 4 · Mirar el registrador (10 min)
+### Paso 4 · Mirar el registrador (hecho el 2026-10-26)
 
-- [ ] ¿`inserttask.es` tiene registros que deban conservarse (correo `MX`, `SPF`/`DKIM` en `TXT`, verificaciones)? Anótalos: hay que añadirlos a la zona de producción **antes** del paso 6. Si no hay ninguno, dilo.
-- [ ] ¿El registrador permite añadir un registro `NS` para el subdominio `staging` mientras el resto del dominio sigue con sus servidores de nombres? Anota **sí** o **no**.
+- [x] Registros a conservar en `inserttask.es`: **ninguno**.
+- [x] ¿Admite un `NS` para `staging`? **No.** Por eso `staging` se delega desde la zona de producción y el ensayo se hace después de la release.
 
-### Paso 5 · Delegar `staging` (durante el ensayo, tras el `apply` de staging)
+### Paso 5 · Cambiar los servidores de nombres del dominio (en la release, una sola vez)
 
-El agente te dará los servidores de nombres (resumen del job `apply-staging`). En el registrador: retira cualquier registro previo de `staging` y añade un `NS` para `staging` con **todos** esos servidores. No toques nada más. Comprueba con `dig +short NS staging.inserttask.es`. Anota cuánto trabajo efectivo te costó y si necesitaste ayuda (SC-008).
+Tras el `apply` de producción, pon en el registrador los servidores de nombres de la zona `inserttask.es` (resumen de `apply-production`, paso *Custom domains and DNS records*) y nada más. La zona ya delega `staging`, así que **no añadas ningún `NS` en el registrador**. Comprueba con `dig +short NS inserttask.es` y `dig +short A inserttask.es`. Después, el agente hace el ensayo de `staging.inserttask.es` y la validación de `inserttask.es`. **Plazo: antes de 30 días desde el `apply`** (si no, Hosting retira el dominio).
 
-### Paso 6 · Cambiar los servidores de nombres del dominio (en la release)
+### Qué me tienes que decir al terminar los pasos 1–3
 
-Tras el `apply` de producción, pon en el registrador los servidores de nombres de la zona `inserttask.es` (resumen de `apply-production`) y retira entonces el `NS` de `staging` del paso 5. Comprueba con `dig +short NS inserttask.es` y `dig +short A inserttask.es`.
+1. «Variable cambiada en `staging` y en `production`.» (hecho)
+2. «Rol `mytasksDnsAdmin` creado y concedido, y `mytasksPlanReader` actualizado, en los dos proyectos.» (hecho y verificado en solo lectura)
 
-### Qué me tienes que decir al terminar los pasos 1–4
-
-1. «Variable cambiada en `staging` y en `production`.»
-2. «Rol `mytasksDnsAdmin` creado y concedido, y `mytasksPlanReader` actualizado, en los dos proyectos.»
-3. «Registros a conservar en el registrador: …» (o «ninguno»).
-4. «El registrador permite/no permite `NS` para `staging`.»
-
-Con eso verifico los permisos en solo lectura (T063) y anoto el resultado en el RUNBOOK §14.
+Y en el paso 5, cuándo has cambiado los servidores de nombres y cuánto trabajo te llevó.
 
 ### Si hay que deshacerlo
 
 - **Rol**: quitar el binding de `mytasksDnsAdmin` a `terraform-<entorno>` y borrar el rol. Sin él, el `apply` de la zona falla con 403 y no cambia nada.
-- **Delegación**: borrar el `NS` de `staging` del registrador. Los servidores de nombres del dominio se vuelven a poner a los que tenía el registrador.
+- **Servidores de nombres**: volver a poner en el registrador los que tenía antes (anótalos antes de cambiarlos).

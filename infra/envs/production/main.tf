@@ -47,7 +47,7 @@ module "environment" {
 
   # Public Cloud DNS zone of the domain. www also points at Hosting. The staging subdomain is
   # delegated to the zone of staging; its name servers are only known after the staging apply, so the
-  # map stays empty until they are filled in (T074) and the registrar holds the delegation meanwhile.
+  # map stays empty until they are filled in (T074, before the release).
   dns_zone_domain  = "inserttask.es"
   dns_a_subdomains = ["www"]
   dns_delegations  = {}

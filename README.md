@@ -61,7 +61,7 @@ project id ficticio `demo-mytasks`: no hace falta ninguna credencial ni se toca 
 | Cloud Run (web) | `https://mytasks-web-838389521553.europe-southwest1.run.app` | `https://mytasks-web-2195266360.europe-southwest1.run.app` |
 
 El DNS vive en Cloud DNS (una zona por entorno, gestionada por Terraform). Los dominios propios solo
-responden cuando el propietario ha delegado la zona en el registrador y Hosting ha emitido el
+responden cuando el propietario ha cambiado los servidores de nombres en el registrador y Hosting ha emitido el
 certificado; hasta entonces la aplicación sigue en las direcciones de Hosting y de Cloud
 Run, que no dejan de funcionar nunca. El procedimiento está en el
 [runbook](infra/RUNBOOK.md#14-dominio-propio-con-firebase-hosting-feature-005).

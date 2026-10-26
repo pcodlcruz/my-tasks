@@ -669,7 +669,7 @@ Tras desplegar por el pipeline, repetir en staging los escenarios 1, 4, 7, 9, 12
 
 ## 14. Dominio propio con Firebase Hosting (feature 005)
 
-Diseño en `specs/005-custom-domain/`. Esta sección recoge los permisos de partida (Phase 1) y el procedimiento completo: el DNS vive en **Cloud DNS** (una zona por entorno, Phase 5), qué debe hacer el propietario en el registrador y en qué orden, los plazos, el diagnóstico del certificado, cómo leer su estado, la renovación y cómo retirar un dominio. El dominio es `inserttask.es` (un primer diseño usó `.com` por error; ver «Retirada de `staging.inserttask.com`»).
+Diseño en `specs/005-custom-domain/`. Esta sección recoge los permisos de partida (Phase 1) y el procedimiento completo: el DNS vive en **Cloud DNS** (una zona por entorno, Phase 5), qué debe hacer el propietario en el registrador (cambiar los servidores de nombres una sola vez) y en qué orden, los plazos, el diagnóstico del certificado, cómo leer su estado, la renovación y cómo retirar un dominio. El dominio es `inserttask.es` (un primer diseño usó `.com` por error; ver «Retirada de `staging.inserttask.com`»).
 
 ### Permisos de Hosting (T001, T003, T004)
 
@@ -700,9 +700,9 @@ Una lista `custom_domains` por entorno en `infra/envs/<entorno>/main.tf`; el mó
 | Entorno | Dominios de Hosting | Zona de Cloud DNS (proyecto) | Registros que escribe Terraform |
 |---|---|---|---|
 | Staging | `staging.inserttask.es` (ensayo, sin redirección) | `staging.inserttask.es` (`pdlco-mytasks-stg`) | `TXT hosting-site=pdlco-mytasks-stg` y `A 199.36.158.100` en el apex de la zona |
-| Producción | `inserttask.es` (canónico) y `www.inserttask.es` (redirige con 301) | `inserttask.es` (`pdlco-mytasks`) | `TXT hosting-site=pdlco-mytasks`, `A 199.36.158.100` en el apex y en `www`, y el `NS` de `staging` (cuando se rellena, T074) |
+| Producción | `inserttask.es` (canónico) y `www.inserttask.es` (redirige con 301) | `inserttask.es` (`pdlco-mytasks`) | `TXT hosting-site=pdlco-mytasks`, `A 199.36.158.100` en el apex y en `www`, y el `NS` que delega `staging` a la zona de staging (se rellena en T074) |
 
-**Nunca hay un registro `AAAA`**: Hosting sirve por IPv4 y, con un `AAAA` en la zona, no emite el certificado. Solo los dominios que sirven la web (no los que redirigen) se añaden a los dominios autorizados de Identity Platform y a los *referrers* de la clave de API web. El código no cambia nada de lo que ve un usuario hasta que el propietario delegue en el registrador.
+**Nunca hay un registro `AAAA`**: Hosting sirve por IPv4 y, con un `AAAA` en la zona, no emite el certificado. Solo los dominios que sirven la web (no los que redirigen) se añaden a los dominios autorizados de Identity Platform y a los *referrers* de la clave de API web. El código no cambia nada de lo que ve un usuario hasta que el propietario cambie los servidores de nombres en el registrador.
 
 ### Permisos de Cloud DNS (propietario, FR-024)
 
@@ -727,13 +727,13 @@ Tras aprobar el `apply` de un entorno, el resumen del job (`apply-staging` o `ap
 
 ### Procedimiento del propietario en el registrador
 
-1. **Antes de nada**, confirma si `inserttask.es` tiene otros registros en el registrador que deban conservarse (correo `MX`/`TXT`/`SPF`/`DKIM`, verificaciones). Todo lo que haya que conservar debe añadirse a la zona de producción **antes** del paso 4 (FR-023); si no, se pierde al cambiar los servidores de nombres.
-2. **Ensayo en staging (el primer paso real, FR-020)**: en el registrador, retira cualquier registro previo de `staging` y añade un registro `NS` para `staging` con los servidores de nombres de la zona `staging.inserttask.es` (los del resumen de `apply-staging`). No toques el apex, `www` ni los servidores de nombres del dominio.
-3. Comprueba la delegación: `dig +short NS staging.inserttask.es`, `dig +short TXT staging.inserttask.es` y `dig +short A staging.inserttask.es`. No debe haber `AAAA`: `dig +short AAAA staging.inserttask.es` debe salir vacío. Espera a `OWNERSHIP_ACTIVE` y `CERT_ACTIVE` y valida el ensayo.
-4. **Release (producción)**: tras el `apply` de producción, cambia en el registrador los **servidores de nombres del dominio** `inserttask.es` a los de la zona de producción (resumen de `apply-production`) y retira entonces el `NS` de `staging` que el registrador tenía durante el ensayo (la zona de producción ya delega `staging`). Comprueba con `dig +short NS inserttask.es` y `dig +short A inserttask.es` (y `www.`).
-5. Anota el tiempo de trabajo efectivo y si necesitaste ayuda adicional (SC-008).
+El registrador **no admite un registro `NS` para un subdominio** (confirmado el 2026-10-26), así que `staging.inserttask.es` no se puede delegar desde él. `staging` se delega desde la zona de producción y solo resuelve cuando el dominio ya usa Cloud DNS: el ensayo de staging se hace **después** de la release. El propietario toca el registrador **una sola vez**.
 
-Si el registrador no permite añadir un `NS` para un subdominio mientras el resto sigue en él, para y avísame: el ensayo tendría que hacerse de otra forma (research R16).
+1. **Antes de nada**, confirma si `inserttask.es` tiene otros registros en el registrador que deban conservarse (correo `MX`/`TXT`/`SPF`/`DKIM`, verificaciones). Todo lo que haya que conservar debe añadirse a la zona de producción **antes** del paso 3 (FR-023); si no, se pierde al cambiar los servidores de nombres. A 2026-10-26 el propietario indicó que no hay ninguno.
+2. **Antes de la release**: los servidores de nombres de la zona `staging.inserttask.es` (resumen de `apply-staging`) se copian a la variable `dns_delegations` del root de producción en una PR propia (T074). Así la zona de producción nace delegando `staging`.
+3. **Release (producción)**: tras el `apply` de producción, cambia en el registrador los **servidores de nombres del dominio** `inserttask.es` a los de la zona de producción (resumen de `apply-production`). Con ese único cambio resuelven `inserttask.es`, `www` y `staging`. Comprueba `dig +short NS inserttask.es`, `dig +short A inserttask.es` (y `www.`).
+4. **Ensayo de staging (después del paso 3, antes de dar por buena la validación de `inserttask.es`)**: `dig +short NS staging.inserttask.es`, `dig +short TXT staging.inserttask.es` y `dig +short A staging.inserttask.es`. No debe haber `AAAA`: `dig +short AAAA staging.inserttask.es` sale vacío. Espera a `OWNERSHIP_ACTIVE` y `CERT_ACTIVE` y valida el ensayo.
+5. Anota el tiempo de trabajo efectivo y si necesitaste ayuda adicional (SC-008).
 
 ### Plazos
 
