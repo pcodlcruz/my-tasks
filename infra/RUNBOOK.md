@@ -756,3 +756,7 @@ El certificado se renueva solo, sin intervención. Lo rompe retirar el `TXT` de 
 ### Aviso a las personas usuarias
 
 La sesión y las preferencias locales (como la apariencia) son **por origen**: la primera vez que alguien entra por `inserttask.com` tiene que iniciar sesión de nuevo, y la apariencia se reconstruye desde su perfil guardado. No se pierde ningún dato.
+
+### Permisos de lectura de Hosting en `mytasksPlanReader` (2026-10-26)
+
+Con la versión de Hosting ya en el estado de staging (Phase 3), el plan de solo lectura de la PR de la Phase 4 falló con `403 … FirebaseHostingVersion`: los permisos de Hosting son de nivel de sitio y `mytasksPlanReader` no incluía `firebasehosting.sites.get` ni `firebasehosting.sites.list`. Añadidos a `infra/iam/roles/plan-reader.yaml` (solo lectura; no dan acceso a datos) y actualizado el rol por el propietario con `gcloud iam roles update` en los dos proyectos. Estado: **pendiente de que el propietario lo ejecute** (guía: `specs/005-custom-domain/guia-propietario-hosting.md`).

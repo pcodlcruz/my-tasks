@@ -31,6 +31,8 @@ includedPermissions:
   - datastore.schemas.get
   - datastore.schemas.list
   - firebaseauth.configs.get
+  - firebasehosting.sites.get
+  - firebasehosting.sites.list
   - iam.serviceAccounts.get
   - iam.serviceAccounts.getIamPolicy
   - iam.serviceAccounts.list

@@ -114,3 +114,16 @@ anterior (otro rol ya presente, una variable que ya existía con otro valor), pa
 - **Rol**: *IAM → editar principal → quitar el rol* de `terraform-<entorno>` en ese proyecto.
 - **Variable**: *Settings → Environments → (entorno) → Environment variables → eliminar* `CUSTOM_WEB_ORIGINS`. El
   pipeline vuelve a componer la lista solo con `run.app` y `<proyecto>.web.app`.
+
+## Corrección (2026-10-26): lectura de Hosting para `mytasksPlanReader`
+
+El plan de solo lectura de la PR de la Fase 4 falló en staging con `403 … FirebaseHostingVersion`: la Fase 3 ya creó la versión de Hosting y, al refrescarla, la identidad `terraform-plan-staging` no podía leerla. Los permisos de Hosting son de nivel de sitio (`firebasehosting.sites.get` y `firebasehosting.sites.list`, de solo lectura, sin acceso a datos) y ningún rol personalizado los tenía. Están añadidos en `infra/iam/roles/plan-reader.yaml`.
+
+Los roles personalizados no se actualizan solos al cambiar el fichero. Ejecuta una vez, con tu cuenta, en los **dos** proyectos (el de producción lo usan `terraform-plan-production` y `terraform-production`, y le pasará lo mismo en cuanto Hosting esté aplicado allí):
+
+```
+gcloud iam roles update mytasksPlanReader --project=pdlco-mytasks-stg --file=infra/iam/roles/plan-reader.yaml
+gcloud iam roles update mytasksPlanReader --project=pdlco-mytasks --file=infra/iam/roles/plan-reader.yaml
+```
+
+No hay que volver a conceder el rol. Después, relanza el job `terraform-validate` de la PR (*Re-run failed jobs*).
