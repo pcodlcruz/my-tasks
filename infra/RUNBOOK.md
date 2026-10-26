@@ -709,7 +709,17 @@ Una lista `custom_domains` por entorno en `infra/envs/<entorno>/main.tf`; el mó
 - API `dns.googleapis.com` activa en los dos proyectos (Terraform la habilita con `apis`; el rol de abajo permite usarla).
 - Rol personalizado **`mytasksDnsAdmin`** (`infra/iam/roles/dns-admin.yaml`), creado por el propietario en cada proyecto y concedido a `terraform-staging` / `terraform-production` en su proyecto. No se usa `roles/dns.admin`, que alcanza además zonas privadas, políticas y la política IAM.
 - Lecturas de DNS añadidas a `mytasksPlanReader` (`dns.managedZones.get`, `dns.managedZones.list`, `dns.resourceRecordSets.list`, `dns.changes.get`): **sin ellas el plan de solo lectura da 403** (como pasó con Hosting). Hay que actualizar el rol en los dos proyectos antes de fusionar la PR de la fase.
-- Los comandos están en `specs/005-custom-domain/guia-propietario-hosting.md`. Verificación posterior en solo lectura con el MCP (T063): ver más abajo.
+- Los comandos están en `specs/005-custom-domain/guia-propietario-hosting.md`. 
+
+**Verificación posterior a la concesión (T063, 2026-10-26, solo lectura con el MCP)**:
+
+| Comprobación | Producción (`pdlco-mytasks`) | Staging (`pdlco-mytasks-stg`) |
+|---|---|---|
+| API `dns.googleapis.com` | Activa | Activa |
+| Rol `mytasksDnsAdmin` | Existe con los 13 permisos de `dns-admin.yaml` | Ídem |
+| Quién lo tiene | Solo `terraform-production` | Solo `terraform-staging` |
+| `mytasksPlanReader` con `dns.changes.get`, `dns.managedZones.get`, `dns.managedZones.list` y `dns.resourceRecordSets.list` | Sí | Sí |
+
 
 ### Leer lo que hay que delegar (propietario)
 

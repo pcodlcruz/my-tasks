@@ -212,7 +212,7 @@ dominios `.es`; las salidas dan los servidores de nombres de cada zona.
 ### Prerrequisitos (propietario)
 
 - [ ] T062 (propietario) Antes de implementar: (a) confirmar si el dominio `inserttask.es` tiene otros registros en el registrador que deban conservarse, como correo (FR-023); (b) confirmar que el registrador permite añadir un `NS` para `staging` mientras el resto sigue en él (R16); (c) cambiar la variable `CUSTOM_WEB_ORIGINS` de los entornos de GitHub `staging` (`https://staging.inserttask.es`) y `production` (`https://inserttask.es`); (d) conceder a `terraform-staging` y `terraform-production` en su proyecto los permisos de Cloud DNS mediante el rol personalizado mínimo `mytasksDnsAdmin` (`dns.managedZones.*`, `dns.resourceRecordSets.*`, `dns.changes.create` y `get`), que el propietario crea en cada proyecto a partir de `infra/iam/roles/dns-admin.yaml` (T065), junto con la API `dns.googleapis.com`
-- [ ] T063 [US3] Verificar con el MCP en solo lectura los permisos de T062(d) y anotarlos en `infra/RUNBOOK.md` §14, como se hizo en T004; si faltan, parar y avisar
+- [X] T063 [US3] Verificar con el MCP en solo lectura los permisos de T062(d) y anotarlos en `infra/RUNBOOK.md` §14, como se hizo en T004; si faltan, parar y avisar
 
 ### Tests de la Phase 5 (escribirlos primero; deben fallar)
 
