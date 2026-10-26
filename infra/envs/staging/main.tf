@@ -32,9 +32,11 @@ module "environment" {
   # Staging holds test data only; point-in-time recovery stays off (LOW-003 of the phase 4 review).
   firestore_point_in_time_recovery = false
 
-  # Custom domains Firebase Hosting serves in this environment (feature 005). Staging gets its
-  # rehearsal domain in phase 4, before production gets any.
-  custom_domains = []
+  # Custom domains Firebase Hosting serves in this environment (feature 005). Staging serves a
+  # rehearsal subdomain, so the whole procedure is proven here before production gets any domain.
+  custom_domains = [
+    { domain = "staging.inserttask.com" },
+  ]
 }
 
 # Identity Platform is enabled by hand once per environment, because enabling it in a project that

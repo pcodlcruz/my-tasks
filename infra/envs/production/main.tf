@@ -38,9 +38,12 @@ module "environment" {
   # a compromised token) can be undone. Cheap for this volume (LOW-003 of the phase 4 review).
   firestore_point_in_time_recovery = true
 
-  # Custom domains Firebase Hosting serves in this environment (feature 005). Production gets its
-  # domains in phase 4, after the rehearsal domain of staging has been validated.
-  custom_domains = []
+  # Custom domains Firebase Hosting serves in this environment (feature 005): the canonical domain,
+  # and www, which answers with a permanent redirect to it.
+  custom_domains = [
+    { domain = "inserttask.com" },
+    { domain = "www.inserttask.com", redirect_to = "inserttask.com" },
+  ]
 }
 
 # Identity Platform already exists in production (created by the owner on 2025-12-03, with the
