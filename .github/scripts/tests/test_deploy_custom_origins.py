@@ -171,21 +171,21 @@ def check_wiring():
 
 
 API_OLD = {"APP_VERSION": "x", "CORS_ORIGINS": "https://mytasks-web-2195266360.europe-southwest1.run.app"}
-API_NEW = {"APP_VERSION": "x", "CORS_ORIGINS": BASE + ",https://inserttask.com"}
+API_NEW = {"APP_VERSION": "x", "CORS_ORIGINS": BASE + ",https://inserttask.es"}
 
 results = [
     check_wiring(),
-    run_origins_step("https://inserttask.com", "production with its domain", True),
+    run_origins_step("https://inserttask.es", "production with its domain", True),
     run_origins_step(None, "production without the variable", True),
-    run_origins_step("http://inserttask.com", "an http origin stops the deployment", False, "http://inserttask.com"),
-    run_origins_step("https://staging.inserttask.com", "the staging domain in production stops it", False, "https://staging.inserttask.com"),
+    run_origins_step("http://inserttask.es", "an http origin stops the deployment", False, "http://inserttask.es"),
+    run_origins_step("https://staging.inserttask.es", "the staging domain in production stops it", False, "https://staging.inserttask.es"),
     run_origins_step("*", "a wildcard stops the deployment", False, "*"),
-    run_post_check(API_NEW, BASE + ",https://inserttask.com", "the revision has exactly the composed list", True),
-    run_post_check(API_OLD, BASE + ",https://inserttask.com", "the revision still has the old value", False, "CORS_ORIGINS"),
+    run_post_check(API_NEW, BASE + ",https://inserttask.es", "the revision has exactly the composed list", True),
+    run_post_check(API_OLD, BASE + ",https://inserttask.es", "the revision still has the old value", False, "CORS_ORIGINS"),
     run_post_check({"APP_VERSION": "x"}, BASE, "the revision has no CORS_ORIGINS", False, "CORS_ORIGINS"),
     run_post_check(
         {"APP_VERSION": "x", "CORS_ORIGINS": BASE + ",https://evil.example"},
-        BASE + ",https://inserttask.com",
+        BASE + ",https://inserttask.es",
         "the revision has an extra origin",
         False,
         "https://evil.example",

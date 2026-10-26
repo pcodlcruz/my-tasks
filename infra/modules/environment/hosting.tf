@@ -51,16 +51,19 @@ resource "google_firebase_hosting_release" "web" {
 }
 
 # Custom domains of the environment. `wait_dns_verification = false` makes the apply finish without
-# waiting for the DNS: the owner puts the records after reading them in the outputs, and Hosting
-# issues the managed certificate (default type) once it sees them, which can take up to 24 hours.
+# waiting for the DNS: the records live in the Cloud DNS zone of dns.tf and become visible once the
+# owner delegates the zone, and Hosting issues the managed certificate (default type) once it sees
+# them, which can take up to 24 hours.
 #
 # Ownership has to be proven with the TXT record and it must stay there for good: if the domain is
 # not active 30 days after it was added, Hosting deletes it, and without the TXT record it cannot
 # renew the certificate later. A domain with `redirect_to` answers with a permanent redirect to
 # the other domain and is never served itself.
 #
-# prevent_destroy: removing a domain by accident would take the address down, so it takes a
-# deliberate change of this file (infra/RUNBOOK.md, section 14, explains how to withdraw one).
+# prevent_destroy is lifted on purpose while staging.inserttask.com is withdrawn (the domain was
+# first written with the wrong top-level domain). It is restored in its own pull request (T073 of
+# specs/005-custom-domain/tasks.md) before the release: removing a domain by accident would take the
+# address down (infra/RUNBOOK.md, section 14, explains how to withdraw one).
 resource "google_firebase_hosting_custom_domain" "web" {
   provider = google-beta
   for_each = { for item in var.custom_domains : item.domain => item }
@@ -71,8 +74,4 @@ resource "google_firebase_hosting_custom_domain" "web" {
   wait_dns_verification = false
 
   depends_on = [google_firebase_hosting_release.web]
-
-  lifecycle {
-    prevent_destroy = true
-  }
 }
