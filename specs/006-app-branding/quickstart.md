@@ -41,6 +41,7 @@ El propietario aprueba o pide ajustes de tamaño, posición o variante (SC-005).
 | 7 | Bloquear la imagen del logo (herramientas del navegador) y recargar | El nombre sigue visible y la pantalla no se descoloca |
 | 8 | Consola del navegador | Sin errores de CSP ni de carga del logo |
 | 9 | Lector de pantalla | El nombre se anuncia una sola vez en la cabecera |
+| 10 | Aprobación del aspecto (SC-005) | El propietario confirma en staging el tamaño, la posición y la legibilidad del logo en claro y oscuro, en móvil y en escritorio |
 
 ## D. Producción (tras la release y el despliegue)
 
