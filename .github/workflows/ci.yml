@@ -237,6 +237,8 @@ jobs:
         run: .github/scripts/tests/test-smoke-test.sh
       - name: Terraform plan script of infra.yml
         run: .github/scripts/tests/test-infra-plan.sh
+      - name: Custom domains summary of infra.yml
+        run: .github/scripts/tests/test-custom-domains-summary.sh
       - name: Image provenance script
         run: .github/scripts/tests/test-image-provenance.sh
       - name: Variable check of the deployment
@@ -247,6 +249,12 @@ jobs:
         run: |
           python3 -m pip install --quiet pyyaml==6.0.2
           python3 .github/scripts/tests/test_deploy_bootstrap_admin.py
+      - name: CORS origins of the API (composition and validation)
+        run: python3 .github/scripts/tests/test_cors_origins.py
+      - name: CORS origins in the deployment workflow
+        run: |
+          python3 -m pip install --quiet pyyaml==6.0.2
+          python3 .github/scripts/tests/test_deploy_custom_origins.py
       - name: Parity of the staging and production roots
         run: python3 .github/scripts/tests/test_env_roots_parity.py
 

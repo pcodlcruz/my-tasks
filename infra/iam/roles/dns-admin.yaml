@@ -1,0 +1,29 @@
+# Custom role mytasksDnsAdmin (feature 005, FR-024).
+# Granted by the owner to terraform-<env> in the project of the environment. It lets the apply
+# manage the Cloud DNS zone of the environment and its records, and nothing else.
+#
+# Why not roles/dns.admin: the predefined role also reaches private zones, networks, policies,
+# response policies and the IAM policy of the zones, none of which this feature uses. The apply
+# runs from a public repository with an approval, so it gets the smallest set that works.
+#
+# What it leaves out on purpose:
+#   dns.managedZones.getIamPolicy / setIamPolicy   nobody else gets access to the zone through Terraform
+#   dns.networks.*, dns.policies.*, dns.responsePolicies.*   no private zones, no DNS policies
+#   dns.dnsKeys.*                                   DNSSEC is out of scope for this feature
+title: MyTasks DNS administrator
+description: Create, update and delete the public Cloud DNS zone of one environment and its records. No IAM policy, private zones, DNS policies or DNSSEC keys.
+stage: GA
+includedPermissions:
+  - dns.changes.create
+  - dns.changes.get
+  - dns.changes.list
+  - dns.managedZones.create
+  - dns.managedZones.delete
+  - dns.managedZones.get
+  - dns.managedZones.list
+  - dns.managedZones.update
+  - dns.resourceRecordSets.create
+  - dns.resourceRecordSets.delete
+  - dns.resourceRecordSets.get
+  - dns.resourceRecordSets.list
+  - dns.resourceRecordSets.update

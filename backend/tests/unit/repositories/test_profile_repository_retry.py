@@ -73,14 +73,17 @@ async def test_an_upload_is_also_retried_when_the_client_ran_out_of_commit_attem
     assert flaky.calls == 2
 
 
-async def test_an_upload_gives_up_after_four_attempts(monkeypatch: pytest.MonkeyPatch) -> None:
-    flaky = Flaky([google_exceptions.Aborted("lock race") for _ in range(10)])
+async def test_an_upload_gives_up_after_the_maximum_attempts(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    flaky = Flaky([google_exceptions.Aborted("lock race") for _ in range(100)])
     monkeypatch.setattr(profile_repository, "_apply_avatar_upload", flaky)
 
     with pytest.raises(google_exceptions.Aborted):
         await _repository().upload_avatar("uid-1", b"webp", NOW)
 
-    assert flaky.calls == 4
+    # The retry is shared with the accounts (account_repository._retry_on_abort).
+    assert flaky.calls == account_repository._MAX_ATTEMPTS
 
 
 async def test_a_rate_limited_upload_is_not_retried(monkeypatch: pytest.MonkeyPatch) -> None:

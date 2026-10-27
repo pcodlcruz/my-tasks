@@ -18,6 +18,8 @@ module "environment" {
   project_number = var.project_number
   region         = var.region
 
+  providers = { google = google, google-beta = google-beta }
+
   terraform_service_account_email = google_service_account.terraform_staging.email
   deployer_service_account_email  = google_service_account.deployer_staging.email
 
@@ -29,6 +31,18 @@ module "environment" {
 
   # Staging holds test data only; point-in-time recovery stays off (LOW-003 of the phase 4 review).
   firestore_point_in_time_recovery = false
+
+  # Custom domains Firebase Hosting serves in this environment (feature 005). Staging serves a
+  # rehearsal subdomain, so the whole procedure is proven here before production gets any domain.
+  custom_domains = [
+    { domain = "staging.inserttask.es" },
+  ]
+
+  # Public Cloud DNS zone of the rehearsal subdomain. The registrar does not accept an NS record for a
+  # subdomain, so the zone of production delegates it (dns_delegations of the production root).
+  dns_zone_domain  = "staging.inserttask.es"
+  dns_a_subdomains = []
+  dns_delegations  = {}
 }
 
 # Identity Platform is enabled by hand once per environment, because enabling it in a project that

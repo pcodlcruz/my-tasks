@@ -22,6 +22,8 @@ module "environment" {
   project_number = var.project_number
   region         = var.region
 
+  providers = { google = google, google-beta = google-beta }
+
   terraform_service_account_email = local.terraform_service_account_email
   deployer_service_account_email  = local.deployer_service_account_email
 
@@ -35,6 +37,28 @@ module "environment" {
   # Production keeps 7 days of versions of the tasks, so a definitive delete (an application bug or
   # a compromised token) can be undone. Cheap for this volume (LOW-003 of the phase 4 review).
   firestore_point_in_time_recovery = true
+
+  # Custom domains Firebase Hosting serves in this environment (feature 005): the canonical domain,
+  # and www, which answers with a permanent redirect to it.
+  custom_domains = [
+    { domain = "inserttask.es" },
+    { domain = "www.inserttask.es", redirect_to = "inserttask.es" },
+  ]
+
+  # Public Cloud DNS zone of the domain. www also points at Hosting. The staging subdomain is
+  # delegated to the zone of staging, whose name servers are public and were read after its apply
+  # (2026-10-26). The registrar does not accept an NS record for a subdomain, so this zone is what
+  # makes staging.inserttask.es resolve once the owner points the domain at it.
+  dns_zone_domain  = "inserttask.es"
+  dns_a_subdomains = ["www"]
+  dns_delegations = {
+    staging = [
+      "ns-cloud-d1.googledomains.com.",
+      "ns-cloud-d2.googledomains.com.",
+      "ns-cloud-d3.googledomains.com.",
+      "ns-cloud-d4.googledomains.com.",
+    ]
+  }
 }
 
 # Identity Platform already exists in production (created by the owner on 2025-12-03, with the

@@ -30,7 +30,13 @@ includedPermissions:
   - datastore.operations.list
   - datastore.schemas.get
   - datastore.schemas.list
+  - dns.changes.get
+  - dns.managedZones.get
+  - dns.managedZones.list
+  - dns.resourceRecordSets.list
   - firebaseauth.configs.get
+  - firebasehosting.sites.get
+  - firebasehosting.sites.list
   - iam.serviceAccounts.get
   - iam.serviceAccounts.getIamPolicy
   - iam.serviceAccounts.list

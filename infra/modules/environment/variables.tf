@@ -67,6 +67,8 @@ variable "apis" {
     "apikeys.googleapis.com",
     "artifactregistry.googleapis.com",
     "cloudresourcemanager.googleapis.com",
+    "dns.googleapis.com",
+    "firebasehosting.googleapis.com",
     "firestore.googleapis.com",
     "iam.googleapis.com",
     "iamcredentials.googleapis.com",
@@ -77,4 +79,72 @@ variable "apis" {
     "securetoken.googleapis.com",
     "serviceusage.googleapis.com",
   ]
+}
+
+variable "custom_domains" {
+  description = "Domains Firebase Hosting serves for this environment (feature 005). `redirect_to` makes a domain answer with a permanent redirect to another domain of the list; the others serve the web and are the ones the sign-in authorizes."
+  type = list(object({
+    domain      = string
+    redirect_to = optional(string)
+  }))
+  default = []
+
+  validation {
+    condition = alltrue([
+      for item in var.custom_domains :
+      can(regex("^[a-z0-9]([a-z0-9-]*[a-z0-9])?(\\.[a-z0-9]([a-z0-9-]*[a-z0-9])?)+$", item.domain))
+      && !can(regex("\\.[0-9]+$", item.domain))
+    ])
+    error_message = "Each domain must be a lower-case domain name: no scheme, path, port, wildcard or trailing dot, and not an IP address."
+  }
+
+  validation {
+    condition     = length(distinct([for item in var.custom_domains : item.domain])) == length(var.custom_domains)
+    error_message = "A domain can appear only once."
+  }
+
+  validation {
+    condition = alltrue([
+      for item in var.custom_domains :
+      item.redirect_to == null ? true : (
+        item.redirect_to != item.domain
+        && contains([for other in var.custom_domains : other.domain], item.redirect_to)
+        && try([for other in var.custom_domains : other.redirect_to if other.domain == item.redirect_to][0], null) == null
+      )
+    ])
+    error_message = "redirect_to must name another domain of the list, and that domain must not redirect in turn."
+  }
+}
+
+variable "dns_zone_domain" {
+  description = "Domain of the public Cloud DNS zone of the environment (feature 005), for example inserttask.es. Null declares no zone."
+  type        = string
+  default     = null
+
+  validation {
+    condition     = var.dns_zone_domain == null ? true : can(regex("^[a-z0-9]([a-z0-9-]*[a-z0-9])?(\\.[a-z0-9]([a-z0-9-]*[a-z0-9])?)+$", var.dns_zone_domain))
+    error_message = "The zone domain must be a lower-case domain name with no trailing dot."
+  }
+}
+
+variable "dns_a_subdomains" {
+  description = "Subdomains of the zone that get an A record to Hosting besides the apex (for example www). Never an AAAA record."
+  type        = list(string)
+  default     = []
+
+  validation {
+    condition     = alltrue([for name in var.dns_a_subdomains : can(regex("^[a-z0-9]([a-z0-9-]*[a-z0-9])?$", name))])
+    error_message = "Each subdomain must be a single lower-case label."
+  }
+}
+
+variable "dns_delegations" {
+  description = "Child zones delegated from this one: subdomain label to the name servers of the child zone (public values, with the trailing dot)."
+  type        = map(list(string))
+  default     = {}
+
+  validation {
+    condition     = alltrue([for servers in values(var.dns_delegations) : length(servers) > 0 && alltrue([for server in servers : endswith(server, ".")])])
+    error_message = "Each delegation needs at least one name server, written with the trailing dot."
+  }
 }
