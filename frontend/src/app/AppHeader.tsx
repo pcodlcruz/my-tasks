@@ -2,6 +2,7 @@ import { NavLink } from 'react-router-dom'
 import { useIsAdmin } from '../features/auth/useIsAdmin'
 import { useSession } from '../features/auth/useSession'
 import { useAvatarUrl } from '../api/profile'
+import { APP_NAME } from '../lib/brand'
 import { Avatar } from '../features/profile/Avatar'
 import { useSettledProfile } from '../features/profile/useSettledProfile'
 
@@ -26,7 +27,7 @@ export function AppHeader(): JSX.Element {
     <header className="sticky top-0 z-40 w-full border-b border-border bg-surface shadow-sm">
       <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-x-4 gap-y-1 px-4 py-2">
         <div className="flex items-center gap-4 sm:gap-8">
-          <span className="font-heading text-heading font-bold text-schedule">MyTasks</span>
+          <span className="font-heading text-heading font-bold text-schedule">{APP_NAME}</span>
           <nav aria-label="Navegación principal" className="flex items-center gap-1 sm:gap-4">
             {navItems.map((item) => (
               <NavLink

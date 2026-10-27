@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Navigate, useLocation, useSearchParams } from 'react-router-dom'
+import { APP_NAME, APP_TAGLINE } from '../../lib/brand'
 import { useSession } from './useSession'
 
 interface LocationState {
@@ -35,10 +36,8 @@ export function LoginPage(): JSX.Element {
     <main className="flex min-h-screen flex-col items-center justify-center bg-surface-alt px-4">
       <div className="w-full max-w-md rounded-xl border border-border bg-surface p-8 shadow-sm">
         <div className="flex flex-col items-center text-center">
-          <h1 className="font-display text-display font-bold text-text">MyTasks</h1>
-          <p className="mt-1 text-body text-text-muted">
-            Organiza tus tareas con la matriz de Eisenhower
-          </p>
+          <h1 className="font-display text-display font-bold text-text">{APP_NAME}</h1>
+          <p className="mt-1 text-body text-text-muted">{APP_TAGLINE}</p>
         </div>
 
         {sessionExpired && (
