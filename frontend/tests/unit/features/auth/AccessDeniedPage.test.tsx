@@ -25,6 +25,13 @@ describe('<AccessDeniedPage>', () => {
     expect(screen.getByText(/ana@example.com/)).toBeInTheDocument()
   })
 
+  it('nombra la aplicación como InsertTasks y no con el nombre anterior', async () => {
+    await renderPage()
+
+    expect(screen.getByText(/^InsertTasks es una aplicación privada/)).toBeInTheDocument()
+    expect(screen.queryByText(/mytasks/i)).toBeNull()
+  })
+
   it('no revela si la cuenta está invitada o fue revocada', async () => {
     await renderPage()
 

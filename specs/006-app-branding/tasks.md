@@ -53,21 +53,21 @@ nombre puede entregarse mientras el propietario prepara la imagen (research, Rie
 
 ### Tests (escribir primero; deben fallar)
 
-- [ ] T001 [P] [US3] Crear `frontend/tests/unit/lib/brand.test.ts`: `APP_NAME` vale `InsertTasks`, `APP_TAGLINE` vale `Inserta tus tareas y prioriza lo que importa`, y el `<title>` de `frontend/index.html` (leído como fichero, como hace `tests/unit/public/theme-init.test.ts`) coincide con `APP_NAME`
-- [ ] T002 [P] [US1] Ampliar `frontend/tests/unit/features/auth/LoginPage.test.tsx`: el encabezado de nivel 1 es «InsertTasks», se ve el mensaje de propósito, no aparece «Organiza tus tareas con la matriz de Eisenhower» ni «MyTasks»
-- [ ] T003 [P] [US3] Ampliar `frontend/tests/unit/features/auth/AccessDeniedPage.test.tsx`: el texto empieza por «InsertTasks es una aplicación privada» y no contiene «MyTasks» (el encabezado «Necesitas una invitación» no cambia)
-- [ ] T004 [P] [US2] Ampliar `frontend/tests/unit/features/board/BoardPage.test.tsx`: con el tablero vacío el mensaje de bienvenida es «¡Bienvenido a InsertTasks!»
-- [ ] T005 [P] [US2] Ampliar `frontend/tests/unit/app/AppHeader.test.tsx`: la cabecera muestra el texto «InsertTasks» y no «MyTasks»
+- [X] T001 [P] [US3] Crear `frontend/tests/unit/lib/brand.test.ts`: `APP_NAME` vale `InsertTasks`, `APP_TAGLINE` vale `Inserta tus tareas y prioriza lo que importa`, y el `<title>` de `frontend/index.html` (leído como fichero, como hace `tests/unit/public/theme-init.test.ts`) coincide con `APP_NAME`
+- [X] T002 [P] [US1] Ampliar `frontend/tests/unit/features/auth/LoginPage.test.tsx`: el encabezado de nivel 1 es «InsertTasks», se ve el mensaje de propósito, no aparece «Organiza tus tareas con la matriz de Eisenhower» ni «MyTasks»
+- [X] T003 [P] [US3] Ampliar `frontend/tests/unit/features/auth/AccessDeniedPage.test.tsx`: el texto empieza por «InsertTasks es una aplicación privada» y no contiene «MyTasks» (el encabezado «Necesitas una invitación» no cambia)
+- [X] T004 [P] [US2] Ampliar `frontend/tests/unit/features/board/BoardPage.test.tsx`: con el tablero vacío el mensaje de bienvenida es «¡Bienvenido a InsertTasks!»
+- [X] T005 [P] [US2] Ampliar `frontend/tests/unit/app/AppHeader.test.tsx`: la cabecera muestra el texto «InsertTasks» y no «MyTasks»
 
 ### Implementación
 
-- [ ] T006 [US3] Crear `frontend/src/lib/brand.ts` con `APP_NAME = 'InsertTasks'` y `APP_TAGLINE = 'Inserta tus tareas y prioriza lo que importa'`, exportadas como constantes tipadas (data-model.md)
-- [ ] T007 [P] [US3] Cambiar el `<title>` de `frontend/index.html` a `InsertTasks`
-- [ ] T008 [US1] Usar `APP_NAME` y `APP_TAGLINE` en `frontend/src/features/auth/LoginPage.tsx` (el encabezado y el subtítulo, que sustituye al texto de Eisenhower)
-- [ ] T009 [US2] Usar `APP_NAME` en el texto de la cabecera de `frontend/src/app/AppHeader.tsx`
-- [ ] T010 [US3] Usar `APP_NAME` en el texto de `frontend/src/features/auth/AccessDeniedPage.tsx` (contracts/branding-ui.md)
-- [ ] T011 [US2] Usar `APP_NAME` en el mensaje de bienvenida de `frontend/src/features/board/BoardPage.tsx`
-- [ ] T012 [US3] Comprobar que no queda «MyTasks» en lo visible: búsqueda en `frontend/src` y `frontend/index.html` sin resultados; `npm --prefix frontend test`, `build` y `lint` en verde
+- [X] T006 [US3] Crear `frontend/src/lib/brand.ts` con `APP_NAME = 'InsertTasks'` y `APP_TAGLINE = 'Inserta tus tareas y prioriza lo que importa'`, exportadas como constantes tipadas (data-model.md)
+- [X] T007 [P] [US3] Cambiar el `<title>` de `frontend/index.html` a `InsertTasks`
+- [X] T008 [US1] Usar `APP_NAME` y `APP_TAGLINE` en `frontend/src/features/auth/LoginPage.tsx` (el encabezado y el subtítulo, que sustituye al texto de Eisenhower)
+- [X] T009 [US2] Usar `APP_NAME` en el texto de la cabecera de `frontend/src/app/AppHeader.tsx`
+- [X] T010 [US3] Usar `APP_NAME` en el texto de `frontend/src/features/auth/AccessDeniedPage.tsx` (contracts/branding-ui.md)
+- [X] T011 [US2] Usar `APP_NAME` en el mensaje de bienvenida de `frontend/src/features/board/BoardPage.tsx`
+- [X] T012 [US3] Comprobar que no queda «MyTasks» en lo visible: búsqueda en `frontend/src` y `frontend/index.html` sin resultados; `npm --prefix frontend test`, `build` y `lint` en verde
 
 **Checkpoint**: la web dice «InsertTasks» en todas partes y el inicio de sesión lleva el mensaje; todavía sin logo. Entregable por sí solo.
 
