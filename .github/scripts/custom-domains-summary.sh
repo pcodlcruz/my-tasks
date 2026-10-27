@@ -1,15 +1,15 @@
 #!/usr/bin/env bash
-# Publishes in the job summary the state of the custom domains of the roots just applied and the name
-# servers of the Cloud DNS zone, so the owner can read what to delegate without opening the console.
-# The records themselves are written by Terraform in the zone; what Hosting reports as required is
-# only shown as a contrast for diagnosis.
+# Publishes in the job summary the state of the custom domains of the roots just applied, so the
+# owner can read it without opening the console. The DNS records live in the registrar, kept by hand
+# (infra/RUNBOOK.md lists them); what Hosting reports as required is shown for diagnosis, to compare
+# with what the registrar holds.
 #
 # Usage: custom-domains-summary.sh ROOT...
 #   ROOT   directory relative to infra/ (envs/staging, envs/production). A root without a
 #          `custom_domains` output (the platform one) is skipped.
 #
-# Only the `custom_domains` and `dns_name_servers` outputs are read, never the rest of them: both are
-# public by nature (they go in the DNS). It is a convenience, so it never fails the job.
+# Only the `custom_domains` output is read, never the rest of them: it is public by nature (it goes
+# in the DNS). It is a convenience, so it never fails the job.
 
 set -uo pipefail
 
@@ -26,17 +26,10 @@ for root in "$@"; do
     echo "|---|---|---|---|---|"
     jq -r 'to_entries[] | "| `\(.key)` | \(.value.host_state // "-") | \(.value.ownership_state // "-") | \(.value.certificate_state // "-") | \((.value.issues // []) | length) |"' <<< "$json"
     echo
-    servers=$(terraform -chdir="infra/$root" output -json dns_name_servers 2> /dev/null) || servers=null
-    if [ "$(jq 'length' <<< "$servers" 2> /dev/null || echo 0)" -gt 0 ]; then
-      echo "Name servers of the Cloud DNS zone (staging: add an NS record for the subdomain at the registrar; production: set them as the name servers of the domain):"
-      echo
-      jq -r '.[] | "- `\(.)`"' <<< "$servers"
-      echo
-    fi
 
     required=$(jq -r 'to_entries[] | .key as $domain | [.value.required_dns_updates[]?.desired[]?.records[]?][] | "| `\($domain)` | \(.type // "-") | `\(.domain_name // "-")` | `\(.rdata // "-")` | \(.required_action // "-") |"' <<< "$json")
     if [ -n "$required" ]; then
-      echo "Records Hosting reports as required (for contrast only; the zone already holds them):"
+      echo "Records Hosting reports as required (compare them with the DNS of the registrar):"
       echo
       echo "| Domain | Type | Name | Value | Action |"
       echo "|---|---|---|---|---|"

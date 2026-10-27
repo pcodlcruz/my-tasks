@@ -38,11 +38,8 @@ module "environment" {
     { domain = "staging.inserttask.es" },
   ]
 
-  # Public Cloud DNS zone of the rehearsal subdomain. The registrar does not accept an NS record for a
-  # subdomain, so the zone of production delegates it (dns_delegations of the production root).
-  dns_zone_domain  = "staging.inserttask.es"
-  dns_a_subdomains = []
-  dns_delegations  = {}
+  # There is no DNS zone in Terraform: the records of the subdomain live in the DNS of the registrar
+  # and the owner keeps them by hand (infra/RUNBOOK.md lists them). Never an AAAA record.
 }
 
 # Identity Platform is enabled by hand once per environment, because enabling it in a project that

@@ -8,6 +8,21 @@
 
 **Input**: User description: "He comprado un nombre de dominio que quiero que apliquemos al proyecto de producción. Teniendo en cuenta que el Cloud Run está en Madrid, no podemos hacer uso de el mapeo de dominios que tiene el producto. Tenemos que usar Firebase. Además quiero que tengamos un certificado ssl gratuíto"
 
+> **Enmienda 2026-10-27 — el DNS pasa del Cloud DNS al registrador.** El propietario comprobó que el
+> registrador sí admite todos los registros, incluidos los de un subdominio, y decidió mantener el DNS
+> allí. Esta enmienda **sustituye a FR-021 a FR-024** y a todo lo que en este documento diga que el DNS
+> vive en Cloud DNS, que `staging` se delega desde la zona de producción o que hay que cambiar los
+> servidores de nombres del dominio:
+>
+> - Terraform ya no declara zonas ni registros DNS; el propietario mantiene a mano en el registrador
+>   `TXT hosting-site=<sitio>` y `A 199.36.158.100` (sin `AAAA`) para `inserttask.es`,
+>   `www.inserttask.es` y `staging.inserttask.es`. La lista exacta está en `infra/RUNBOOK.md`.
+> - Los servidores de nombres del dominio siguen siendo los del registrador.
+> - El coste de Cloud DNS desaparece; se pierde el DNS como código (los registros pueden desviarse sin
+>   que un plan lo vea) y la opción de DNSSEC con Cloud DNS (LOW-002 del backlog de seguridad).
+> - El rol `mytasksDnsAdmin` y las lecturas de DNS de `mytasksPlanReader` quedan sin uso; se retiran en
+>   una PR aparte.
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - Entrar a la aplicación de producción con mi propio dominio (Priority: P1)
