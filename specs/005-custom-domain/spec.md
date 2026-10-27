@@ -4,7 +4,7 @@
 
 **Created**: 2026-10-25
 
-**Status**: Draft
+**Status**: Cerrada el 2026-10-27 (en producción desde las releases 1.3.0 a 1.3.2; seguimiento en `validacion-produccion.md`)
 
 **Input**: User description: "He comprado un nombre de dominio que quiero que apliquemos al proyecto de producción. Teniendo en cuenta que el Cloud Run está en Madrid, no podemos hacer uso de el mapeo de dominios que tiene el producto. Tenemos que usar Firebase. Además quiero que tengamos un certificado ssl gratuíto"
 

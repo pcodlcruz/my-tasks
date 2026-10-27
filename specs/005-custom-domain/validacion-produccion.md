@@ -59,7 +59,12 @@ Comprobados con `dig` por el propietario:
 Si autorizar `inserttask.es` en Identity Platform autoriza también sus subdominios: **sin resolver**. El inicio de sesión funciona en los dos, pero cada
 entorno autoriza su propio dominio por Terraform (`staging.inserttask.es` en staging), así que la prueba no distingue el caso.
 
-## Pendiente (no se midió o no se comunicó)
+## Cierre de la feature (2026-10-27)
+
+El propietario decidió dar por anotados los casos de abajo y cerrar la feature. **No se midieron ni se comunicaron**: se aceptan sin
+medir, no como superados. Quedan como seguimiento, sin plazo, y si se mide alguno se añade aquí en una PR corta.
+
+## Aceptado sin medir (no se midió o no se comunicó)
 
 - Navegadores (Chrome, Safari, Firefox, Edge) y consola del navegador sin errores de CSP ni CORS en los dos dominios (T050, T051, T058).
 - Rendimiento (SC-005): mediana de tres cargas en frío de `https://inserttask.es/` frente a la URL `run.app`. Sin medir.
