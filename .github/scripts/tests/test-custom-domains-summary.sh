@@ -15,14 +15,12 @@ failures=0
 
 mkdir -p "$work/bin"
 
-# Fake terraform: `output -json custom_domains` prints outputs/<root>.json and `output -json
-# dns_name_servers` prints outputs/<root>.ns.json; both fail when the file does not exist (a root
-# without that output).
+# Fake terraform: `output -json custom_domains` prints outputs/<root>.json and fails when the file
+# does not exist (a root without that output).
 cat > "$work/bin/terraform" << 'EOF'
 #!/usr/bin/env bash
 dir="${1#-chdir=}"; shift
 file="$FAKE_OUTPUTS/$(basename "$dir").json"
-[ "$3" = dns_name_servers ] && file="$FAKE_OUTPUTS/$(basename "$dir").ns.json"
 [ "$1" = output ] && [ -f "$file" ] && { cat "$file"; exit 0; }
 echo "Error: Output \"custom_domains\" not found" >&2
 exit 1
@@ -54,8 +52,6 @@ cat > "$work/outputs/production.json" << 'EOF'
 }
 EOF
 
-echo '["ns-cloud-a1.googledomains.com.", "ns-cloud-a2.googledomains.com."]' > "$work/outputs/production.ns.json"
-
 check() {
   local label="$1" condition="$2"
   if eval "$condition"; then
@@ -79,7 +75,7 @@ has() { grep -qF -- "$1" <<< "$summary_text"; }
 run envs/production
 check "the summary lists each domain with its states" 'has "| \`inserttask.es\` | HOST_UNHOSTED | OWNERSHIP_PENDING |" && has "| \`www.inserttask.es\` | HOST_UNHOSTED | OWNERSHIP_PENDING | - | 1 |"'
 check "the summary lists the TXT and A records to add" 'has "| TXT | \`inserttask.es\` | \`hosting-site=abc\` | ADD |" && has "| A | \`inserttask.es\` | \`199.36.158.100\` | ADD |"'
-check "the summary lists the name servers of the zone" 'has "- \`ns-cloud-a1.googledomains.com.\`" && has "- \`ns-cloud-a2.googledomains.com.\`"'
+check "the summary no longer mentions name servers" '! has "Name servers"'
 check "the script succeeds" '[ "$code" -eq 0 ]'
 
 # Without records from Hosting (right after the creation) the summary says so instead of an empty table.
@@ -94,7 +90,7 @@ PY
 cp "$work/outputs/empty.json" "$work/outputs/staging.json"
 run envs/staging
 check "no required records from Hosting: the summary says so" 'has "Hosting has not reported any required record yet" && ! has "| Domain | Type | Name |"'
-check "a root without the name servers output still lists its domains" 'has "Custom domains of envs/staging" && ! has "Name servers"'
+check "a root with domains but no required records still lists its domains" 'has "Custom domains of envs/staging"'
 
 run platform
 check "a root without the output is skipped and writes nothing" '[ "$code" -eq 0 ] && [ -z "$summary_text" ]'

@@ -115,36 +115,3 @@ variable "custom_domains" {
     error_message = "redirect_to must name another domain of the list, and that domain must not redirect in turn."
   }
 }
-
-variable "dns_zone_domain" {
-  description = "Domain of the public Cloud DNS zone of the environment (feature 005), for example inserttask.es. Null declares no zone."
-  type        = string
-  default     = null
-
-  validation {
-    condition     = var.dns_zone_domain == null ? true : can(regex("^[a-z0-9]([a-z0-9-]*[a-z0-9])?(\\.[a-z0-9]([a-z0-9-]*[a-z0-9])?)+$", var.dns_zone_domain))
-    error_message = "The zone domain must be a lower-case domain name with no trailing dot."
-  }
-}
-
-variable "dns_a_subdomains" {
-  description = "Subdomains of the zone that get an A record to Hosting besides the apex (for example www). Never an AAAA record."
-  type        = list(string)
-  default     = []
-
-  validation {
-    condition     = alltrue([for name in var.dns_a_subdomains : can(regex("^[a-z0-9]([a-z0-9-]*[a-z0-9])?$", name))])
-    error_message = "Each subdomain must be a single lower-case label."
-  }
-}
-
-variable "dns_delegations" {
-  description = "Child zones delegated from this one: subdomain label to the name servers of the child zone (public values, with the trailing dot)."
-  type        = map(list(string))
-  default     = {}
-
-  validation {
-    condition     = alltrue([for servers in values(var.dns_delegations) : length(servers) > 0 && alltrue([for server in servers : endswith(server, ".")])])
-    error_message = "Each delegation needs at least one name server, written with the trailing dot."
-  }
-}

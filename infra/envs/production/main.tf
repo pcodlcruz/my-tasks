@@ -45,20 +45,8 @@ module "environment" {
     { domain = "www.inserttask.es", redirect_to = "inserttask.es" },
   ]
 
-  # Public Cloud DNS zone of the domain. www also points at Hosting. The staging subdomain is
-  # delegated to the zone of staging, whose name servers are public and were read after its apply
-  # (2026-10-26). The registrar does not accept an NS record for a subdomain, so this zone is what
-  # makes staging.inserttask.es resolve once the owner points the domain at it.
-  dns_zone_domain  = "inserttask.es"
-  dns_a_subdomains = ["www"]
-  dns_delegations = {
-    staging = [
-      "ns-cloud-d1.googledomains.com.",
-      "ns-cloud-d2.googledomains.com.",
-      "ns-cloud-d3.googledomains.com.",
-      "ns-cloud-d4.googledomains.com.",
-    ]
-  }
+  # There is no DNS zone in Terraform: the records live in the DNS of the registrar and the owner
+  # keeps them by hand (infra/RUNBOOK.md lists them). Never an AAAA record.
 }
 
 # Identity Platform already exists in production (created by the owner on 2025-12-03, with the
