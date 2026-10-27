@@ -51,6 +51,11 @@ Fecha: 2026-10-27. No quedan `NEEDS CLARIFICATION`; esto recoge las decisiones t
 - **Decisión**: primero se prueba **una sola imagen** sobre los dos fondos. Si no se distingue en uno, se pide la variante al propietario y se
   muestran dos `<img>` alternadas con una regla en `index.css` según `:root[data-theme='dark']`, como el resto de los tokens.
 - **Razón**: la spec ya asume una imagen válida para los dos temas; la variante solo se añade si hace falta (Principio I).
+- **Criterio medible (SC-003)**: los colores principales del logo tienen al menos **3:1** de contraste con el token `surface` de cada tema (los
+  valores están en `docs/design/check-contrast.py`; la tarjeta del inicio de sesión y la cabecera usan `bg-surface`). Se mide en T014 muestreando
+  los colores dominantes de la imagen con un script de Python de la biblioteca estándar, que no se añade al repositorio; si el logo lleva su propio
+  fondo, no se mide. El e2e de accesibilidad (axe) solo comprueba **texto**, no imágenes, así que el contraste del logo se confirma con esa
+  medida y con la aprobación visual del propietario (T024).
 - **Alternativas**: filtros CSS para invertir el logo: rechazado, altera la marca (FR-009).
 
 ## R6 — Icono de la pestaña (FR-011)

@@ -84,7 +84,7 @@ nombre puede entregarse mientras el propietario prepara la imagen (research, Rie
 **Depende de**: Phase 1 fusionada y T013 (la imagen).
 
 - [ ] T013 (propietario) Entregar la imagen del logo al agente (en el repositorio o por conversación): a ser posible vectorial (SVG), válida sobre fondo claro y oscuro, y optimizada (~50 KB como tope, research R4). Si solo hay imagen de píxeles, con resolución suficiente para pantallas de alta densidad
-- [ ] T014 [US1] Colocar la imagen en `frontend/src/assets/brand/logo.<ext>` sin rediseñarla (FR-009); si pasa de ~50 KB, optimizarla sin cambiar el diseño. Comprobar con una captura que se distingue sobre el fondo claro y sobre el oscuro de `frontend/src/index.css`; si no, **parar y pedir la variante al propietario** (research R5)
+- [ ] T014 [US1] Colocar la imagen en `frontend/src/assets/brand/logo.<ext>` sin rediseñarla (FR-009); si pasa de ~50 KB, optimizarla sin cambiar el diseño. Comprobar con una captura que se distingue sobre el fondo claro y sobre el oscuro de `frontend/src/index.css` y medir el contraste de sus colores principales con el token `surface` de cada tema (valores de `docs/design/check-contrast.py`): al menos 3:1, salvo que el logo lleve su propio fondo (SC-003, research R5); si no llega, **parar y pedir la variante al propietario**
 
 ### Tests (escribir primero; deben fallar)
 
@@ -102,7 +102,7 @@ nombre puede entregarse mientras el propietario prepara la imagen (research, Rie
 - [ ] T023 [US1] Generar capturas locales con Playwright del inicio de sesión y del tablero, en tema claro y oscuro y en 360 px y escritorio, y guardarlas en el scratchpad de la sesión (no en el repositorio) para enseñárselas al propietario
 - [ ] T024 (propietario) Aprobar las capturas de T023 o pedir ajustes de tamaño, posición, espaciado o variante (SC-005); bloquea la PR de la fase, como el punto de control de diseño de la feature 004
 - [ ] T025 [US1] Aplicar los ajustes que pida el propietario en T024 y repetir T023 hasta que apruebe
-- [ ] T026 [US1] Ejecutar `npm --prefix frontend test`, `build`, `lint`, `npm --prefix frontend run test:e2e` (incluidos `branding.spec.ts` y `a11y.spec.ts`, sin fallos de contraste en claro ni oscuro)
+- [ ] T026 [US1] Ejecutar `npm --prefix frontend test`, `build`, `lint`, `npm --prefix frontend run test:e2e` (incluidos `branding.spec.ts` y `a11y.spec.ts`, sin fallos de contraste de texto en claro ni oscuro; el contraste del propio logo no lo comprueba axe, se midió en T014)
 
 **Checkpoint**: el inicio de sesión y la cabecera muestran el logo con el nombre; aprobado por el propietario.
 
@@ -160,10 +160,10 @@ documental propia, `feature/006-app-branding-cierre`, a `develop`.
 
 **Goal**: «InsertTasks» y el logo en servicio en producción.
 
-**Independent Test**: escenarios 1–9 de `quickstart.md` en staging y 1–5 en producción.
+**Independent Test**: escenarios 1–10 de `quickstart.md` en staging y 1–5 en producción.
 
-- [ ] T039 (propietario) Con las fases 1 a 4 fusionadas y el CI de `develop` en verde, validar en `https://staging.inserttask.es` los escenarios 1 a 9 de la sección C de `quickstart.md` (incluidos tema claro y oscuro, logo bloqueado, consola sin errores de CSP y lector de pantalla) y comunicar el resultado al agente
-- [ ] T040 Crear `release/<versión>` desde `origin/develop` sin commits propios y abrir la PR a `main` en español, con la lista de cambios, la aprobación visual (T024) y la validación de staging (T039)
+- [ ] T039 (propietario) Con las fases 1 a 4 fusionadas y el CI de `develop` en verde, validar en `https://staging.inserttask.es` los escenarios 1 a 10 de la sección C de `quickstart.md` (incluidos tema claro y oscuro, logo bloqueado, consola sin errores de CSP, lector de pantalla y **la aprobación del aspecto del logo en staging, SC-005**) y comunicar el resultado al agente
+- [ ] T040 Crear `release/<versión>` desde `origin/develop` sin commits propios y abrir la PR a `main` en español, con la lista de cambios, la aprobación visual previa (T024) y la validación de staging con la aprobación del aspecto (T039, SC-005)
 - [ ] T041 (propietario) Fusionar la PR de la release; aprobar el `deploy-production` del pipeline y avisar cuando termine; si falla por «versión no validada», no relanzar y avisar al agente
 - [ ] T042 (propietario) Repetir los escenarios 1 a 5 de la sección D de `quickstart.md` en `https://inserttask.es` y comunicar el resultado
 - [ ] T043 Registrar el resultado en `specs/006-app-branding/validacion-produccion.md` (valores comunicados por el propietario, sin inventar detalle), marcar T037 como cerrada en `definition-of-done.md` y abrir la PR documental `feature/006-app-branding-cierre` a `develop` (la fusiona el propietario)

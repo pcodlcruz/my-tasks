@@ -146,8 +146,10 @@ esto.
   lugares donde estaba el nombre anterior.
 - **SC-002**: El logo es visible en la pantalla de inicio de sesión y en el tablero en los dos temas, en una pantalla de móvil de 360 px de
   ancho y en una de escritorio, sin que el botón de inicio de sesión quede fuera de la vista.
-- **SC-003**: El logo y su texto cumplen el contraste que ya exige la aplicación en el tema claro y en el oscuro (verificado como en la
-  feature 004).
+- **SC-003**: El texto que acompaña al logo cumple el contraste AA que ya exige la aplicación en el tema claro y en el oscuro (verificado
+  como en la feature 004), y el logo se distingue con claridad sobre el fondo de cada tema: sus colores principales tienen al menos **3:1**
+  de contraste con el fondo de la tarjeta y de la cabecera (criterio de contraste de elementos gráficos de WCAG 2.1), salvo que el logo
+  lleve su propio fondo. El propietario lo confirma además a simple vista.
 - **SC-004**: El logo aparece a la vez que el resto de la pantalla de inicio de sesión, sin parpadeo ni desplazamiento del contenido al
   cargar.
 - **SC-005**: El propietario aprueba el resultado visual en staging, en los dos temas y en móvil y escritorio, antes de que llegue a
