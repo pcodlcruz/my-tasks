@@ -69,7 +69,8 @@ esac
 EOF
 chmod +x "$work/bin/terraform" "$work/bin/gcloud"
 
-# plan_file NAME CODE REFRESH_LINE [ACTION_LINE]: a plan with a noisy head and the actions section.
+# plan_file NAME CODE REFRESH_LINE [ACTION_LINE [EXTRA_LINE]]: a plan with a noisy head and the
+# actions section; EXTRA_LINE goes inside the actions.
 plan_file() {
   local name="$1" code="$2" refresh="$3" action="${4:-}"
   {
@@ -79,6 +80,7 @@ plan_file() {
       echo
       echo "Terraform will perform the following actions:"
       echo "  # $action will be created"
+      [ -n "${5:-}" ] && echo "$5"
       echo "Plan: 1 to add, 0 to change, 0 to destroy."
     elif [ "$code" = 0 ]; then
       echo "No changes. Your infrastructure matches the configuration."
@@ -182,6 +184,15 @@ check "the digest changes when the planned actions change" '[ "$(output_of diges
 plan_file staging 2 "Refreshing state... [id=a]" "google_x.one"
 FAKE_STATE=exists run_plan --save-dir "$work/saved" --expect-digest "$first" envs/staging
 check "the expected digest matches: ok" '[ "$code" -eq 0 ]'
+
+# The check_time that Hosting reports in required_dns_updates is the moment of each plan: it must not
+# change the digest, or the plan shown could never be the plan applied.
+plan_file staging 2 "Refreshing state... [id=a]" "google_x.one" '                  + check_time = "2026-10-27T08:58:05.103291806Z"'
+FAKE_STATE=exists run_plan --read-only envs/staging
+with_time=$(output_of digest)
+plan_file staging 2 "Refreshing state... [id=a]" "google_x.one" '                  + check_time = "2026-10-27T08:59:35.387479918Z"'
+FAKE_STATE=exists run_plan --save-dir "$work/saved" --expect-digest "$with_time" envs/staging
+check "a different check_time does not change the digest" '[ "$code" -eq 0 ] && [ "$with_time" = "$first" ]'
 
 plan_file staging 2 "Refreshing state... [id=a]" "google_x.changed"
 FAKE_STATE=exists run_plan --save-dir "$work/saved" --expect-digest "$first" envs/staging

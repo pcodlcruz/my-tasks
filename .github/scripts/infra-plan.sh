@@ -60,10 +60,15 @@ digest_input=""
 # the plan is saved ("You didn't use the -out option" or "Saved the plan to"), so the plan shown
 # (not saved) and the plan to apply (saved) would never have the same digest. The extract stops
 # at the first separator line and drops the blank lines before it.
+#
+# Inside the actions there is one more unstable value: the `check_time` of the DNS checks that
+# Firebase Hosting reports in `required_dns_updates`, which is the moment of each plan. It is not an
+# action, so those lines are left out, or no plan could ever be applied as shown.
 actions_of() {
   awk '
     /^Terraform will perform the following actions/ { on = 1 }
     on && index($0, "─") == 1 { exit }
+    on && $0 ~ /^[[:space:]]*[-+~][[:space:]]+check_time[[:space:]]+=/ { next }
     on {
       if ($0 ~ /^[[:space:]]*$/) { blank++ }
       else { while (blank > 0) { print ""; blank-- } print }
