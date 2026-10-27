@@ -28,9 +28,6 @@ MODULE_ARGUMENTS_THAT_DIFFER = {
 # the custom domains each environment serves; both start empty and the phase 4 fills them in).
 MODULE_ARGUMENTS_THAT_MAY_DIFFER = {
     "custom_domains": "each environment serves its own domains (staging a rehearsal one)",
-    "dns_zone_domain": "each environment owns the Cloud DNS zone of its own domain",
-    "dns_a_subdomains": "only production serves www besides the apex of its zone",
-    "dns_delegations": "only production delegates the staging subdomain to the zone of staging",
 }
 # Values of terraform.tfvars that may differ: identifiers and sizing.
 TFVARS_THAT_DIFFER = {"project_id", "project_number", "api_max_instances", "web_max_instances"}
@@ -225,49 +222,24 @@ check(
     all(word in outputs_tf for word in ("host_state", "ownership_state", "required_dns_updates", "issues")),
 )
 
-# --- Feature 005, phase 5: DNS in Cloud DNS, one public zone per environment (FR-021, FR-022).
-# Terraform writes the records Hosting needs, so they are deterministic and public. There is never
-# an AAAA record: with one, Hosting does not issue the certificate.
-EXPECTED_ZONES = {"staging": "staging.inserttask.es", "production": "inserttask.es"}
+# --- Feature 005: DNS in the registrar, not in Cloud DNS. The records Hosting needs (TXT, and A with
+# no AAAA) are kept by hand at the registrar (infra/RUNBOOK.md lists them), so Terraform declares no
+# zone and no DNS variable. There is never an AAAA record: with one, Hosting does not issue the certificate.
+EXPECTED_DOMAINS = {"staging": "staging.inserttask.es", "production": "inserttask.es"}
 modules = {"staging": staging_module, "production": production_module}
 
 for name, module in modules.items():
-    check(f"the {name} root passes the zone arguments to the module", {"dns_zone_domain", "dns_a_subdomains", "dns_delegations"} <= set(module))
-    check(
-        f"the {name} zone is the domain of the environment",
-        module.get("dns_zone_domain") == f'"{EXPECTED_ZONES[name]}"',
-        str(module.get("dns_zone_domain")),
-    )
+    check(f"the {name} root passes no DNS argument to the module", not any(key.startswith("dns_") for key in module), str(sorted(module)))
     root_text = (ENVS / name / "main.tf").read_text(encoding="utf-8")
     check(f"the {name} root has no .com domain left", "inserttask.com" not in root_text)
     canonical = [item["domain"] for item in domains[name] if "redirect_to" not in item]
-    check(f"the {name} zone is the canonical domain it serves", canonical == [EXPECTED_ZONES[name]], str(canonical))
+    check(f"the {name} canonical domain is the one of the environment", canonical == [EXPECTED_DOMAINS[name]], str(canonical))
 
-check("staging does not delegate any subdomain", staging_module.get("dns_delegations") == "{}", str(staging_module.get("dns_delegations")))
-# T074: production delegates staging to the name servers of the zone of staging (public values read
-# after its apply). Without them the zone of production would not delegate and staging would not resolve.
-delegations = re.search(r"dns_delegations\s*=\s*\{(.*?)\n  \}", re.sub(r"#.*", "", (PRODUCTION / "main.tf").read_text(encoding="utf-8")), re.DOTALL)
-servers = re.findall(r'"([^"]+)"', delegations.group(1)) if delegations else []
-check(
-    "production delegates staging to the name servers of its zone (with trailing dots)",
-    bool(delegations) and re.match(r"\s*staging\s*=\s*\[", delegations.group(1)) is not None and len(servers) >= 2 and all(server.endswith(".") for server in servers),
-    str(servers),
-)
-check("production delegates only the staging subdomain", delegations is not None and len(re.findall(r"^\s*[a-z0-9-]+\s*=\s*\[", delegations.group(1), re.MULTILINE)) == 1)
-check("staging adds no A record besides the apex", staging_module.get("dns_a_subdomains") == "[]", str(staging_module.get("dns_a_subdomains")))
-check("production adds the A record of www", production_module.get("dns_a_subdomains") == '["www"]', str(production_module.get("dns_a_subdomains")))
-
-dns_tf_path = MODULE / "dns.tf"
-check("the module has dns.tf", dns_tf_path.exists())
-dns_tf = re.sub(r"#.*", "", dns_tf_path.read_text(encoding="utf-8")) if dns_tf_path.exists() else ""
-check("the module declares a public Cloud DNS zone", bool(re.search(r'resource "google_dns_managed_zone" "\w+"', dns_tf)) and bool(re.search(r'visibility\s*=\s*"public"', dns_tf)))
-check("the zone is protected against destroy", bool(re.search(r"prevent_destroy\s*=\s*true", dns_tf)))
-check("the module never declares an AAAA record", not re.search(r'"AAAA"', dns_tf) and "AAAA" not in (MODULE / "variables.tf").read_text(encoding="utf-8").replace("AAAA record", ""))
-record_types = set(re.findall(r'type\s*=\s*"([A-Z]+)"', dns_tf))
-check("the records are TXT, A and NS only", bool(record_types) and record_types <= {"TXT", "A", "NS"}, str(record_types))
-check("the A records point to the Hosting address", "199.36.158.100" in dns_tf)
-check("the TXT record proves the Hosting site", "hosting-site=" in dns_tf)
-check("the module enables the Cloud DNS API", "dns.googleapis.com" in (MODULE / "variables.tf").read_text(encoding="utf-8"))
-check("the module outputs the name servers of the zone", "name_servers" in outputs_tf)
+variables_tf = (MODULE / "variables.tf").read_text(encoding="utf-8")
+check("the module has no dns.tf", not (MODULE / "dns.tf").exists())
+check("no file of the module declares a Cloud DNS resource", not any("google_dns_" in path.read_text(encoding="utf-8") for path in MODULE.glob("*.tf")))
+check("the module declares no DNS variable", not re.search(r'variable "dns_', variables_tf))
+check("the module does not output name servers", "name_servers" not in outputs_tf)
+check("no root outputs name servers", all("name_servers" not in (ENVS / name / "outputs.tf").read_text(encoding="utf-8") for name in modules))
 
 sys.exit(1 if failures else 0)

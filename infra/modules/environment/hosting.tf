@@ -51,9 +51,9 @@ resource "google_firebase_hosting_release" "web" {
 }
 
 # Custom domains of the environment. `wait_dns_verification = false` makes the apply finish without
-# waiting for the DNS: the records live in the Cloud DNS zone of dns.tf and become visible once the
-# owner delegates the zone, and Hosting issues the managed certificate (default type) once it sees
-# them, which can take up to 24 hours.
+# waiting for the DNS: the records live in the DNS of the registrar, which the owner keeps by hand
+# (infra/RUNBOOK.md lists them), and Hosting issues the managed certificate (default type) once it
+# sees them, which can take up to 24 hours.
 #
 # Ownership has to be proven with the TXT record and it must stay there for good: if the domain is
 # not active 30 days after it was added, Hosting deletes it, and without the TXT record it cannot
