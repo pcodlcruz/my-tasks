@@ -12,6 +12,17 @@ test.describe('Acceso solo por invitación', () => {
     await expect(page.getByRole('button', { name: '+ Nueva tarea' })).toHaveCount(0)
   })
 
+  test('la pantalla sin acceso muestra el logo y que InsertTasks es una aplicación privada', async ({
+    page,
+    loginAsGoogleUser,
+  }) => {
+    await loginAsGoogleUser(`desconocido-${crypto.randomUUID()}@example.com`, { invited: false })
+
+    await expect(page.getByRole('heading', { name: 'Necesitas una invitación' })).toBeVisible()
+    await expect(page.getByTestId('brand-logo')).toBeVisible()
+    await expect(page.getByText(/^InsertTasks es una aplicación privada/)).toBeVisible()
+  })
+
   test('la pantalla sin acceso permite cerrar sesión y vuelve a /login', async ({
     page,
     loginAsGoogleUser,

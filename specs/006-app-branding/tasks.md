@@ -120,18 +120,18 @@ nombre puede entregarse mientras el propietario prepara la imagen (research, Rie
 
 ### Tests (escribir primero; deben fallar)
 
-- [ ] T027 [P] [US4] Ampliar `frontend/tests/unit/features/auth/AccessDeniedPage.test.tsx`: el logo aparece encima del encabezado y el nombre se anuncia una sola vez
-- [ ] T028 [P] [US4] ~~Crear `frontend/tests/unit/public/favicon.test.ts`~~ No aplicable (se mantiene el favicon). Era: el `<link rel="icon">` de `frontend/index.html` apunta a un fichero que existe en `frontend/public/`, con el `type` que corresponde a su formato (como `theme-init.test.ts` lee `public/`)
-- [ ] T029 [P] [US4] Ampliar `frontend/tests/e2e/access-denied.spec.ts`: la pantalla muestra el logo y «InsertTasks es una aplicación privada»
+- [X] T027 [P] [US4] Ampliar `frontend/tests/unit/features/auth/AccessDeniedPage.test.tsx`: el logo aparece encima del encabezado y el nombre se anuncia una sola vez
+- [X] T028 [P] [US4] ~~Crear `frontend/tests/unit/public/favicon.test.ts`~~ No aplicable (se mantiene el favicon). Era: el `<link rel="icon">` de `frontend/index.html` apunta a un fichero que existe en `frontend/public/`, con el `type` que corresponde a su formato (como `theme-init.test.ts` lee `public/`)
+- [X] T029 [P] [US4] Ampliar `frontend/tests/e2e/access-denied.spec.ts`: la pantalla muestra el logo y «InsertTasks es una aplicación privada»
 
 ### Implementación
 
-- [ ] T030 [US4] Mostrar `BrandLogo` en `frontend/src/features/auth/AccessDeniedPage.tsx`, encima del encabezado
-- [ ] T031 [US4] ~~Sustituir el icono~~ No aplicable (se mantiene `favicon.svg`). Era: sustituir el icono: si el logo es **SVG**, reemplazar `frontend/public/favicon.svg` por el logo (mantiene el `<link>` y la regla de nginx); si es **PNG**, añadir `frontend/public/favicon.png`, cambiar el `<link rel="icon">` de `frontend/index.html` a `type="image/png"` y quitar el antiguo `favicon.svg` (research R6)
-- [ ] T032 [US4] No aplicable (no cambia el icono, no se toca nginx). Era: solo si el icono es PNG: añadir en `frontend/nginx/default.conf` una `location = /favicon.png` con `Cache-Control "public, max-age=86400"` y las cabeceras de seguridad, y su comprobación en `frontend/nginx/tests/test-runtime-config.sh` (sin ella caería en `no-store`); si el icono es SVG, esta tarea se cierra como no aplicable
-- [ ] T033 [US4] No aplicable (no cambia el icono). Era: comprobar con una captura de la pestaña a tamaño pequeño que el logo se reconoce; si no, **parar y pedir al propietario una versión simplificada** del icono (edge case de la spec)
-- [ ] T034 (propietario) No aplicable (no cambia el icono). Era: confirmar que el icono de la pestaña se reconoce a tamaño pequeño (o aportar la versión simplificada)
-- [ ] T035 [US4] Ejecutar `npm --prefix frontend test`, `build`, `lint`, `npm --prefix frontend run test:e2e` (nginx no cambia, así que no hace falta `test:entrypoint`)
+- [X] T030 [US4] Mostrar `BrandLogo` en `frontend/src/features/auth/AccessDeniedPage.tsx`, encima del encabezado
+- [X] T031 [US4] ~~Sustituir el icono~~ No aplicable (se mantiene `favicon.svg`). Era: sustituir el icono: si el logo es **SVG**, reemplazar `frontend/public/favicon.svg` por el logo (mantiene el `<link>` y la regla de nginx); si es **PNG**, añadir `frontend/public/favicon.png`, cambiar el `<link rel="icon">` de `frontend/index.html` a `type="image/png"` y quitar el antiguo `favicon.svg` (research R6)
+- [X] T032 [US4] No aplicable (no cambia el icono, no se toca nginx). Era: solo si el icono es PNG: añadir en `frontend/nginx/default.conf` una `location = /favicon.png` con `Cache-Control "public, max-age=86400"` y las cabeceras de seguridad, y su comprobación en `frontend/nginx/tests/test-runtime-config.sh` (sin ella caería en `no-store`); si el icono es SVG, esta tarea se cierra como no aplicable
+- [X] T033 [US4] No aplicable (no cambia el icono). Era: comprobar con una captura de la pestaña a tamaño pequeño que el logo se reconoce; si no, **parar y pedir al propietario una versión simplificada** del icono (edge case de la spec)
+- [X] T034 (propietario) No aplicable (no cambia el icono). Era: confirmar que el icono de la pestaña se reconoce a tamaño pequeño (o aportar la versión simplificada)
+- [X] T035 [US4] Hecho en local salvo `build` (el sandbox lo impide; lo ejecuta el CI). Ejecutar `npm --prefix frontend test`, `build`, `lint`, `npm --prefix frontend run test:e2e` (nginx no cambia, así que no hace falta `test:entrypoint`)
 
 **Checkpoint**: el acceso denegado lleva el logo; las cuatro historias están implementadas con el alcance decidido el 2026-10-28.
 
