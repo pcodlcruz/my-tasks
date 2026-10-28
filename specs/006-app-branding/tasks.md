@@ -100,9 +100,9 @@ nombre puede entregarse mientras el propietario prepara la imagen (research, Rie
 - [X] T021 [US2] ~~Mostrar `BrandLogo` en `frontend/src/app/AppHeader.tsx`~~ No aplicable por decisión del propietario del 2026-10-28: la cabecera se queda con solo el texto. No se toca `AppHeader.tsx`
 - [X] T022 [US1] No aplicable: el logo lleva su propio fondo y se distingue en ambos temas. Era: solo si T014 pidió variante para el tema oscuro: añadir las dos imágenes y alternarlas con `:root[data-theme='dark']` en `frontend/src/index.css` (research R5); si no, esta tarea se cierra como no aplicable
 - [X] T023 [US1] Generar capturas locales con Playwright del inicio de sesión y del tablero (este solo para ver que la cabecera sigue sin logo), en tema claro y oscuro y en 360 px y escritorio, y guardarlas en el scratchpad de la sesión (no en el repositorio) para enseñárselas al propietario
-- [ ] T024 (propietario) Aprobar las capturas de T023 o pedir ajustes de tamaño, posición, espaciado o variante (SC-005); bloquea la PR de la fase, como el punto de control de diseño de la feature 004
-- [ ] T025 [US1] Aplicar los ajustes que pida el propietario en T024 y repetir T023 hasta que apruebe
-- [ ] T026 [US1] Ejecutar `npm --prefix frontend test`, `build`, `lint`, `npm --prefix frontend run test:e2e` (incluidos `branding.spec.ts` y `a11y.spec.ts`, sin fallos de contraste de texto en claro ni oscuro; el contraste del propio logo no lo comprueba axe, se midió en T014)
+- [X] T024 (propietario) Aprobado el 2026-10-28, sin ajustes. Aprobar las capturas de T023 o pedir ajustes de tamaño, posición, espaciado o variante (SC-005); bloquea la PR de la fase, como el punto de control de diseño de la feature 004
+- [X] T025 [US1] No aplicable: sin ajustes. Aplicar los ajustes que pida el propietario en T024 y repetir T023 hasta que apruebe
+- [X] T026 [US1] Hecho en local salvo `build` (el sandbox lo impide; lo ejecuta el CI). Ejecutar `npm --prefix frontend test`, `build`, `lint`, `npm --prefix frontend run test:e2e` (incluidos `branding.spec.ts` y `a11y.spec.ts`, sin fallos de contraste de texto en claro ni oscuro; el contraste del propio logo no lo comprueba axe, se midió en T014)
 
 **Checkpoint**: el inicio de sesión muestra el logo sobre el nombre y la cabecera solo el nombre; aprobado por el propietario.
 
