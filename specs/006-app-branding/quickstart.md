@@ -4,7 +4,7 @@ Guía de validación. Los textos exactos y los lugares están en [`contracts/bra
 
 ## Prerrequisitos
 
-- El propietario ha entregado la imagen del logo y está en `frontend/src/assets/brand/`.
+- El logo está en `frontend/src/assets/brand/logo.png` (PNG con transparencia, aprobado por el propietario).
 - Dependencias instaladas en `frontend/` (`npm ci`) y, para los e2e, los emuladores de Firebase y los navegadores de Playwright (como en las
   features anteriores).
 
@@ -12,10 +12,10 @@ Guía de validación. Los textos exactos y los lugares están en [`contracts/bra
 
 | Paso | Comando (desde la raíz) | Resultado esperado |
 |---|---|---|
-| Unitarios | `env VITE_FIREBASE_API_KEY= VITE_FIREBASE_AUTH_DOMAIN= VITE_FIREBASE_PROJECT_ID= VITE_USE_EMULATORS= npm --prefix frontend test` | En verde, incluidos `brand.test.ts` y los de `LoginPage`, `AppHeader`, `AccessDeniedPage` y la bienvenida del tablero |
+| Unitarios | `env VITE_FIREBASE_API_KEY= VITE_FIREBASE_AUTH_DOMAIN= VITE_FIREBASE_PROJECT_ID= VITE_USE_EMULATORS= npm --prefix frontend test` | En verde, incluidos `brand.test.ts`, `BrandLogo.test.tsx` y los de `LoginPage`, `AppHeader` (sin logo), `AccessDeniedPage` y la bienvenida del tablero |
 | Tipos y lint | `npm --prefix frontend run build` y `npm --prefix frontend run lint` | Sin errores |
-| e2e | `npm --prefix frontend run test:e2e` | En verde, con `branding.spec.ts` y la accesibilidad (`a11y.spec.ts`) sin fallos de contraste |
-| Entrada de nginx (solo si el icono es PNG) | `npm --prefix frontend run test:entrypoint` | En verde, con la regla del icono |
+| e2e | `npm --prefix frontend run test:e2e` | En verde, con `branding.spec.ts`, `access-denied.spec.ts` y la accesibilidad (`a11y.spec.ts`) sin fallos de contraste |
+| Entrada de nginx | — | No aplica: el favicon no cambia y no se toca nginx |
 
 ## B. Aprobación visual del propietario (antes de abrir la PR de la fase)
 

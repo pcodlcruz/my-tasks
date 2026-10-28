@@ -177,3 +177,27 @@ El tablero toma su relleno de variables de densidad (`--card-padding`, `--card-g
 `--card-inner-gap`, `--card-footer-gap`, `--quadrant-padding`; cómoda 1 / 0,75 / 0,75 / 0,5 / 1 rem,
 compacta 0,5 / 0,375 / 0,375 / 0,25 / 0,5 rem) y, en compacta, la tarjeta se maqueta en una fila
 (título y acciones, luego ámbito y «Completar»).
+
+## Logo y nombre (feature 006)
+
+**Fuente**: [specs/006-app-branding/](../../specs/006-app-branding/spec.md) y su contrato
+[branding-ui.md](../../specs/006-app-branding/contracts/branding-ui.md). Los textos exactos viven en
+`frontend/src/lib/brand.ts`; ningún otro fichero los repite.
+
+- **Nombre**: `InsertTasks` (solo visual: los nombres técnicos no cambian). Mensaje del inicio de
+  sesión: «Inserta tus tareas y prioriza lo que importa».
+- **Logo**: la insignia completa del propietario (emblema de recreativa y rótulo «INSERTTASK ·
+  GESTOR DE TAREAS PERSONALES»), en `frontend/src/assets/brand/logo.png` (PNG con transparencia,
+  384×413 px). El rótulo dice «INSERTTASK», sin la «s» final, y está aceptado tal cual.
+- **Dónde se usa**: solo en el inicio de sesión y en el acceso denegado, encima del encabezado y
+  centrado. **No** va en la cabecera (a tamaño pequeño se ve borrosa: allí solo el texto
+  «InsertTasks») ni como icono de la pestaña (se mantiene `favicon.svg`). Un diseño futuro que
+  quiera el logo en otro sitio lo decide el propietario.
+- **Tamaño**: uno solo, grande, con el componente `BrandLogo`: 128 px de ancho en móvil y 176 px
+  desde `sm` (≥ 640 px). La imagen reserva su hueco con `width`/`height` para no mover el contenido
+  al cargar. No hay variante pequeña.
+- **Accesibilidad**: decorativo (`alt=""`); el nombre lo anuncia el texto, una sola vez.
+- **Temas**: una sola imagen para claro y oscuro. La insignia lleva su propio fondo (emblema
+  oscuro con borde), por lo que no se mide contra `surface` y no hay variante por tema.
+- **Regla (FR-009)**: el logo se publica tal como lo entregó el propietario. No se recolorea, no se
+  redibuja y no se recorta (un recorte del emblema se probó y no es legible por debajo de 48 px).
