@@ -162,11 +162,11 @@ documental propia, `feature/006-app-branding-cierre`, a `develop`.
 
 **Independent Test**: escenarios 1–10 de `quickstart.md` en staging y 1–5 en producción.
 
-- [ ] T039 (propietario) Con las fases 1 a 4 fusionadas y el CI de `develop` en verde, validar en `https://staging.inserttask.es` los escenarios 1 a 10 de la sección C de `quickstart.md` (incluidos tema claro y oscuro, logo bloqueado, consola sin errores de CSP, lector de pantalla y **la aprobación del aspecto del logo en staging, SC-005**) y comunicar el resultado al agente
-- [ ] T040 Crear `release/<versión>` desde `origin/develop` sin commits propios y abrir la PR a `main` en español, con la lista de cambios, la aprobación visual previa (T024) y la validación de staging con la aprobación del aspecto (T039, SC-005)
-- [ ] T041 (propietario) Fusionar la PR de la release; aprobar el `deploy-production` del pipeline y avisar cuando termine; si falla por «versión no validada», no relanzar y avisar al agente
-- [ ] T042 (propietario) Repetir los escenarios 1 a 5 de la sección D de `quickstart.md` en `https://inserttask.es` y comunicar el resultado
-- [ ] T043 Registrar el resultado en `specs/006-app-branding/validacion-produccion.md` (valores comunicados por el propietario, sin inventar detalle), marcar T037 como cerrada en `definition-of-done.md` y abrir la PR documental `feature/006-app-branding-cierre` a `develop` (la fusiona el propietario)
+- [X] T039 (propietario) Con las fases 1 a 4 fusionadas y el CI de `develop` en verde, validar en `https://staging.inserttask.es` los escenarios 1 a 10 de la sección C de `quickstart.md` (incluidos tema claro y oscuro, logo bloqueado, consola sin errores de CSP, lector de pantalla y **la aprobación del aspecto del logo en staging, SC-005**) y comunicar el resultado al agente
+- [X] T040 Crear `release/<versión>` desde `origin/develop` sin commits propios y abrir la PR a `main` en español, con la lista de cambios, la aprobación visual previa (T024) y la validación de staging con la aprobación del aspecto (T039, SC-005)
+- [X] T041 (propietario) Fusionar la PR de la release; aprobar el `deploy-production` del pipeline y avisar cuando termine; si falla por «versión no validada», no relanzar y avisar al agente
+- [X] T042 (propietario) Repetir los escenarios 1 a 5 de la sección D de `quickstart.md` en `https://inserttask.es` y comunicar el resultado
+- [X] T043 Registrar el resultado en `specs/006-app-branding/validacion-produccion.md` (valores comunicados por el propietario, sin inventar detalle), marcar T037 como cerrada en `definition-of-done.md` y abrir la PR documental `feature/006-app-branding-cierre` a `develop` (la fusiona el propietario)
 - [ ] T044 (propietario) Decidir el retro-merge de `main` a `develop` y, si procede, pedir al agente que abra la PR; el agente no la fusiona
 
 **Checkpoint**: feature en producción, validada y documentada.
