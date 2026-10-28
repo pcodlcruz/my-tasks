@@ -32,6 +32,17 @@ describe('<LoginPage>', () => {
     expect(screen.queryByText(/mytasks/i)).toBeNull()
   })
 
+  it('muestra el logo encima del nombre y anuncia el nombre una sola vez', async () => {
+    await renderLoginPage()
+
+    const logo = screen.getByTestId('brand-logo')
+    const heading = screen.getByRole('heading', { level: 1, name: 'InsertTasks' })
+    expect(logo.compareDocumentPosition(heading) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+    expect(screen.getAllByRole('heading', { name: 'InsertTasks' })).toHaveLength(1)
+    expect(screen.getAllByText('InsertTasks')).toHaveLength(1)
+    expect(logo).toHaveAttribute('alt', '')
+  })
+
   it('muestra el botón "Iniciar sesión con Google"', async () => {
     await renderLoginPage()
 
