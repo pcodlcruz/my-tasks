@@ -141,9 +141,9 @@ nombre puede entregarse mientras el propietario prepara la imagen (research, Rie
 
 **Purpose**: dejar documentada la marca, repasar la Definition of Done y comprobar la guía de validación.
 
-- [ ] T036 [P] Añadir a `docs/design/DESIGN.md` una sección breve «Logo y nombre» con el nombre, el mensaje, los tamaños (`sm` y `lg`), dónde se usa y la regla de no rediseñarlo (FR-009), para que los diseños futuros lo respeten
-- [ ] T037 [P] Repasar el checklist *Definition of Done* de la constitución para la feature completa y registrarlo en `specs/006-app-branding/definition-of-done.md`, marcando como pendientes solo los puntos de la Phase 5
-- [ ] T038 Ejecutar los escenarios de la sección A de `quickstart.md` (unitarios, tipos, lint, e2e, entrada de nginx si procede) y corregir lo que haya cambiado durante la implementación en `quickstart.md` y `contracts/branding-ui.md`
+- [X] T036 [P] Añadir a `docs/design/DESIGN.md` una sección breve «Logo y nombre» con el nombre, el mensaje, los tamaños (`sm` y `lg`), dónde se usa y la regla de no rediseñarlo (FR-009), para que los diseños futuros lo respeten
+- [X] T037 [P] Repasar el checklist *Definition of Done* de la constitución para la feature completa y registrarlo en `specs/006-app-branding/definition-of-done.md`, marcando como pendientes solo los puntos de la Phase 5
+- [X] T038 Ejecutar los escenarios de la sección A de `quickstart.md` (unitarios, tipos, lint, e2e, entrada de nginx si procede) y corregir lo que haya cambiado durante la implementación en `quickstart.md` y `contracts/branding-ui.md`
 
 **Checkpoint**: la feature está lista para release con su documentación al día.
 
