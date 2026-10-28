@@ -32,6 +32,16 @@ describe('<AccessDeniedPage>', () => {
     expect(screen.queryByText(/mytasks/i)).toBeNull()
   })
 
+  it('muestra el logo encima del encabezado y el nombre se anuncia una sola vez', async () => {
+    await renderPage()
+
+    const logo = screen.getByTestId('brand-logo')
+    const heading = screen.getByRole('heading', { name: 'Necesitas una invitación' })
+    expect(logo.compareDocumentPosition(heading) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+    expect(logo).toHaveAttribute('alt', '')
+    expect(screen.getAllByText(/InsertTasks/)).toHaveLength(1)
+  })
+
   it('no revela si la cuenta está invitada o fue revocada', async () => {
     await renderPage()
 
