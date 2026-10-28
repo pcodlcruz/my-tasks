@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useBoardTasks } from '../../api/tasks'
 import type { Quadrant as QuadrantKey, Task } from '../../api/types'
+import { APP_NAME } from '../../lib/brand'
 import { useUiStore } from '../../stores/uiStore'
 import { useSettledProfile } from '../profile/useSettledProfile'
 import { TaskForm } from '../task-form/TaskForm'
@@ -94,7 +95,7 @@ export function BoardPage(): JSX.Element {
         <>
           {hasNoTasks && scopeFilter === 'all' && (
             <div className="mb-6 rounded-xl border border-border bg-surface-alt p-6 text-center">
-              <p className="text-body font-semibold text-text">¡Bienvenido a MyTasks!</p>
+              <p className="text-body font-semibold text-text">¡Bienvenido a {APP_NAME}!</p>
               <p className="mt-1 text-caption text-text-muted">
                 Crea tu primera tarea para empezar a organizarte.
               </p>

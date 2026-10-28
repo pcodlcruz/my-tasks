@@ -1,3 +1,5 @@
+import { APP_NAME } from '../../lib/brand'
+import { BrandLogo } from '../shared/BrandLogo'
 import { useSession } from './useSession'
 
 // Shown to anyone who signed in with Google but has no active account. It says the same
@@ -8,9 +10,14 @@ export function AccessDeniedPage(): JSX.Element {
   return (
     <main className="flex min-h-screen flex-col items-center justify-center bg-surface-alt px-4">
       <div className="w-full max-w-md rounded-xl border border-border bg-surface p-8 text-center shadow-sm">
-        <h1 className="font-display text-heading font-bold text-text">Necesitas una invitación</h1>
+        <div className="flex justify-center">
+          <BrandLogo />
+        </div>
+        <h1 className="mt-4 font-display text-heading font-bold text-text">
+          Necesitas una invitación
+        </h1>
         <p className="mt-3 text-body text-text-muted">
-          MyTasks es una aplicación privada. Pide al administrador que te invite con tu cuenta de
+          {APP_NAME} es una aplicación privada. Pide al administrador que te invite con tu cuenta de
           Google y vuelve a entrar.
         </p>
         {user?.email && (

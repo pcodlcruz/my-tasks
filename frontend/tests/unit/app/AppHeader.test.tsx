@@ -67,6 +67,19 @@ describe('<AppHeader>', () => {
     useProfileMock.mockReturnValue(profileResult())
   })
 
+  it('muestra el nombre InsertTasks y no el nombre anterior', async () => {
+    await renderHeader()
+
+    expect(screen.getByText('InsertTasks')).toBeInTheDocument()
+    expect(screen.queryByText(/mytasks/i)).toBeNull()
+  })
+
+  it('no lleva el logo: la insignia no se lee a tamaño de cabecera, solo el texto', async () => {
+    await renderHeader()
+
+    expect(screen.queryByTestId('brand-logo')).toBeNull()
+  })
+
   describe('enlace al perfil', () => {
     it('es un único enlace «Perfil de <nombre>» a /perfil con el avatar y el nombre dentro', async () => {
       await renderHeader()

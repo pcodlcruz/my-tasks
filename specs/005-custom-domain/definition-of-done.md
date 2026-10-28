@@ -26,7 +26,19 @@ propietario el 2026-10-26) y T073 (`prevent_destroy` restaurado, PR #78) ya est�
 2. ~~**T073**~~ (hecha, PR #78): `prevent_destroy` restaurado en el dominio de Hosting.
 3. **T061**: fusionar la PR documental de cierre de staging (`validacion-staging.md`).
 
-## Pendiente de la Phase 7 (no bloquea la fusión de las fases)
+## Estado de la Phase 7 (2026-10-27)
+
+Release 1.3.0 y las correcciones 1.3.1 y 1.3.2 en producción; `inserttask.es`, `www.inserttask.es` y `staging.inserttask.es` sirven por HTTPS
+con certificado válido y el inicio de sesión funciona en producción y en staging. **El DNS quedó en el registrador, no en Cloud DNS**
+(enmienda del 2026-10-27, que sustituye FR-021 a FR-024): las notas de arriba sobre zonas de Cloud DNS describen el diseño anterior.
+Detalle y lo que sigue sin medir en [`validacion-produccion.md`](./validacion-produccion.md): navegadores, rendimiento (SC-005), cuentas
+usadas, `CORS_ORIGINS` de staging, SC-008 y la renovación del certificado (T052).
+
+**Feature cerrada el 2026-10-27 por decisión del propietario**, que acepta esos casos **sin medir** (no como superados): quedan como
+seguimiento sin plazo en `validacion-produccion.md`. También quedan en el backlog LOW-001, LOW-002 (DNSSEC) y LOW-003 (`CAA`) de
+`security-review-final.md`, y la duda sobre si autorizar `inserttask.es` en Identity Platform autoriza sus subdominios.
+
+## Pendiente de la Phase 7 (histórico, antes de la release)
 
 - T044–T054: release 1.3.0, `apply` de producción aprobado, cambio de servidores de nombres, ensayo de `staging.inserttask.es`
   (T055–T060), validación de `inserttask.es` y cierre en `validacion-produccion.md`.

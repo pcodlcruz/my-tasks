@@ -706,9 +706,9 @@ Una lista `custom_domains` por entorno en `infra/envs/<entorno>/main.tf`; el mó
 
 **Al ser a mano, el DNS puede desviarse sin que ningún plan lo vea.** Tras cualquier cambio en el registrador, comprueba los registros con `dig` (abajo) y el estado de los dominios en el resumen del job.
 
-### Permisos de Cloud DNS (histórico)
+### Permisos de Cloud DNS (retirados el 2026-10-27)
 
-La feature creó el rol `mytasksDnsAdmin` (`infra/iam/roles/dns-admin.yaml`) y añadió lecturas de DNS a `mytasksPlanReader`. Ya nada en Terraform los usa. Retirarlos (`gcloud iam roles delete` en los dos proyectos y quitar la concesión a `terraform-<entorno>`) lo hace el propietario en una PR aparte; mientras tanto no hacen daño.
+La feature creó el rol `mytasksDnsAdmin` y añadió lecturas de DNS a `mytasksPlanReader`. Como el DNS ya no está en Terraform, esta PR borra `infra/iam/roles/dns-admin.yaml` y quita las cuatro lecturas de DNS de `infra/iam/roles/plan-reader.yaml`. El propietario retira después el rol y la concesión en los dos proyectos (comandos en `specs/005-custom-domain/guia-propietario-hosting.md`, apartado «Retirada de los permisos de Cloud DNS»). La API `dns.googleapis.com` sigue habilitada.
 
 ### Comprobar el DNS (propietario)
 

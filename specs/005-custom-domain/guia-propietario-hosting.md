@@ -196,3 +196,19 @@ Y en el paso 5, cuándo has cambiado los servidores de nombres y cuánto trabajo
 
 - **Rol**: quitar el binding de `mytasksDnsAdmin` a `terraform-<entorno>` y borrar el rol. Sin él, el `apply` de la zona falla con 403 y no cambia nada.
 - **Servidores de nombres**: volver a poner en el registrador los que tenía antes (anótalos antes de cambiarlos).
+
+### Retirada de los permisos de Cloud DNS (2026-10-27)
+
+Desde la enmienda del 2026-10-27 el DNS vive en el registrador y Terraform ya no declara zonas, así que los pasos 2 y 3 de arriba se deshacen. Hazlo **después de fusionar la PR que borra `dns-admin.yaml` y quita las lecturas de DNS de `plan-reader.yaml`**: así ningún plan ni `apply` usa ya esos permisos cuando los quitas. Con tus credenciales, desde la raíz del repositorio, una vez por proyecto:
+
+```
+gcloud projects remove-iam-policy-binding pdlco-mytasks-stg --member=serviceAccount:terraform-staging@pdlco-mytasks-stg.iam.gserviceaccount.com --role=projects/pdlco-mytasks-stg/roles/mytasksDnsAdmin
+gcloud iam roles delete mytasksDnsAdmin --project=pdlco-mytasks-stg
+gcloud iam roles update mytasksPlanReader --project=pdlco-mytasks-stg --file=infra/iam/roles/plan-reader.yaml
+
+gcloud projects remove-iam-policy-binding pdlco-mytasks --member=serviceAccount:terraform-production@pdlco-mytasks.iam.gserviceaccount.com --role=projects/pdlco-mytasks/roles/mytasksDnsAdmin
+gcloud iam roles delete mytasksDnsAdmin --project=pdlco-mytasks
+gcloud iam roles update mytasksPlanReader --project=pdlco-mytasks --file=infra/iam/roles/plan-reader.yaml
+```
+
+Un rol borrado queda en estado «eliminado» durante 7 días (se puede restaurar con `gcloud iam roles undelete`) y su nombre no se puede reutilizar hasta que pasen 37 días; no importa porque no se va a recrear. Después dime que está hecho y lo compruebo en solo lectura con el MCP.

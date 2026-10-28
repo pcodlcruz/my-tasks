@@ -23,6 +23,26 @@ describe('<LoginPage>', () => {
     signInWithGoogle.mockReset()
   })
 
+  it('muestra el nombre InsertTasks y el mensaje de propósito, y no el nombre anterior', async () => {
+    await renderLoginPage()
+
+    expect(screen.getByRole('heading', { level: 1, name: 'InsertTasks' })).toBeInTheDocument()
+    expect(screen.getByText('Inserta tus tareas y prioriza lo que importa')).toBeInTheDocument()
+    expect(screen.queryByText(/organiza tus tareas con la matriz de eisenhower/i)).toBeNull()
+    expect(screen.queryByText(/mytasks/i)).toBeNull()
+  })
+
+  it('muestra el logo encima del nombre y anuncia el nombre una sola vez', async () => {
+    await renderLoginPage()
+
+    const logo = screen.getByTestId('brand-logo')
+    const heading = screen.getByRole('heading', { level: 1, name: 'InsertTasks' })
+    expect(logo.compareDocumentPosition(heading) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+    expect(screen.getAllByRole('heading', { name: 'InsertTasks' })).toHaveLength(1)
+    expect(screen.getAllByText('InsertTasks')).toHaveLength(1)
+    expect(logo).toHaveAttribute('alt', '')
+  })
+
   it('muestra el botón "Iniciar sesión con Google"', async () => {
     await renderLoginPage()
 

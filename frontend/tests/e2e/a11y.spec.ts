@@ -197,6 +197,28 @@ test.describe('Accesibilidad WCAG 2.1 AA', () => {
     await expectNoHorizontalOverflow('Papelera')
   })
 
+  // 320 CSS px is the width WCAG 1.4.10 uses for reflow, and the administrator has the most
+  // tabs. The header must wrap instead of overflowing: its content differs in width between
+  // fonts, so a layout that only just fits at 390 px fails on another machine.
+  test('la cabecera no desborda a 320 px ni con las pestañas del administrador', async ({
+    page,
+    loginAsAdmin,
+  }) => {
+    await page.setViewportSize({ width: 320, height: 640 })
+    await loginAsAdmin()
+    await expect(page.getByRole('navigation', { name: 'Navegación principal' })).toBeVisible()
+
+    const overflow = await page.evaluate(
+      () => document.documentElement.scrollWidth - window.innerWidth,
+    )
+    expect(overflow, 'Desbordamiento horizontal de la cabecera a 320 px').toBeLessThanOrEqual(0)
+    await goToAdmin(page)
+    const adminOverflow = await page.evaluate(
+      () => document.documentElement.scrollWidth - window.innerWidth,
+    )
+    expect(adminOverflow, 'Desbordamiento horizontal en Accesos a 320 px').toBeLessThanOrEqual(0)
+  })
+
   test('los cuadrantes se distinguen por texto y no solo por color', async ({
     page,
     loginAsGoogleUser,

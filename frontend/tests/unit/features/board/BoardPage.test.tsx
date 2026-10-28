@@ -77,6 +77,13 @@ describe('<BoardPage>', () => {
     expect(screen.getByText(/crea tu primera tarea/i)).toBeInTheDocument()
   })
 
+  it('el mensaje de bienvenida nombra InsertTasks y no el nombre anterior', async () => {
+    await renderBoardPage()
+
+    expect(screen.getByText('¡Bienvenido a InsertTasks!')).toBeInTheDocument()
+    expect(screen.queryByText(/mytasks/i)).toBeNull()
+  })
+
   it('muestra un esqueleto de carga mientras se obtienen las tareas', async () => {
     useBoardTasksMock.mockReturnValue(boardResult({ data: undefined, isLoading: true }))
 
