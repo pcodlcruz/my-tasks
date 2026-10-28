@@ -73,67 +73,67 @@ nombre puede entregarse mientras el propietario prepara la imagen (research, Rie
 
 ---
 
-## Phase 2: Logo en el inicio de sesión y en la cabecera (US1 y US2)
+## Phase 2: Logo en el inicio de sesión (US1)
 
-**Purpose**: mostrar el logo del propietario junto al nombre en el inicio de sesión y en la cabecera de las pantallas con sesión.
+**Purpose**: mostrar el logo del propietario sobre el nombre en el inicio de sesión. Decisión del 2026-10-28: la cabecera se queda con solo el texto «InsertTasks» (la insignia no se lee a ese tamaño) y no lleva logo.
 
-**Goal**: el logo se ve en los dos sitios, en tema claro y oscuro, en móvil y escritorio, sin saltos de maquetación.
+**Goal**: el logo se ve en el inicio de sesión, en tema claro y oscuro, en móvil y escritorio, sin saltos de maquetación; la cabecera no lo lleva.
 
-**Independent Test**: abrir el inicio de sesión (sin sesión) y el tablero (con sesión) y comprobar el logo junto al nombre; con la imagen bloqueada el nombre sigue ahí; el propietario aprueba las capturas (SC-005).
+**Independent Test**: abrir el inicio de sesión (sin sesión) y comprobar el logo sobre el nombre; abrir el tablero (con sesión) y comprobar que la cabecera solo tiene el nombre; con la imagen bloqueada el nombre sigue ahí; el propietario aprueba las capturas (SC-005).
 
-**Depende de**: Phase 1 fusionada y T013 (la imagen).
+**Depende de**: Phase 1 fusionada y T013 (la imagen). Ambas cumplidas.
 
-- [ ] T013 (propietario) Entregar la imagen del logo al agente (en el repositorio o por conversación): a ser posible vectorial (SVG), válida sobre fondo claro y oscuro, y optimizada (~50 KB como tope, research R4). Si solo hay imagen de píxeles, con resolución suficiente para pantallas de alta densidad
-- [ ] T014 [US1] Colocar la imagen en `frontend/src/assets/brand/logo.<ext>` sin rediseñarla (FR-009); si pasa de ~50 KB, optimizarla sin cambiar el diseño. Comprobar con una captura que se distingue sobre el fondo claro y sobre el oscuro de `frontend/src/index.css` y medir el contraste de sus colores principales con el token `surface` de cada tema (valores de `docs/design/check-contrast.py`): al menos 3:1, salvo que el logo lleve su propio fondo (SC-003, research R5); si no llega, **parar y pedir la variante al propietario**
+- [X] T013 (propietario) Entregar la imagen del logo al agente (en el repositorio o por conversación): a ser posible vectorial (SVG), válida sobre fondo claro y oscuro, y optimizada (~50 KB como tope, research R4). Si solo hay imagen de píxeles, con resolución suficiente para pantallas de alta densidad. *Cumplida: entregó un JPEG con el fondo de cuadros horneado; el agente extrajo un PNG transparente y el propietario lo aprobó el 2026-10-28.*
+- [X] T014 [US1] Colocar la imagen (el PNG transparente de 384×413 px) en `frontend/src/assets/brand/logo.png` sin rediseñarla (FR-009); si pasa de ~50 KB, optimizarla sin cambiar el diseño. Comprobar con una captura que se distingue sobre el fondo claro y sobre el oscuro de `frontend/src/index.css` y medir el contraste de sus colores principales con el token `surface` de cada tema (valores de `docs/design/check-contrast.py`): al menos 3:1, salvo que el logo lleve su propio fondo (SC-003, research R5); si no llega, **parar y pedir la variante al propietario**
 
 ### Tests (escribir primero; deben fallar)
 
-- [ ] T015 [P] [US1] Crear `frontend/tests/unit/features/shared/BrandLogo.test.tsx`: renderiza una imagen decorativa (`alt=""`), con `width` y `height` fijos definidos, sin ser anunciada como imagen por un lector de pantalla (FR-006, FR-007)
-- [ ] T016 [P] [US1] Ampliar `frontend/tests/unit/features/auth/LoginPage.test.tsx`: el logo aparece sobre el nombre en el inicio de sesión y el nombre se anuncia una sola vez (un solo encabezado «InsertTasks»)
-- [ ] T017 [P] [US2] Ampliar `frontend/tests/unit/app/AppHeader.test.tsx`: la cabecera muestra el logo junto al texto «InsertTasks», sin duplicar el nombre accesible
-- [ ] T018 [P] [US1] Crear `frontend/tests/e2e/branding.spec.ts` (Playwright, con el emulador como los demás e2e): sin sesión, el inicio de sesión muestra el logo, «InsertTasks» y el mensaje, y el título de la pestaña es «InsertTasks»; con sesión, la cabecera del tablero muestra el logo y el nombre; y en 360 px el botón «Iniciar sesión con Google» queda visible sin desplazarse (FR-008)
+- [X] T015 [P] [US1] Crear `frontend/tests/unit/features/shared/BrandLogo.test.tsx`: renderiza una imagen decorativa (`alt=""`), con `width` y `height` fijos definidos, sin ser anunciada como imagen por un lector de pantalla (FR-006, FR-007)
+- [X] T016 [P] [US1] Ampliar `frontend/tests/unit/features/auth/LoginPage.test.tsx`: el logo aparece sobre el nombre en el inicio de sesión y el nombre se anuncia una sola vez (un solo encabezado «InsertTasks»)
+- [X] T017 [P] [US2] Ampliar `frontend/tests/unit/app/AppHeader.test.tsx`: la cabecera muestra el texto «InsertTasks» y **no** contiene ninguna imagen de logo (decisión del 2026-10-28)
+- [X] T018 [P] [US1] Crear `frontend/tests/e2e/branding.spec.ts` (Playwright, con el emulador como los demás e2e): sin sesión, el inicio de sesión muestra el logo, «InsertTasks» y el mensaje, y el título de la pestaña es «InsertTasks»; con sesión, la cabecera del tablero muestra el nombre y no lleva logo; y en 360 px el botón «Iniciar sesión con Google» queda visible sin desplazarse (FR-008)
 
 ### Implementación
 
-- [ ] T019 [US1] Crear `frontend/src/features/shared/BrandLogo.tsx`: importa `frontend/src/assets/brand/logo.<ext>`, la pinta con tamaño fijo (`width`/`height` como atributos y como clases de Tailwind) y `alt=""`, con una prop de tamaño (`sm` para la cabecera, `lg` para el inicio de sesión); el logo se muestra siempre con `<img>`, nunca como HTML (research R2, R3, R4, R8)
-- [ ] T020 [US1] Mostrar `BrandLogo` encima del nombre en `frontend/src/features/auth/LoginPage.tsx`, centrado, sin sacar el botón de Google de la vista en 360 px
-- [ ] T021 [US2] Mostrar `BrandLogo` junto al texto «InsertTasks» en `frontend/src/app/AppHeader.tsx`, sin solapar las pestañas ni el perfil en móvil
-- [ ] T022 [US1] Solo si T014 pidió variante para el tema oscuro: añadir las dos imágenes y alternarlas con `:root[data-theme='dark']` en `frontend/src/index.css` (research R5); si no, esta tarea se cierra como no aplicable
-- [ ] T023 [US1] Generar capturas locales con Playwright del inicio de sesión y del tablero, en tema claro y oscuro y en 360 px y escritorio, y guardarlas en el scratchpad de la sesión (no en el repositorio) para enseñárselas al propietario
-- [ ] T024 (propietario) Aprobar las capturas de T023 o pedir ajustes de tamaño, posición, espaciado o variante (SC-005); bloquea la PR de la fase, como el punto de control de diseño de la feature 004
-- [ ] T025 [US1] Aplicar los ajustes que pida el propietario en T024 y repetir T023 hasta que apruebe
-- [ ] T026 [US1] Ejecutar `npm --prefix frontend test`, `build`, `lint`, `npm --prefix frontend run test:e2e` (incluidos `branding.spec.ts` y `a11y.spec.ts`, sin fallos de contraste de texto en claro ni oscuro; el contraste del propio logo no lo comprueba axe, se midió en T014)
+- [X] T019 [US1] Crear `frontend/src/features/shared/BrandLogo.tsx`: importa `frontend/src/assets/brand/logo.<ext>`, la pinta con tamaño fijo (`width`/`height` como atributos y como clases de Tailwind) y `alt=""`, con un único tamaño grande (~176 px de ancho; sin prop de tamaño porque no hay variante pequeña); el logo se muestra siempre con `<img>`, nunca como HTML (research R2, R3, R4, R8)
+- [X] T020 [US1] Mostrar `BrandLogo` encima del nombre en `frontend/src/features/auth/LoginPage.tsx`, centrado, sin sacar el botón de Google de la vista en 360 px
+- [X] T021 [US2] ~~Mostrar `BrandLogo` en `frontend/src/app/AppHeader.tsx`~~ No aplicable por decisión del propietario del 2026-10-28: la cabecera se queda con solo el texto. No se toca `AppHeader.tsx`
+- [X] T022 [US1] No aplicable: el logo lleva su propio fondo y se distingue en ambos temas. Era: solo si T014 pidió variante para el tema oscuro: añadir las dos imágenes y alternarlas con `:root[data-theme='dark']` en `frontend/src/index.css` (research R5); si no, esta tarea se cierra como no aplicable
+- [X] T023 [US1] Generar capturas locales con Playwright del inicio de sesión y del tablero (este solo para ver que la cabecera sigue sin logo), en tema claro y oscuro y en 360 px y escritorio, y guardarlas en el scratchpad de la sesión (no en el repositorio) para enseñárselas al propietario
+- [X] T024 (propietario) Aprobado el 2026-10-28, sin ajustes. Aprobar las capturas de T023 o pedir ajustes de tamaño, posición, espaciado o variante (SC-005); bloquea la PR de la fase, como el punto de control de diseño de la feature 004
+- [X] T025 [US1] No aplicable: sin ajustes. Aplicar los ajustes que pida el propietario en T024 y repetir T023 hasta que apruebe
+- [X] T026 [US1] Hecho en local salvo `build` (el sandbox lo impide; lo ejecuta el CI). Ejecutar `npm --prefix frontend test`, `build`, `lint`, `npm --prefix frontend run test:e2e` (incluidos `branding.spec.ts` y `a11y.spec.ts`, sin fallos de contraste de texto en claro ni oscuro; el contraste del propio logo no lo comprueba axe, se midió en T014)
 
-**Checkpoint**: el inicio de sesión y la cabecera muestran el logo con el nombre; aprobado por el propietario.
+**Checkpoint**: el inicio de sesión muestra el logo sobre el nombre y la cabecera solo el nombre; aprobado por el propietario.
 
 ---
 
-## Phase 3: Icono de la pestaña y logo en el acceso denegado (US4)
+## Phase 3: Logo en el acceso denegado (US4)
 
-**Purpose**: usar el logo como icono del navegador y en la pantalla de acceso denegado (decisión Q1 = B del propietario).
+**Purpose**: usar el logo en la pantalla de acceso denegado (decisión Q1 = B del propietario). Decisión del 2026-10-28: el icono de la pestaña **no** cambia, se mantiene `favicon.svg`.
 
-**Goal**: la pestaña muestra el logo en lugar del icono genérico de Vite y el acceso denegado lo lleva junto al nombre.
+**Goal**: el acceso denegado lleva el logo junto al nombre; la pestaña conserva su icono actual.
 
-**Independent Test**: abrir la aplicación y comprobar el icono de la pestaña; iniciar sesión con una cuenta sin invitación y comprobar el logo en el acceso denegado.
+**Independent Test**: iniciar sesión con una cuenta sin invitación y comprobar el logo en el acceso denegado.
 
 **Depende de**: Phase 2 fusionada (usa `BrandLogo`).
 
 ### Tests (escribir primero; deben fallar)
 
 - [ ] T027 [P] [US4] Ampliar `frontend/tests/unit/features/auth/AccessDeniedPage.test.tsx`: el logo aparece encima del encabezado y el nombre se anuncia una sola vez
-- [ ] T028 [P] [US4] Crear `frontend/tests/unit/public/favicon.test.ts`: el `<link rel="icon">` de `frontend/index.html` apunta a un fichero que existe en `frontend/public/`, con el `type` que corresponde a su formato (como `theme-init.test.ts` lee `public/`)
+- [ ] T028 [P] [US4] ~~Crear `frontend/tests/unit/public/favicon.test.ts`~~ No aplicable (se mantiene el favicon). Era: el `<link rel="icon">` de `frontend/index.html` apunta a un fichero que existe en `frontend/public/`, con el `type` que corresponde a su formato (como `theme-init.test.ts` lee `public/`)
 - [ ] T029 [P] [US4] Ampliar `frontend/tests/e2e/access-denied.spec.ts`: la pantalla muestra el logo y «InsertTasks es una aplicación privada»
 
 ### Implementación
 
 - [ ] T030 [US4] Mostrar `BrandLogo` en `frontend/src/features/auth/AccessDeniedPage.tsx`, encima del encabezado
-- [ ] T031 [US4] Sustituir el icono: si el logo es **SVG**, reemplazar `frontend/public/favicon.svg` por el logo (mantiene el `<link>` y la regla de nginx); si es **PNG**, añadir `frontend/public/favicon.png`, cambiar el `<link rel="icon">` de `frontend/index.html` a `type="image/png"` y quitar el antiguo `favicon.svg` (research R6)
-- [ ] T032 [US4] Solo si el icono es PNG: añadir en `frontend/nginx/default.conf` una `location = /favicon.png` con `Cache-Control "public, max-age=86400"` y las cabeceras de seguridad, y su comprobación en `frontend/nginx/tests/test-runtime-config.sh` (sin ella caería en `no-store`); si el icono es SVG, esta tarea se cierra como no aplicable
-- [ ] T033 [US4] Comprobar con una captura de la pestaña a tamaño pequeño que el logo se reconoce; si no, **parar y pedir al propietario una versión simplificada** del icono (edge case de la spec)
-- [ ] T034 (propietario) Confirmar que el icono de la pestaña se reconoce a tamaño pequeño (o aportar la versión simplificada)
-- [ ] T035 [US4] Ejecutar `npm --prefix frontend test`, `build`, `lint`, `npm --prefix frontend run test:e2e` y, si cambió nginx, `npm --prefix frontend run test:entrypoint`
+- [ ] T031 [US4] ~~Sustituir el icono~~ No aplicable (se mantiene `favicon.svg`). Era: sustituir el icono: si el logo es **SVG**, reemplazar `frontend/public/favicon.svg` por el logo (mantiene el `<link>` y la regla de nginx); si es **PNG**, añadir `frontend/public/favicon.png`, cambiar el `<link rel="icon">` de `frontend/index.html` a `type="image/png"` y quitar el antiguo `favicon.svg` (research R6)
+- [ ] T032 [US4] No aplicable (no cambia el icono, no se toca nginx). Era: solo si el icono es PNG: añadir en `frontend/nginx/default.conf` una `location = /favicon.png` con `Cache-Control "public, max-age=86400"` y las cabeceras de seguridad, y su comprobación en `frontend/nginx/tests/test-runtime-config.sh` (sin ella caería en `no-store`); si el icono es SVG, esta tarea se cierra como no aplicable
+- [ ] T033 [US4] No aplicable (no cambia el icono). Era: comprobar con una captura de la pestaña a tamaño pequeño que el logo se reconoce; si no, **parar y pedir al propietario una versión simplificada** del icono (edge case de la spec)
+- [ ] T034 (propietario) No aplicable (no cambia el icono). Era: confirmar que el icono de la pestaña se reconoce a tamaño pequeño (o aportar la versión simplificada)
+- [ ] T035 [US4] Ejecutar `npm --prefix frontend test`, `build`, `lint`, `npm --prefix frontend run test:e2e` (nginx no cambia, así que no hace falta `test:entrypoint`)
 
-**Checkpoint**: la pestaña y el acceso denegado llevan el logo; las cuatro historias están implementadas.
+**Checkpoint**: el acceso denegado lleva el logo; las cuatro historias están implementadas con el alcance decidido el 2026-10-28.
 
 ---
 

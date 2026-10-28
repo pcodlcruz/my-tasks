@@ -22,9 +22,9 @@ Guía de validación. Los textos exactos y los lugares están en [`contracts/bra
 El agente genera capturas locales y se las enseña al propietario:
 
 1. Inicio de sesión: tema claro y oscuro, 360 px y escritorio. Se ve logo, nombre y mensaje; el botón de Google queda a la vista.
-2. Tablero: tema claro y oscuro, 360 px y escritorio. La cabecera muestra logo y nombre sin solapar las pestañas ni el perfil.
+2. Tablero: tema claro y oscuro, 360 px y escritorio. La cabecera muestra el nombre (sin logo) sin solapar las pestañas ni el perfil.
 3. Acceso denegado: logo, nombre y texto.
-4. Pestaña del navegador: el icono es el logo y se reconoce a tamaño pequeño.
+4. Pestaña del navegador: se mantiene el `favicon.svg` actual y el título es «InsertTasks».
 
 El propietario aprueba o pide ajustes de tamaño, posición o variante (SC-005).
 
@@ -33,14 +33,14 @@ El propietario aprueba o pide ajustes de tamaño, posición o variante (SC-005).
 | Escenario | Comprobación | Resultado esperado |
 |---|---|---|
 | 1 | Abrir `https://staging.inserttask.es` sin sesión | Logo, «InsertTasks» y el mensaje; sin «MyTasks» |
-| 2 | Iniciar sesión | Cabecera con logo y nombre; con tablero vacío, «¡Bienvenido a InsertTasks!» |
-| 3 | Recorrer historial, papelera, perfil y accesos | La cabecera mantiene logo y nombre; no aparece «MyTasks» en ningún texto |
+| 2 | Iniciar sesión | Cabecera con el nombre (sin logo); con tablero vacío, «¡Bienvenido a InsertTasks!» |
+| 3 | Recorrer historial, papelera, perfil y accesos | La cabecera mantiene el nombre; no aparece «MyTasks» en ningún texto |
 | 4 | Iniciar sesión con una cuenta sin invitación | Acceso denegado con logo y «InsertTasks es una aplicación privada…» |
-| 5 | Mirar la pestaña | Icono del logo y título «InsertTasks» (si el icono antiguo persiste, es la caché de un día) |
+| 5 | Mirar la pestaña | Icono actual (`favicon.svg`, sin cambios) y título «InsertTasks» |
 | 6 | Cambiar entre tema claro y oscuro desde el perfil | El logo se distingue en ambos |
 | 7 | Bloquear la imagen del logo (herramientas del navegador) y recargar | El nombre sigue visible y la pantalla no se descoloca |
 | 8 | Consola del navegador | Sin errores de CSP ni de carga del logo |
-| 9 | Lector de pantalla | El nombre se anuncia una sola vez en la cabecera |
+| 9 | Lector de pantalla | El nombre se anuncia una sola vez en el inicio de sesión y en la cabecera |
 | 10 | Aprobación del aspecto (SC-005) | El propietario confirma en staging el tamaño, la posición y la legibilidad del logo en claro y oscuro, en móvil y en escritorio |
 
 ## D. Producción (tras la release y el despliegue)

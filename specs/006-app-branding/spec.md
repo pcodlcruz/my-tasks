@@ -8,6 +8,18 @@
 
 **Input**: User description: "Quiero que añadamos un logo a la aplicación. Yo te lo pasaré en una imagen. Quiero que aparezca en la home y en la pantalla de login. Si te parece bien incluirlo en algún sitio mas me dices. Además quiero que cambiemos el nombre de la aplicación (solo de forma visual en la web) a \"InsertTasks\" con un mensaje que sugiera el propósito de la aplicación."
 
+## Decisiones del propietario (2026-10-28)
+
+El logo entregado es una insignia completa (emblema y rótulo «INSERTTASK · GESTOR DE TAREAS PERSONALES») que, a tamaño pequeño, se ve
+borrosa. Con las capturas y las pruebas de tamaño a la vista, el propietario decidió:
+
+1. **Inicio de sesión y acceso denegado**: la insignia completa, a tamaño grande (~160–200 px), encima del nombre.
+2. **Cabecera**: **solo el texto «InsertTasks»**, sin logo. Esto matiza FR-002 y la historia US2: la cabecera mantiene el nombre, no el logo.
+3. **Pestaña del navegador**: se **mantiene el `favicon.svg` actual**. Esto matiza FR-011 y la historia US4: el logo no se usa como icono.
+4. **Rótulo del logo**: dice «INSERTTASK» (sin «s» final) y se acepta tal cual; el nombre visible sigue siendo «InsertTasks» (FR-009: no se rediseña).
+
+Donde el texto de abajo contradice estas decisiones (FR-002, FR-011, US2, US4, SC-002), prevalecen estas.
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - Reconocer la aplicación nada más llegar al inicio de sesión (Priority: P1)
@@ -45,7 +57,7 @@ tablero está vacío) dice «InsertTasks».
 
 **Acceptance Scenarios**:
 
-1. **Given** una persona con sesión, **When** entra en el tablero, **Then** la cabecera muestra el logo junto a «InsertTasks».
+1. **Given** una persona con sesión, **When** entra en el tablero, **Then** la cabecera muestra «InsertTasks» (solo texto, sin logo).
 2. **Given** una cuenta sin tareas, **When** entra en el tablero, **Then** el mensaje de bienvenida nombra «InsertTasks» y no «MyTasks».
 3. **Given** la cabecera con el logo, **When** la persona usa la aplicación en móvil, **Then** la cabecera sigue mostrando sus acciones
    habituales sin cortarse ni solaparse.
@@ -84,7 +96,8 @@ esto.
 
 **Acceptance Scenarios**:
 
-1. **Given** la aplicación abierta en el navegador, **When** se mira la pestaña, **Then** el icono es el logo y no el icono genérico actual.
+1. ~~**Given** la aplicación abierta en el navegador, **When** se mira la pestaña, **Then** el icono es el logo.~~ Descartado: se mantiene
+   el `favicon.svg` actual (decisión del 2026-10-28).
 2. **Given** una persona sin invitación, **When** ve la pantalla de acceso denegado, **Then** aparece el logo junto al nombre.
 
 ---
@@ -107,8 +120,8 @@ esto.
 ### Functional Requirements
 
 - **FR-001**: La pantalla de inicio de sesión MUST mostrar el logo junto al nombre «InsertTasks».
-- **FR-002**: La pantalla principal (el tablero de tareas) MUST mostrar el logo junto al nombre «InsertTasks» en su cabecera. Si la cabecera es
-  común a las demás pantallas con sesión, el logo aparece también en ellas.
+- **FR-002**: La pantalla principal (el tablero de tareas) MUST mostrar el nombre «InsertTasks» en su cabecera, **sin logo** (decisión del
+  propietario del 2026-10-28: la insignia no se lee a tamaño de cabecera). La cabecera es común a las demás pantallas con sesión.
 - **FR-003**: El nombre visible de la aplicación MUST ser «InsertTasks» en todos los textos que hoy dicen «MyTasks»: la cabecera, la pantalla
   de inicio de sesión, el mensaje de bienvenida del tablero, la pantalla de acceso denegado y el título de la pestaña del navegador. No MUST
   quedar ningún «MyTasks» visible para las personas usuarias.
@@ -125,8 +138,8 @@ esto.
   para mostrarlo bien.
 - **FR-010**: El cambio de nombre MUST ser solo visual en la web: no se renombran los servicios, el proyecto de nube, el repositorio, los
   datos guardados, la API ni el dominio (que ya es `inserttask.es`).
-- **FR-011**: El logo MUST usarse además como icono de la pestaña del navegador, en lugar del icono genérico actual, y en la pantalla de
-  acceso denegado, junto al nombre. No se añade en ningún otro sitio (decisión del propietario).
+- **FR-011**: El logo MUST usarse además en la pantalla de acceso denegado, junto al nombre. **No** se usa como icono de la pestaña: se
+  mantiene el `favicon.svg` actual (decisión del propietario del 2026-10-28). No se añade en ningún otro sitio.
 - **FR-012**: Mostrar el logo no MUST hacer que la pantalla de inicio de sesión o el tablero se perciban más lentos: el logo es ligero y no
   provoca saltos de maquetación al cargar.
 
@@ -144,8 +157,8 @@ esto.
 - **SC-001**: En el recorrido completo de la aplicación (inicio de sesión, acceso denegado, tablero, historial, papelera, perfil y
   administración de accesos) y en las pestañas del navegador, el nombre «MyTasks» aparece **0 veces** y «InsertTasks» aparece en todos los
   lugares donde estaba el nombre anterior.
-- **SC-002**: El logo es visible en la pantalla de inicio de sesión y en el tablero en los dos temas, en una pantalla de móvil de 360 px de
-  ancho y en una de escritorio, sin que el botón de inicio de sesión quede fuera de la vista.
+- **SC-002**: El logo es visible en la pantalla de inicio de sesión en los dos temas, en una pantalla de móvil de 360 px de ancho y en una
+  de escritorio, sin que el botón de inicio de sesión quede fuera de la vista; el tablero muestra el nombre sin logo.
 - **SC-003**: El texto que acompaña al logo cumple el contraste AA que ya exige la aplicación en el tema claro y en el oscuro (verificado
   como en la feature 004), y el logo se distingue con claridad sobre el fondo de cada tema: sus colores principales tienen al menos **3:1**
   de contraste con el fondo de la tarjeta y de la cabecera (criterio de contraste de elementos gráficos de WCAG 2.1), salvo que el logo
