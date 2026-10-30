@@ -148,12 +148,28 @@ class TaskService:
             and not existing.in_trash
             and existing.quadrant is Quadrant.DO_NOW
         ):
-            do_now_left = max(0, await self._repository.count_active_do_now(uid) - 1)
+            do_now_left = await self._count_do_now_left(uid)
 
         def rule(before: Task, _: Task, day: ProgressDay, state: PlayerState) -> Outcome:
             return apply_complete(_facts(before), day, state, now, do_now_left=do_now_left)
 
         return rule
+
+    async def _count_do_now_left(self, uid: str) -> int | None:
+        # Only feeds a cosmetic achievement: if the count fails (a missing index, a timeout),
+        # the task is still completed and the check is skipped (security-review-fase-2,
+        # MED-001; FR-034).
+        try:
+            return max(0, await self._repository.count_active_do_now(uid) - 1)
+        except Exception as error:
+            log_event(
+                logger,
+                logging.WARNING,
+                "progress_do_now_count_failed",
+                uid=uid,
+                reason=type(error).__name__,
+            )
+            return None
 
     async def _reopen_rule(self, _uid: str, _task_id: str, now: datetime) -> ProgressRule:
         def rule(before: Task, _: Task, day: ProgressDay, state: PlayerState) -> Outcome:
