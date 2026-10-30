@@ -1,0 +1,561 @@
+openapi: 3.1.0
+info:
+  title: InsertTasks API — progreso diario, tareas programadas y gamificación (feature 007)
+  version: 1.0.0
+  description: >-
+    Añade a `specs/001-eisenhower-task-manager/contracts/openapi.yaml` (v1.3.0) los endpoints del
+    progreso diario, la misión del día, el marcador arcade y las tareas programadas, y amplía el
+    perfil (feature 004) y `TaskOut`. Todos los endpoints exigen `Authorization: Bearer <ID token
+    de Firebase>` y una **cuenta activa** (feature 003): una cuenta revocada o sin acceso recibe el
+    mismo 403 `access_denied` que en el resto de la API. El `uid` sale siempre del token. Ningún
+    endpoint acepta valores de puntuación, racha, nivel ni logros del cliente (FR-032). Se
+    integrará en el contrato de la 001 en la fase de cierre.
+
+paths:
+  /api/v1/me/progress:
+    get:
+      operationId: getProgress
+      summary: Marcador de hoy, con puesta al día idempotente
+      description: >-
+        Antes de responder, cierra los días pasados pendientes y genera las tareas programadas
+        vencidas (research R1, R2, R6, R7). Repetir la llamada no cambia el resultado. Responde
+        con `Cache-Control: no-store`. El cliente la llama al cargar la aplicación, antes de
+        pedir el tablero, y al volver a la pestaña si ha cambiado el día.
+      responses:
+        "200":
+          description: Progreso de hoy.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ProgressOut" }
+        "401": { $ref: "#/components/responses/Unauthenticated" }
+        "403": { $ref: "#/components/responses/AccessDenied" }
+
+  /api/v1/me/progress/review:
+    post:
+      operationId: markReviewSeen
+      summary: Marca como vista la pantalla de inicio de jornada de hoy
+      description: Idempotente. Después, `show_review` es `false` en todos los dispositivos.
+      responses:
+        "200":
+          description: Progreso de hoy tras el cambio.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ProgressOut" }
+        "401": { $ref: "#/components/responses/Unauthenticated" }
+        "403": { $ref: "#/components/responses/AccessDenied" }
+
+  /api/v1/me/progress/today/mission:
+    put:
+      operationId: setTodayMission
+      summary: Reemplaza la misión del día
+      description: >-
+        Hasta 5 tareas **activas** de la persona, que no estén en la papelera y sin repetir. Una
+        lista vacía quita la misión. Marcar o desmarcar no da ni quita puntos. Si con el cambio
+        todas las tareas de la misión quedan completadas hoy, se concede el bonus de misión.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/MissionIn" }
+      responses:
+        "200":
+          description: Progreso de hoy tras el cambio.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ProgressOut" }
+        "401": { $ref: "#/components/responses/Unauthenticated" }
+        "403": { $ref: "#/components/responses/AccessDenied" }
+        "422":
+          description: >-
+            Más de 5 tareas, ids repetidos, o alguna tarea que no existe, no es de la persona, no
+            está activa o está en la papelera (`mission_invalid_task`). Las tareas de otra persona
+            se tratan como inexistentes.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorOut" }
+
+  /api/v1/me/progress/ack:
+    post:
+      operationId: acknowledgeProgressMessages
+      summary: Confirma que se han mostrado anuncios y avisos
+      description: Elimina de los pendientes los ids indicados. Los ids desconocidos se ignoran.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/AckIn" }
+      responses:
+        "204": { description: Confirmados. }
+        "401": { $ref: "#/components/responses/Unauthenticated" }
+        "403": { $ref: "#/components/responses/AccessDenied" }
+        "422": { $ref: "#/components/responses/ValidationError" }
+
+  /api/v1/me/progress/days:
+    get:
+      operationId: listProgressDays
+      summary: Días de progreso de un rango (calendario)
+      description: >-
+        Como mucho 84 días. Los días sin documento (sin actividad y aún sin cerrar) no se
+        devuelven: el cliente los pinta vacíos.
+      parameters:
+        - { name: from, in: query, required: true, schema: { $ref: "#/components/schemas/Day" } }
+        - { name: to, in: query, required: true, schema: { $ref: "#/components/schemas/Day" } }
+      responses:
+        "200":
+          description: Días ordenados por fecha ascendente.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items]
+                properties:
+                  items:
+                    type: array
+                    items: { $ref: "#/components/schemas/ProgressDayOut" }
+        "401": { $ref: "#/components/responses/Unauthenticated" }
+        "403": { $ref: "#/components/responses/AccessDenied" }
+        "422":
+          description: Fechas inválidas, `from > to` o rango de más de 84 días.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorOut" }
+
+  /api/v1/me/progress/days/{day}:
+    get:
+      operationId: getProgressDay
+      summary: Detalle de un día, con sus tareas completadas
+      description: Lista solo las tareas que siguen existiendo fuera de la papelera (FR-029).
+      parameters:
+        - { name: day, in: path, required: true, schema: { $ref: "#/components/schemas/Day" } }
+      responses:
+        "200":
+          description: Detalle del día.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ProgressDayDetailOut" }
+        "401": { $ref: "#/components/responses/Unauthenticated" }
+        "403": { $ref: "#/components/responses/AccessDenied" }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  /api/v1/me/progress/stats:
+    get:
+      operationId: getProgressStats
+      summary: Estadísticas y sala de trofeos
+      responses:
+        "200":
+          description: Estadísticas y catálogo de logros, con los conseguidos y su fecha.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/StatsOut" }
+        "401": { $ref: "#/components/responses/Unauthenticated" }
+        "403": { $ref: "#/components/responses/AccessDenied" }
+
+  /api/v1/schedules:
+    get:
+      operationId: listSchedules
+      summary: Todas las programaciones de la persona (como mucho 50)
+      responses:
+        "200":
+          description: Ordenadas por fecha de creación.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items]
+                properties:
+                  items:
+                    type: array
+                    items: { $ref: "#/components/schemas/ScheduleOut" }
+        "401": { $ref: "#/components/responses/Unauthenticated" }
+        "403": { $ref: "#/components/responses/AccessDenied" }
+    post:
+      operationId: createSchedule
+      summary: Crea una programación
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ScheduleIn" }
+      responses:
+        "201":
+          description: Creada.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ScheduleOut" }
+        "401": { $ref: "#/components/responses/Unauthenticated" }
+        "403": { $ref: "#/components/responses/AccessDenied" }
+        "409":
+          description: Ya hay 50 programaciones (`schedule_limit`).
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorOut" }
+        "422": { $ref: "#/components/responses/ValidationError" }
+
+  /api/v1/schedules/{schedule_id}:
+    parameters:
+      - name: schedule_id
+        in: path
+        required: true
+        schema: { type: string, pattern: "^(?!__.*__$)[A-Za-z0-9_-]{1,128}$" }
+    patch:
+      operationId: updateSchedule
+      summary: Cambia datos o repetición; solo afecta a las próximas apariciones
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ScheduleUpdateIn" }
+      responses:
+        "200":
+          description: Programación tras el cambio.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ScheduleOut" }
+        "401": { $ref: "#/components/responses/Unauthenticated" }
+        "403": { $ref: "#/components/responses/AccessDenied" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "409":
+          description: La programación está terminada (`schedule_finished`).
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorOut" }
+        "422": { $ref: "#/components/responses/ValidationError" }
+    delete:
+      operationId: deleteSchedule
+      summary: Elimina la programación; las tareas ya generadas se quedan
+      responses:
+        "204": { description: Eliminada. }
+        "401": { $ref: "#/components/responses/Unauthenticated" }
+        "403": { $ref: "#/components/responses/AccessDenied" }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  /api/v1/schedules/{schedule_id}/pause:
+    parameters:
+      - { name: schedule_id, in: path, required: true, schema: { type: string } }
+    post:
+      operationId: pauseSchedule
+      summary: Pausa (idempotente)
+      responses:
+        "200":
+          description: Programación pausada.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ScheduleOut" }
+        "401": { $ref: "#/components/responses/Unauthenticated" }
+        "403": { $ref: "#/components/responses/AccessDenied" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "409":
+          description: La programación está terminada (`schedule_finished`).
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorOut" }
+
+  /api/v1/schedules/{schedule_id}/resume:
+    parameters:
+      - { name: schedule_id, in: path, required: true, schema: { type: string } }
+    post:
+      operationId: resumeSchedule
+      summary: Reanuda (idempotente); la próxima aparición se calcula desde hoy
+      responses:
+        "200":
+          description: Programación activa.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ScheduleOut" }
+        "401": { $ref: "#/components/responses/Unauthenticated" }
+        "403": { $ref: "#/components/responses/AccessDenied" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "409":
+          description: >-
+            Programación terminada, o de fecha única con la fecha ya pasada
+            (`schedule_finished`).
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorOut" }
+
+components:
+  schemas:
+    Day:
+      type: string
+      format: date
+      description: Día de progreso (`YYYY-MM-DD`); va de 04:00 a 03:59 en la zona horaria de la persona.
+
+    ProgressOut:
+      type: object
+      required:
+        - today
+        - goal
+        - completed_count
+        - goal_met
+        - is_active_day
+        - mission
+        - show_review
+        - streak
+        - streak_at_stake
+        - arcade
+        - last_day
+        - announcements
+        - notices
+      properties:
+        today: { $ref: "#/components/schemas/Day" }
+        goal: { type: integer, minimum: 1, maximum: 20 }
+        completed_count: { type: integer, minimum: 0 }
+        goal_met: { type: boolean }
+        is_active_day: { type: boolean }
+        mission:
+          type: object
+          required: [task_ids, completed_ids, cleared]
+          properties:
+            task_ids: { type: array, maxItems: 5, items: { type: string } }
+            completed_ids: { type: array, maxItems: 5, items: { type: string } }
+            cleared: { type: boolean }
+        show_review:
+          type: boolean
+          description: "`morning_review` activado, hoy es día activo y aún no se ha visto hoy."
+        streak:
+          type: integer
+          description: Racha cerrada hasta ayer más 1 si hoy es activo y ya se cumplió la meta.
+        streak_at_stake:
+          type: boolean
+          description: Hoy es activo, aún no se ha cumplido la meta y la racha cerrada es > 0.
+        arcade:
+          description: "`null` si `arcade_mode` está desactivado (se sigue calculando)."
+          oneOf:
+            - type: "null"
+            - type: object
+              required: [score, level, level_name, next_level_at, points_today]
+              properties:
+                score: { type: integer, minimum: 0 }
+                level: { type: integer, minimum: 1, maximum: 10 }
+                level_name: { type: string }
+                next_level_at: { type: [integer, "null"], description: "null en el nivel 10" }
+                points_today: { type: integer }
+        last_day:
+          description: Resultado del último día activo cerrado, para la pantalla de inicio de jornada.
+          oneOf:
+            - type: "null"
+            - { $ref: "#/components/schemas/ProgressDayOut" }
+        announcements:
+          type: array
+          maxItems: 20
+          description: Vacío si `arcade_mode` está desactivado (se conservan para cuando se active).
+          items: { $ref: "#/components/schemas/AnnouncementOut" }
+        notices:
+          type: array
+          maxItems: 20
+          items: { $ref: "#/components/schemas/NoticeOut" }
+
+    AnnouncementOut:
+      type: object
+      required: [id, kind]
+      properties:
+        id: { type: string }
+        kind: { type: string, enum: [phase_clear, mission_clear, level_up, achievement, new_record] }
+        value:
+          type: [string, integer, "null"]
+          description: Nivel alcanzado, id del logro o récord, según `kind`.
+
+    NoticeOut:
+      type: object
+      required: [id, kind, schedule_id, day]
+      properties:
+        id: { type: string }
+        kind: { type: string, enum: [schedule_skipped_limit] }
+        schedule_id: { type: string }
+        schedule_title: { type: [string, "null"], description: "null si la programación ya no existe" }
+        day: { $ref: "#/components/schemas/Day" }
+
+    MissionIn:
+      type: object
+      additionalProperties: false
+      required: [task_ids]
+      properties:
+        task_ids:
+          type: array
+          maxItems: 5
+          uniqueItems: true
+          items: { type: string, pattern: "^(?!__.*__$)[A-Za-z0-9_-]{1,128}$" }
+
+    AckIn:
+      type: object
+      additionalProperties: false
+      properties:
+        announcement_ids: { type: array, maxItems: 20, items: { type: string, maxLength: 64 } }
+        notice_ids: { type: array, maxItems: 20, items: { type: string, maxLength: 64 } }
+      minProperties: 1
+
+    ProgressDayOut:
+      type: object
+      required: [date, active, goal, completed_count, goal_met, closed]
+      properties:
+        date: { $ref: "#/components/schemas/Day" }
+        active: { type: boolean }
+        goal: { type: integer }
+        completed_count: { type: integer }
+        goal_met: { type: boolean }
+        mission_cleared: { type: boolean }
+        points: { type: [integer, "null"], description: "null si `arcade_mode` está desactivado" }
+        closed: { type: boolean }
+
+    ProgressDayDetailOut:
+      allOf:
+        - { $ref: "#/components/schemas/ProgressDayOut" }
+        - type: object
+          required: [tasks]
+          properties:
+            tasks:
+              type: array
+              description: "`TaskOut` de la feature 001, solo de las tareas que siguen fuera de la papelera."
+              items: { $ref: "#/components/schemas/TaskOut" }
+
+    StatsOut:
+      type: object
+      required: [best_day_count, best_day_date, current_streak, best_streak, tasks_scored, started_at]
+      properties:
+        best_day_count: { type: integer }
+        best_day_date: { type: [string, "null"], format: date }
+        current_streak: { type: integer }
+        best_streak: { type: integer }
+        tasks_scored:
+          type: integer
+          description: Total de tareas distintas completadas desde el despliegue (una reabierta y vuelta a completar cuenta una vez).
+        started_at: { type: [string, "null"], format: date-time }
+        arcade:
+          description: "`null` si `arcade_mode` está desactivado."
+          oneOf:
+            - type: "null"
+            - type: object
+              required: [score, level, level_name, achievements]
+              properties:
+                score: { type: integer }
+                level: { type: integer }
+                level_name: { type: string }
+                achievements:
+                  type: array
+                  description: El catálogo completo (12), con los conseguidos marcados.
+                  items:
+                    type: object
+                    required: [id, name, condition, unlocked_at]
+                    properties:
+                      id: { type: string }
+                      name: { type: string }
+                      condition: { type: string }
+                      unlocked_at: { type: [string, "null"], format: date-time }
+
+    Recurrence:
+      oneOf:
+        - type: object
+          additionalProperties: false
+          required: [kind, date]
+          properties:
+            kind: { const: once }
+            date: { $ref: "#/components/schemas/Day" }
+        - type: object
+          additionalProperties: false
+          required: [kind]
+          properties:
+            kind: { const: daily }
+        - type: object
+          additionalProperties: false
+          required: [kind, weekdays]
+          properties:
+            kind: { const: weekly }
+            weekdays:
+              type: array
+              minItems: 1
+              maxItems: 7
+              uniqueItems: true
+              items: { type: integer, minimum: 1, maximum: 7, description: "ISO: 1 = lunes … 7 = domingo" }
+        - type: object
+          additionalProperties: false
+          required: [kind, month_day]
+          properties:
+            kind: { const: monthly }
+            month_day: { type: integer, minimum: 1, maximum: 31 }
+      discriminator: { propertyName: kind }
+
+    ScheduleIn:
+      type: object
+      additionalProperties: false
+      required: [title, description, urgent, important, scope, recurrence]
+      properties:
+        title: { type: string, minLength: 1, maxLength: 200 }
+        description: { type: string, minLength: 1, maxLength: 2000 }
+        urgent: { type: boolean }
+        important: { type: boolean }
+        scope: { type: string, enum: [work, personal] }
+        recurrence: { $ref: "#/components/schemas/Recurrence" }
+      description: >-
+        Mismas reglas que `TaskCreate` (texto solo de espacios = vacío). Con `once`, `date` DEBE
+        ser hoy o futura en la zona horaria de la persona.
+
+    ScheduleUpdateIn:
+      type: object
+      additionalProperties: false
+      minProperties: 1
+      properties:
+        title: { type: string, minLength: 1, maxLength: 200 }
+        description: { type: string, minLength: 1, maxLength: 2000 }
+        urgent: { type: boolean }
+        important: { type: boolean }
+        scope: { type: string, enum: [work, personal] }
+        recurrence: { $ref: "#/components/schemas/Recurrence" }
+
+    ScheduleOut:
+      type: object
+      required: [id, title, description, urgent, important, scope, quadrant, recurrence, status, next_occurrence, created_at]
+      properties:
+        id: { type: string }
+        title: { type: string }
+        description: { type: string }
+        urgent: { type: boolean }
+        important: { type: boolean }
+        scope: { type: string, enum: [work, personal] }
+        quadrant: { type: string, enum: [do_now, schedule, delegate, eliminate] }
+        recurrence: { $ref: "#/components/schemas/Recurrence" }
+        status: { type: string, enum: [active, paused, finished] }
+        next_occurrence: { type: [string, "null"], format: date }
+        last_generated_for: { type: [string, "null"], format: date }
+        created_at: { type: string, format: date-time }
+
+    TaskOut:
+      description: >-
+        `TaskOut` de la feature 001 con dos campos nuevos, siempre presentes: `schedule_id`
+        (string | null) y `scheduled_for` (fecha | null, el «pendiente desde» de FR-023).
+
+    ProfileOut:
+      description: >-
+        `ProfileOut` de la feature 004 con los campos nuevos `daily_goal` (1–20),
+        `active_weekdays` (array 1–7), `timezone` (string | null), `morning_review` (bool) y
+        `arcade_mode` (bool). `PATCH /api/v1/me/profile` los acepta con las mismas reglas
+        (`extra = forbid`, ningún `null` salvo en `timezone`, que no se puede vaciar una vez
+        fijada). `DELETE /api/v1/me/profile` no los restablece.
+
+    ErrorOut:
+      type: object
+      required: [code, message]
+      properties:
+        code: { type: string }
+        message: { type: string }
+
+  responses:
+    Unauthenticated:
+      description: Sin token o con un token no válido.
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/ErrorOut" }
+    AccessDenied:
+      description: Cuenta sin acceso (`access_denied`, feature 003).
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/ErrorOut" }
+    NotFound:
+      description: No existe o es de otra persona (misma respuesta en ambos casos).
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/ErrorOut" }
+    ValidationError:
+      description: Cuerpo o parámetros no válidos.
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/ErrorOut" }
