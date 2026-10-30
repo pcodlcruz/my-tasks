@@ -99,15 +99,15 @@ modifican ni se borran**: cada cambio es una versión nueva (FR-036).
 > móvil oscura, se acepta como **solo color**. Si una pantalla falla tras los reintentos, se avisa en
 > el punto de control en lugar de bloquear la fase.
 
-- [ ] T001 Comprobar el acceso al proyecto Stitch «MyTasks» con `mcp__stitch__get_project` y `mcp__stitch__list_screens`, leer `docs/design/DESIGN.md` y `docs/design/screens/README.md`, y anotar en `docs/design/screens/README.md` una sección «Feature 007 · pantallas nuevas y versiones» con los identificadores de las bases vigentes (S3 v2, S3 compacta, S4 v2 y S7, en claro y oscuro y en escritorio y móvil)
-- [ ] T002 Añadir a `docs/design/DESIGN.md` una sección «Estética arcade»:
+- [X] T001 Comprobar el acceso al proyecto Stitch «MyTasks» con `mcp__stitch__get_project` y `mcp__stitch__list_screens`, leer `docs/design/DESIGN.md` y `docs/design/screens/README.md`, y anotar en `docs/design/screens/README.md` una sección «Feature 007 · pantallas nuevas y versiones» con los identificadores de las bases vigentes (S3 v2, S3 compacta, S4 v2 y S7, en claro y oscuro y en escritorio y móvil) *Hecho: bases vigentes en `docs/design/screens/README.md` § Feature 007.*
+- [X] T002 Añadir a `docs/design/DESIGN.md` una sección «Estética arcade»:
   - tipografía «Press Start 2P», solo para cifras y rótulos cortos;
   - tokens nuevos en claro y oscuro: barra de energía (segmento lleno, vacío y extra), oro de logros y racha en juego, con los mismos nombres semánticos que `frontend/tailwind.config.ts`;
   - patrón de celebración no modal y su versión con movimiento reducido;
   - regla de no comunicar estados solo por color.
 
   Después, ampliar `docs/design/check-contrast.py` con los pares nuevos y pegar su salida en `DESIGN.md`, con 0 pares por debajo de AA.
-- [ ] T003 Añadir los tokens arcade al *design system* de Stitch sin tocar los aprobados (como *asset* aparte si `update_design_system` cambiaría el modo de color, igual que T003 de la feature 004) y anotar el identificador en `docs/design/screens/README.md`
+- [X] T003 Añadir los tokens arcade al *design system* de Stitch sin tocar los aprobados (como *asset* aparte si `update_design_system` cambiaría el modo de color, igual que T003 de la feature 004) y anotar el identificador en `docs/design/screens/README.md` *Hecho sin tocar los sistemas: los tokens arcade van en cada prompt (Stitch admite un solo modo de color por sistema y `update_design_system` recalcula `namedColors`); ver README § Design systems (T003).*
 - [ ] T004 Generar **S3 v3 · Tablero** claro en escritorio y móvil a partir de S3 v2, según `contracts/ui-screens.md`:
   - marcador «HOY 2/3» con barra de energía, racha con «en juego», y puntuación y nivel;
   - botón para reabrir el inicio de jornada;

@@ -407,3 +407,66 @@ como referencia anterior (FR-028); el detalle (ids de Stitch y carpetas) está e
 | Historial, formulario de tarea y papelera (claro y oscuro) | S5, S4 y S6 v2 | Ronda 2 (T112) |
 | Inicio de sesión en oscuro | S1 · Iniciar sesión (oscuro) | Ronda 2 (T112) |
 | Selector de avatar (catálogo y «Subir imagen») y recortador | S7 · Selector y recortador (claro y oscuro) | Selector de avatar (T114) |
+
+## Feature 007 · pantallas nuevas y versiones (T001, 2026-10-30)
+
+**Fuente**: [specs/007-daily-progress-arcade/contracts/ui-screens.md](../../../specs/007-daily-progress-arcade/contracts/ui-screens.md).
+Las pantallas aprobadas de las features 001 y 004 **no se modifican**: cada cambio es una
+pantalla nueva (FR-036).
+
+### Bases vigentes de las que parten las versiones nuevas
+
+| Base | Claro, escritorio | Claro, móvil | Oscuro, escritorio | Oscuro, «móvil» |
+|---|---|---|---|---|
+| S3 · Tablero v2 | `a3f141c47d3946ea9c1466f3916df60d` | `27a7b42bf13c4592a5d665c889b6aebf` | `6229bf994c8446378757eddc823322df` | `76ec68dd342142b5bc86c2c30ea03ddd` (solo color) |
+| S3 · Tablero compacto | `963cfc7d68c9445b86f32918d2babb02` | `1ae725edfe09482e94c92d2082c9b04e` | — | — |
+| S4 · Formulario v2 (base de S11) | `2dcd890bf4f84f87b0f23e4f01315b39` | `b53dd6d79bd44274ab064dbfa48d17f9` | `5c3ddf048d35439c92ef053db11fbf42` | `9036112ceed343cfbc60c7ec2f4bc8dc` (solo color) |
+| S7 · Perfil | `5b4edf53a88f4c5f89c51608ed120c60` | `0b97e3e427874566a38fc843734dc918` | `912d3dc861c84104af22ceb366a9010a` | `2d33b97724904379828180049debbfe6` (solo color) |
+
+### Design systems (T003)
+
+Se usan los dos ya existentes, **sin modificarlos**: `assets/ec957f11ef474eb58336b8af664aaa2e`
+(claro, aprobado en la 001) y `assets/16783421015770598561` (oscuro, feature 004). Los tokens
+arcade de `DESIGN.md` § Estética arcade **no se añaden a ningún sistema**: Stitch admite un solo
+modo de color por sistema, y `update_design_system` recalcula `namedColors` y sube de versión el
+sistema (lección de la 004). En su lugar, cada *prompt* de generación lleva los valores exactos
+de los tokens arcade y la tipografía «Press Start 2P».
+
+### Registro de generaciones (T004–T010)
+
+`generate_screen_from_text` suele responder con *timeout* y la pantalla aparece igualmente en el
+lienzo 45–60 minutos después (feature 004): **no se reintenta**. Se comprueba con `get_screen`
+o `get_project` antes de volver a lanzar nada.
+
+| Pantalla | Variante | Id de Stitch | Estado |
+|---|---|---|---|
+| S3 v3 · Tablero | claro, escritorio | pendiente de indexar | lanzada 2026-10-30 |
+| S3 v3 · Tablero | claro, móvil | pendiente de indexar | lanzada 2026-10-30 |
+| S3 v3 · Tablero | oscuro, escritorio | pendiente de indexar | lanzada 2026-10-30 |
+| S3 v3 · Tablero | oscuro, móvil | pendiente de indexar | lanzada 2026-10-30 |
+| S3 v3 · Tablero sin modo arcade | claro, escritorio | pendiente de indexar | lanzada 2026-10-30 |
+| S3-c · Celebraciones | claro, escritorio | pendiente de indexar | lanzada 2026-10-30 |
+| S3-c · Celebraciones | oscuro, escritorio | pendiente de indexar | lanzada 2026-10-30 |
+| S7 v2 · Perfil | claro, escritorio | pendiente de indexar | lanzada 2026-10-30 |
+| S7 v2 · Perfil | claro, móvil | pendiente de indexar | lanzada 2026-10-30 |
+| S7 v2 · Perfil | oscuro, escritorio | pendiente de indexar | lanzada 2026-10-30 |
+| S7 v2 · Perfil | oscuro, móvil | pendiente de indexar | lanzada 2026-10-30 |
+| S8 · Inicio de jornada | claro, escritorio | pendiente de indexar | lanzada 2026-10-30 |
+| S8 · Inicio de jornada | claro, móvil | pendiente de indexar | lanzada 2026-10-30 |
+| S8 · Inicio de jornada | oscuro, escritorio | pendiente de indexar | lanzada 2026-10-30 |
+| S8 · Inicio de jornada | oscuro, móvil | pendiente de indexar | lanzada 2026-10-30 |
+| S9 · Progreso | claro, escritorio | pendiente de indexar | lanzada 2026-10-30 |
+| S9 · Progreso | claro, móvil | pendiente de indexar | lanzada 2026-10-30 |
+| S9 · Progreso | oscuro, escritorio | pendiente de indexar | lanzada 2026-10-30 |
+| S10 · Tareas programadas | claro, escritorio | pendiente de indexar | lanzada 2026-10-30 (incluye el diálogo de eliminar) |
+| S10 · Tareas programadas | claro, móvil | pendiente de indexar | lanzada 2026-10-30 (incluye el estado vacío) |
+| S10 · Tareas programadas | oscuro, escritorio | pendiente de indexar | lanzada 2026-10-30 |
+| S11 · Formulario de programación | claro, escritorio | pendiente de indexar | lanzada 2026-10-30 (días de la semana, error en línea) |
+| S11 · Formulario de programación | claro, móvil | pendiente de indexar | lanzada 2026-10-30 (día 31) |
+| S11 · Formulario de programación | oscuro, escritorio | pendiente de indexar | lanzada 2026-10-30 |
+
+Las variantes **móviles oscuras** de S9, S10 y S11 no se generan aparte: en la feature 004 Stitch
+devolvía esas variantes como lienzo de escritorio. Valen como **solo color** la oscura de
+escritorio sobre la maquetación de la móvil clara, igual que en la 004. Los estados «PARTIDA
+NUEVA» y «sin tareas activas» de S8 y el estado vacío de S9 se implementan a partir del contrato
+(`ui-screens.md`), salvo que el propietario pida pantalla propia en el punto de control.

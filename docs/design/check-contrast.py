@@ -44,6 +44,14 @@ LIGHT = {
     "eliminate-accent": "#475569",
     "eliminate-surface": "#F8FAFC",
     "on-accent": "#FFFFFF",
+    # Arcade tokens (feature 007): energy bar, extra segments, gold for trophies and
+    # records, and the "streak at stake" accent.
+    "energy-fill": "#0E7490",
+    "energy-extra": "#A21CAF",
+    "energy-empty-border": "#64748B",
+    "gold": "#A16207",
+    "on-gold": "#FFFFFF",
+    "streak": "#C2410C",
 }
 
 # Dark theme proposed by this feature (FR-028a). Same semantic names as the light one,
@@ -74,6 +82,12 @@ DARK = {
     "eliminate-accent": "#94A3B8",
     "eliminate-surface": "#1C2536",
     "on-accent": "#0F172A",
+    "energy-fill": "#22D3EE",
+    "energy-extra": "#F0ABFC",
+    "energy-empty-border": "#94A3B8",
+    "gold": "#FACC15",
+    "on-gold": "#0F172A",
+    "streak": "#FB923C",
 }
 
 # (foreground, background, kind, where it is used)
@@ -110,6 +124,17 @@ PAIRS = [
     ("on-accent", "eliminate-accent", "text", "Texto sobre acento «Eliminar»"),
     ("disabled-text", "disabled-bg", "exempt", "Control deshabilitado (exento de AA)"),
     ("border", "surface", "exempt", "Borde decorativo de tarjetas e inputs (paridad con claro)"),
+    # Arcade (feature 007)
+    ("energy-fill", "surface", "text", "Cifra del marcador y segmento lleno de la barra de energía"),
+    ("energy-fill", "surface-alt", "large", "Segmento lleno sobre el fondo de página"),
+    ("energy-extra", "surface", "text", "Segmentos por encima de la meta y su cifra"),
+    ("energy-empty-border", "surface", "large", "Contorno del segmento vacío (componente gráfico)"),
+    ("energy-fill", "energy-empty-border", "exempt", "Lleno frente a vacío: se distinguen también por relleno"),
+    ("gold", "surface", "text", "Logros conseguidos, «RÉCORD» y nivel"),
+    ("gold", "surface-alt", "text", "Rótulos dorados sobre el fondo de página"),
+    ("on-gold", "gold", "text", "Texto sobre insignia dorada (celebraciones)"),
+    ("streak", "surface", "text", "Racha «en juego»"),
+    ("text", "surface", "text", "Texto de las celebraciones (aviso sobre superficie)"),
 ]
 
 
