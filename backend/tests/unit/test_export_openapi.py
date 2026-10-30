@@ -124,6 +124,12 @@ def test_export_matches_the_profile_contract_of_feature_004(tmp_path: Path) -> N
         "history_days",
         "display_name",
         "avatar",
+        # Progress settings, feature 007.
+        "daily_goal",
+        "active_weekdays",
+        "timezone",
+        "morning_review",
+        "arcade_mode",
     }
     assert schemas["ProfileUpdateIn"]["additionalProperties"] is False
     assert schemas["AvatarChoiceIn"]["additionalProperties"] is False
@@ -190,3 +196,52 @@ def test_the_cors_policy_allows_put_for_the_avatar_upload() -> None:
     from mytasks_api.factory import ALLOWED_METHODS
 
     assert "PUT" in ALLOWED_METHODS
+
+
+def test_export_matches_the_progress_contract_of_feature_007(tmp_path: Path) -> None:
+    target = tmp_path / "openapi.json"
+
+    export_openapi(target)
+    contract = json.loads(target.read_text(encoding="utf-8"))
+
+    paths = contract["paths"]
+    assert set(paths["/api/v1/me/progress"]) == {"get"}
+    assert set(paths["/api/v1/me/progress/review"]) == {"post"}
+    assert set(paths["/api/v1/me/progress/today/mission"]) == {"put"}
+    assert set(paths["/api/v1/me/progress/ack"]) == {"post"}
+    for path in (
+        "/api/v1/me/progress",
+        "/api/v1/me/progress/review",
+        "/api/v1/me/progress/today/mission",
+        "/api/v1/me/progress/ack",
+    ):
+        for operation in paths[path].values():
+            assert {"401", "403"} <= set(operation["responses"])
+    assert "422" in paths["/api/v1/me/progress/today/mission"]["put"]["responses"]
+    assert "204" in paths["/api/v1/me/progress/ack"]["post"]["responses"]
+    schemas = contract["components"]["schemas"]
+    assert set(schemas["ProgressOut"]["required"]) == {
+        "today",
+        "goal",
+        "completed_count",
+        "goal_met",
+        "is_active_day",
+        "mission",
+        "show_review",
+        "streak",
+        "streak_at_stake",
+        "arcade",
+        "last_day",
+        "announcements",
+        "notices",
+    }
+    assert schemas["MissionIn"]["additionalProperties"] is False
+    assert schemas["AckIn"]["additionalProperties"] is False
+    assert schemas["MissionIn"]["properties"]["task_ids"]["maxItems"] == 5
+    assert set(schemas["AnnouncementKind"]["enum"]) == {
+        "phase_clear",
+        "mission_clear",
+        "level_up",
+        "achievement",
+        "new_record",
+    }
