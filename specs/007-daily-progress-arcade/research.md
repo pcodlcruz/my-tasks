@@ -236,6 +236,8 @@ con `PUT /api/v1/me/progress/today/mission`, que reemplaza la lista entera.
   una tarea que ya está en la misión.
 - Si después de completar tareas se añade a la misión una tarea activa y se completa, cuenta como
   misión. Una tarea completada antes de ser misión no se puede añadir: ya no está activa.
+- Al reemplazar la lista, las tareas de la misión **ya completadas hoy** pueden seguir en ella
+  aunque no estén activas. Así se pueden añadir otras sin perderlas.
 - Cumplida = la misión no está vacía y todas sus tareas están completadas hoy. Se evalúa al
   completar, al reabrir, al cambiar la misión y al mandar a la papelera una tarea de la misión.
 - La misión caduca sola: el día siguiente es otro documento.

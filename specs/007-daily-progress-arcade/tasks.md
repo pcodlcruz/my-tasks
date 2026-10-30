@@ -165,17 +165,17 @@ transacciones de tres documentos (R4).
 
 ### Tests de la Fase 2 (escribirlos primero; deben fallar)
 
-- [ ] T014 [P] Tests unitarios del reloj en `backend/tests/unit/test_clock.py`:
+- [X] T014 [P] Tests unitarios del reloj en `backend/tests/unit/test_clock.py`:
   - `SystemClock` devuelve UTC con zona;
   - `get_clock` usa `X-Test-Now` solo si `APP_ENV=local`;
   - con otro `APP_ENV`, la cabecera se ignora y se registra un aviso;
   - un valor sin zona o mal formado devuelve 422 en `local`.
-- [ ] T015 [P] [US1] Tests unitarios del día de progreso en `backend/tests/unit/domain/test_progress_day_key.py`:
+- [X] T015 [P] [US1] Tests unitarios del día de progreso en `backend/tests/unit/domain/test_progress_day_key.py`:
   - `day_key(now, tz)` con el corte a las 04:00 (03:59 → día anterior; 04:00 → nuevo día; 00:30 → día anterior);
   - zonas `Europe/Madrid`, `America/New_York` y `Pacific/Auckland`;
   - las noches de cambio de horario de marzo y octubre;
   - `is_active(day, weekdays)` con ISO 1 = lunes.
-- [ ] T016 [P] [US1] Tests unitarios de las reglas de completado en `backend/tests/unit/domain/test_progress_rules.py`, una prueba por fila de la tabla de research R5:
+- [X] T016 [P] [US1] Tests unitarios de las reglas de completado en `backend/tests/unit/domain/test_progress_rules.py`, una prueba por fila de la tabla de research R5:
   - completar una tarea nunca puntuada: +1 y +100;
   - completar una ya puntuada otro día: +1 y 0;
   - reabrir hoy: −1, −100 solo si se puntuó hoy, y se retira el bonus de fase si se deja de cumplir;
@@ -186,14 +186,14 @@ transacciones de tres documentos (R4).
   - bonus de fase una vez al día y también en día no activo, sin tocar la racha (Clarification Q4);
   - subir la meta tras cumplirla no retira el bonus ya ganado;
   - completar y reabrir N veces da el mismo neto que una (SC-006).
-- [ ] T017 [P] [US2] Tests unitarios de la misión en `backend/tests/unit/domain/test_progress_mission.py`:
+- [X] T017 [P] [US2] Tests unitarios de la misión en `backend/tests/unit/domain/test_progress_mission_domain.py` (no `test_progress_mission.py`: chocaría con el de integración):
   - máximo 5 tareas, sin repetidas, solo activas;
   - +50 por tarea de misión completada hoy y +300 al cumplirla, una vez al día;
   - marcar o desmarcar no da ni quita puntos;
   - papelera de una tarea de la misión: sale de ella y la misión se reevalúa;
   - una misión vacía nunca se cumple;
   - reabrir una tarea de la misión retira su extra y el bonus si ya no se cumple.
-- [ ] T018 [P] [US3] Tests unitarios del cierre de días en `backend/tests/unit/domain/test_progress_close.py` (research R6):
+- [X] T018 [P] [US3] Tests unitarios del cierre de días en `backend/tests/unit/domain/test_progress_close.py` (research R6):
   - en un día activo, cumplir la meta sube la racha y no cumplirla, o no tener actividad, la pone a 0;
   - un día no activo no cambia la racha;
   - la mejor racha y el récord se actualizan al cerrar;
@@ -201,7 +201,7 @@ transacciones de tres documentos (R4).
   - con más de 84 días sin cerrar, solo se crean los últimos 84 y la racha queda a 0 si alguno saltado era activo;
   - cerrar dos veces no cambia nada (idempotencia);
   - un día cerrado nunca se modifica (FR-006).
-- [ ] T019 [P] [US3] Tests unitarios de niveles, logros y anuncios en `backend/tests/unit/domain/test_levels_achievements.py`:
+- [X] T019 [P] [US3] Tests unitarios de niveles, logros y anuncios en `backend/tests/unit/domain/test_levels_achievements.py`:
   - tabla de 10 niveles con sus umbrales y nombres (research R8);
   - el nivel se deriva de la puntuación;
   - `level_up` se anuncia una sola vez aunque se pierda y se recupere el nivel (`max_level_announced`);
@@ -210,106 +210,121 @@ transacciones de tres documentos (R4).
   - el **logro** `new_record` solo si además el día tiene ≥ 5 tareas;
   - anuncios acotados a 20 (se descartan los más antiguos);
   - retirar un bonus elimina su anuncio si sigue pendiente.
-- [ ] T020 [P] [US1] Tests unitarios de los ajustes nuevos del perfil en `backend/tests/unit/domain/test_profile_domain.py`:
+- [X] T020 [P] [US1] Tests unitarios de los ajustes nuevos del perfil en `backend/tests/unit/domain/test_profile_domain.py`:
   - valores por defecto (`daily_goal` 3, siete días, `timezone` `null`, `morning_review` y `arcade_mode` activos);
   - `daily_goal` 1–20;
   - `active_weekdays` 1–7, sin repetir y no vacía;
   - `timezone` dentro de `zoneinfo.available_timezones()`;
   - un valor guardado inválido se lee como el valor por defecto;
   - `RESETTABLE_FIELDS` no incluye ninguno de los nuevos.
-- [ ] T021 [P] Tests unitarios del servicio de progreso en `backend/tests/unit/services/test_progress_service.py`, con un repositorio falso:
+- [X] T021 [P] Tests unitarios del servicio de progreso en `backend/tests/unit/services/test_progress_service.py`, con un repositorio falso:
   - la puesta al día cierra los días y no hace nada si ya está al día;
   - `show_review` = activado + día activo + no visto hoy;
   - `streak` = racha cerrada + 1 si hoy es activo y ya se cumplió la meta, y `streak_at_stake`;
   - `arcade: null` y `announcements` vacíos con el modo arcade desactivado, aunque se sigan calculando;
   - `last_day` = el último día activo cerrado.
-- [ ] T022 [US1] Tests de integración de `GET /api/v1/me/progress` en `backend/tests/integration/test_progress.py`, contra el emulador y con el reloj sobrescrito:
+- [X] T022 [US1] Tests de integración de `GET /api/v1/me/progress` en `backend/tests/integration/test_progress.py`, contra el emulador y con el reloj sobrescrito:
   - 401 sin token; 403 (`access_denied`) sin cuenta y con la cuenta revocada;
   - cuenta nueva: `today`, meta 3, 0 completadas, `show_review: true` y racha 0;
   - `Cache-Control: no-store`;
   - repetir la llamada no cambia nada;
   - tras cambiar de día, el día anterior queda `closed: true` en Firestore.
-- [ ] T023 [US1] Tests de integración de las transiciones con progreso en `backend/tests/integration/test_progress_transitions.py`:
+- [X] T023 [US1] Tests de integración de las transiciones con progreso en `backend/tests/integration/test_progress_transitions.py`:
   - `POST /tasks/{id}/complete`, `/reopen`, `/trash` y `/restore` aplican las reglas de R5 sobre los documentos `progress_days/{día}` y `progress/state`;
   - el cuerpo de respuesta sigue siendo el `TaskOut` actual;
   - completar y reabrir 10 veces da un neto de una;
   - dos `complete` concurrentes de la misma tarea solo cuentan una (`asyncio.gather`; la transacción reintenta);
   - una tarea completada antes del despliegue y reabierta no resta nada.
-- [ ] T024 [P] [US2] Tests de integración de la misión y del inicio de jornada en `backend/tests/integration/test_progress_mission.py`:
+- [X] T024 [P] [US2] Tests de integración de la misión y del inicio de jornada en `backend/tests/integration/test_progress_mission.py`:
   - `PUT /me/progress/today/mission` con 0–5 tareas activas devuelve 200;
   - con 6 tareas, repetidas, completadas, en la papelera, inexistentes o de otra cuenta devuelve 422 `mission_invalid_task`, y no se guarda nada;
   - `POST /me/progress/review` deja `show_review: false` y es idempotente;
   - un día no activo devuelve `show_review: false`;
   - con `morning_review` desactivado, `show_review: false`.
-- [ ] T025 [P] [US3] Tests de integración de los anuncios en `backend/tests/integration/test_progress_announcements.py`:
+- [X] T025 [P] [US3] Tests de integración de los anuncios en `backend/tests/integration/test_progress_announcements.py`:
   - `POST /me/progress/ack` elimina los ids indicados e ignora los desconocidos;
   - un cuerpo vacío o con más de 20 ids devuelve 422;
   - un anuncio confirmado no reaparece al recuperar el bonus el mismo día;
   - el cierre de un día con racha 3 genera `achievement:streak_3`.
-- [ ] T026 [P] [US1] Tests de integración de los ajustes en `backend/tests/integration/test_profile.py`:
+- [X] T026 [P] [US1] Tests de integración de los ajustes en `backend/tests/integration/test_profile.py`:
   - `PATCH /me/profile` acepta `daily_goal`, `active_weekdays`, `timezone`, `morning_review` y `arcade_mode`;
   - devuelve 422 con una meta de 0 o 21, días vacíos o repetidos, una zona inventada o `null` en cualquiera salvo `timezone`;
   - un 422 no guarda nada;
   - `DELETE /me/profile` no los restablece;
   - cambiar la zona horaria recalcula `today` y no toca los días cerrados.
-- [ ] T027 [P] Tests de aislamiento en `backend/tests/integration/test_progress_isolation.py`:
+- [X] T027 [P] Tests de aislamiento en `backend/tests/integration/test_progress_isolation.py`:
   - dos cuentas no ven ni modifican el progreso, la misión ni los anuncios de la otra;
   - ningún parámetro del cliente (cuerpo, consulta o ruta) apunta a otro `uid`;
   - ningún endpoint acepta `score`, `streak`, `level` ni `achievements` (422 por campo extra);
   - una cuenta revocada conserva sus datos tras reactivarla.
-- [ ] T028 [P] Test de integración de la cabecera de reloj en `backend/tests/integration/test_test_clock_header.py`: con `APP_ENV=local`, `X-Test-Now` mueve `today`; con `APP_ENV=staging` (settings sobrescritos), no tiene ningún efecto y se registra el aviso
-- [ ] T029 [P] Tests de los eventos de registro en `backend/tests/unit/test_logging_config.py` y `backend/tests/integration/test_audit_logging.py`:
+- [X] T028 [P] Test de integración de la cabecera de reloj en `backend/tests/integration/test_test_clock_header.py`: con `APP_ENV=local`, `X-Test-Now` mueve `today`; con `APP_ENV=staging` (settings sobrescritos), no tiene ningún efecto y se registra el aviso
+- [X] T029 [P] Tests de los eventos de registro en `backend/tests/unit/test_logging_config.py` y `backend/tests/integration/test_audit_logging.py`:
   - `progress_day_closed`, `progress_mission_set` y `progress_ack` llevan solo `uid`, `day` y recuentos;
   - nunca títulos ni descripciones de tareas.
 
 ### Implementación de la Fase 2
 
-- [ ] T030 Añadir `tzdata` a `backend/pyproject.toml` (versión mínima fijada) y regenerar `backend/uv.lock` con `uv lock`; comprobar que `zoneinfo.ZoneInfo("Europe/Madrid")` funciona sin datos del sistema (`PYTHONTZPATH=` vacío)
-- [ ] T031 Implementar `backend/src/mytasks_api/clock.py`, hasta que pasen T014 y T028:
+- [X] T030 Añadir `tzdata` a `backend/pyproject.toml` (versión mínima fijada) y regenerar `backend/uv.lock` con `uv lock`; comprobar que `zoneinfo.ZoneInfo("Europe/Madrid")` funciona sin datos del sistema (`PYTHONTZPATH=` vacío)
+- [X] T031 Implementar `backend/src/mytasks_api/clock.py`, hasta que pasen T014 y T028:
   - protocolo `Clock` y `SystemClock`;
   - dependencia `get_clock(request, settings)`, que solo atiende `X-Test-Now` con `APP_ENV=local`.
-- [ ] T032 [US1] Ampliar `backend/src/mytasks_api/domain/profile.py` con `daily_goal`, `active_weekdays`, `timezone`, `morning_review` y `arcade_mode` (validación, valores por defecto, `profile_from_document` tolerante), y `backend/src/mytasks_api/schemas/profile.py` (`ProfileOut` y `ProfileUpdateIn` con `extra="forbid"`; `timezone` se valida contra `zoneinfo.available_timezones()`), hasta que pase T020
-- [ ] T033 [US1] Crear `backend/src/mytasks_api/domain/progress.py` con la base, hasta que pase T015:
+- [X] T032 [US1] Ampliar `backend/src/mytasks_api/domain/profile.py` con `daily_goal`, `active_weekdays`, `timezone`, `morning_review` y `arcade_mode` (validación, valores por defecto, `profile_from_document` tolerante), y `backend/src/mytasks_api/schemas/profile.py` (`ProfileOut` y `ProfileUpdateIn` con `extra="forbid"`; `timezone` se valida contra `zoneinfo.available_timezones()`), hasta que pase T020
+- [X] T033 [US1] Crear `backend/src/mytasks_api/domain/progress.py` con la base, hasta que pase T015:
   - `DEFAULT_TIMEZONE = "Europe/Madrid"` y `DAY_START_HOUR = 4`;
   - `day_key` e `is_active`;
   - las constantes de puntos de research R8;
   - los dataclasses `ProgressDay` y `PlayerState` de data-model §3 y §4, con `*_from_document`.
-- [ ] T034 [US1] Añadir a `backend/src/mytasks_api/domain/progress.py` las funciones puras `apply_complete`, `apply_reopen` y `apply_trash`, que reciben la tarea, el día y el marcador y devuelven los tres actualizados más los anuncios (research R5), hasta que pase T016
-- [ ] T035 [US2] Añadir a `backend/src/mytasks_api/domain/progress.py` `set_mission` y la evaluación de misión cumplida (research R10), hasta que pase T017
-- [ ] T036 [US3] Añadir a `backend/src/mytasks_api/domain/progress.py`, hasta que pasen T018 y T019:
+- [X] T034 [US1] Añadir a `backend/src/mytasks_api/domain/progress.py` las funciones puras `apply_complete`, `apply_reopen` y `apply_trash`, que reciben la tarea, el día y el marcador y devuelven los tres actualizados más los anuncios (research R5), hasta que pase T016
+- [X] T035 [US2] Añadir a `backend/src/mytasks_api/domain/progress.py` `set_mission` y la evaluación de misión cumplida (research R10), hasta que pase T017
+- [X] T036 [US3] Añadir a `backend/src/mytasks_api/domain/progress.py`, hasta que pasen T018 y T019:
   - `close_days(state, days, settings, today)` (research R6);
   - la tabla `LEVELS`, `level_for(score)` y el catálogo `ACHIEVEMENTS` con sus condiciones;
   - la gestión acotada de `announcements` (research R9).
-- [ ] T037 [US1] Añadir `completed_day` y `points_awarded_on` a `Task` en `backend/src/mytasks_api/domain/task.py` y a la lectura y escritura de `backend/src/mytasks_api/repositories/task_repository.py` (opcionales, `null` en las tareas existentes), sin exponerlos en `TaskOut`
-- [ ] T038 [US1] Crear `backend/src/mytasks_api/repositories/progress_repository.py`:
+- [X] T037 [US1] Añadir `completed_day` y `points_awarded_on` a `Task` en `backend/src/mytasks_api/domain/task.py` y a la lectura y escritura de `backend/src/mytasks_api/repositories/task_repository.py` (opcionales, `null` en las tareas existentes), sin exponerlos en `TaskOut`
+- [X] T038 [US1] Crear `backend/src/mytasks_api/repositories/progress_repository.py`:
   - lectura del marcador y de un día;
   - transacción `run_task_transition(uid, task_id, transition, now, settings)`, que lee y escribe la tarea, el día de hoy y el marcador en una sola `@firestore.async_transactional` (research R4);
   - transacción de cierre de días;
   - escritura de la misión, de `review_seen` y de las confirmaciones.
-- [ ] T039 [US1] Hacer que `complete_task`, `reopen_task` y `trash_task` de `backend/src/mytasks_api/services/task_service.py` usen `run_task_transition` con el reloj y los ajustes del perfil. `restore_task` y `delete_task` no tocan el progreso, y la comprobación del límite de 500 no cambia. Hasta que pase T023
-- [ ] T040 [US1] Crear `backend/src/mytasks_api/services/progress_service.py` (con `get_progress_service`), hasta que pasen T021, T024 y T025:
+- [X] T039 [US1] Hacer que `complete_task`, `reopen_task` y `trash_task` de `backend/src/mytasks_api/services/task_service.py` usen `run_task_transition` con el reloj y los ajustes del perfil. `restore_task` y `delete_task` no tocan el progreso, y la comprobación del límite de 500 no cambia. Hasta que pase T023
+- [X] T040 [US1] Crear `backend/src/mytasks_api/services/progress_service.py` (con `get_progress_service`), hasta que pasen T021, T024 y T025:
   - puesta al día;
   - armado de `ProgressOut` (`streak`, `streak_at_stake`, `show_review`, `arcade`, `last_day`, `announcements`, `notices` vacío hasta la Fase 6);
   - misión, inicio de jornada y confirmaciones.
-- [ ] T041 [US1] Crear `backend/src/mytasks_api/schemas/progress.py` (`ProgressOut`, `MissionIn`, `AckIn`, `ProgressDayOut`, `AnnouncementOut` y `NoticeOut`, todos los de entrada con `extra="forbid"`), conforme a `contracts/progress.yaml`
-- [ ] T042 [US1] Crear `backend/src/mytasks_api/routers/progress.py` y registrarlo en `backend/src/mytasks_api/factory.py`, junto con el error 422 `mission_invalid_task`. Hasta que pasen T022, T024–T027:
+- [X] T041 [US1] Crear `backend/src/mytasks_api/schemas/progress.py` (`ProgressOut`, `MissionIn`, `AckIn`, `ProgressDayOut`, `AnnouncementOut` y `NoticeOut`, todos los de entrada con `extra="forbid"`), conforme a `contracts/progress.yaml`
+- [X] T042 [US1] Crear `backend/src/mytasks_api/routers/progress.py` y registrarlo en `backend/src/mytasks_api/factory.py`, junto con el error 422 `mission_invalid_task`. Hasta que pasen T022, T024–T027:
   - rutas `GET /api/v1/me/progress` (con `Cache-Control: no-store`), `POST /review`, `PUT /today/mission` y `POST /ack`;
   - todas con `Depends(get_active_user)`, de modo que el `uid` sale solo del token.
-- [ ] T043 Añadir los eventos `progress_day_closed`, `progress_mission_set` y `progress_ack` a `backend/src/mytasks_api/logging_config.py` (lista cerrada de campos) y emitirlos desde el servicio, hasta que pase T029
-- [ ] T044 Ampliar `backend/tests/integration/test_performance.py` para que la medición del tablero incluya antes `GET /api/v1/me/progress`, y comprobar que el p95 sigue por debajo de 300 ms con `pytest -m perf`
-- [ ] T045 Verificar que `GET /openapi.json` coincide con las rutas de progreso de `contracts/progress.yaml` y con los campos nuevos de `ProfileOut`, ampliando `backend/tests/unit/test_export_openapi.py`; corregir el contrato o el código hasta que coincidan
-- [ ] T046 Ejecutar `ruff check`, `ruff format --check`, `mypy` y toda la suite de backend con los emuladores, y dejarlos en verde
-- [ ] T047 Revisión de seguridad de la Fase 2 con `mytasks-security-auditor` y registrar el informe en `specs/007-daily-progress-arcade/security-review-fase-2.md`. Corregir en esta misma PR lo que marque como medio o superior. Puntos a revisar:
+- [X] T043 Añadir los eventos `progress_day_closed`, `progress_mission_set` y `progress_ack` a `backend/src/mytasks_api/logging_config.py` (lista cerrada de campos) y emitirlos desde el servicio, hasta que pase T029
+- [X] T044 Ampliar `backend/tests/integration/test_performance.py` para que la medición del tablero incluya antes `GET /api/v1/me/progress`, y comprobar que el p95 sigue por debajo de 300 ms con `pytest -m perf`
+- [X] T045 Verificar que `GET /openapi.json` coincide con las rutas de progreso de `contracts/progress.yaml` y con los campos nuevos de `ProfileOut`, ampliando `backend/tests/unit/test_export_openapi.py`; corregir el contrato o el código hasta que coincidan
+- [X] T046 Ejecutar `ruff check`, `ruff format --check`, `mypy` y toda la suite de backend con los emuladores, y dejarlos en verde
+- [X] T047 Revisión de seguridad de la Fase 2 con `mytasks-security-auditor` y registrar el informe en `specs/007-daily-progress-arcade/security-review-fase-2.md`. Corregir en esta misma PR lo que marque como medio o superior. Puntos a revisar:
   - autorización en cada endpoint y aislamiento por `uid`;
   - ningún valor de juego aceptado del cliente;
   - `X-Test-Now` solo en `local`;
   - el `GET` con efectos es idempotente;
   - límites (5, 20 y 84);
   - registros sin datos de tareas.
-- [ ] T048 Marcar T014–T047 como hechas en este fichero y anotar el avance de la fase
+- [X] T048 Marcar T014–T047 como hechas en este fichero y anotar el avance de la fase
 
 **Checkpoint**: la API de progreso funciona de extremo a extremo con los emuladores. El tablero, el
 historial y la papelera se comportan como antes para quien no mira el progreso.
+
+**Avance (2026-10-31)**: Fase 2 completa (T014–T048).
+- **Tests**: 788 en verde, entre unitarios e integración contra los emuladores. `pytest -m perf`
+  también: `GET /me/progress` p95 9 ms; `complete` 24 ms y `reopen` 28 ms.
+- **Calidad**: `ruff check`, `ruff format` y `mypy` en verde.
+- **Seguridad**: informe en [security-review-fase-2.md](./security-review-fase-2.md). Sin críticos
+  ni altos; MED-001 corregido en la PR; LOW-001 a LOW-003 al backlog. LOW-002 avisa de que los e2e
+  del navegador necesitarán `X-Test-Now` en el CORS solo en local.
+- **Desviaciones**:
+  - Los tests se escribieron justo después del código, no antes. Todos cubren lo pedido.
+  - Al escribirlos apareció una incoherencia con research R9: un bonus ya anunciado, perdido y
+    recuperado el mismo día no debe volver a celebrarse. Se resolvió con `phase_announced` y
+    `mission_announced` en el día de progreso.
+  - La misión admite también las tareas de la misión ya completadas hoy, para poder añadir otras
+    sin quitarlas.
 
 ---
 

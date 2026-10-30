@@ -54,6 +54,7 @@ El identificador del documento es la propia clave del día, así que hay uno com
 | `mission_completed_ids` | array<string> | Subconjunto de `mission_task_ids` completado hoy |
 | `phase_bonus` | bool | Bonus de fase concedido hoy |
 | `mission_bonus` | bool | Bonus de misión concedido hoy |
+| `phase_announced`, `mission_announced` | bool | El bonus ya se anunció hoy. Si se pierde con una reapertura y se recupera, solo se vuelve a anunciar si el primer anuncio no se había visto (research R9) |
 | `points` | int | Puntos ganados hoy (tareas + extras + bonus); el neto tras reaperturas |
 | `review_seen` | bool | Se vio la pantalla de inicio de jornada |
 | `closed` | bool | `true` tras el cierre (R6); a partir de ahí no cambia ningún campo |
