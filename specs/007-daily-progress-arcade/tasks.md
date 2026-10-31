@@ -130,21 +130,23 @@ modifican ni se borran**: cada cambio es una versión nueva (FR-036).
   - sala de trofeos con 12 logros, conseguidos con su fecha y bloqueados con su condición;
   - estado vacío del primer día.
 - [X] T010 Generar **S3-c · Celebración** sobre S3 v3 (claro y oscuro): «¡FASE SUPERADA! +500», «¡MISIÓN CUMPLIDA! +300», «¡SUBES DE NIVEL! Nivel 3 · Jugador», «Logro: Primera moneda» y «¡NUEVO RÉCORD!», más su versión estática para movimiento reducido. Añadir también la variante de S3 v3 **sin modo arcade** (sin puntuación ni nivel)
-- [ ] T011 *(parcial: identificadores registrados; HTML y PNG sin exportar porque las URLs de Stitch piden credenciales, ver `docs/design/screens/README.md`)* Exportar el HTML y la captura PNG de cada pantalla generada (T004–T010) a `docs/design/screens/<id>/` (`desktop.html`, `desktop.png`, `mobile.html` y `mobile.png`, como las existentes) y marcarlas como **pendientes de aprobación** en la tabla de `docs/design/screens/README.md`
-- [ ] T012 (propietario) **Punto de control humano**: revisar en Stitch y en `docs/design/screens/` las pantallas de T004–T010 y la salida de `check-contrast.py`, y aprobar o pedir cambios. Si pide cambios, se repite el paso afectado. Si el propietario lo decide, se puede aprobar en dos rondas:
+- [x] T011 *(2026-10-31: exportadas por el propietario con `docs/design/export-stitch.py` y su propio token; ver `docs/design/screens/README.md`)* Exportar el HTML y la captura PNG de cada pantalla generada (T004–T010) a `docs/design/screens/<id>/` (`desktop.html`, `desktop.png`, `mobile.html` y `mobile.png`, como las existentes) y marcarlas como **pendientes de aprobación** en la tabla de `docs/design/screens/README.md`
+- [x] T012 (propietario) *(2026-10-31: las 24 aprobadas en una sola ronda; S3 v3 claro móvil usa la maquetación de S3 v2 móvil)* **Punto de control humano**: revisar en Stitch y en `docs/design/screens/` las pantallas de T004–T010 y la salida de `check-contrast.py`, y aprobar o pedir cambios. Si pide cambios, se repite el paso afectado. Si el propietario lo decide, se puede aprobar en dos rondas:
   - **ronda 1**, antes de la Fase 3: S3 v3, S7 v2 y la cabecera;
   - **ronda 2**, antes de cada fase que la use: S8 antes de la Fase 4, S3-c antes de la 5, S10 y S11 antes de la 6, y S9 antes de la 7.
-- [ ] T013 Registrar las aprobaciones en `docs/design/screens/README.md` (identificador de Stitch, fecha y **pantalla vigente** de cada una; las aprobadas anteriores siguen intactas) y marcar el avance de esta fase en este fichero
+- [x] T013 Registrar las aprobaciones en `docs/design/screens/README.md` (identificador de Stitch, fecha y **pantalla vigente** de cada una; las aprobadas anteriores siguen intactas) y marcar el avance de esta fase en este fichero
 
 **Checkpoint**: diseños aprobados (o la ronda 1) y registrados. La Fase 2 no depende del diseño.
 
 **Avance (2026-10-31)**:
 - **Hecho (T001–T010)**: tokens arcade con 0 pares por debajo de AA, y las 24 pantallas
   generadas en Stitch, con sus identificadores en `docs/design/screens/README.md`.
-- **T011, parcial**: las URLs de descarga de Stitch piden credenciales.
-- **S3 v3 claro móvil** salió como lienzo de escritorio.
-- **Pendiente**: el punto de control del propietario (T012) y el registro de las aprobaciones
-  (T013).
+- **Hecho (T011–T013)**: el propietario aprobó las 24 pantallas en una sola ronda; HTML y PNG
+  exportados a `docs/design/screens/` con `docs/design/export-stitch.py`, ejecutado por el
+  propietario con su token.
+- **S3 v3 claro móvil** salió como lienzo de escritorio: la maquetación móvil vigente es la de
+  S3 v2 móvil, por decisión del propietario.
+- **Fase 1 terminada.**
 
 ---
 

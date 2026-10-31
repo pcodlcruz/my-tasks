@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>InsertTasks · S8 Inicio de Jornada: PULSA START</title>
+<!-- Fonts: Inter & Press Start 2P -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Press+Start+2P&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "on-error": "#690005",
+            "inverse-on-surface": "#263143",
+            "secondary": "#44e2cd",
+            "on-surface-variant": "#c1c7d3",
+            "on-tertiary-fixed-variant": "#4f319c",
+            "primary-fixed": "#d4e3ff",
+            "outline": "#8b919d",
+            "tertiary-fixed": "#e8ddff",
+            "secondary-fixed": "#62fae3",
+            "on-secondary-fixed": "#00201c",
+            "on-surface": "#d8e3fb",
+            "tertiary": "#cebdff",
+            "background": "#081425",
+            "primary": "#a4c9ff",
+            "surface-variant": "#2a3548",
+            "surface-container-low": "#111c2d",
+            "surface-container-high": "#1f2a3c",
+            "on-secondary-container": "#004d44",
+            "surface-container-lowest": "#040e1f",
+            "surface-bright": "#2f3a4c",
+            "on-tertiary": "#381385",
+            "on-background": "#d8e3fb",
+            "error-container": "#93000a",
+            "tertiary-fixed-dim": "#cebdff",
+            "inverse-primary": "#0060ac",
+            "on-error-container": "#ffdad6",
+            "surface-container-highest": "#2a3548",
+            "on-tertiary-fixed": "#21005e",
+            "on-tertiary-container": "#40208d",
+            "secondary-fixed-dim": "#3cddc7",
+            "on-secondary-fixed-variant": "#005047",
+            "outline-variant": "#414751",
+            "on-primary": "#00315d",
+            "secondary-container": "#03c6b2",
+            "on-primary-fixed-variant": "#004883",
+            "on-primary-fixed": "#001c39",
+            "on-primary-container": "#003a6b",
+            "inverse-surface": "#d8e3fb",
+            "surface-dim": "#081425",
+            "primary-container": "#60a5fa",
+            "surface": "#081425",
+            "error": "#ffb4ab",
+            "surface-tint": "#a4c9ff",
+            "primary-fixed-dim": "#a4c9ff",
+            "surface-container": "#152031",
+            "on-secondary": "#003731",
+            "tertiary-container": "#ad91ff"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.125rem",
+            "lg": "0.25rem",
+            "xl": "0.5rem",
+            "full": "0.75rem"
+          },
+          "spacing": {
+            "space-md": "0.75rem",
+            "space-xs": "0.25rem",
+            "space-sm": "0.5rem",
+            "space-lg": "1rem",
+            "margin": "1.5rem",
+            "space-xl": "2rem",
+            "gutter": "1.5rem",
+            "space-2xl": "3rem"
+          },
+          "fontFamily": {
+            "caption": ["Inter", "sans-serif"],
+            "display": ["Inter", "sans-serif"],
+            "body-strong": ["Inter", "sans-serif"],
+            "heading": ["Inter", "sans-serif"],
+            "body": ["Inter", "sans-serif"],
+            "pixel": ['"Press Start 2P"', "cursive"]
+          },
+          "fontSize": {
+            "caption": ["13px", { "lineHeight": "18px", "fontWeight": "400" }],
+            "display": ["28px", { "lineHeight": "36px", "fontWeight": "700" }],
+            "body-strong": ["16px", { "lineHeight": "24px", "fontWeight": "600" }],
+            "heading": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+            "body": ["16px", { "lineHeight": "24px", "fontWeight": "400" }]
+          }
+        }
+      }
+    }
+  </script>
+<style>
+    .font-pixel {
+      font-family: 'Press Start 2P', monospace;
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 6px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: #0f172a;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #334155;
+      border-radius: 3px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+      background: #475569;
+    }
+  </style>
+</head>
+<body class="bg-[#0F172A] text-on-surface antialiased font-body relative overflow-x-hidden min-h-screen selection:bg-[#22D3EE]/30 selection:text-white">
+<!-- ========================================================================= -->
+<!-- BACKGROUND LAYER: Eisenhower Dashboard S3 (Blurred & Dimmed Behind Modal) -->
+<!-- ========================================================================= -->
+<div class="pointer-events-none select-none opacity-25 filter blur-[3px] transition-all duration-300">
+<!-- Top Nav Header (Shared Component blueprint) -->
+<header class="w-full border-b border-[#334155] bg-[#0F172A] px-6 flex items-center justify-between h-16">
+<div class="flex items-center gap-8">
+<div class="flex items-center gap-2">
+<span class="font-pixel text-[13px] text-[#22D3EE] tracking-tighter">▶ MyTasks</span>
+<span class="text-[10px] px-1.5 py-0.5 rounded bg-[#334155] text-slate-300 font-pixel">LVL 07</span>
+</div>
+<nav class="flex items-center gap-6">
+<span class="text-primary font-body-strong text-body-strong border-b-2 border-primary pb-1">Tablero</span>
+<span class="text-[#64748B] font-body text-body">Historial</span>
+<span class="text-[#64748B] font-body text-body">Papelera</span>
+</nav>
+</div>
+<div class="flex items-center gap-5">
+<!-- Gamification Widgets Mock -->
+<div class="flex items-center gap-4 bg-[#1E293B] border border-[#334155] px-3 py-1.5 rounded-lg text-xs">
+<div class="flex items-center gap-1.5 text-[#FB923C]">
+<span class="material-symbols-outlined text-[16px]">local_fire_department</span>
+<span class="font-pixel text-[10px]">4 DÍAS</span>
+</div>
+<div class="w-px h-3 bg-[#334155]"></div>
+<div class="flex items-center gap-1.5 text-[#FACC15]">
+<span class="material-symbols-outlined text-[16px]">star</span>
+<span class="font-pixel text-[10px]">850 XP</span>
+</div>
+<div class="w-px h-3 bg-[#334155]"></div>
+<div class="flex items-center gap-1.5 text-[#22D3EE]">
+<span class="material-symbols-outlined text-[16px]">bolt</span>
+<span class="font-pixel text-[10px]">100%</span>
+</div>
+</div>
+<div class="flex items-center gap-3">
+<span class="text-xs text-[#64748B]">Cerrar sesión</span>
+<div class="w-8 h-8 rounded-full bg-[#334155] border border-[#475569] flex items-center justify-center text-xs font-bold text-white">
+            AC
+          </div>
+</div>
+</div>
+</header>
+<!-- Eisenhower Board Matrix Background (2x2 Grid) -->
+<main class="max-w-[1440px] mx-auto p-6 grid grid-cols-2 gap-6 h-[calc(100vh-4rem)]">
+<!-- Quadrant 1: Urgente & Importante -->
+<section class="bg-[#1E293B]/70 border border-[#EF4444]/40 rounded-xl p-5 flex flex-col gap-4">
+<div class="flex items-center justify-between pb-3 border-b border-[#334155]">
+<div class="flex items-center gap-2">
+<span class="w-2.5 h-2.5 rounded-full bg-[#EF4444]"></span>
+<h3 class="font-heading text-heading text-white">Q1 · Hacer Ahora</h3>
+</div>
+<span class="text-xs font-mono text-slate-400">3 Tareas</span>
+</div>
+<div class="space-y-3">
+<div class="p-3.5 bg-[#0F172A] border border-[#334155] rounded-lg">
+<p class="text-sm font-medium text-slate-200">Resolver caída del servidor de pagos Stripe</p>
+</div>
+<div class="p-3.5 bg-[#0F172A] border border-[#334155] rounded-lg">
+<p class="text-sm font-medium text-slate-200">Comprar receta médica prescrita</p>
+</div>
+<div class="p-3.5 bg-[#0F172A] border border-[#334155] rounded-lg">
+<p class="text-sm font-medium text-slate-200">Revisar presupuesto de infraestructura cloud</p>
+</div>
+</div>
+</section>
+<!-- Quadrant 2: Programar -->
+<section class="bg-[#1E293B]/70 border border-[#3B82F6]/40 rounded-xl p-5 flex flex-col gap-4">
+<div class="flex items-center justify-between pb-3 border-b border-[#334155]">
+<div class="flex items-center gap-2">
+<span class="w-2.5 h-2.5 rounded-full bg-[#3B82F6]"></span>
+<h3 class="font-heading text-heading text-white">Q2 · Programar</h3>
+</div>
+<span class="text-xs font-mono text-slate-400">2 Tareas</span>
+</div>
+<div class="space-y-3">
+<div class="p-3.5 bg-[#0F172A] border border-[#334155] rounded-lg">
+<p class="text-sm font-medium text-slate-200">Definir arquitectura v2 para microservicios</p>
+</div>
+<div class="p-3.5 bg-[#0F172A] border border-[#334155] rounded-lg">
+<p class="text-sm font-medium text-slate-200">Sesión de entrenamiento de fuerza y cardio</p>
+</div>
+</div>
+</section>
+<!-- Quadrant 3: Delegar -->
+<section class="bg-[#1E293B]/70 border border-[#F59E0B]/30 rounded-xl p-5 flex flex-col gap-4">
+<div class="flex items-center justify-between pb-3 border-b border-[#334155]">
+<div class="flex items-center gap-2">
+<span class="w-2.5 h-2.5 rounded-full bg-[#F59E0B]"></span>
+<h3 class="font-heading text-heading text-white">Q3 · Delegar</h3>
+</div>
+<span class="text-xs font-mono text-slate-400">1 Tarea</span>
+</div>
+<div class="p-3.5 bg-[#0F172A] border border-[#334155] rounded-lg">
+<p class="text-sm font-medium text-slate-200">Reenvío de métricas semanales a marketing</p>
+</div>
+</section>
+<!-- Quadrant 4: Eliminar -->
+<section class="bg-[#1E293B]/70 border border-[#64748B]/30 rounded-xl p-5 flex flex-col gap-4">
+<div class="flex items-center justify-between pb-3 border-b border-[#334155]">
+<div class="flex items-center gap-2">
+<span class="w-2.5 h-2.5 rounded-full bg-[#64748B]"></span>
+<h3 class="font-heading text-heading text-white">Q4 · Eliminar / Filtrar</h3>
+</div>
+<span class="text-xs font-mono text-slate-400">Vacío</span>
+</div>
+<div class="p-4 rounded border border-dashed border-[#334155] text-center text-xs text-slate-500">
+          Sin elementos triviales activos
+        </div>
+</section>
+</main>
+</div>
+<!-- ========================================================================= -->
+<!-- MODAL OVERLAY & POPUP CONTAINER (S8: INICIO DE JORNADA «PULSA START») -->
+<!-- ========================================================================= -->
+<div class="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-[#081425]/80 backdrop-blur-md overflow-y-auto">
+<!-- Modal Card (640px Max Width) -->
+<div class="relative w-full max-w-[640px] my-auto bg-[#1E293B] border border-[#475569] rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.85)] flex flex-col overflow-hidden text-slate-100 animate-in fade-in zoom-in-95 duration-200">
+<!-- Top Decorative Gamified Accent Bar -->
+<div class="h-1 w-full bg-gradient-to-r from-[#22D3EE] via-[#60A5FA] to-[#FACC15]"></div>
+<!-- 1. Modal Header -->
+<div class="px-6 pt-5 pb-4 border-b border-[#334155] relative bg-[#1E293B]">
+<!-- Active Session Pill & Close Icon -->
+<div class="flex items-center justify-between mb-3">
+<div class="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-[#0F172A] border border-[#334155] shadow-inner">
+<span class="w-2 h-2 rounded-full bg-[#22D3EE] animate-pulse"></span>
+<span class="font-pixel text-[9px] text-[#22D3EE] tracking-wider uppercase">Sesión activa · S8</span>
+</div>
+<button aria-label="Cerrar modal" class="w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 hover:text-white hover:bg-[#334155] transition-colors focus:outline-none focus:ring-2 focus:ring-[#60A5FA]" type="button">
+<span class="material-symbols-outlined text-[20px]">close</span>
+</button>
+</div>
+<!-- Main Title & Subtitle -->
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-[#22D3EE] text-[26px]">sports_esports</span>
+<h1 class="font-pixel text-[17px] text-white tracking-wide flex items-center gap-2">
+            PULSA START
+            <span class="inline-block w-2.5 h-2.5 rounded-full bg-[#22D3EE] shadow-[0_0_8px_#22D3EE]"></span>
+</h1>
+</div>
+<p class="font-body text-sm text-slate-300 mt-1 pl-9">
+          Buenos días, Ana. Así va tu partida.
+        </p>
+</div>
+<!-- Modal Body (Scrollable if viewport is tiny) -->
+<div class="px-6 py-5 space-y-5 max-h-[calc(88vh-130px)] overflow-y-auto custom-scrollbar">
+<!-- 2. Three Metric Cards Grid (3 Columns) -->
+<div class="grid grid-cols-3 gap-3">
+<!-- Card 1: Ayer -->
+<div class="bg-[#0F172A] border border-[#334155] rounded-xl p-3.5 flex flex-col justify-between hover:border-[#475569] transition-all">
+<div class="flex items-center justify-between text-slate-400 text-xs mb-1.5">
+<span class="font-medium text-slate-300">Ayer</span>
+<span class="material-symbols-outlined text-[16px] text-emerald-400">done_all</span>
+</div>
+<div class="font-pixel text-sm text-white tracking-tight my-1">
+              4/3
+            </div>
+<div class="mt-2 inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-[10px] text-emerald-300 font-medium self-start">
+<span>✓ Fase superada</span>
+</div>
+</div>
+<!-- Card 2: Racha -->
+<div class="bg-[#0F172A] border border-[#334155] rounded-xl p-3.5 flex flex-col justify-between hover:border-[#FB923C]/50 transition-all">
+<div class="flex items-center justify-between text-slate-400 text-xs mb-1.5">
+<span class="font-medium text-slate-300">Racha</span>
+<span class="material-symbols-outlined text-[16px] text-[#FB923C]" style="font-variation-settings: 'FILL' 1;">local_fire_department</span>
+</div>
+<div class="flex items-baseline gap-1 my-1">
+<span class="font-pixel text-sm text-[#FB923C] tracking-tight">4</span>
+<span class="font-body text-xs text-slate-300">días</span>
+</div>
+<div class="mt-2 inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#FB923C]/15 border border-[#FB923C]/30 text-[10px] text-[#FB923C] font-medium self-start">
+<span class="w-1.5 h-1.5 rounded-full bg-[#FB923C]"></span>
+<span>Racha activa</span>
+</div>
+</div>
+<!-- Card 3: Meta de hoy -->
+<div class="bg-[#0F172A] border border-[#334155] rounded-xl p-3.5 flex flex-col justify-between hover:border-[#22D3EE]/50 transition-all">
+<div class="flex items-center justify-between text-slate-400 text-xs mb-1.5">
+<span class="font-medium text-slate-300">Meta de hoy</span>
+<span class="material-symbols-outlined text-[16px] text-[#22D3EE]">flag</span>
+</div>
+<div class="flex items-baseline gap-1 my-1">
+<span class="font-pixel text-sm text-[#22D3EE] tracking-tight">3</span>
+<span class="font-body text-xs text-slate-300">tareas</span>
+</div>
+<!-- Empty 3-Segment Progress Bar -->
+<div class="mt-2 grid grid-cols-3 gap-1.5 w-full">
+<div class="h-1.5 rounded-sm border border-[#22D3EE]/60 bg-[#0F172A]"></div>
+<div class="h-1.5 rounded-sm border border-[#22D3EE]/60 bg-[#0F172A]"></div>
+<div class="h-1.5 rounded-sm border border-[#22D3EE]/60 bg-[#0F172A]"></div>
+</div>
+</div>
+</div>
+<!-- 3. Daily Mission Banner Block -->
+<div class="rounded-xl border border-[#FACC15]/40 bg-[#FACC15]/10 p-4 relative overflow-hidden">
+<div class="flex items-center justify-between flex-wrap gap-2 mb-2.5">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[#FACC15] text-[20px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="font-heading text-sm text-amber-200">
+                Misión del día: <span class="font-pixel text-xs text-[#FACC15] ml-1">2 de 5</span> elegidas
+              </span>
+</div>
+<span class="font-caption text-[11px] text-[#FACC15] bg-[#FACC15]/20 border border-[#FACC15]/40 px-2 py-0.5 rounded-full font-semibold">
+              BONUS ACTIVO
+            </span>
+</div>
+<!-- 5 Segment Progress Bar: 2 Filled (Golden/Cyan), 3 Empty -->
+<div class="grid grid-cols-5 gap-2 my-2">
+<div class="h-2 rounded bg-gradient-to-r from-[#FACC15] to-[#22D3EE] shadow-[0_0_6px_rgba(250,204,21,0.5)]"></div>
+<div class="h-2 rounded bg-gradient-to-r from-[#22D3EE] to-[#60A5FA] shadow-[0_0_6px_rgba(34,211,238,0.5)]"></div>
+<div class="h-2 rounded bg-[#0F172A] border border-[#475569]/60"></div>
+<div class="h-2 rounded bg-[#0F172A] border border-[#475569]/60"></div>
+<div class="h-2 rounded bg-[#0F172A] border border-[#475569]/60"></div>
+</div>
+<div class="flex items-center gap-1.5 mt-2 text-xs text-amber-300/90 font-medium">
+<span class="material-symbols-outlined text-[15px] text-[#FACC15]">workspace_premium</span>
+<span>+50 XP por tarea de la misión, +300 XP si las completas todas</span>
+</div>
+</div>
+<!-- 4. Section: Hacer ahora (Urgente e Importante) -->
+<div class="space-y-2.5">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="w-2.5 h-2.5 rounded-full bg-[#EF4444] shadow-[0_0_6px_#EF4444]"></span>
+<h2 class="font-body-strong text-sm text-slate-200 uppercase tracking-wide">
+                Hacer ahora <span class="text-xs text-slate-400 font-normal capitalize">(Urgente e Importante)</span>
+</h2>
+</div>
+<span class="text-xs text-slate-400">3 pendientes</span>
+</div>
+<div class="space-y-2">
+<!-- Task 1 (Active in mission) -->
+<div class="bg-[#0F172A] border border-[#334155] hover:border-[#60A5FA]/60 rounded-xl p-3 flex items-center justify-between gap-3 transition-colors">
+<div class="flex flex-col gap-1.5 min-w-0">
+<span class="text-sm font-medium text-slate-100 truncate" title="Resolver caída del servidor de pagos Stripe en producción">
+                  Resolver caída del servidor de pagos Stripe en producción
+                </span>
+<div class="flex items-center gap-1.5 flex-wrap">
+<span class="px-2 py-0.5 rounded-full bg-violet-500/15 border border-violet-500/30 text-violet-300 text-[11px] font-medium flex items-center gap-1">
+<span class="material-symbols-outlined text-[12px]">work</span>
+                    Laboral
+                  </span>
+<span class="px-2 py-0.5 rounded-full bg-rose-500/15 border border-rose-500/30 text-rose-300 text-[11px] font-medium">
+                    Servidor crítico
+                  </span>
+</div>
+</div>
+<!-- Button Active in Mission -->
+<button class="shrink-0 px-3 py-1.5 rounded-lg bg-[#FACC15]/20 border border-[#FACC15]/60 hover:bg-[#FACC15]/30 text-[#FACC15] text-xs font-semibold flex items-center gap-1.5 transition-all shadow-sm" type="button">
+<span class="material-symbols-outlined text-[15px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span>En misión</span>
+</button>
+</div>
+<!-- Task 2 (Active in mission) -->
+<div class="bg-[#0F172A] border border-[#334155] hover:border-[#60A5FA]/60 rounded-xl p-3 flex items-center justify-between gap-3 transition-colors">
+<div class="flex flex-col gap-1.5 min-w-0">
+<span class="text-sm font-medium text-slate-100 truncate" title="Comprar receta médica prescrita en farmacia de turno">
+                  Comprar receta médica prescrita en farmacia de turno
+                </span>
+<div class="flex items-center gap-1.5 flex-wrap">
+<span class="px-2 py-0.5 rounded-full bg-teal-500/15 border border-teal-500/30 text-teal-300 text-[11px] font-medium flex items-center gap-1">
+<span class="material-symbols-outlined text-[12px]">person</span>
+                    Personal
+                  </span>
+<span class="px-2 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-[11px] font-medium">
+                    Salud
+                  </span>
+</div>
+</div>
+<!-- Button Active in Mission -->
+<button class="shrink-0 px-3 py-1.5 rounded-lg bg-[#FACC15]/20 border border-[#FACC15]/60 hover:bg-[#FACC15]/30 text-[#FACC15] text-xs font-semibold flex items-center gap-1.5 transition-all shadow-sm" type="button">
+<span class="material-symbols-outlined text-[15px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span>En misión</span>
+</button>
+</div>
+<!-- Task 3 (Inactive in mission) -->
+<div class="bg-[#0F172A] border border-[#334155] hover:border-[#60A5FA]/60 rounded-xl p-3 flex items-center justify-between gap-3 transition-colors">
+<div class="flex flex-col gap-1.5 min-w-0">
+<span class="text-sm font-medium text-slate-200 truncate" title="Revisar presupuesto de infraestructura cloud">
+                  Revisar presupuesto de infraestructura cloud
+                </span>
+<div class="flex items-center gap-1.5 flex-wrap">
+<span class="px-2 py-0.5 rounded-full bg-violet-500/15 border border-violet-500/30 text-violet-300 text-[11px] font-medium flex items-center gap-1">
+<span class="material-symbols-outlined text-[12px]">work</span>
+                    Laboral
+                  </span>
+<span class="px-2 py-0.5 rounded-full bg-blue-500/15 border border-blue-500/30 text-blue-300 text-[11px] font-medium">
+                    Finanzas
+                  </span>
+</div>
+</div>
+<!-- Button Inactive in Mission -->
+<button class="shrink-0 px-2.5 py-1.5 rounded-lg bg-transparent border border-[#475569] hover:border-[#FACC15] hover:text-[#FACC15] text-slate-400 text-xs font-medium flex items-center gap-1.5 transition-all" type="button">
+<span class="material-symbols-outlined text-[15px]">star</span>
+<span>Añadir a la misión</span>
+</button>
+</div>
+</div>
+</div>
+<!-- 5. Section: Programadas de hoy -->
+<div class="space-y-2.5 pt-1">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="w-2.5 h-2.5 rounded-full bg-[#3B82F6] shadow-[0_0_6px_#3B82F6]"></span>
+<h2 class="font-body-strong text-sm text-slate-200 uppercase tracking-wide">
+                Programadas de hoy
+              </h2>
+</div>
+<span class="text-xs text-slate-400">2 programadas</span>
+</div>
+<div class="space-y-2">
+<!-- Task 4 (Programada) -->
+<div class="bg-[#0F172A] border border-[#334155] hover:border-[#60A5FA]/60 rounded-xl p-3 flex items-center justify-between gap-3 transition-colors">
+<div class="flex flex-col gap-1.5 min-w-0">
+<span class="text-sm font-medium text-slate-200 truncate" title="Definir arquitectura v2 para microservicios de inventario">
+                  Definir arquitectura v2 para microservicios de inventario
+                </span>
+<div class="flex items-center gap-1.5 flex-wrap">
+<span class="px-2 py-0.5 rounded-full bg-blue-500/15 border border-blue-500/30 text-blue-300 text-[11px] font-medium flex items-center gap-1">
+<span class="material-symbols-outlined text-[12px]">calendar_today</span>
+                    Programada · Jueves 10:00
+                  </span>
+<span class="px-2 py-0.5 rounded-full bg-violet-500/15 border border-violet-500/30 text-violet-300 text-[11px] font-medium">
+                    Laboral
+                  </span>
+</div>
+</div>
+<button class="shrink-0 px-2.5 py-1.5 rounded-lg bg-transparent border border-[#475569] hover:border-[#FACC15] hover:text-[#FACC15] text-slate-400 text-xs font-medium flex items-center gap-1.5 transition-all" type="button">
+<span class="material-symbols-outlined text-[15px]">star</span>
+<span>Añadir a la misión</span>
+</button>
+</div>
+<!-- Task 5 (Programada) -->
+<div class="bg-[#0F172A] border border-[#334155] hover:border-[#60A5FA]/60 rounded-xl p-3 flex items-center justify-between gap-3 transition-colors">
+<div class="flex flex-col gap-1.5 min-w-0">
+<span class="text-sm font-medium text-slate-200 truncate" title="Sesión de entrenamiento de fuerza y cardio">
+                  Sesión de entrenamiento de fuerza y cardio
+                </span>
+<div class="flex items-center gap-1.5 flex-wrap">
+<span class="px-2 py-0.5 rounded-full bg-blue-500/15 border border-blue-500/30 text-blue-300 text-[11px] font-medium flex items-center gap-1">
+<span class="material-symbols-outlined text-[12px]">calendar_today</span>
+                    Programada · Mañana 07:30
+                  </span>
+<span class="px-2 py-0.5 rounded-full bg-teal-500/15 border border-teal-500/30 text-teal-300 text-[11px] font-medium">
+                    Personal
+                  </span>
+</div>
+</div>
+<button class="shrink-0 px-2.5 py-1.5 rounded-lg bg-transparent border border-[#475569] hover:border-[#FACC15] hover:text-[#FACC15] text-slate-400 text-xs font-medium flex items-center gap-1.5 transition-all" type="button">
+<span class="material-symbols-outlined text-[15px]">star</span>
+<span>Añadir a la misión</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<!-- 6. Modal Footer Actions -->
+<div class="px-6 py-4 bg-[#0F172A]/90 border-t border-[#334155] flex items-center justify-between gap-4">
+<!-- Secondary Dismiss Action -->
+<button class="text-xs sm:text-sm text-slate-400 hover:text-white transition-colors underline-offset-4 hover:underline focus:outline-none focus:ring-1 focus:ring-slate-400 rounded px-1" type="button">
+          Ver tablero sin elegir misión
+        </button>
+<!-- Primary Start CTA Button -->
+<button class="inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-lg bg-gradient-to-r from-[#2563EB] to-[#1D4ED8] hover:from-[#3B82F6] hover:to-[#2563EB] text-white font-body-strong text-sm shadow-[0_4px_16px_rgba(37,99,235,0.4)] hover:shadow-[0_4px_22px_rgba(59,130,246,0.6)] active:scale-[0.98] transition-all focus:outline-none focus:ring-2 focus:ring-[#60A5FA] focus:ring-offset-2 focus:ring-offset-[#0F172A]" type="button">
+<span class="font-semibold tracking-wide">Empezar</span>
+<span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Micro-interactions Script -->
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // Toggle mission star buttons interactively
+      const missionButtons = document.querySelectorAll('button:has(span.material-symbols-outlined:contains("star")), button:has(span.material-symbols-outlined)');
+      
+      missionButtons.forEach(btn => {
+        if (btn.textContent.includes('misión') || btn.textContent.includes('Misión')) {
+          btn.addEventListener('click', (e) => {
+            const icon = btn.querySelector('.material-symbols-outlined');
+            const label = btn.querySelector('span:last-child');
+            
+            if (btn.classList.contains('bg-[#FACC15]/20')) {
+              // Transition to inactive
+              btn.classList.remove('bg-[#FACC15]/20', 'border-[#FACC15]/60', 'text-[#FACC15]');
+              btn.classList.add('bg-transparent', 'border-[#475569]', 'text-slate-400');
+              if (icon) icon.style.fontVariationSettings = "'FILL' 0";
+              if (label) label.textContent = 'Añadir a la misión';
+            } else {
+              // Transition to active
+              btn.classList.remove('bg-transparent', 'border-[#475569]', 'text-slate-400');
+              btn.classList.add('bg-[#FACC15]/20', 'border-[#FACC15]/60', 'text-[#FACC15]');
+              if (icon) icon.style.fontVariationSettings = "'FILL' 1";
+              if (label) label.textContent = 'En misión';
+            }
+          });
+        }
+      });
+    });
+  </script>
+</body></html>

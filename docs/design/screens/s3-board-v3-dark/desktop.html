@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>S3 v3 · Tablero - InsertTasks (Escritorio Oscuro 1440px)</title>
+<!-- Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Inter Font & Press Start 2P for Arcade accents -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Press+Start+2P&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "surface-tint": "#a4c9ff",
+            "on-tertiary-fixed-variant": "#4f319c",
+            "secondary-fixed-dim": "#3cddc7",
+            "primary-fixed": "#d4e3ff",
+            "on-tertiary": "#381385",
+            "surface-container-low": "#111c2d",
+            "on-surface": "#d8e3fb",
+            "on-primary": "#00315d",
+            "error-container": "#93000a",
+            "surface-container-highest": "#2a3548",
+            "error": "#ffb4ab",
+            "surface-dim": "#081425",
+            "on-secondary-fixed-variant": "#005047",
+            "on-secondary": "#003731",
+            "surface": "#081425",
+            "on-primary-container": "#003a6b",
+            "surface-bright": "#2f3a4c",
+            "inverse-on-surface": "#263143",
+            "tertiary-container": "#ad91ff",
+            "on-surface-variant": "#c1c7d3",
+            "secondary-fixed": "#62fae3",
+            "on-background": "#d8e3fb",
+            "on-tertiary-container": "#40208d",
+            "on-error": "#690005",
+            "tertiary-fixed-dim": "#cebdff",
+            "secondary-container": "#03c6b2",
+            "tertiary-fixed": "#e8ddff",
+            "surface-container-high": "#1f2a3c",
+            "surface-container-lowest": "#040e1f",
+            "primary-container": "#60a5fa",
+            "primary": "#a4c9ff",
+            "outline-variant": "#414751",
+            "on-primary-fixed": "#001c39",
+            "outline": "#8b919d",
+            "on-secondary-container": "#004d44",
+            "surface-container": "#152031",
+            "secondary": "#44e2cd",
+            "primary-fixed-dim": "#a4c9ff",
+            "surface-variant": "#2a3548",
+            "tertiary": "#cebdff",
+            "inverse-primary": "#0060ac",
+            "background": "#081425",
+            "on-error-container": "#ffdad6",
+            "on-tertiary-fixed": "#21005e",
+            "on-primary-fixed-variant": "#004883",
+            "on-secondary-fixed": "#00201c",
+            "inverse-surface": "#d8e3fb",
+            /* Theme Slate & Arcade Specific mappings */
+            "slate-base": "#0F172A",
+            "slate-card": "#1E293B",
+            "slate-border": "#334155",
+            "slate-txt": "#F1F5F9",
+            "slate-muted": "#94A3B8",
+            "energy-fill": "#22D3EE",
+            "energy-extra": "#F0ABFC",
+            "gold-arcade": "#FACC15",
+            "gold-on": "#0F172A",
+            "streak-orange": "#FB923C",
+            "badge-work": "#A78BFA",
+            "badge-personal": "#2DD4BF"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.125rem",
+            "lg": "0.25rem",
+            "xl": "0.5rem",
+            "full": "0.75rem"
+          },
+          "spacing": {
+            "space-xs": "0.25rem",
+            "space-lg": "1rem",
+            "space-xl": "2rem",
+            "space-2xl": "3rem",
+            "space-sm": "0.5rem",
+            "margin": "1.5rem",
+            "space-md": "0.75rem",
+            "gutter": "1.5rem"
+          },
+          "fontFamily": {
+            "body-strong": ["Inter", "sans-serif"],
+            "caption": ["Inter", "sans-serif"],
+            "heading": ["Inter", "sans-serif"],
+            "body": ["Inter", "sans-serif"],
+            "display": ["Inter", "sans-serif"],
+            "arcade": ['"Press Start 2P"', "monospace"]
+          },
+          "fontSize": {
+            "body-strong": ["16px", { "lineHeight": "24px", "fontWeight": "600" }],
+            "caption": ["13px", { "lineHeight": "18px", "fontWeight": "400" }],
+            "heading": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+            "body": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+            "display": ["28px", { "lineHeight": "36px", "fontWeight": "700" }]
+          }
+        }
+      }
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-family: 'Material Symbols Outlined';
+      font-weight: normal;
+      font-style: normal;
+      font-size: 20px;
+      line-height: 1;
+      letter-spacing: normal;
+      text-transform: none;
+      display: inline-block;
+      white-space: nowrap;
+      word-wrap: normal;
+      direction: ltr;
+      -webkit-font-feature-settings: 'liga';
+      -webkit-font-smoothing: antialiased;
+      vertical-align: middle;
+    }
+    .font-pixel {
+      font-family: 'Press Start 2P', monospace;
+    }
+  </style>
+</head>
+<body class="bg-background text-on-surface min-h-screen flex flex-col font-body selection:bg-energy-fill selection:text-slate-base">
+<!-- 1. TopNavBar (Shared Component Anchor) -->
+<header class="w-full border-b border-outline-variant bg-surface px-margin sticky top-0 z-50 flex items-center justify-between h-16 shadow-sm">
+<div class="flex items-center space-x-8">
+<div class="flex items-center space-x-2">
+<span class="font-display text-display text-primary font-bold tracking-tight">InsertTasks</span>
+<span class="font-pixel text-[9px] px-1.5 py-0.5 rounded bg-surface-container-highest text-energy-fill border border-outline-variant">v3</span>
+</div>
+<!-- Navigation Links -->
+<nav class="hidden md:flex items-center space-x-6 text-body">
+<a class="text-primary font-body-strong text-body-strong border-b-2 border-primary pb-1 flex items-center gap-1.5" href="#tablero">
+<span class="material-symbols-outlined text-[18px]">grid_view</span>
+          Tablero
+        </a>
+<a class="text-on-surface-variant font-body text-body hover:text-on-surface transition-colors duration-150 flex items-center gap-1.5" href="#historial">
+<span class="material-symbols-outlined text-[18px]">history</span>
+          Historial
+        </a>
+<a class="text-on-surface-variant font-body text-body hover:text-on-surface transition-colors duration-150 flex items-center gap-1.5" href="#papelera">
+<span class="material-symbols-outlined text-[18px]">delete</span>
+          Papelera
+        </a>
+<a class="text-on-surface-variant font-body text-body hover:text-on-surface transition-colors duration-150 flex items-center gap-1.5" href="#progreso">
+<span class="material-symbols-outlined text-[18px]">trending_up</span>
+          Progreso
+        </a>
+<a class="text-on-surface-variant font-body text-body hover:text-on-surface transition-colors duration-150 flex items-center gap-1.5" href="#programadas">
+<span class="material-symbols-outlined text-[18px]">event_repeat</span>
+          Programadas
+        </a>
+</nav>
+</div>
+<!-- Trailing User Session Actions -->
+<div class="flex items-center space-x-4">
+<div class="flex items-center space-x-3 pr-2 border-r border-outline-variant">
+<div class="w-8 h-8 rounded-full bg-surface-container-high border border-outline-variant flex items-center justify-center text-primary font-body-strong text-caption" title="Foto de perfil de Ana Cruz">
+          AC
+        </div>
+<div class="hidden lg:flex flex-col text-left leading-tight">
+<span class="font-body-strong text-caption text-on-surface">Ana Cruz</span>
+<span class="font-caption text-[11px] text-on-surface-variant">Rango: Operador Senior</span>
+</div>
+</div>
+<button class="font-body text-caption text-on-surface-variant hover:text-error transition-colors duration-150 flex items-center space-x-1 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2">
+<span class="material-symbols-outlined text-[18px]">logout</span>
+<span>Cerrar sesión</span>
+</button>
+</div>
+</header>
+<!-- Main Workspace / Canvas -->
+<main class="flex-1 w-full max-w-[1440px] mx-auto px-margin py-6 flex flex-col space-y-6">
+<!-- 2. Marcador del Día (HUD Arcade Gamificado) -->
+<section aria-label="Marcador y Progreso Diario" class="w-full bg-surface-container rounded-xl border border-outline-variant p-4 shadow-sm relative overflow-hidden">
+<!-- Glow ambient background -->
+<div class="absolute -right-16 -top-16 w-64 h-64 bg-energy-fill/5 rounded-full blur-3xl pointer-events-none"></div>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 items-center">
+<!-- Bloque 1: Tareas Hoy & Barra de Energía -->
+<div class="bg-surface-container-low border border-outline-variant rounded-lg p-3.5 flex flex-col justify-between space-y-2">
+<div class="flex items-center justify-between">
+<span class="font-pixel text-[13px] text-energy-fill tracking-wider">HOY 2/3</span>
+<span class="text-caption text-on-surface-variant flex items-center gap-1 font-mono text-[11px]">
+<span class="material-symbols-outlined text-[15px] text-energy-fill">bolt</span> 66% CARGA
+            </span>
+</div>
+<!-- Barra de energía: 3 segmentos (2 llenos #22D3EE, 1 vacío) -->
+<div aria-label="Barra de Energía Diaria" aria-valuemax="3" aria-valuemin="0" aria-valuenow="2" class="flex items-center space-x-1.5 w-full h-3.5 bg-surface-container-lowest p-0.5 rounded border border-outline-variant" role="progressbar">
+<div class="h-full flex-1 bg-energy-fill rounded-DEFAULT shadow-[0_0_8px_rgba(34,211,238,0.5)]"></div>
+<div class="h-full flex-1 bg-energy-fill rounded-DEFAULT shadow-[0_0_8px_rgba(34,211,238,0.5)]"></div>
+<div class="h-full flex-1 border border-dashed border-outline-variant rounded-DEFAULT bg-transparent"></div>
+</div>
+<p class="font-caption text-on-surface-variant text-[12px]">2 de 3 tareas clave completadas hoy</p>
+</div>
+<!-- Bloque 2: Racha en juego -->
+<div class="bg-surface-container-low border border-outline-variant rounded-lg p-3.5 flex items-center space-x-3.5">
+<div class="w-11 h-11 rounded-lg bg-surface-container-highest border border-outline-variant flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-streak-orange text-[26px]">local_fire_department</span>
+</div>
+<div class="flex flex-col">
+<div class="flex items-center space-x-2">
+<span class="font-pixel text-[11px] text-streak-orange">RACHA 4 DÍAS</span>
+<span class="bg-streak-orange/15 text-streak-orange text-[10px] font-caption px-1.5 py-0.5 rounded border border-streak-orange/30">En juego</span>
+</div>
+<span class="font-caption text-on-surface-variant text-[12px] mt-0.5">Mantén el ritmo diario sin romper ciclo</span>
+</div>
+</div>
+<!-- Bloque 3: Misión Activa -->
+<div class="bg-surface-container-low border border-outline-variant rounded-lg p-3.5 flex items-center space-x-3.5">
+<div class="w-11 h-11 rounded-lg bg-surface-container-highest border border-outline-variant flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-gold-arcade text-[24px]">workspace_premium</span>
+</div>
+<div class="flex flex-col">
+<div class="flex items-center space-x-2">
+<span class="font-pixel text-[11px] text-gold-arcade">★ MISIÓN 1/2</span>
+</div>
+<span class="font-caption text-on-surface text-[12px] font-medium mt-0.5">1 tarea clave asignada</span>
+<span class="font-caption text-on-surface-variant text-[11px]">Recompensa: +150 PTS de foco</span>
+</div>
+</div>
+<!-- Bloque 4: Nivel, Puntos & Botón Arcade START -->
+<div class="bg-surface-container-low border border-outline-variant rounded-lg p-3.5 flex flex-col justify-between space-y-2">
+<div class="flex items-center justify-between">
+<span class="font-body-strong text-caption text-gold-arcade flex items-center gap-1 font-semibold">
+<span class="material-symbols-outlined text-[16px]">stars</span> NIVEL 3 · Jugador
+            </span>
+<span class="font-pixel text-[10px] text-gold-arcade">3.450 PTS</span>
+</div>
+<!-- Mini barra progreso nivel -->
+<div class="w-full bg-surface-container-lowest h-1.5 rounded-full overflow-hidden border border-outline-variant/50">
+<div class="bg-gold-arcade h-full rounded-full w-[70%]" title="70% a Nivel 4"></div>
+</div>
+<div class="flex items-center justify-between pt-1">
+<span class="font-caption text-[11px] text-on-surface-variant">70% a Nivel 4</span>
+<button class="font-pixel text-[9px] bg-gold-arcade text-gold-on px-2.5 py-1.5 rounded hover:bg-yellow-300 active:scale-95 transition-all shadow-[0_2px_0_rgba(180,83,9,1)] flex items-center space-x-1 focus:outline-none">
+<span>PULSA START</span>
+<span class="material-symbols-outlined text-[12px]">play_arrow</span>
+</button>
+</div>
+</div>
+</div>
+</section>
+<!-- 3. Banner de Aviso / Notificación -->
+<div class="w-full bg-surface-container border-l-4 border-l-streak-orange border-y border-r border-outline-variant rounded-lg p-3.5 flex items-center justify-between shadow-sm">
+<div class="flex items-center space-x-3">
+<div class="w-8 h-8 rounded bg-streak-orange/15 border border-streak-orange/30 flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-streak-orange text-[20px]">warning</span>
+</div>
+<p class="font-body text-caption text-on-surface">
+          La tarea programada <strong class="text-slate-txt font-semibold">"Pagar alquiler"</strong> no cupo: tienes 500 tareas activas.
+        </p>
+</div>
+<button class="shrink-0 px-3 py-1.5 rounded bg-surface-container-high border border-outline-variant text-caption text-on-surface hover:bg-surface-variant hover:text-slate-txt transition-colors focus:outline-none focus:ring-2 focus:ring-primary">
+        Entendido
+      </button>
+</div>
+<!-- 4. Barra de Acciones y Filtros de Ámbito -->
+<div class="w-full flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 pt-1 pb-1">
+<div class="flex items-center space-x-2 overflow-x-auto">
+<!-- Filtro: Todas -->
+<button class="px-3.5 py-1.5 rounded-full text-caption font-medium bg-primary-container text-on-primary-container border border-primary/50 shadow-sm flex items-center space-x-1.5">
+<span>Todas (8)</span>
+</button>
+<!-- Filtro: Laboral -->
+<button class="px-3.5 py-1.5 rounded-full text-caption font-medium bg-surface-container border border-outline-variant text-on-surface-variant hover:text-on-surface hover:border-badge-work transition-all flex items-center space-x-2">
+<span class="w-2.5 h-2.5 rounded-full bg-badge-work"></span>
+<span>Laboral (5)</span>
+</button>
+<!-- Filtro: Personal -->
+<button class="px-3.5 py-1.5 rounded-full text-caption font-medium bg-surface-container border border-outline-variant text-on-surface-variant hover:text-on-surface hover:border-badge-personal transition-all flex items-center space-x-2">
+<span class="w-2.5 h-2.5 rounded-full bg-badge-personal"></span>
+<span>Personal (3)</span>
+</button>
+</div>
+<!-- Acción Primaria Nueva Tarea -->
+<button class="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-slate-txt rounded text-body-strong font-semibold shadow-sm hover:shadow transition-all flex items-center justify-center space-x-2 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2">
+<span class="material-symbols-outlined text-[20px]">add</span>
+<span>+ Nueva tarea</span>
+</button>
+</div>
+<!-- 5. Matriz de Eisenhower 2×2 -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-margin items-start">
+<!-- ============================================== -->
+<!-- CUADRANTE I: HACER AHORA (Urgente e Importante) -->
+<!-- ============================================== -->
+<div class="bg-surface-container rounded-xl border-t-4 border-t-red-500 border border-outline-variant flex flex-col overflow-hidden shadow-sm">
+<!-- Cabecera Cuadrante -->
+<div class="p-4 bg-surface-container-high border-b border-outline-variant flex items-center justify-between">
+<div class="flex items-center space-x-2.5">
+<span class="w-3 h-3 rounded-sm bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.6)]"></span>
+<h2 class="font-heading text-heading text-slate-txt">Hacer ahora</h2>
+<span class="font-caption text-xs text-red-400 bg-red-950/60 border border-red-800 px-2 py-0.5 rounded">Urgente e Importante</span>
+</div>
+<span class="font-pixel text-[11px] text-red-400 bg-surface-container-lowest px-2 py-1 rounded border border-outline-variant">2 TAREAS</span>
+</div>
+<!-- Lista de tareas Cuadrante I -->
+<div class="p-4 space-y-3 bg-surface/40">
+<!-- Tarjeta 1 (Crítica / Misión activa) -->
+<div class="bg-surface-container-high border border-outline-variant hover:border-red-500/50 rounded-lg p-3.5 shadow-sm transition-all flex flex-col space-y-3">
+<div class="flex items-start justify-between gap-2">
+<div class="flex flex-col space-y-1.5 flex-1">
+<div class="flex flex-wrap items-center gap-1.5">
+<span class="bg-gold-arcade/20 text-gold-arcade border border-gold-arcade/40 font-caption text-[11px] font-semibold px-2 py-0.5 rounded-full flex items-center gap-1">
+<span class="material-symbols-outlined text-[13px]">star</span> Misión del día
+                  </span>
+<span class="bg-badge-work/15 text-badge-work border border-badge-work/30 font-caption text-[11px] px-2 py-0.5 rounded-full flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-badge-work"></span> Laboral
+                  </span>
+</div>
+<h3 class="font-body-strong text-slate-txt text-[15px] leading-snug">
+                  Resolver caída del servidor de pagos Stripe en producción
+                </h3>
+</div>
+</div>
+<!-- Meta & Acciones -->
+<div class="flex flex-wrap items-center justify-between pt-2 border-t border-outline-variant/60 gap-2">
+<div class="flex items-center space-x-1.5 text-red-400 text-caption text-[12px]">
+<span class="material-symbols-outlined text-[16px]">alarm</span>
+<span class="font-medium">Vence hoy 17:00 / Crítico</span>
+</div>
+<div class="flex items-center space-x-2">
+<button class="px-2.5 py-1 text-caption rounded bg-gold-arcade/15 text-gold-arcade border border-gold-arcade/40 hover:bg-gold-arcade/25 transition-colors flex items-center gap-1 font-medium">
+<span class="material-symbols-outlined text-[16px]">star</span>
+<span>★ En misión</span>
+</button>
+<button class="px-2.5 py-1 text-caption rounded bg-surface-container text-on-surface hover:bg-primary-container hover:text-on-primary-container border border-outline-variant transition-colors flex items-center gap-1 font-medium">
+<span class="material-symbols-outlined text-[16px]">check</span>
+<span>✓ Completar</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Tarjeta 2 (Personal urgente) -->
+<div class="bg-surface-container-high border border-outline-variant hover:border-red-500/50 rounded-lg p-3.5 shadow-sm transition-all flex flex-col space-y-3">
+<div class="flex items-start justify-between gap-2">
+<div class="flex flex-col space-y-1.5 flex-1">
+<div class="flex flex-wrap items-center gap-1.5">
+<span class="bg-badge-personal/15 text-badge-personal border border-badge-personal/30 font-caption text-[11px] px-2 py-0.5 rounded-full flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-badge-personal"></span> Personal
+                  </span>
+</div>
+<h3 class="font-body-strong text-slate-txt text-[15px] leading-snug">
+                  Comprar receta médica prescrita en farmacia de turno
+                </h3>
+</div>
+</div>
+<!-- Meta & Acciones -->
+<div class="flex flex-wrap items-center justify-between pt-2 border-t border-outline-variant/60 gap-2">
+<div class="flex items-center space-x-1.5 text-on-surface-variant text-caption text-[12px]">
+<span class="material-symbols-outlined text-[16px]">schedule</span>
+<span>Vence hoy, 19:30</span>
+</div>
+<div class="flex items-center space-x-2">
+<button class="px-2.5 py-1 text-caption rounded bg-surface-container text-on-surface-variant border border-outline-variant hover:text-gold-arcade hover:border-gold-arcade/40 transition-colors flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">star_border</span>
+<span>☆ Añadir a la misión</span>
+</button>
+<button class="px-2.5 py-1 text-caption rounded bg-surface-container text-on-surface hover:bg-primary-container hover:text-on-primary-container border border-outline-variant transition-colors flex items-center gap-1 font-medium">
+<span class="material-symbols-outlined text-[16px]">check</span>
+<span>✓ Completar</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- ============================================== -->
+<!-- CUADRANTE II: PLANIFICAR (No urgente, Importante) -->
+<!-- ============================================== -->
+<div class="bg-surface-container rounded-xl border-t-4 border-t-blue-500 border border-outline-variant flex flex-col overflow-hidden shadow-sm">
+<!-- Cabecera Cuadrante -->
+<div class="p-4 bg-surface-container-high border-b border-outline-variant flex items-center justify-between">
+<div class="flex items-center space-x-2.5">
+<span class="w-3 h-3 rounded-sm bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.6)]"></span>
+<h2 class="font-heading text-heading text-slate-txt">Planificar</h2>
+<span class="font-caption text-xs text-blue-400 bg-blue-950/60 border border-blue-800 px-2 py-0.5 rounded">No urgente, Importante</span>
+</div>
+<span class="font-pixel text-[11px] text-blue-400 bg-surface-container-lowest px-2 py-1 rounded border border-outline-variant">2 TAREAS</span>
+</div>
+<!-- Lista de tareas Cuadrante II -->
+<div class="p-4 space-y-3 bg-surface/40">
+<!-- Tarjeta 1 (Laboral Programada) -->
+<div class="bg-surface-container-high border border-outline-variant hover:border-blue-500/50 rounded-lg p-3.5 shadow-sm transition-all flex flex-col space-y-3">
+<div class="flex items-start justify-between gap-2">
+<div class="flex flex-col space-y-1.5 flex-1">
+<div class="flex flex-wrap items-center gap-1.5">
+<span class="bg-surface-variant text-on-surface-variant border border-outline-variant font-caption text-[11px] px-2 py-0.5 rounded-full flex items-center gap-1">
+<span class="material-symbols-outlined text-[13px]">calendar_today</span> 📅 Programada · Pendiente desde el lun 3
+                  </span>
+<span class="bg-badge-work/15 text-badge-work border border-badge-work/30 font-caption text-[11px] px-2 py-0.5 rounded-full flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-badge-work"></span> Laboral
+                  </span>
+</div>
+<h3 class="font-body-strong text-slate-txt text-[15px] leading-snug">
+                  Definir arquitectura v2 para microservicios de inventario
+                </h3>
+</div>
+</div>
+<!-- Meta & Acciones -->
+<div class="flex flex-wrap items-center justify-between pt-2 border-t border-outline-variant/60 gap-2">
+<div class="flex items-center space-x-1.5 text-on-surface-variant text-caption text-[12px]">
+<span class="material-symbols-outlined text-[16px]">event</span>
+<span>Jueves 16, 10:00</span>
+</div>
+<div class="flex items-center space-x-2">
+<button class="px-2.5 py-1 text-caption rounded bg-surface-container text-on-surface-variant border border-outline-variant hover:text-gold-arcade hover:border-gold-arcade/40 transition-colors flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">star_border</span>
+<span>☆ Añadir a la misión</span>
+</button>
+<button class="px-2.5 py-1 text-caption rounded bg-surface-container text-on-surface hover:bg-primary-container hover:text-on-primary-container border border-outline-variant transition-colors flex items-center gap-1 font-medium">
+<span class="material-symbols-outlined text-[16px]">check</span>
+<span>✓ Completar</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Tarjeta 2 (Personal Rutina) -->
+<div class="bg-surface-container-high border border-outline-variant hover:border-blue-500/50 rounded-lg p-3.5 shadow-sm transition-all flex flex-col space-y-3">
+<div class="flex items-start justify-between gap-2">
+<div class="flex flex-col space-y-1.5 flex-1">
+<div class="flex flex-wrap items-center gap-1.5">
+<span class="bg-badge-personal/15 text-badge-personal border border-badge-personal/30 font-caption text-[11px] px-2 py-0.5 rounded-full flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-badge-personal"></span> Personal
+                  </span>
+</div>
+<h3 class="font-body-strong text-slate-txt text-[15px] leading-snug">
+                  Planificar rutina trimestral de entrenamiento de fuerza y cardio
+                </h3>
+</div>
+</div>
+<!-- Meta & Acciones -->
+<div class="flex flex-wrap items-center justify-between pt-2 border-t border-outline-variant/60 gap-2">
+<div class="flex items-center space-x-1.5 text-on-surface-variant text-caption text-[12px]">
+<span class="material-symbols-outlined text-[16px]">alarm</span>
+<span>Mañana 07:30</span>
+</div>
+<div class="flex items-center space-x-2">
+<button class="px-2.5 py-1 text-caption rounded bg-surface-container text-on-surface-variant border border-outline-variant hover:text-gold-arcade hover:border-gold-arcade/40 transition-colors flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">star_border</span>
+<span>☆ Añadir a la misión</span>
+</button>
+<button class="px-2.5 py-1 text-caption rounded bg-surface-container text-on-surface hover:bg-primary-container hover:text-on-primary-container border border-outline-variant transition-colors flex items-center gap-1 font-medium">
+<span class="material-symbols-outlined text-[16px]">check</span>
+<span>✓ Completar</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- ============================================== -->
+<!-- CUADRANTE III: DELEGAR (Urgente, No importante) -->
+<!-- ============================================== -->
+<div class="bg-surface-container rounded-xl border-t-4 border-t-amber-500 border border-outline-variant flex flex-col overflow-hidden shadow-sm">
+<!-- Cabecera Cuadrante -->
+<div class="p-4 bg-surface-container-high border-b border-outline-variant flex items-center justify-between">
+<div class="flex items-center space-x-2.5">
+<span class="w-3 h-3 rounded-sm bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.6)]"></span>
+<h2 class="font-heading text-heading text-slate-txt">Delegar</h2>
+<span class="font-caption text-xs text-amber-400 bg-amber-950/60 border border-amber-800 px-2 py-0.5 rounded">Urgente, No importante</span>
+</div>
+<span class="font-pixel text-[11px] text-amber-400 bg-surface-container-lowest px-2 py-1 rounded border border-outline-variant">2 TAREAS</span>
+</div>
+<!-- Lista de tareas Cuadrante III -->
+<div class="p-4 space-y-3 bg-surface/40">
+<!-- Tarjeta 1 Delegada -->
+<div class="bg-surface-container-high border border-outline-variant hover:border-amber-500/50 rounded-lg p-3.5 shadow-sm transition-all flex flex-col space-y-3">
+<div class="flex items-start justify-between gap-2">
+<div class="flex flex-col space-y-1.5 flex-1">
+<div class="flex flex-wrap items-center gap-1.5">
+<span class="bg-badge-work/15 text-badge-work border border-badge-work/30 font-caption text-[11px] px-2 py-0.5 rounded-full flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-badge-work"></span> Laboral
+                  </span>
+<span class="bg-surface-variant text-on-surface-variant font-caption text-[11px] px-2 py-0.5 rounded-full border border-outline-variant flex items-center gap-1">
+<span class="material-symbols-outlined text-[13px]">person</span> Asignado a: Marta G.
+                  </span>
+</div>
+<h3 class="font-body-strong text-slate-txt text-[15px] leading-snug">
+                  Recopilar métricas de latencia de API para el reporte mensual
+                </h3>
+</div>
+</div>
+<!-- Meta & Acciones -->
+<div class="flex flex-wrap items-center justify-between pt-2 border-t border-outline-variant/60 gap-2">
+<div class="flex items-center space-x-1.5 text-on-surface-variant text-caption text-[12px]">
+<span class="material-symbols-outlined text-[16px]">schedule</span>
+<span>Hoy antes de las 18:00</span>
+</div>
+<div class="flex items-center space-x-2">
+<button class="px-2.5 py-1 text-caption rounded bg-surface-container text-on-surface-variant border border-outline-variant hover:text-gold-arcade hover:border-gold-arcade/40 transition-colors flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">star_border</span>
+<span>☆ Añadir a la misión</span>
+</button>
+<button class="px-2.5 py-1 text-caption rounded bg-surface-container text-on-surface hover:bg-primary-container hover:text-on-primary-container border border-outline-variant transition-colors flex items-center gap-1 font-medium">
+<span class="material-symbols-outlined text-[16px]">check</span>
+<span>✓ Completar</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Tarjeta 2 Delegada -->
+<div class="bg-surface-container-high border border-outline-variant hover:border-amber-500/50 rounded-lg p-3.5 shadow-sm transition-all flex flex-col space-y-3">
+<div class="flex items-start justify-between gap-2">
+<div class="flex flex-col space-y-1.5 flex-1">
+<div class="flex flex-wrap items-center gap-1.5">
+<span class="bg-badge-work/15 text-badge-work border border-badge-work/30 font-caption text-[11px] px-2 py-0.5 rounded-full flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-badge-work"></span> Laboral
+                  </span>
+<span class="bg-surface-variant text-on-surface-variant font-caption text-[11px] px-2 py-0.5 rounded-full border border-outline-variant flex items-center gap-1">
+<span class="material-symbols-outlined text-[13px]">person</span> Asignado a: Roberto M.
+                  </span>
+</div>
+<h3 class="font-body-strong text-slate-txt text-[15px] leading-snug">
+                  Coordinar llamada preliminar con proveedores de soporte cloud
+                </h3>
+</div>
+</div>
+<!-- Meta & Acciones -->
+<div class="flex flex-wrap items-center justify-between pt-2 border-t border-outline-variant/60 gap-2">
+<div class="flex items-center space-x-1.5 text-on-surface-variant text-caption text-[12px]">
+<span class="material-symbols-outlined text-[16px]">schedule</span>
+<span>Vence mañana 12:00</span>
+</div>
+<div class="flex items-center space-x-2">
+<button class="px-2.5 py-1 text-caption rounded bg-surface-container text-on-surface-variant border border-outline-variant hover:text-gold-arcade hover:border-gold-arcade/40 transition-colors flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">star_border</span>
+<span>☆ Añadir a la misión</span>
+</button>
+<button class="px-2.5 py-1 text-caption rounded bg-surface-container text-on-surface hover:bg-primary-container hover:text-on-primary-container border border-outline-variant transition-colors flex items-center gap-1 font-medium">
+<span class="material-symbols-outlined text-[16px]">check</span>
+<span>✓ Completar</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- ============================================== -->
+<!-- CUADRANTE IV: ELIMINAR (Ni urgente, Ni importante) -->
+<!-- ============================================== -->
+<div class="bg-surface-container rounded-xl border-t-4 border-t-slate-500 border border-outline-variant flex flex-col overflow-hidden shadow-sm">
+<!-- Cabecera Cuadrante -->
+<div class="p-4 bg-surface-container-high border-b border-outline-variant flex items-center justify-between">
+<div class="flex items-center space-x-2.5">
+<span class="w-3 h-3 rounded-sm bg-slate-500"></span>
+<h2 class="font-heading text-heading text-slate-txt">Eliminar</h2>
+<span class="font-caption text-xs text-on-surface-variant bg-surface-variant px-2 py-0.5 rounded border border-outline-variant">Ni urgente, Ni importante</span>
+</div>
+<span class="font-pixel text-[11px] text-on-surface-variant bg-surface-container-lowest px-2 py-1 rounded border border-outline-variant">2 TAREAS</span>
+</div>
+<!-- Lista de tareas Cuadrante IV -->
+<div class="p-4 space-y-3 bg-surface/40">
+<!-- Tarjeta 1 Descartable -->
+<div class="bg-surface-container-high border border-outline-variant hover:border-slate-500/50 rounded-lg p-3.5 shadow-sm transition-all flex flex-col space-y-3 opacity-90">
+<div class="flex items-start justify-between gap-2">
+<div class="flex flex-col space-y-1.5 flex-1">
+<div class="flex flex-wrap items-center gap-1.5">
+<span class="bg-badge-personal/15 text-badge-personal border border-badge-personal/30 font-caption text-[11px] px-2 py-0.5 rounded-full flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-badge-personal"></span> Personal
+                  </span>
+<span class="bg-surface-variant text-on-surface-variant font-caption text-[11px] px-2 py-0.5 rounded-full">Baja prioridad</span>
+</div>
+<h3 class="font-body-strong text-slate-txt text-[15px] leading-snug">
+                  Revisar ofertas de suscripciones streaming en desuso
+                </h3>
+</div>
+</div>
+<!-- Meta & Acciones -->
+<div class="flex flex-wrap items-center justify-between pt-2 border-t border-outline-variant/60 gap-2">
+<div class="flex items-center space-x-1.5 text-on-surface-variant text-caption text-[12px]">
+<span class="material-symbols-outlined text-[16px]">info</span>
+<span>Sin fecha límite asignada</span>
+</div>
+<div class="flex items-center space-x-2">
+<button class="px-2.5 py-1 text-caption rounded bg-surface-container text-on-surface-variant border border-outline-variant hover:text-gold-arcade transition-colors flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">star_border</span>
+<span>☆ Añadir</span>
+</button>
+<button class="px-2.5 py-1 text-caption rounded bg-error-container/20 text-error border border-error/30 hover:bg-error-container/40 transition-colors flex items-center gap-1 font-medium">
+<span class="material-symbols-outlined text-[16px]">delete</span>
+<span>Descartar</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Tarjeta 2 Descartable -->
+<div class="bg-surface-container-high border border-outline-variant hover:border-slate-500/50 rounded-lg p-3.5 shadow-sm transition-all flex flex-col space-y-3 opacity-90">
+<div class="flex items-start justify-between gap-2">
+<div class="flex flex-col space-y-1.5 flex-1">
+<div class="flex flex-wrap items-center gap-1.5">
+<span class="bg-badge-work/15 text-badge-work border border-badge-work/30 font-caption text-[11px] px-2 py-0.5 rounded-full flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-badge-work"></span> Laboral
+                  </span>
+<span class="bg-surface-variant text-on-surface-variant font-caption text-[11px] px-2 py-0.5 rounded-full">Ruido cognitivo</span>
+</div>
+<h3 class="font-body-strong text-slate-txt text-[15px] leading-snug">
+                  Ordenar carpetas antiguas de descargas locales y capturas
+                </h3>
+</div>
+</div>
+<!-- Meta & Acciones -->
+<div class="flex flex-wrap items-center justify-between pt-2 border-t border-outline-variant/60 gap-2">
+<div class="flex items-center space-x-1.5 text-on-surface-variant text-caption text-[12px]">
+<span class="material-symbols-outlined text-[16px]">archive</span>
+<span>Opcional de fin de semana</span>
+</div>
+<div class="flex items-center space-x-2">
+<button class="px-2.5 py-1 text-caption rounded bg-surface-container text-on-surface-variant border border-outline-variant hover:text-gold-arcade transition-colors flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">star_border</span>
+<span>☆ Añadir</span>
+</button>
+<button class="px-2.5 py-1 text-caption rounded bg-error-container/20 text-error border border-error/30 hover:bg-error-container/40 transition-colors flex items-center gap-1 font-medium">
+<span class="material-symbols-outlined text-[16px]">delete</span>
+<span>Descartar</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- 6. Pie de Página (Footer) -->
+<footer class="w-full border-t border-outline-variant bg-surface py-6 px-margin mt-12">
+<div class="max-w-[1440px] mx-auto flex flex-col md:flex-row items-center justify-between gap-4 text-caption text-on-surface-variant">
+<div class="flex items-center space-x-2">
+<span class="font-pixel text-[10px] text-energy-fill">IT //</span>
+<span>© 2025 InsertTasks • Enfoque de productividad con matriz de Dwight D. Eisenhower y micro-recompensas.</span>
+</div>
+<div class="flex items-center space-x-6">
+<a class="hover:text-primary transition-colors" href="#privacidad">Privacidad</a>
+<a class="hover:text-primary transition-colors" href="#terminos">Términos</a>
+<a class="hover:text-primary transition-colors flex items-center gap-1" href="#ayuda">
+<span class="material-symbols-outlined text-[16px]">keyboard</span>
+<span>Ayuda y Atajos</span>
+</a>
+</div>
+</div>
+</footer>
+</body></html>

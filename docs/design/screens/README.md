@@ -440,30 +440,30 @@ o `get_project` antes de volver a lanzar nada.
 
 | Pantalla | Variante | Id de Stitch | Estado |
 |---|---|---|---|
-| S3 v3 · Tablero | claro, escritorio | `81117eabaa4646c3abd3f0bb4f5eb94b` | generada; **pendiente de aprobación** |
-| S3 v3 · Tablero | claro, móvil | `c897887510c1449ab912c09dee1e50fc` | generada como lienzo `DESKTOP` (1280 px) ⚠: ver nota; **pendiente de aprobación** |
-| S3 v3 · Tablero | oscuro, escritorio | `14e9ca5694e14e2c8e87af6ec1c2fc73` | generada; **pendiente de aprobación** |
-| S3 v3 · Tablero | oscuro, móvil | `9bc244225a004223bad38caa44671dd7` | lienzo `DESKTOP` ⚠: solo color; **pendiente de aprobación** |
-| S3 v3 · Tablero sin modo arcade | claro, escritorio | `aeba00edd3bb4bbca68d96f83fd7928d` | generada; **pendiente de aprobación** |
-| S3-c · Celebraciones | claro, escritorio | `a849ae882f33445186187d949d16e599` | generada; **pendiente de aprobación** |
-| S3-c · Celebraciones | oscuro, escritorio | `1236b480972045a3b77af91ca42d5cea` | generada; **pendiente de aprobación** |
-| S7 v2 · Perfil | claro, escritorio | `6963be246e3c470a917811748108e6fc` | generada; **pendiente de aprobación** |
-| S7 v2 · Perfil | claro, móvil | `2f2edf7ef1464aaca6f2b9fb6db91a20` | generada (390 px); **pendiente de aprobación** |
-| S7 v2 · Perfil | oscuro, escritorio | `9b76b8f83b8f493f9f6d9c6666bc54ca` | generada; **pendiente de aprobación** |
-| S7 v2 · Perfil | oscuro, móvil | `cbd569609d7748e9bd6a0c7992d179f7` | lienzo `DESKTOP` ⚠: solo color; **pendiente de aprobación** |
-| S8 · Inicio de jornada | claro, escritorio | `a1322c6444844c428bb3a188421d79dc` | generada; **pendiente de aprobación** |
-| S8 · Inicio de jornada | claro, móvil | `a074bb8078344b23b0764adcd8e27684` | generada (390 px); **pendiente de aprobación** |
-| S8 · Inicio de jornada | oscuro, escritorio | `0b1585100994409ebb5074538bbb6242` | generada; **pendiente de aprobación** |
-| S8 · Inicio de jornada | oscuro, móvil | `fa5ff90879914845befe6838e0024e8e` | lienzo `DESKTOP` ⚠: solo color; **pendiente de aprobación** |
-| S9 · Progreso | claro, escritorio | `64ea9d11db404202a2932956249fd826` | generada; **pendiente de aprobación** |
-| S9 · Progreso | claro, móvil | `4c3d0611a3b343a18411cf8802daa389` | generada (390 px); **pendiente de aprobación** |
-| S9 · Progreso | oscuro, escritorio | `13eae85e91884f869ae0d46ed598d598` | generada; **pendiente de aprobación** |
-| S10 · Tareas programadas | claro, escritorio | `e54daa11eee144b0ad4b3ef1e902b305` | generada (incluye el diálogo de eliminar); **pendiente de aprobación** |
-| S10 · Tareas programadas | claro, móvil | `e5cd17d754364db88d5e3ea4fe744aec` | generada (390 px, incluye el estado vacío); **pendiente de aprobación** |
-| S10 · Tareas programadas | oscuro, escritorio | `ffb027706df54057a8939489a0f54b56` | generada; **pendiente de aprobación** |
-| S11 · Formulario de programación | claro, escritorio | `d7fd20eb7f5d4e13838b763446b8b698` | generada (días de la semana, error en línea); **pendiente de aprobación** |
-| S11 · Formulario de programación | claro, móvil | `6e642b45ac624bc791963c50f74b7193` | generada (390 px, día 31); **pendiente de aprobación** |
-| S11 · Formulario de programación | oscuro, escritorio | `e010f309c1934c698114b746ca98163a` | generada; **pendiente de aprobación** |
+| S3 v3 · Tablero | claro, escritorio | `81117eabaa4646c3abd3f0bb4f5eb94b` | generada; **aprobada (2026-10-31)** |
+| S3 v3 · Tablero | claro, móvil | `c897887510c1449ab912c09dee1e50fc` | lienzo `DESKTOP` (1280 px) ⚠: solo color; la maquetación móvil vigente es la de S3 v2 móvil (`27a7b42b…`), por decisión del propietario; **aprobada (2026-10-31)** |
+| S3 v3 · Tablero | oscuro, escritorio | `14e9ca5694e14e2c8e87af6ec1c2fc73` | generada; **aprobada (2026-10-31)** |
+| S3 v3 · Tablero | oscuro, móvil | `9bc244225a004223bad38caa44671dd7` | lienzo `DESKTOP` ⚠: solo color; **aprobada (2026-10-31)** |
+| S3 v3 · Tablero sin modo arcade | claro, escritorio | `aeba00edd3bb4bbca68d96f83fd7928d` | generada; **aprobada (2026-10-31)** |
+| S3-c · Celebraciones | claro, escritorio | `a849ae882f33445186187d949d16e599` | generada; **aprobada (2026-10-31)** |
+| S3-c · Celebraciones | oscuro, escritorio | `1236b480972045a3b77af91ca42d5cea` | generada; **aprobada (2026-10-31)** |
+| S7 v2 · Perfil | claro, escritorio | `6963be246e3c470a917811748108e6fc` | generada; **aprobada (2026-10-31)** |
+| S7 v2 · Perfil | claro, móvil | `2f2edf7ef1464aaca6f2b9fb6db91a20` | generada (390 px); **aprobada (2026-10-31)** |
+| S7 v2 · Perfil | oscuro, escritorio | `9b76b8f83b8f493f9f6d9c6666bc54ca` | generada; **aprobada (2026-10-31)** |
+| S7 v2 · Perfil | oscuro, móvil | `cbd569609d7748e9bd6a0c7992d179f7` | lienzo `DESKTOP` ⚠: solo color; **aprobada (2026-10-31)** |
+| S8 · Inicio de jornada | claro, escritorio | `a1322c6444844c428bb3a188421d79dc` | generada; **aprobada (2026-10-31)** |
+| S8 · Inicio de jornada | claro, móvil | `a074bb8078344b23b0764adcd8e27684` | generada (390 px); **aprobada (2026-10-31)** |
+| S8 · Inicio de jornada | oscuro, escritorio | `0b1585100994409ebb5074538bbb6242` | generada; **aprobada (2026-10-31)** |
+| S8 · Inicio de jornada | oscuro, móvil | `fa5ff90879914845befe6838e0024e8e` | lienzo `DESKTOP` ⚠: solo color; **aprobada (2026-10-31)** |
+| S9 · Progreso | claro, escritorio | `64ea9d11db404202a2932956249fd826` | generada; **aprobada (2026-10-31)** |
+| S9 · Progreso | claro, móvil | `4c3d0611a3b343a18411cf8802daa389` | generada (390 px); **aprobada (2026-10-31)** |
+| S9 · Progreso | oscuro, escritorio | `13eae85e91884f869ae0d46ed598d598` | generada; **aprobada (2026-10-31)** |
+| S10 · Tareas programadas | claro, escritorio | `e54daa11eee144b0ad4b3ef1e902b305` | generada (incluye el diálogo de eliminar); **aprobada (2026-10-31)** |
+| S10 · Tareas programadas | claro, móvil | `e5cd17d754364db88d5e3ea4fe744aec` | generada (390 px, incluye el estado vacío); **aprobada (2026-10-31)** |
+| S10 · Tareas programadas | oscuro, escritorio | `ffb027706df54057a8939489a0f54b56` | generada; **aprobada (2026-10-31)** |
+| S11 · Formulario de programación | claro, escritorio | `d7fd20eb7f5d4e13838b763446b8b698` | generada (días de la semana, error en línea); **aprobada (2026-10-31)** |
+| S11 · Formulario de programación | claro, móvil | `6e642b45ac624bc791963c50f74b7193` | generada (390 px, día 31); **aprobada (2026-10-31)** |
+| S11 · Formulario de programación | oscuro, escritorio | `e010f309c1934c698114b746ca98163a` | generada; **aprobada (2026-10-31)** |
 
 Las variantes **móviles oscuras** de S9, S10 y S11 no se generan aparte: en la feature 004 Stitch
 devolvía esas variantes como lienzo de escritorio. Valen como **solo color** la oscura de
@@ -471,16 +471,42 @@ escritorio sobre la maquetación de la móvil clara, igual que en la 004. Los es
 NUEVA» y «sin tareas activas» de S8 y el estado vacío de S9 se implementan a partir del contrato
 (`ui-screens.md`), salvo que el propietario pida pantalla propia en el punto de control.
 
-**Estado (2026-10-31)**: las 24 pantallas están en el lienzo (comprobado con `get_project`).
+**Estado (2026-10-31)**: las 24 pantallas, **aprobadas por el propietario en una sola ronda**
+(T012) y exportadas a `docs/design/screens/` (T011).
 
 **Salvedades**:
 - **S3 v3 claro móvil** salió como lienzo de escritorio (1280 px), igual que las móviles oscuras.
-  Si el propietario no pide regenerarla, la maquetación móvil del tablero es la de S3 v2 móvil
-  (`27a7b42b…`) con el marcador compacto en dos filas que describe `ui-screens.md`.
-- **Exportación (T011)**: no se ha podido hacer de forma automática. Las URLs de descarga de
-  `get_screen` son ahora de `stitch.googleapis.com` y responden 401 sin credenciales.
-  `download_file` devuelve el contenido dentro de la conversación (el HTML y la imagen en base64),
-  lo que no es viable para 24 pantallas. Los identificadores de arriba permiten abrir cada
-  pantalla en Stitch. El HTML y la captura de las **aprobadas** se versionarán en
-  `docs/design/screens/<id>/` cuando el propietario las exporte desde Stitch, o pantalla a
-  pantalla, según decida en el punto de control.
+  Por decisión del propietario no se regenera: la maquetación móvil vigente del tablero es la de
+  S3 v2 móvil (`27a7b42b…`) con el marcador compacto en dos filas que describe `ui-screens.md`, y
+  `s3-board-v3/mobile.*` vale solo como referencia de color y contenido.
+
+### Pantallas vigentes exportadas (T011, T013)
+
+| Carpeta | Pantalla | Ficheros |
+|---|---|---|
+| [`s3-board-v3/`](s3-board-v3/) | S3 v3 · Tablero, claro | `desktop`, `mobile` (solo color) |
+| [`s3-board-v3-dark/`](s3-board-v3-dark/) | S3 v3 · Tablero, oscuro | `desktop`, `mobile` (solo color) |
+| [`s3-board-v3-no-arcade/`](s3-board-v3-no-arcade/) | S3 v3 · Tablero sin modo arcade | `desktop` |
+| [`s3c-celebrations/`](s3c-celebrations/) | S3-c · Celebraciones, claro | `desktop` |
+| [`s3c-celebrations-dark/`](s3c-celebrations-dark/) | S3-c · Celebraciones, oscuro | `desktop` |
+| [`s7-profile-v2/`](s7-profile-v2/) | S7 v2 · Perfil, claro | `desktop`, `mobile` |
+| [`s7-profile-v2-dark/`](s7-profile-v2-dark/) | S7 v2 · Perfil, oscuro | `desktop`, `mobile` (solo color) |
+| [`s8-day-start/`](s8-day-start/) | S8 · Inicio de jornada, claro | `desktop`, `mobile` |
+| [`s8-day-start-dark/`](s8-day-start-dark/) | S8 · Inicio de jornada, oscuro | `desktop`, `mobile` (solo color) |
+| [`s9-progress/`](s9-progress/) | S9 · Progreso, claro | `desktop`, `mobile` |
+| [`s9-progress-dark/`](s9-progress-dark/) | S9 · Progreso, oscuro | `desktop` |
+| [`s10-schedules/`](s10-schedules/) | S10 · Tareas programadas, claro | `desktop`, `mobile` |
+| [`s10-schedules-dark/`](s10-schedules-dark/) | S10 · Tareas programadas, oscuro | `desktop` |
+| [`s11-schedule-form/`](s11-schedule-form/) | S11 · Formulario de programación, claro | `desktop`, `mobile` |
+| [`s11-schedule-form-dark/`](s11-schedule-form-dark/) | S11 · Formulario de programación, oscuro | `desktop` |
+
+Cada variante tiene su `.html` y su `.png`. Las pantallas aprobadas de las features 001 y 004
+siguen intactas.
+
+**Cómo se exportaron**: las URLs de descarga de `get_screen` (`stitch.googleapis.com`) exigen un
+token OAuth (no admiten claves de API) y un proyecto de cuota con la API de Stitch habilitada, y
+devuelven el fichero dentro de un JSON (`dataString`). `download_file` del MCP mete el contenido en
+la conversación, lo que no es viable para 48 ficheros. Por eso el propietario ejecutó
+[`../export-stitch.py`](../export-stitch.py) en su terminal, con su propio token: el agente no usa
+credenciales personales (Principio V). Para exportar más pantallas, se añaden sus ids de fichero
+(los `htmlCode.name` y `screenshot.name` de `get_screen`) a la lista `EXPORTS` del script.

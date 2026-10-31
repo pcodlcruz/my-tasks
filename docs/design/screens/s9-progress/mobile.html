@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+
+<html class="light" lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>InsertTasks - Progreso</title>
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Press+Start+2P&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "on-background": "#1a1b23",
+            "on-primary-fixed-variant": "#0039b5",
+            "border": "#CBD5E1",
+            "inverse-surface": "#2e3039",
+            "tertiary": "#7f2500",
+            "on-secondary-fixed-variant": "#005049",
+            "surface-variant": "#e2e1ed",
+            "secondary-fixed-dim": "#6bd8cb",
+            "on-error-container": "#93000a",
+            "scope-work": "#7C3AED",
+            "surface-container-high": "#e8e7f3",
+            "surface-bright": "#faf8ff",
+            "inverse-primary": "#b7c4ff",
+            "primary-fixed": "#dce1ff",
+            "do-now": "#B91C1C",
+            "text": "#0F172A",
+            "surface-dim": "#d9d9e5",
+            "scope-personal": "#0D9488",
+            "on-surface-variant": "#434655",
+            "on-surface": "#1a1b23",
+            "surface-container-low": "#f3f2fe",
+            "on-secondary": "#ffffff",
+            "on-primary": "#ffffff",
+            "on-tertiary-fixed-variant": "#832700",
+            "surface-tint": "#2151da",
+            "success": "#15803D",
+            "on-tertiary-fixed": "#390c00",
+            "secondary-container": "#86f2e4",
+            "secondary": "#006a61",
+            "schedule": "#1D4ED8",
+            "on-tertiary": "#ffffff",
+            "on-primary-container": "#cad3ff",
+            "surface-alt": "#F8FAFC",
+            "error": "#B91C1C",
+            "surface": "#FFFFFF",
+            "secondary-fixed": "#89f5e7",
+            "primary": "#0037b0",
+            "on-secondary-container": "#006f66",
+            "error-container": "#ffdad6",
+            "outline-variant": "#c4c5d7",
+            "on-secondary-fixed": "#00201d",
+            "tertiary-fixed": "#ffdbcf",
+            "delegate": "#B45309",
+            "surface-container-highest": "#e2e1ed",
+            "on-tertiary-container": "#ffc9b7",
+            "primary-fixed-dim": "#b7c4ff",
+            "tertiary-container": "#a73400",
+            "primary-container": "#1d4ed8",
+            "on-error": "#ffffff",
+            "outline": "#747686",
+            "text-muted": "#475569",
+            "surface-container": "#ededf9",
+            "eliminate": "#475569",
+            "on-primary-fixed": "#001551",
+            "tertiary-fixed-dim": "#ffb59c",
+            "inverse-on-surface": "#f0f0fb",
+            "background": "#faf8ff",
+            "surface-container-lowest": "#ffffff"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.125rem",
+            "lg": "0.25rem",
+            "xl": "0.5rem",
+            "full": "0.75rem"
+          },
+          "spacing": {
+            "space-lg": "16px",
+            "margin": "24px",
+            "space-xs": "4px",
+            "space-xl": "32px",
+            "space-sm": "8px",
+            "space-md": "12px",
+            "space-2xl": "48px",
+            "gutter": "24px"
+          },
+          "fontFamily": {
+            "heading": ["Inter"],
+            "caption": ["Inter"],
+            "display": ["Inter"],
+            "body-strong": ["Inter"],
+            "body": ["Inter"],
+            "pixel": ["'Press Start 2P'", "monospace"]
+          },
+          "fontSize": {
+            "heading": [
+              "20px",
+              {
+                "lineHeight": "28px",
+                "fontWeight": "600"
+              }
+            ],
+            "caption": [
+              "13px",
+              {
+                "lineHeight": "18px",
+                "fontWeight": "400"
+              }
+            ],
+            "display": [
+              "28px",
+              {
+                "lineHeight": "36px",
+                "fontWeight": "700"
+              }
+            ],
+            "body-strong": [
+              "16px",
+              {
+                "lineHeight": "24px",
+                "fontWeight": "600"
+              }
+            ],
+            "body": [
+              "16px",
+              {
+                "lineHeight": "24px",
+                "fontWeight": "400"
+              }
+            ]
+          }
+        },
+      },
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      line-height: 1;
+      display: inline-block;
+    }
+    .material-symbols-outlined.fill-icon {
+      font-variation-settings: 'FILL' 1;
+    }
+    .striped-pattern {
+      background-color: #f1f5f9;
+      background-image: repeating-linear-gradient(
+        45deg,
+        #e2e8f0,
+        #e2e8f0 2.5px,
+        #f8fafc 2.5px,
+        #f8fafc 5px
+      );
+    }
+    /* Pixel numeric helper */
+    .num-pixel {
+      font-family: 'Press Start 2P', monospace;
+      letter-spacing: -0.05em;
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface-alt text-text font-body antialiased flex justify-center min-h-screen selection:bg-primary-fixed selection:text-on-primary-fixed">
+<!-- Mobile Container (Max 390px viewport fidelity) -->
+<div class="w-full max-w-[390px] min-h-screen flex flex-col bg-surface shadow-2xl relative pb-24 overflow-x-hidden">
+<!-- 1. BRANDING & TOP APP BAR -->
+<header class="sticky top-0 z-40 bg-surface/95 backdrop-blur-md px-space-lg pt-3 pb-2 shadow-sm">
+<div class="flex items-center justify-between">
+<!-- Logo and Title Area -->
+<div class="flex items-center gap-2">
+<div class="w-8 h-8 rounded-xl bg-primary-container text-on-primary flex items-center justify-center font-black text-sm tracking-tighter shadow-sm">
+            IT
+          </div>
+<div class="flex items-center gap-1.5">
+<span class="font-heading text-[17px] font-bold tracking-tight text-on-background">InsertTasks</span>
+<span class="px-1.5 py-0.5 text-[9px] font-pixel bg-surface-container-low text-primary border border-primary/20 rounded-md font-bold tracking-normal uppercase">ARCADE</span>
+</div>
+</div>
+<!-- Trailing Avatar -->
+<div class="flex items-center gap-2">
+<button class="w-8 h-8 rounded-full bg-primary text-on-primary flex items-center justify-center text-xs font-semibold ring-2 ring-primary-fixed hover:opacity-90 transition-opacity" title="Avatar de usuario con iniciales AC">
+            AC
+          </button>
+</div>
+</div>
+<!-- Secondary Navigation Tabs -->
+<nav aria-label="Navegación secundaria" class="flex items-center justify-between mt-3 text-caption border-b border-border/50 px-1">
+<a class="py-2 px-2 text-text-muted hover:text-on-surface font-body font-medium transition-colors" href="#tablero">
+          Tablero
+        </a>
+<a aria-current="page" class="py-2 px-2 text-primary font-body-strong font-semibold border-b-2 border-primary relative transition-colors flex items-center gap-1" href="#progreso">
+          Progreso
+          <span class="w-1.5 h-1.5 rounded-full bg-primary inline-block"></span>
+</a>
+<a class="py-2 px-2 text-text-muted hover:text-on-surface font-body font-medium transition-colors" href="#programadas">
+          Programadas
+        </a>
+<a class="py-2 px-2 text-text-muted hover:text-on-surface font-body font-medium transition-colors" href="#historial">
+          Historial
+        </a>
+</nav>
+</header>
+<!-- MAIN SCROLLABLE CONTENT -->
+<main class="flex-1 px-4 pt-3.5 space-y-4">
+<!-- 2. BANNER DE NIVEL Y ENERGÍA/PUNTOS -->
+<section aria-label="Progreso de Nivel" class="bg-surface rounded-xl p-3.5 border border-border shadow-sm relative overflow-hidden">
+<div class="flex items-center justify-between mb-2">
+<div class="flex items-center gap-1.5">
+<span class="text-xs font-semibold text-text-muted tracking-wide uppercase">Rango</span>
+<div class="flex items-center gap-1 bg-surface-container-low px-2 py-0.5 rounded-md border border-border/60">
+<span class="text-[11px] font-bold text-on-background">NIVEL</span>
+<span class="num-pixel text-[11px] text-primary">3</span>
+</div>
+</div>
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[18px] text-[#A16207] fill-icon">hotel_class</span>
+<span class="num-pixel text-[11px] text-[#A16207]">3.450 PTS</span>
+</div>
+</div>
+<!-- Barra de progreso de energía (70% hacia Nivel 4) -->
+<div class="space-y-1">
+<div class="w-full h-3 bg-surface-container rounded-full overflow-hidden p-0.5 border border-border/40">
+<div class="h-full rounded-full bg-gradient-to-r from-[#0E7490] to-[#1D4ED8] transition-all duration-500 shadow-inner" style="width: 70%"></div>
+</div>
+<div class="flex justify-between items-center text-[11px] text-text-muted font-caption px-0.5">
+<span>Progreso actual (70%)</span>
+<span>Meta: <strong class="font-medium text-text">4.000 PTS</strong> (Nivel 4)</span>
+</div>
+</div>
+</section>
+<!-- 3. CALENDARIO DE ACTIVIDAD DE 12 SEMANAS (HEATMAP) -->
+<section aria-label="Matriz de actividad de 12 semanas" class="bg-surface rounded-xl p-3 border border-border shadow-sm">
+<div class="flex items-center justify-between mb-2.5">
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-primary text-[18px]">calendar_month</span>
+<h2 class="font-heading text-sm font-semibold text-on-background">Actividad (12 Semanas)</h2>
+</div>
+<span class="text-[11px] text-text-muted font-caption">Ene – Mar 2025</span>
+</div>
+<!-- Contenedor adaptado estrictamente al ancho móvil (390px canvas) -->
+<div class="flex gap-1.5 overflow-x-hidden pt-1 pb-1">
+<!-- Etiquetas de días L M X J V S D -->
+<div class="grid grid-rows-7 gap-[3px] text-[9px] font-bold text-text-muted justify-items-center select-none pt-[1px] w-3">
+<span class="h-[21px] flex items-center">L</span>
+<span class="h-[21px] flex items-center">M</span>
+<span class="h-[21px] flex items-center">X</span>
+<span class="h-[21px] flex items-center">J</span>
+<span class="h-[21px] flex items-center">V</span>
+<span class="h-[21px] flex items-center">S</span>
+<span class="h-[21px] flex items-center">D</span>
+</div>
+<!-- Matriz 12 semanas (columnas) × 7 días (filas) -->
+<div class="grid grid-cols-12 gap-[3px] flex-1">
+<!-- SEMANA 1 -->
+<div class="flex flex-col gap-[3px]">
+<div class="w-[21px] h-[21px] rounded bg-emerald-50 text-success text-[10px] font-bold flex items-center justify-center border border-emerald-200" title="Meta cumplida">✓</div>
+<div class="w-[21px] h-[21px] rounded bg-emerald-50 text-success text-[10px] font-bold flex items-center justify-center border border-emerald-200">✓</div>
+<div class="w-[21px] h-[21px] rounded striped-pattern border border-slate-200" title="Descanso / No activo"></div>
+<div class="w-[21px] h-[21px] rounded bg-emerald-50 text-success text-[10px] font-bold flex items-center justify-center border border-emerald-200">✓</div>
+<div class="w-[21px] h-[21px] rounded bg-emerald-50 text-success text-[10px] font-bold flex items-center justify-center border border-emerald-200">✓</div>
+<div class="w-[21px] h-[21px] rounded striped-pattern border border-slate-200"></div>
+<div class="w-[21px] h-[21px] rounded striped-pattern border border-slate-200"></div>
+</div>
+<!-- SEMANA 2 -->
+<div class="flex flex-col gap-[3px]">
+<div class="w-[21px] h-[21px] rounded bg-blue-50 text-schedule text-[9px] font-semibold flex items-center justify-center border border-blue-200" title="Parcial (1/3)">1</div>
+<div class="w-[21px] h-[21px] rounded bg-emerald-50 text-success text-[10px] font-bold flex items-center justify-center border border-emerald-200">✓</div>
+<div class="w-[21px] h-[21px] rounded bg-emerald-50 text-success text-[10px] font-bold flex items-center justify-center border border-emerald-200">✓</div>
+<div class="w-[21px] h-[21px] rounded striped-pattern border border-slate-200"></div>
+<div class="w-[21px] h-[21px] rounded bg-emerald-50 text-success text-[10px] font-bold flex items-center justify-center border border-emerald-200">✓</div>
+<div class="w-[21px] h-[21px] rounded striped-pattern border border-slate-200"></div>
+<div class="w-[21px] h-[21px] rounded striped-pattern border border-slate-200"></div>
+</div>
+<!-- SEMANA 3 -->
+<div class="flex flex-col gap-[3px]">
+<div class="w-[21px] h-[21px] rounded bg-emerald-50 text-success text-[10px] font-bold flex items-center justify-center border border-emerald-200">✓</div>
+<div class="w-[21px] h-[21px] rounded bg-emerald-50 text-success text-[10px] font-bold flex items-center justify-center border border-emerald-200">✓</div>
+<div class="w-[21px] h-[21px] rounded bg-emerald-50 text-success text-[10px] font-bold flex items-center justify-center border border-emerald-200">✓</div>
+<div class="w-[21px] h-[21px] rounded bg-emerald-50 text-success text-[10px] font-bold flex items-center justify-center border border-emerald-200">✓</div>
+<div class="w-[21px] h-[21px] rounded bg-blue-50 text-schedule text-[9px] font-semibold flex items-center justify-center border border-blue-200">2</div>
+<div class="w-[21px] h-[21px] rounded striped-pattern border border-slate-200"></div>
+<div class="w-[21px] h-[21px] rounded striped-pattern border border-slate-200"></div>
+</div>
+<!-- SEMANA 4 -->
+<div class="flex flex-col gap-[3px]">
+<div class="w-[21px] h-[21px] rounded bg-emerald-50 text-success text-[10px] font-bold flex items-center justify-center border border-emerald-200">✓</div>
+<div class="w-[21px] h-[21px] rounded striped-pattern border border-slate-200"></div>
+<div class="w-[21px] h-[21px] rounded bg-emerald-50 text-success text-[10px] font-bold flex items-center justify-center border border-emerald-200">✓</div>
+<div class="w-[21px] h-[21px] rounded bg-emerald-50 text-success text-[10px] font-bold flex items-center justify-center border border-emerald-200">✓</div>
+<div class="w-[21px] h-[21px] rounded bg-emerald-50 text-success text-[10px] font-bold flex items-center justify-center border border-emerald-200">✓</div>
+<div class="w-[21px] h-[21px] rounded striped-pattern border border-slate-200"></div>
+<div class="w-[21px] h-[21px] rounded striped-pattern border border-slate-200"></div>
+</div>
+<!-- SEMANA 5 -->
+<div class="flex flex-col gap-[3px]">
+<div class="w-[21px] h-[21px] rounded striped-pattern border border-slate-200"></div>
+<div class="w-[21px] h-[21px] rounded bg-emerald-50 text-success text-[10px] font-bold flex items-center justify-center border border-emerald-200">✓</div>
+<div class="w-[21px] h-[21px] rounded bg-blue-50 text-schedule text-[9px] font-semibold flex items-center justify-center border border-blue-200">1</div>
+<div class="w-[21px] h-[21px] rounded bg-emerald-50 text-success text-[10px] font-bold flex items-center justify-center border border-emerald-200">✓</div>
+<div class="w-[21px] h-[21px] rounded bg-emerald-50 text-success text-[10px] font-bold flex items-center justify-center border border-emerald-200">✓</div>
+<div class="w-[21px] h-[21px] rounded striped-pattern border border-slate-200"></div>
+<div class="w-[21px] h-[21px] rounded striped-pattern border border-slate-200"></div>
+</div>
+<!-- SEMANA 6 -->
+<div class="flex flex-col gap-[3px]">
+<div class="w-[21px] h-[21px] rounded bg-emerald-50 text-success text-[10px] font-bold flex items-center justify-center border border-emerald-200">✓</div>
+<div class="w-[21px] h-[21px] rounded bg-emerald-50 text-success text-[10px] font-bold flex items-center justify-center border border-emerald-200">✓</div>
+<div class="w-[21px] h-[21px] rounded bg-emerald-50 text-success text-[10px] font-bold flex items-center justify-center border border-emerald-200">✓</div>
+<div class="w-[21px] h-[21px] rounded bg-emerald-50 text-success text-[10px] font-bold flex items-center justify-center border border-emerald-200">✓</div>
+<div class="w-[21px] h-[21px] rounded bg-emerald-50 text-success text-[10px] font-bold flex items-center justify-center border border-emerald-200">✓</div>
+<div class="w-[21px] h-[21px] rounded striped-pattern border border-slate-200"></div>
+<div class="w-[21px] h-[21px] rounded striped-pattern border border-slate-200"></div>
+</div>
+<!-- SEMANA 7 -->
+<div class="flex flex-col gap-[3px]">
+<div class="w-[21px] h-[21px] rounded bg-emerald-50 text-success text-[10px] font-bold flex items-center justify-center border border-emerald-200">✓</div>
+<div class="w-[21px] h-[21px] rounded striped-pattern border border-slate-200"></div>
+<div class="w-[21px] h-[21px] rounded bg-emerald-50 text-success text-[10px] font-bold flex items-center justify-center border border-emerald-200">✓</div>
+<div class="w-[21px] h-[21px] rounded bg-emerald-50 text-success text-[10px] font-bold flex items-center justify-center border border-emerald-200">✓</div>
+<div class="w-[21px] h-[21px] rounded bg-blue-50 text-schedule text-[9px] font-semibold flex items-center justify-center border border-blue-200">2</div>
+<div class="w-[21px] h-[21px] rounded striped-pattern border border-slate-200"></div>
+<div class="w-[21px] h-[21px] rounded striped-pattern border border-slate-200"></div>
+</div>
+<!-- SEMANA 8 -->
+<div class="flex flex-col gap-[3px]">
+<div class="w-[21px] h-[21px] rounded bg-emerald-50 text-success text-[10px] font-bold flex items-center justify-center border border-emerald-200">✓</div>
+<div class="w-[21px] h-[21px] rounded bg-emerald-50 text-success text-[10px] font-bold flex items-center justify-center border border-emerald-200">✓</div>
+<div class="w-[21px] h-[21px] rounded bg-emerald-50 text-success text-[10px] font-bold flex items-center justify-center border border-emerald-200">✓</div>
+<div class="w-[21px] h-[21px] rounded bg-emerald-50 text-success text-[10px] font-bold flex items-center justify-center border border-emerald-200">✓</div>
+<div class="w-[21px] h-[21px] rounded bg-emerald-50 text-success text-[10px] font-bold flex items-center justify-center border border-emerald-200">✓</div>
+<div class="w-[21px] h-[21px] rounded bg-blue-50 text-schedule text-[9px] font-semibold flex items-center justify-center border border-blue-200">1</div>
+<div class="w-[21px] h-[21px] rounded striped-pattern border border-slate-200"></div>
+</div>
+<!-- SEMANA 9 -->
+<div class="flex flex-col gap-[3px]">
+<div class="w-[21px] h-[21px] rounded bg-emerald-50 text-success text-[10px] font-bold flex items-center justify-center border border-emerald-200">✓</div>
+<div class="w-[21px] h-[21px] rounded bg-emerald-50 text-success text-[10px] font-bold flex items-center justify-center border border-emerald-200">✓</div>
+<div class="w-[21px] h-[21px] rounded bg-emerald-50 text-success text-[10px] font-bold flex items-center justify-center border border-emerald-200">✓</div>
+<div class="w-[21px] h-[21px] rounded bg-emerald-50 text-success text-[10px] font-bold flex items-center justify-center border border-emerald-200">✓</div>
+<div class="w-[21px] h-[21px] rounded bg-emerald-50 text-success text-[10px] font-bold flex items-center justify-center border border-emerald-200">✓</div>
+<div class="w-[21px] h-[21px] rounded striped-pattern border border-slate-200"></div>
+<div class="w-[21px] h-[21px] rounded striped-pattern border border-slate-200"></div>
+</div>
+<!-- SEMANA 10 -->
+<div class="flex flex-col gap-[3px]">
+<div class="w-[21px] h-[21px] rounded bg-emerald-50 text-success text-[10px] font-bold flex items-center justify-center border border-emerald-200">✓</div>
+<div class="w-[21px] h-[21px] rounded bg-emerald-50 text-success text-[10px] font-bold flex items-center justify-center border border-emerald-200">✓</div>
+<div class="w-[21px] h-[21px] rounded bg-blue-50 text-schedule text-[9px] font-semibold flex items-center justify-center border border-blue-200">2</div>
+<div class="w-[21px] h-[21px] rounded bg-emerald-50 text-success text-[10px] font-bold flex items-center justify-center border border-emerald-200">✓</div>
+<div class="w-[21px] h-[21px] rounded bg-emerald-50 text-success text-[10px] font-bold flex items-center justify-center border border-emerald-200">✓</div>
+<div class="w-[21px] h-[21px] rounded striped-pattern border border-slate-200"></div>
+<div class="w-[21px] h-[21px] rounded striped-pattern border border-slate-200"></div>
+</div>
+<!-- SEMANA 11 (Semana actual: L, M, X cumplidos; Jueves = HOY con ring azul grueso) -->
+<div class="flex flex-col gap-[3px]">
+<div class="w-[21px] h-[21px] rounded bg-emerald-50 text-success text-[10px] font-bold flex items-center justify-center border border-emerald-200">✓</div>
+<div class="w-[21px] h-[21px] rounded bg-emerald-50 text-success text-[10px] font-bold flex items-center justify-center border border-emerald-200">✓</div>
+<div class="w-[21px] h-[21px] rounded bg-emerald-50 text-success text-[10px] font-bold flex items-center justify-center border border-emerald-200">✓</div>
+<!-- HOY (JUEVES) -->
+<div class="w-[21px] h-[21px] rounded bg-emerald-100 text-schedule text-[10px] font-bold flex items-center justify-center ring-2 ring-primary-container border border-primary shadow-sm" title="Hoy: Jueves 28 Mar (3 tareas)">✓</div>
+<!-- Viernes a Domingo: Futuro -->
+<div class="w-[21px] h-[21px] rounded border border-dashed border-slate-300 bg-transparent" title="Futuro"></div>
+<div class="w-[21px] h-[21px] rounded border border-dashed border-slate-300 bg-transparent"></div>
+<div class="w-[21px] h-[21px] rounded border border-dashed border-slate-300 bg-transparent"></div>
+</div>
+<!-- SEMANA 12 (Semana próxima: Todo futuro) -->
+<div class="flex flex-col gap-[3px]">
+<div class="w-[21px] h-[21px] rounded border border-dashed border-slate-300 bg-transparent"></div>
+<div class="w-[21px] h-[21px] rounded border border-dashed border-slate-300 bg-transparent"></div>
+<div class="w-[21px] h-[21px] rounded border border-dashed border-slate-300 bg-transparent"></div>
+<div class="w-[21px] h-[21px] rounded border border-dashed border-slate-300 bg-transparent"></div>
+<div class="w-[21px] h-[21px] rounded border border-dashed border-slate-300 bg-transparent"></div>
+<div class="w-[21px] h-[21px] rounded border border-dashed border-slate-300 bg-transparent"></div>
+<div class="w-[21px] h-[21px] rounded border border-dashed border-slate-300 bg-transparent"></div>
+</div>
+</div>
+</div>
+<!-- Leyenda explicativa -->
+<div class="flex flex-wrap items-center justify-between gap-y-1 pt-2.5 mt-2 border-t border-border/50 text-[10px] text-text-muted">
+<div class="flex items-center gap-1">
+<span class="w-3 h-3 rounded bg-emerald-50 text-success flex items-center justify-center font-bold text-[8px] border border-emerald-200">✓</span>
+<span>Meta cumplida</span>
+</div>
+<div class="flex items-center gap-1">
+<span class="w-3 h-3 rounded bg-blue-50 text-schedule flex items-center justify-center font-bold text-[8px] border border-blue-200">2</span>
+<span>Parcial</span>
+</div>
+<div class="flex items-center gap-1">
+<span class="w-3 h-3 rounded striped-pattern border border-slate-200"></span>
+<span>▨ No activo</span>
+</div>
+<div class="flex items-center gap-1">
+<span class="w-3 h-3 rounded border border-dashed border-slate-300"></span>
+<span>◌ Futuro</span>
+</div>
+<div class="flex items-center gap-1">
+<span class="w-3 h-3 rounded bg-emerald-100 ring-1 ring-primary-container border border-primary"></span>
+<span class="font-semibold text-primary">Hoy</span>
+</div>
+</div>
+</section>
+<!-- 4. DETALLE DEL DÍA SELECCIONADO -->
+<section aria-label="Detalle del día seleccionado" class="bg-surface rounded-xl p-3.5 border border-border shadow-sm space-y-2.5">
+<div class="flex items-center justify-between border-b border-border/50 pb-2">
+<div>
+<h3 class="font-heading text-[14px] font-semibold text-on-background flex items-center gap-1.5">
+<span>Jueves, 28 de marzo (Hoy)</span>
+<span class="w-2 h-2 rounded-full bg-emerald-500 inline-block animate-pulse"></span>
+</h3>
+<p class="text-caption text-[11px] text-text-muted mt-0.5">3 de 3 tareas prioritarias completadas</p>
+</div>
+<span class="px-2 py-0.5 rounded-full bg-emerald-50 text-success text-[11px] font-semibold border border-emerald-200">
+            100%
+          </span>
+</div>
+<!-- Lista de tareas con estética Eisenhower -->
+<div class="space-y-2">
+<!-- Tarea 1 -->
+<article class="p-2.5 rounded-lg border-l-4 border-l-do-now bg-surface-alt border border-border/70 flex items-start justify-between gap-2 shadow-sm">
+<div class="space-y-1 flex-1">
+<p class="text-[13px] font-body-strong font-semibold text-text leading-snug">
+                Resolver caída de servidor de pagos en producción
+              </p>
+<div class="flex flex-wrap items-center gap-1.5 pt-0.5">
+<span class="px-1.5 py-0.5 rounded text-[10px] font-medium bg-red-50 text-do-now border border-red-200">
+                  Hacer ahora
+                </span>
+<span class="px-1.5 py-0.5 rounded text-[10px] font-medium bg-purple-50 text-scope-work border border-purple-200">
+                  Laboral
+                </span>
+</div>
+</div>
+<div class="text-right shrink-0">
+<span class="num-pixel text-[10px] text-primary bg-primary-fixed/60 px-1.5 py-0.5 rounded border border-primary/20">
+                +150 PTS
+              </span>
+</div>
+</article>
+<!-- Tarea 2 -->
+<article class="p-2.5 rounded-lg border-l-4 border-l-do-now bg-surface-alt border border-border/70 flex items-start justify-between gap-2 shadow-sm">
+<div class="space-y-1 flex-1">
+<p class="text-[13px] font-body-strong font-semibold text-text leading-snug">
+                Comprar receta médica en farmacia de turno
+              </p>
+<div class="flex flex-wrap items-center gap-1.5 pt-0.5">
+<span class="px-1.5 py-0.5 rounded text-[10px] font-medium bg-red-50 text-do-now border border-red-200">
+                  Hacer ahora
+                </span>
+<span class="px-1.5 py-0.5 rounded text-[10px] font-medium bg-teal-50 text-scope-personal border border-teal-200">
+                  Personal
+                </span>
+</div>
+</div>
+<div class="text-right shrink-0">
+<span class="num-pixel text-[10px] text-primary bg-primary-fixed/60 px-1.5 py-0.5 rounded border border-primary/20">
+                +100 PTS
+              </span>
+</div>
+</article>
+<!-- Tarea 3 -->
+<article class="p-2.5 rounded-lg border-l-4 border-l-schedule bg-surface-alt border border-border/70 flex items-start justify-between gap-2 shadow-sm">
+<div class="space-y-1 flex-1">
+<p class="text-[13px] font-body-strong font-semibold text-text leading-snug">
+                Planificar arquitectura de microservicios
+              </p>
+<div class="flex flex-wrap items-center gap-1.5 pt-0.5">
+<span class="px-1.5 py-0.5 rounded text-[10px] font-medium bg-blue-50 text-schedule border border-blue-200">
+                  Planificar
+                </span>
+<span class="px-1.5 py-0.5 rounded text-[10px] font-medium bg-purple-50 text-scope-work border border-purple-200">
+                  Laboral
+                </span>
+</div>
+</div>
+<div class="text-right shrink-0">
+<span class="num-pixel text-[10px] text-primary bg-primary-fixed/60 px-1.5 py-0.5 rounded border border-primary/20">
+                +120 PTS
+              </span>
+</div>
+</article>
+</div>
+</section>
+<!-- 5. ESTADÍSTICAS EN REJILLA 2×2 -->
+<section aria-label="Métricas de rendimiento" class="space-y-2">
+<h2 class="font-heading text-sm font-semibold text-on-background px-0.5 flex items-center gap-1">
+<span class="material-symbols-outlined text-[18px] text-schedule">analytics</span>
+          Métricas de Rendimiento
+        </h2>
+<div class="grid grid-cols-2 gap-2.5">
+<!-- Card 1: Mejor día -->
+<div class="bg-surface rounded-xl p-3 border border-border shadow-sm flex flex-col justify-between">
+<div class="flex items-center justify-between text-text-muted mb-1">
+<span class="text-[11px] font-caption font-medium">Mejor día</span>
+<span class="material-symbols-outlined text-[18px] text-primary">military_tech</span>
+</div>
+<div class="my-1">
+<div class="flex items-baseline gap-1.5">
+<span class="num-pixel text-[22px] text-on-background leading-none">6</span>
+<span class="text-caption text-xs font-medium text-text-muted">tareas</span>
+</div>
+</div>
+<p class="text-[10px] text-text-muted font-caption pt-1 border-t border-border/40">
+              Récord: <span class="font-medium text-text">14 Mar 2025</span>
+</p>
+</div>
+<!-- Card 2: Racha actual -->
+<div class="bg-surface rounded-xl p-3 border border-border shadow-sm flex flex-col justify-between">
+<div class="flex items-center justify-between text-text-muted mb-1">
+<span class="text-[11px] font-caption font-medium">Racha actual</span>
+<span class="material-symbols-outlined text-[18px] text-[#B45309] fill-icon">local_fire_department</span>
+</div>
+<div class="my-1">
+<div class="flex items-baseline gap-1.5">
+<span class="num-pixel text-[22px] text-[#B45309] leading-none">4</span>
+<span class="text-caption text-xs font-medium text-text-muted">días</span>
+</div>
+</div>
+<p class="text-[10px] text-text-muted font-caption pt-1 border-t border-border/40 flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+<span>¡Racha activa hoy!</span>
+</p>
+</div>
+<!-- Card 3: Mejor racha -->
+<div class="bg-surface rounded-xl p-3 border border-border shadow-sm flex flex-col justify-between">
+<div class="flex items-center justify-between text-text-muted mb-1">
+<span class="text-[11px] font-caption font-medium">Mejor racha</span>
+<span class="material-symbols-outlined text-[18px] text-[#A16207] fill-icon">emoji_events</span>
+</div>
+<div class="my-1">
+<div class="flex items-baseline gap-1.5">
+<span class="num-pixel text-[22px] text-on-background leading-none">12</span>
+<span class="text-caption text-xs font-medium text-text-muted">días</span>
+</div>
+</div>
+<p class="text-[10px] text-text-muted font-caption pt-1 border-t border-border/40">
+              Alcanzado en febrero
+            </p>
+</div>
+<!-- Card 4: Tareas distintas -->
+<div class="bg-surface rounded-xl p-3 border border-border shadow-sm flex flex-col justify-between">
+<div class="flex items-center justify-between text-text-muted mb-1">
+<span class="text-[11px] font-caption font-medium">Tareas distintas</span>
+<span class="material-symbols-outlined text-[18px] text-[#0E7490]">view_compact_alt</span>
+</div>
+<div class="my-1">
+<div class="flex items-baseline gap-1.5">
+<span class="num-pixel text-[22px] text-on-background leading-none">48</span>
+<span class="text-caption text-xs font-medium text-text-muted">ítems</span>
+</div>
+</div>
+<p class="text-[10px] text-text-muted font-caption pt-1 border-t border-border/40">
+              En ciclo actual
+            </p>
+</div>
+</div>
+</section>
+<!-- 6. SALA DE TROFEOS (12 LOGROS EN GRID-COLS-3) -->
+<section aria-label="Sala de trofeos y logros" class="bg-surface rounded-xl p-3.5 border border-border shadow-sm space-y-3">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[#A16207] text-[20px] fill-icon">trophy</span>
+<h2 class="font-heading text-sm font-semibold text-on-background">Sala de Trofeos</h2>
+</div>
+<span class="text-[11px] font-medium text-text-muted bg-surface-container px-2 py-0.5 rounded-full">
+            6 / 12 Desbloqueados
+          </span>
+</div>
+<!-- Rejilla de exactamente 12 logros (3 columnas) -->
+<div class="grid grid-cols-3 gap-2">
+<!-- TROFEO 1 (CONSEGUIDO) -->
+<div class="flex flex-col items-center text-center p-2 rounded-lg bg-amber-50/50 border border-amber-200/80 shadow-xs relative">
+<div class="w-8 h-8 rounded-full bg-amber-100 flex items-center justify-center text-[#A16207] mb-1.5 ring-2 ring-amber-300">
+<span class="material-symbols-outlined text-[18px] fill-icon">award_star</span>
+</div>
+<span class="text-[11px] font-body-strong font-semibold text-text leading-tight line-clamp-1">Primer paso</span>
+<span class="text-[9px] text-[#A16207] font-medium mt-0.5">12 Mar</span>
+</div>
+<!-- TROFEO 2 (CONSEGUIDO) -->
+<div class="flex flex-col items-center text-center p-2 rounded-lg bg-amber-50/50 border border-amber-200/80 shadow-xs relative">
+<div class="w-8 h-8 rounded-full bg-amber-100 flex items-center justify-center text-[#A16207] mb-1.5 ring-2 ring-amber-300">
+<span class="material-symbols-outlined text-[18px] fill-icon">local_fire_department</span>
+</div>
+<span class="text-[11px] font-body-strong font-semibold text-text leading-tight line-clamp-1">En racha</span>
+<span class="text-[9px] text-[#A16207] font-medium mt-0.5">18 Mar</span>
+</div>
+<!-- TROFEO 3 (CONSEGUIDO) -->
+<div class="flex flex-col items-center text-center p-2 rounded-lg bg-amber-50/50 border border-amber-200/80 shadow-xs relative">
+<div class="w-8 h-8 rounded-full bg-amber-100 flex items-center justify-center text-[#A16207] mb-1.5 ring-2 ring-amber-300">
+<span class="material-symbols-outlined text-[18px] fill-icon">grid_view</span>
+</div>
+<span class="text-[11px] font-body-strong font-semibold text-text leading-tight line-clamp-1">Cuadrante</span>
+<span class="text-[9px] text-[#A16207] font-medium mt-0.5">22 Mar</span>
+</div>
+<!-- TROFEO 4 (CONSEGUIDO) -->
+<div class="flex flex-col items-center text-center p-2 rounded-lg bg-amber-50/50 border border-amber-200/80 shadow-xs relative">
+<div class="w-8 h-8 rounded-full bg-amber-100 flex items-center justify-center text-[#A16207] mb-1.5 ring-2 ring-amber-300">
+<span class="material-symbols-outlined text-[18px] fill-icon">center_focus_strong</span>
+</div>
+<span class="text-[11px] font-body-strong font-semibold text-text leading-tight line-clamp-1">Foco absoluto</span>
+<span class="text-[9px] text-[#A16207] font-medium mt-0.5">25 Mar</span>
+</div>
+<!-- TROFEO 5 (CONSEGUIDO) -->
+<div class="flex flex-col items-center text-center p-2 rounded-lg bg-amber-50/50 border border-amber-200/80 shadow-xs relative">
+<div class="w-8 h-8 rounded-full bg-amber-100 flex items-center justify-center text-[#A16207] mb-1.5 ring-2 ring-amber-300">
+<span class="material-symbols-outlined text-[18px] fill-icon">bolt</span>
+</div>
+<span class="text-[11px] font-body-strong font-semibold text-text leading-tight line-clamp-1">Imparable</span>
+<span class="text-[9px] text-[#A16207] font-medium mt-0.5">Ayer</span>
+</div>
+<!-- TROFEO 6 (CONSEGUIDO) -->
+<div class="flex flex-col items-center text-center p-2 rounded-lg bg-amber-50/50 border border-amber-200/80 shadow-xs relative">
+<div class="w-8 h-8 rounded-full bg-amber-100 flex items-center justify-center text-[#A16207] mb-1.5 ring-2 ring-amber-300">
+<span class="material-symbols-outlined text-[18px] fill-icon">verified</span>
+</div>
+<span class="text-[11px] font-body-strong font-semibold text-text leading-tight line-clamp-1">Maestría</span>
+<span class="text-[9px] text-[#A16207] font-medium mt-0.5">28 Mar</span>
+</div>
+<!-- TROFEO 7 (BLOQUEADO) -->
+<div class="flex flex-col items-center text-center p-2 rounded-lg bg-slate-50 border border-dashed border-slate-300 opacity-80" title="Completa 7 días seguidos">
+<div class="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center text-slate-500 mb-1.5">
+<span class="material-symbols-outlined text-[16px]">lock</span>
+</div>
+<span class="text-[10px] font-medium text-text-muted leading-tight line-clamp-1">Semana 7d</span>
+<span class="text-[8px] text-slate-400 mt-0.5 leading-none">7 días seguidos</span>
+</div>
+<!-- TROFEO 8 (BLOQUEADO) -->
+<div class="flex flex-col items-center text-center p-2 rounded-lg bg-slate-50 border border-dashed border-slate-300 opacity-80" title="10 tareas en Planificar">
+<div class="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center text-slate-500 mb-1.5">
+<span class="material-symbols-outlined text-[16px]">lock</span>
+</div>
+<span class="text-[10px] font-medium text-text-muted leading-tight line-clamp-1">Estratega</span>
+<span class="text-[8px] text-slate-400 mt-0.5 leading-none">10 Planificar</span>
+</div>
+<!-- TROFEO 9 (BLOQUEADO) -->
+<div class="flex flex-col items-center text-center p-2 rounded-lg bg-slate-50 border border-dashed border-slate-300 opacity-80" title="5 tareas Delegadas">
+<div class="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center text-slate-500 mb-1.5">
+<span class="material-symbols-outlined text-[16px]">lock</span>
+</div>
+<span class="text-[10px] font-medium text-text-muted leading-tight line-clamp-1">Delegador</span>
+<span class="text-[8px] text-slate-400 mt-0.5 leading-none">5 Delegadas</span>
+</div>
+<!-- TROFEO 10 (BLOQUEADO) -->
+<div class="flex flex-col items-center text-center p-2 rounded-lg bg-slate-50 border border-dashed border-slate-300 opacity-80" title="Vacía cuadrante Eliminar">
+<div class="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center text-slate-500 mb-1.5">
+<span class="material-symbols-outlined text-[16px]">lock</span>
+</div>
+<span class="text-[10px] font-medium text-text-muted leading-tight line-clamp-1">Zen</span>
+<span class="text-[8px] text-slate-400 mt-0.5 leading-none">Vacía Eliminar</span>
+</div>
+<!-- TROFEO 11 (BLOQUEADO) -->
+<div class="flex flex-col items-center text-center p-2 rounded-lg bg-slate-50 border border-dashed border-slate-300 opacity-80" title="Alcanza 30 días de racha">
+<div class="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center text-slate-500 mb-1.5">
+<span class="material-symbols-outlined text-[16px]">lock</span>
+</div>
+<span class="text-[10px] font-medium text-text-muted leading-tight line-clamp-1">Racha 30d</span>
+<span class="text-[8px] text-slate-400 mt-0.5 leading-none">Racha 30 días</span>
+</div>
+<!-- TROFEO 12 (BLOQUEADO) -->
+<div class="flex flex-col items-center text-center p-2 rounded-lg bg-slate-50 border border-dashed border-slate-300 opacity-80" title="Alcanza 5.000 PTS">
+<div class="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center text-slate-500 mb-1.5">
+<span class="material-symbols-outlined text-[16px]">lock</span>
+</div>
+<span class="text-[10px] font-medium text-text-muted leading-tight line-clamp-1">Leyenda</span>
+<span class="text-[8px] text-slate-400 mt-0.5 leading-none">5.000 PTS</span>
+</div>
+</div>
+</section>
+</main>
+<!-- 7. BOTTOM NAVIGATION BAR (Shared Components: BottomNavBar) -->
+<!-- Prohibido border-t: Separación mediante sombra sutil tonal -->
+<nav aria-label="Navegación principal" class="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[390px] z-50 flex justify-around items-center px-space-md py-space-xs bg-surface shadow-[0_-4px_12px_rgba(15,23,42,0.06)]">
+<!-- 1. Matriz -->
+<a class="flex flex-col items-center justify-center text-text-muted px-space-md py-space-xs font-caption hover:text-primary transition-colors duration-150 active:scale-95" href="#matriz">
+<span class="material-symbols-outlined text-[22px]">grid_view</span>
+<span class="text-[11px] mt-0.5 font-medium">Matriz</span>
+</a>
+<!-- 2. Progreso (ACTIVO) -->
+<a aria-current="page" class="flex flex-col items-center justify-center bg-primary-fixed text-on-primary-fixed rounded-xl px-space-md py-space-xs font-body-strong shadow-xs active:scale-95 transition-transform duration-150" href="#progreso">
+<span class="material-symbols-outlined text-[22px] fill-icon">trending_up</span>
+<span class="text-[11px] mt-0.5 font-semibold">Progreso</span>
+</a>
+<!-- 3. Historial -->
+<a class="flex flex-col items-center justify-center text-text-muted px-space-md py-space-xs font-caption hover:text-primary transition-colors duration-150 active:scale-95" href="#historial">
+<span class="material-symbols-outlined text-[22px]">history</span>
+<span class="text-[11px] mt-0.5 font-medium">Historial</span>
+</a>
+<!-- 4. Ajustes -->
+<a class="flex flex-col items-center justify-center text-text-muted px-space-md py-space-xs font-caption hover:text-primary transition-colors duration-150 active:scale-95" href="#ajustes">
+<span class="material-symbols-outlined text-[22px]">settings</span>
+<span class="text-[11px] mt-0.5 font-medium">Ajustes</span>
+</a>
+</nav>
+</div>
+</body></html>

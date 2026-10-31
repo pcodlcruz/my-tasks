@@ -1,0 +1,828 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>S3 v3 · Tablero - InsertTasks (Escritorio)</title>
+  <!-- Google Fonts: Inter & Press Start 2P -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Press+Start+2P&display=swap" rel="stylesheet">
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Phosphor Icons / Lucide-like SVG helpers -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            pixel: ['"Press Start 2P"', 'monospace'],
+          },
+          colors: {
+            energy: {
+              fill: '#0E7490',
+              extra: '#A21CAF',
+              empty: '#64748B'
+            },
+            arcade: {
+              gold: '#A16207',
+              'gold-light': '#FEF08A',
+              streak: '#C2410C',
+              'streak-bg': '#FFEDD5',
+            },
+            eisenhower: {
+              do: {
+                accent: '#B91C1C',
+                bg: '#FEF2F2',
+                border: '#FCA5A5'
+              },
+              schedule: {
+                accent: '#1D4ED8',
+                bg: '#EFF6FF',
+                border: '#BFDBFE'
+              },
+              delegate: {
+                accent: '#B45309',
+                bg: '#FFFBEB',
+                border: '#FDE68A'
+              },
+              eliminate: {
+                accent: '#475569',
+                bg: '#F8FAFC',
+                border: '#CBD5E1'
+              }
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    /* Tipografía arcade solo en rótulos y cifras mín 12px con buen espaciado */
+    .font-pixel {
+      font-family: 'Press Start 2P', monospace;
+      letter-spacing: -0.05em;
+    }
+    .pixel-badge {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 12px;
+      line-height: 1.2;
+    }
+  </style>
+</head>
+<body class="bg-[#F8FAFC] text-[#0F172A] font-sans antialiased min-h-screen flex flex-col">
+
+  <!-- CABECERA PRINCIPAL (1440px desktop layout) -->
+  <header class="w-full bg-white border-b border-[#E2E8F0] sticky top-0 z-30 shadow-xs">
+    <div class="max-w-[1440px] mx-auto px-8 h-16 flex items-center justify-between">
+      
+      <!-- Izquierda: Marca InsertTasks (sin logo) y Navegación -->
+      <div class="flex items-center gap-10">
+        <div class="flex items-center gap-2">
+          <span class="font-pixel text-[15px] font-bold tracking-tight text-[#0F172A] hover:text-[#1D4ED8] transition-colors cursor-pointer select-none">
+            InsertTasks
+          </span>
+          <span class="text-[10px] font-pixel text-energy-fill bg-cyan-50 border border-cyan-200 px-1.5 py-0.5 rounded">v3</span>
+        </div>
+
+        <nav class="flex items-center gap-1 text-[14px] font-medium" aria-label="Navegación principal">
+          <!-- Tablero (activa) -->
+          <a href="#" class="px-3.5 py-2 rounded-md bg-[#EFF6FF] text-[#1D4ED8] font-semibold flex items-center gap-2 border-b-2 border-[#1D4ED8]" aria-current="page">
+            <svg class="w-4 h-4 text-[#1D4ED8]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <rect x="3" y="3" width="7" height="7" rx="1.5" stroke-width="2"/>
+              <rect x="14" y="3" width="7" height="7" rx="1.5" stroke-width="2"/>
+              <rect x="3" y="14" width="7" height="7" rx="1.5" stroke-width="2"/>
+              <rect x="14" y="14" width="7" height="7" rx="1.5" stroke-width="2"/>
+            </svg>
+            <span>Tablero</span>
+          </a>
+
+          <!-- Progreso -->
+          <a href="#" class="px-3.5 py-2 rounded-md text-[#475569] hover:text-[#0F172A] hover:bg-[#F1F5F9] transition-colors flex items-center gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
+            </svg>
+            <span>Progreso</span>
+          </a>
+
+          <!-- Programadas -->
+          <a href="#" class="px-3.5 py-2 rounded-md text-[#475569] hover:text-[#0F172A] hover:bg-[#F1F5F9] transition-colors flex items-center gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <rect x="3" y="4" width="18" height="18" rx="2" stroke-width="2"/>
+              <line x1="16" y1="2" x2="16" y2="6" stroke-width="2" stroke-linecap="round"/>
+              <line x1="8" y1="2" x2="8" y2="6" stroke-width="2" stroke-linecap="round"/>
+              <line x1="3" y1="10" x2="21" y2="10" stroke-width="2"/>
+            </svg>
+            <span>Programadas</span>
+          </a>
+
+          <!-- Historial -->
+          <a href="#" class="px-3.5 py-2 rounded-md text-[#475569] hover:text-[#0F172A] hover:bg-[#F1F5F9] transition-colors flex items-center gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <circle cx="12" cy="12" r="9" stroke-width="2"/>
+              <polyline points="12 7 12 12 15 15" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+            <span>Historial</span>
+          </a>
+
+          <!-- Papelera -->
+          <a href="#" class="px-3.5 py-2 rounded-md text-[#475569] hover:text-[#0F172A] hover:bg-[#F1F5F9] transition-colors flex items-center gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <polyline points="3 6 5 6 21 6" stroke-width="2" stroke-linecap="round"/>
+              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" stroke-width="2"/>
+            </svg>
+            <span>Papelera</span>
+          </a>
+
+          <!-- Accesos -->
+          <a href="#" class="px-3.5 py-2 rounded-md text-[#475569] hover:text-[#0F172A] hover:bg-[#F1F5F9] transition-colors flex items-center gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/>
+            </svg>
+            <span>Accesos</span>
+          </a>
+        </nav>
+      </div>
+
+      <!-- Derecha: Avatar con iniciales, nombre Ana y Cerrar sesión -->
+      <div class="flex items-center gap-4">
+        <div class="flex items-center gap-3 pl-3 pr-2 py-1 rounded-full bg-slate-50 border border-slate-200">
+          <div class="w-8 h-8 rounded-full bg-[#1D4ED8] text-white flex items-center justify-center font-bold text-xs ring-2 ring-blue-100 select-none">
+            AC
+          </div>
+          <span class="text-sm font-semibold text-[#0F172A]">Ana</span>
+        </div>
+
+        <button type="button" class="text-sm font-medium text-[#475569] hover:text-[#B91C1C] flex items-center gap-1.5 px-3 py-1.5 rounded-md hover:bg-slate-100 transition-colors" title="Cerrar sesión">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+          </svg>
+          <span>Cerrar sesión</span>
+        </button>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- CONTENEDOR PRINCIPAL -->
+  <main class="max-w-[1440px] mx-auto px-8 py-6 w-full flex-1 flex flex-col gap-6">
+
+    <!-- 1. MARCADOR DEL DÍA (Horizontal Arcade Banner) -->
+    <section class="w-full bg-white rounded-xl border border-slate-200/90 shadow-sm p-5 relative overflow-hidden" aria-label="Marcador del día">
+      <!-- Sutil acento superior arcade pixelado -->
+      <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-energy-fill via-arcade-gold to-energy-extra"></div>
+
+      <div class="flex flex-col xl:flex-row xl:items-center justify-between gap-6">
+        
+        <!-- Bloque Izquierdo: HOY 2/3 + Barra de energía + Metadatos -->
+        <div class="flex flex-wrap items-center gap-6 md:gap-8">
+          
+          <!-- HOY 2/3 -->
+          <div class="flex flex-col">
+            <div class="flex items-baseline gap-2">
+              <span class="pixel-badge text-[#0F172A] tracking-wider text-[14px]">HOY 2/3</span>
+            </div>
+            <span class="text-xs text-[#475569] font-medium mt-1">2 de 3 tareas completadas hoy</span>
+          </div>
+
+          <!-- Barra de energía de 3 segmentos (2 llenos #0E7490, 1 vacío contorno #64748B) -->
+          <div class="flex flex-col gap-1.5" aria-label="Barra de energía de 3 segmentos">
+            <span class="text-[11px] font-semibold text-slate-500 uppercase tracking-wider flex items-center gap-1">
+              <svg class="w-3.5 h-3.5 text-energy-fill" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z"/>
+              </svg>
+              Energía
+            </span>
+            <div class="flex items-center gap-1.5">
+              <!-- Segmento 1: Lleno #0E7490 -->
+              <div class="w-10 h-4 bg-energy-fill rounded-sm shadow-xs border border-[#085368] flex items-center justify-center" title="Segmento 1: Completado">
+                <div class="w-full h-[2px] bg-cyan-300/40 mb-auto"></div>
+              </div>
+              <!-- Segmento 2: Lleno #0E7490 -->
+              <div class="w-10 h-4 bg-energy-fill rounded-sm shadow-xs border border-[#085368] flex items-center justify-center" title="Segmento 2: Completado">
+                <div class="w-full h-[2px] bg-cyan-300/40 mb-auto"></div>
+              </div>
+              <!-- Segmento 3: Vacío con contorno #64748B -->
+              <div class="w-10 h-4 bg-slate-100 rounded-sm border-2 border-energy-empty flex items-center justify-center relative" title="Segmento 3: Pendiente">
+                <div class="w-1.5 h-1.5 bg-slate-300 rounded-full"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Divisor vertical -->
+          <div class="hidden sm:block h-10 w-px bg-slate-200"></div>
+
+          <!-- Racha 4 días · en juego con icono de llama en #C2410C -->
+          <div class="flex items-center gap-2.5 bg-orange-50/70 border border-orange-200/80 px-3.5 py-2 rounded-lg">
+            <div class="w-7 h-7 rounded-md bg-orange-100 flex items-center justify-center text-arcade-streak">
+              <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M12.395 2.553a1 1 0 00-1.45-.385c-.345.23-.614.558-.822.88-.527.82-1.124 2.102-1.328 3.52-.395 2.76.643 5.372 2.378 6.945a.75.75 0 001.077-1.04 7.02 7.02 0 01-1.616-4.992c.15-.992.576-1.956.964-2.56.195-.304.382-.544.53-.715.112-.13.208-.225.267-.282a.75.75 0 000-1.061l-1-1a.75.75 0 00-1-1c-.13.13-.274.29-.427.48a10.96 10.96 0 00-1.282 2.015c-.44.896-.757 1.895-.884 2.923A7.514 7.514 0 0012 17.5a7.5 7.5 0 007.5-7.5c0-2.31-1.048-4.38-2.695-5.758a.75.75 0 00-1.02.09c-.27.31-.59.71-.937 1.2a12.018 12.018 0 01-2.453 2.621z" clip-rule="evenodd"/>
+              </svg>
+            </div>
+            <div>
+              <div class="flex items-center gap-1.5">
+                <span class="text-sm font-bold text-arcade-streak">Racha 4 días</span>
+                <span class="text-[11px] font-medium text-orange-800 bg-orange-100/80 px-1.5 py-0.5 rounded">en juego</span>
+              </div>
+              <span class="text-[11px] text-orange-700">Mantén el ritmo diario</span>
+            </div>
+          </div>
+
+          <!-- Misión 1/2 -->
+          <div class="flex items-center gap-2 bg-purple-50 border border-purple-200/80 px-3.5 py-2 rounded-lg">
+            <span class="text-purple-700 font-bold text-base leading-none">★</span>
+            <div>
+              <span class="text-xs font-semibold text-purple-900 block">Misión 1/2</span>
+              <span class="text-[11px] text-purple-700">1 tarea clave asignada</span>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Bloque Derecho: Nivel + Puntos + Botón PULSA START -->
+        <div class="flex flex-wrap items-center gap-5 xl:justify-end">
+          
+          <!-- NIVEL 3 · Jugador & 3.450 PTS -->
+          <div class="flex items-center gap-3.5 bg-amber-50/70 border border-amber-200/80 px-4 py-2 rounded-lg">
+            <div class="text-right">
+              <div class="flex items-center justify-end gap-1.5 text-xs font-bold text-arcade-gold">
+                <svg class="w-3.5 h-3.5 text-arcade-gold" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                </svg>
+                <span>NIVEL 3 · Jugador</span>
+              </div>
+              <div class="flex items-center justify-end gap-2 mt-0.5">
+                <span class="font-pixel text-[13px] text-arcade-gold font-bold">3.450 PTS</span>
+              </div>
+            </div>
+
+            <!-- Mini barra hacia el nivel 4 -->
+            <div class="w-20 flex flex-col gap-1" title="Progreso a Nivel 4 (70%)">
+              <div class="w-full bg-amber-200/80 h-2.5 rounded-full overflow-hidden p-0.5">
+                <div class="bg-arcade-gold h-full rounded-full" style="width: 70%;"></div>
+              </div>
+              <span class="text-[9px] text-amber-800 font-semibold text-right leading-none">70% a Nivel 4</span>
+            </div>
+          </div>
+
+          <!-- Botón secundario: PULSA START -->
+          <button type="button" class="group px-4 py-2.5 bg-white border-2 border-slate-700 hover:border-[#1D4ED8] rounded-md shadow-xs hover:shadow text-slate-800 hover:text-[#1D4ED8] transition-all flex items-center gap-2 active:scale-95" title="Reabre el inicio de jornada">
+            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+            <span class="font-pixel text-[12px] tracking-tight">PULSA START</span>
+            <svg class="w-3.5 h-3.5 text-slate-500 group-hover:text-[#1D4ED8] transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
+            </svg>
+          </button>
+
+        </div>
+
+      </div>
+    </section>
+
+    <!-- 2. AVISO DISCRETO BAJO EL MARCADOR -->
+    <div class="w-full bg-amber-50 border border-amber-200/90 rounded-lg px-4 py-2.5 flex items-center justify-between text-sm text-amber-900 shadow-xs" role="alert">
+      <div class="flex items-center gap-3">
+        <div class="w-6 h-6 rounded-full bg-amber-200 text-amber-800 flex items-center justify-center shrink-0">
+          <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+          </svg>
+        </div>
+        <p class="font-medium text-[13.5px]">
+          La tarea programada <span class="font-semibold underline decoration-amber-400">"Pagar alquiler"</span> no cupo: tienes <strong class="font-semibold">500 tareas activas</strong>.
+        </p>
+      </div>
+      <button type="button" class="px-3 py-1 bg-white hover:bg-amber-100 text-amber-900 border border-amber-300 font-semibold text-xs rounded-md shadow-2xs transition-colors shrink-0">
+        Entendido
+      </button>
+    </div>
+
+    <!-- 3. BARRA DE ACCIONES: FILTRO DE ÁMBITO Y NUEVA TAREA -->
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-1">
+      
+      <!-- Filtros de ámbito -->
+      <div class="flex items-center gap-2">
+        <span class="text-xs font-semibold text-[#475569] uppercase tracking-wider mr-1">Ámbito:</span>
+        <div class="inline-flex p-1 bg-slate-200/80 rounded-lg">
+          <button type="button" class="px-3.5 py-1.5 rounded-md text-xs font-bold bg-white text-[#1D4ED8] shadow-xs transition-all">
+            Todas <span class="ml-1 text-[11px] px-1.5 py-0.2 rounded-full bg-blue-100 text-blue-800">8</span>
+          </button>
+          <button type="button" class="px-3.5 py-1.5 rounded-md text-xs font-medium text-[#475569] hover:text-[#0F172A] transition-all flex items-center gap-1.5">
+            <span class="w-2 h-2 rounded-full bg-[#7C3AED]"></span>
+            <span>Laboral</span>
+            <span class="text-[11px] text-slate-500">5</span>
+          </button>
+          <button type="button" class="px-3.5 py-1.5 rounded-md text-xs font-medium text-[#475569] hover:text-[#0F172A] transition-all flex items-center gap-1.5">
+            <span class="w-2 h-2 rounded-full bg-[#0D9488]"></span>
+            <span>Personal</span>
+            <span class="text-[11px] text-slate-500">3</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Botón Principal: Nueva Tarea -->
+      <button type="button" class="px-4 py-2 bg-[#1D4ED8] hover:bg-[#1E40AF] text-white font-semibold text-sm rounded-lg shadow-sm hover:shadow transition-all flex items-center justify-center gap-2 active:scale-98">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/>
+        </svg>
+        <span>Nueva tarea</span>
+      </button>
+
+    </div>
+
+    <!-- 4. MATRIZ DE EISENHOWER (2×2 GRID PARA ESCRITORIO) -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pb-12">
+
+      <!-- ========================================== -->
+      <!-- CUADRANTE 1: HACER AHORA (Urgente e Importante) - ROJO -->
+      <!-- ========================================== -->
+      <section class="bg-white rounded-xl border border-slate-200 shadow-xs flex flex-col overflow-hidden" aria-labelledby="heading-q1">
+        <!-- Header Cuadrante -->
+        <div class="px-5 py-3.5 bg-eisenhower-do-bg border-b border-eisenhower-do-border flex items-center justify-between">
+          <div class="flex items-center gap-2.5">
+            <div class="w-3.5 h-3.5 rounded-full bg-eisenhower-do-accent ring-4 ring-red-100 flex items-center justify-center">
+              <span class="sr-only">Cuadrante 1</span>
+            </div>
+            <h2 id="heading-q1" class="text-base font-bold text-eisenhower-do-accent flex items-center gap-2">
+              <span>Hacer ahora</span>
+              <span class="text-xs font-normal text-slate-600 bg-white/80 px-2 py-0.5 rounded border border-red-200">Urgente e Importante</span>
+            </h2>
+          </div>
+          <span class="text-xs font-semibold px-2 py-0.5 rounded-full bg-red-100 text-red-800">2 tareas</span>
+        </div>
+
+        <!-- Lista de Tarjetas -->
+        <div class="p-4 flex flex-col gap-3.5 flex-1 bg-slate-50/50">
+          
+          <!-- Tarjeta 1.1: Con Misión del día & Laboral -->
+          <article class="bg-white rounded-lg border border-slate-200 border-l-4 border-l-eisenhower-do-accent p-3.5 shadow-xs hover:shadow-md transition-shadow relative">
+            <div class="flex items-start justify-between gap-3">
+              <div class="flex-1">
+                <div class="flex flex-wrap items-center gap-2 mb-1.5">
+                  <!-- Insignia: Misión del día -->
+                  <span class="inline-flex items-center gap-1 text-[11px] font-bold text-purple-700 bg-purple-50 border border-purple-200 px-2 py-0.5 rounded">
+                    ★ Misión del día
+                  </span>
+                  <!-- Insignia Ámbito: Laboral -->
+                  <span class="inline-flex items-center gap-1 text-[11px] font-semibold text-[#7C3AED] bg-purple-50 px-2 py-0.5 rounded">
+                    <span class="w-1.5 h-1.5 rounded-full bg-[#7C3AED]"></span> Laboral
+                  </span>
+                  <span class="text-xs text-red-600 font-medium flex items-center gap-1">
+                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" stroke-width="2"/><polyline points="12 6 12 12 16 14" stroke-width="2"/></svg>
+                    Hoy, 15:00
+                  </span>
+                </div>
+                <h3 class="text-sm font-semibold text-[#0F172A] leading-snug">
+                  Resolver caída del servidor de pagos Stripe en producción
+                </h3>
+              </div>
+
+              <!-- Acciones de tarjeta -->
+              <div class="flex items-center gap-1 shrink-0">
+                <!-- Quitar de la misión (estrella llena) -->
+                <button type="button" class="p-1.5 text-purple-600 hover:bg-purple-50 rounded transition-colors" title="Quitar de la misión">
+                  <svg class="w-4 h-4 fill-current" viewBox="0 0 20 20">
+                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                  </svg>
+                </button>
+                <!-- Fijar -->
+                <button type="button" class="p-1.5 text-slate-400 hover:text-[#1D4ED8] hover:bg-slate-100 rounded" title="Fijar tarea">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"/></svg>
+                </button>
+                <!-- Editar -->
+                <button type="button" class="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded" title="Editar tarea">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
+                </button>
+                <!-- Eliminar -->
+                <button type="button" class="p-1.5 text-slate-400 hover:text-[#B91C1C] hover:bg-slate-100 rounded" title="Mover a papelera">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                </button>
+              </div>
+            </div>
+
+            <!-- Footer tarjeta con botón Completar -->
+            <div class="mt-3 pt-2.5 border-t border-slate-100 flex items-center justify-between">
+              <span class="text-xs text-slate-400">Recompensa: +150 PTS</span>
+              <button type="button" class="px-3 py-1 bg-white hover:bg-emerald-50 text-emerald-700 hover:text-emerald-800 border border-emerald-300 font-semibold text-xs rounded-md flex items-center gap-1.5 transition-colors">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                <span>Completar</span>
+              </button>
+            </div>
+          </article>
+
+          <!-- Tarjeta 1.2: Personal & Añadir a la misión -->
+          <article class="bg-white rounded-lg border border-slate-200 border-l-4 border-l-eisenhower-do-accent p-3.5 shadow-xs hover:shadow-md transition-shadow relative">
+            <div class="flex items-start justify-between gap-3">
+              <div class="flex-1">
+                <div class="flex flex-wrap items-center gap-2 mb-1.5">
+                  <!-- Insignia Ámbito: Personal -->
+                  <span class="inline-flex items-center gap-1 text-[11px] font-semibold text-[#0D9488] bg-teal-50 px-2 py-0.5 rounded">
+                    <span class="w-1.5 h-1.5 rounded-full bg-[#0D9488]"></span> Personal
+                  </span>
+                  <span class="text-xs text-red-600 font-medium">Vence hoy, 19:30</span>
+                </div>
+                <h3 class="text-sm font-semibold text-[#0F172A] leading-snug">
+                  Comprar receta médica prescrita en farmacia de turno
+                </h3>
+              </div>
+
+              <!-- Acciones de tarjeta -->
+              <div class="flex items-center gap-1 shrink-0">
+                <!-- Añadir a la misión (estrella con contorno) -->
+                <button type="button" class="p-1.5 text-slate-400 hover:text-purple-600 hover:bg-purple-50 rounded transition-colors" title="Añadir a la misión">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/>
+                  </svg>
+                </button>
+                <button type="button" class="p-1.5 text-slate-400 hover:text-[#1D4ED8] hover:bg-slate-100 rounded" title="Fijar">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"/></svg>
+                </button>
+                <button type="button" class="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded" title="Editar">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
+                </button>
+                <button type="button" class="p-1.5 text-slate-400 hover:text-[#B91C1C] hover:bg-slate-100 rounded" title="Eliminar">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                </button>
+              </div>
+            </div>
+
+            <div class="mt-3 pt-2.5 border-t border-slate-100 flex items-center justify-between">
+              <span class="text-xs text-slate-400">Recompensa: +100 PTS</span>
+              <button type="button" class="px-3 py-1 bg-white hover:bg-emerald-50 text-emerald-700 hover:text-emerald-800 border border-emerald-300 font-semibold text-xs rounded-md flex items-center gap-1.5 transition-colors">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                <span>Completar</span>
+              </button>
+            </div>
+          </article>
+
+        </div>
+      </section>
+
+      <!-- ========================================== -->
+      <!-- CUADRANTE 2: PLANIFICAR (No urgente, Importante) - AZUL -->
+      <!-- ========================================== -->
+      <section class="bg-white rounded-xl border border-slate-200 shadow-xs flex flex-col overflow-hidden" aria-labelledby="heading-q2">
+        <!-- Header Cuadrante -->
+        <div class="px-5 py-3.5 bg-eisenhower-schedule-bg border-b border-eisenhower-schedule-border flex items-center justify-between">
+          <div class="flex items-center gap-2.5">
+            <div class="w-3.5 h-3.5 rounded-full bg-eisenhower-schedule-accent ring-4 ring-blue-100 flex items-center justify-center">
+              <span class="sr-only">Cuadrante 2</span>
+            </div>
+            <h2 id="heading-q2" class="text-base font-bold text-eisenhower-schedule-accent flex items-center gap-2">
+              <span>Planificar</span>
+              <span class="text-xs font-normal text-slate-600 bg-white/80 px-2 py-0.5 rounded border border-blue-200">No urgente, Importante</span>
+            </h2>
+          </div>
+          <span class="text-xs font-semibold px-2 py-0.5 rounded-full bg-blue-100 text-blue-800">2 tareas</span>
+        </div>
+
+        <!-- Lista de Tarjetas -->
+        <div class="p-4 flex flex-col gap-3.5 flex-1 bg-slate-50/50">
+
+          <!-- Tarjeta 2.1: Con insignia "📅 Programada" -->
+          <article class="bg-white rounded-lg border border-slate-200 border-l-4 border-l-eisenhower-schedule-accent p-3.5 shadow-xs hover:shadow-md transition-shadow relative">
+            <div class="flex items-start justify-between gap-3">
+              <div class="flex-1">
+                <div class="flex flex-wrap items-center gap-2 mb-1.5">
+                  <!-- Insignia: Programada -->
+                  <span class="inline-flex items-center gap-1 text-[11px] font-semibold text-blue-700 bg-blue-50 border border-blue-200 px-2 py-0.5 rounded">
+                    📅 Programada
+                  </span>
+                  <!-- Insignia Ámbito: Laboral -->
+                  <span class="inline-flex items-center gap-1 text-[11px] font-semibold text-[#7C3AED] bg-purple-50 px-2 py-0.5 rounded">
+                    <span class="w-1.5 h-1.5 rounded-full bg-[#7C3AED]"></span> Laboral
+                  </span>
+                  <span class="text-xs text-slate-500 font-medium">Jueves 16, 10:00</span>
+                </div>
+                <h3 class="text-sm font-semibold text-[#0F172A] leading-snug">
+                  Definir arquitectura v2 para microservicios de inventario
+                </h3>
+              </div>
+
+              <!-- Acciones de tarjeta -->
+              <div class="flex items-center gap-1 shrink-0">
+                <button type="button" class="p-1.5 text-slate-400 hover:text-purple-600 hover:bg-purple-50 rounded transition-colors" title="Añadir a la misión">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/>
+                  </svg>
+                </button>
+                <button type="button" class="p-1.5 text-slate-400 hover:text-[#1D4ED8] hover:bg-slate-100 rounded" title="Fijar">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"/></svg>
+                </button>
+                <button type="button" class="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded" title="Editar">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
+                </button>
+                <button type="button" class="p-1.5 text-slate-400 hover:text-[#B91C1C] hover:bg-slate-100 rounded" title="Eliminar">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                </button>
+              </div>
+            </div>
+
+            <div class="mt-3 pt-2.5 border-t border-slate-100 flex items-center justify-between">
+              <span class="text-xs text-slate-400">Recompensa: +200 PTS</span>
+              <button type="button" class="px-3 py-1 bg-white hover:bg-emerald-50 text-emerald-700 hover:text-emerald-800 border border-emerald-300 font-semibold text-xs rounded-md flex items-center gap-1.5 transition-colors">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                <span>Completar</span>
+              </button>
+            </div>
+          </article>
+
+          <!-- Tarjeta 2.2: Con insignia "Programada · Pendiente desde el lun 3" -->
+          <article class="bg-white rounded-lg border border-slate-200 border-l-4 border-l-eisenhower-schedule-accent p-3.5 shadow-xs hover:shadow-md transition-shadow relative">
+            <div class="flex items-start justify-between gap-3">
+              <div class="flex-1">
+                <div class="flex flex-wrap items-center gap-2 mb-1.5">
+                  <!-- Insignia especial programada atrasada -->
+                  <span class="inline-flex items-center gap-1 text-[11px] font-semibold text-amber-800 bg-amber-50 border border-amber-300 px-2 py-0.5 rounded">
+                    ⚠️ Programada · Pendiente desde el lun 3
+                  </span>
+                  <!-- Insignia Ámbito: Personal -->
+                  <span class="inline-flex items-center gap-1 text-[11px] font-semibold text-[#0D9488] bg-teal-50 px-2 py-0.5 rounded">
+                    <span class="w-1.5 h-1.5 rounded-full bg-[#0D9488]"></span> Personal
+                  </span>
+                </div>
+                <h3 class="text-sm font-semibold text-[#0F172A] leading-snug">
+                  Planificar rutina trimestral de entrenamiento de fuerza y cardio
+                </h3>
+              </div>
+
+              <!-- Acciones de tarjeta -->
+              <div class="flex items-center gap-1 shrink-0">
+                <button type="button" class="p-1.5 text-slate-400 hover:text-purple-600 hover:bg-purple-50 rounded transition-colors" title="Añadir a la misión">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/>
+                  </svg>
+                </button>
+                <button type="button" class="p-1.5 text-slate-400 hover:text-[#1D4ED8] hover:bg-slate-100 rounded" title="Fijar">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"/></svg>
+                </button>
+                <button type="button" class="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded" title="Editar">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
+                </button>
+                <button type="button" class="p-1.5 text-slate-400 hover:text-[#B91C1C] hover:bg-slate-100 rounded" title="Eliminar">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                </button>
+              </div>
+            </div>
+
+            <div class="mt-3 pt-2.5 border-t border-slate-100 flex items-center justify-between">
+              <span class="text-xs text-slate-400">Recompensa: +100 PTS</span>
+              <button type="button" class="px-3 py-1 bg-white hover:bg-emerald-50 text-emerald-700 hover:text-emerald-800 border border-emerald-300 font-semibold text-xs rounded-md flex items-center gap-1.5 transition-colors">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                <span>Completar</span>
+              </button>
+            </div>
+          </article>
+
+        </div>
+      </section>
+
+      <!-- ========================================== -->
+      <!-- CUADRANTE 3: DELEGAR (Urgente, No importante) - ÁMBAR -->
+      <!-- ========================================== -->
+      <section class="bg-white rounded-xl border border-slate-200 shadow-xs flex flex-col overflow-hidden" aria-labelledby="heading-q3">
+        <!-- Header Cuadrante -->
+        <div class="px-5 py-3.5 bg-eisenhower-delegate-bg border-b border-eisenhower-delegate-border flex items-center justify-between">
+          <div class="flex items-center gap-2.5">
+            <div class="w-3.5 h-3.5 rounded-full bg-eisenhower-delegate-accent ring-4 ring-amber-100 flex items-center justify-center">
+              <span class="sr-only">Cuadrante 3</span>
+            </div>
+            <h2 id="heading-q3" class="text-base font-bold text-eisenhower-delegate-accent flex items-center gap-2">
+              <span>Delegar</span>
+              <span class="text-xs font-normal text-slate-600 bg-white/80 px-2 py-0.5 rounded border border-amber-200">Urgente, No importante</span>
+            </h2>
+          </div>
+          <span class="text-xs font-semibold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800">2 tareas</span>
+        </div>
+
+        <!-- Lista de Tarjetas -->
+        <div class="p-4 flex flex-col gap-3.5 flex-1 bg-slate-50/50">
+
+          <!-- Tarjeta 3.1: Laboral delegado -->
+          <article class="bg-white rounded-lg border border-slate-200 border-l-4 border-l-eisenhower-delegate-accent p-3.5 shadow-xs hover:shadow-md transition-shadow relative">
+            <div class="flex items-start justify-between gap-3">
+              <div class="flex-1">
+                <div class="flex flex-wrap items-center gap-2 mb-1.5">
+                  <span class="inline-flex items-center gap-1 text-[11px] font-semibold text-[#7C3AED] bg-purple-50 px-2 py-0.5 rounded">
+                    <span class="w-1.5 h-1.5 rounded-full bg-[#7C3AED]"></span> Laboral
+                  </span>
+                  <span class="text-xs text-amber-800 bg-amber-100/70 px-2 py-0.5 rounded font-medium flex items-center gap-1">
+                    👤 Asignado a: Marta G.
+                  </span>
+                </div>
+                <h3 class="text-sm font-semibold text-[#0F172A] leading-snug">
+                  Coordinar logística y catering para evento de innovación tecnológica
+                </h3>
+              </div>
+
+              <!-- Acciones de tarjeta -->
+              <div class="flex items-center gap-1 shrink-0">
+                <button type="button" class="p-1.5 text-slate-400 hover:text-purple-600 hover:bg-purple-50 rounded transition-colors" title="Añadir a la misión">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/>
+                  </svg>
+                </button>
+                <button type="button" class="p-1.5 text-slate-400 hover:text-[#1D4ED8] hover:bg-slate-100 rounded" title="Fijar">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"/></svg>
+                </button>
+                <button type="button" class="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded" title="Editar">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
+                </button>
+                <button type="button" class="p-1.5 text-slate-400 hover:text-[#B91C1C] hover:bg-slate-100 rounded" title="Eliminar">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                </button>
+              </div>
+            </div>
+
+            <div class="mt-3 pt-2.5 border-t border-slate-100 flex items-center justify-between">
+              <span class="text-xs text-slate-400">Recompensa: +80 PTS</span>
+              <button type="button" class="px-3 py-1 bg-white hover:bg-emerald-50 text-emerald-700 hover:text-emerald-800 border border-emerald-300 font-semibold text-xs rounded-md flex items-center gap-1.5 transition-colors">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                <span>Completar</span>
+              </button>
+            </div>
+          </article>
+
+          <!-- Tarjeta 3.2: Personal delegado -->
+          <article class="bg-white rounded-lg border border-slate-200 border-l-4 border-l-eisenhower-delegate-accent p-3.5 shadow-xs hover:shadow-md transition-shadow relative">
+            <div class="flex items-start justify-between gap-3">
+              <div class="flex-1">
+                <div class="flex flex-wrap items-center gap-2 mb-1.5">
+                  <span class="inline-flex items-center gap-1 text-[11px] font-semibold text-[#0D9488] bg-teal-50 px-2 py-0.5 rounded">
+                    <span class="w-1.5 h-1.5 rounded-full bg-[#0D9488]"></span> Personal
+                  </span>
+                  <span class="text-xs text-amber-800 bg-amber-100/70 px-2 py-0.5 rounded font-medium flex items-center gap-1">
+                    👤 Asignado a: Roberto M.
+                  </span>
+                </div>
+                <h3 class="text-sm font-semibold text-[#0F172A] leading-snug">
+                  Revisar presupuestos y garantías de pintura y mantenimiento doméstico
+                </h3>
+              </div>
+
+              <!-- Acciones de tarjeta -->
+              <div class="flex items-center gap-1 shrink-0">
+                <button type="button" class="p-1.5 text-slate-400 hover:text-purple-600 hover:bg-purple-50 rounded transition-colors" title="Añadir a la misión">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/>
+                  </svg>
+                </button>
+                <button type="button" class="p-1.5 text-slate-400 hover:text-[#1D4ED8] hover:bg-slate-100 rounded" title="Fijar">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"/></svg>
+                </button>
+                <button type="button" class="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded" title="Editar">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
+                </button>
+                <button type="button" class="p-1.5 text-slate-400 hover:text-[#B91C1C] hover:bg-slate-100 rounded" title="Eliminar">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                </button>
+              </div>
+            </div>
+
+            <div class="mt-3 pt-2.5 border-t border-slate-100 flex items-center justify-between">
+              <span class="text-xs text-slate-400">Recompensa: +80 PTS</span>
+              <button type="button" class="px-3 py-1 bg-white hover:bg-emerald-50 text-emerald-700 hover:text-emerald-800 border border-emerald-300 font-semibold text-xs rounded-md flex items-center gap-1.5 transition-colors">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                <span>Completar</span>
+              </button>
+            </div>
+          </article>
+
+        </div>
+      </section>
+
+      <!-- ========================================== -->
+      <!-- CUADRANTE 4: ELIMINAR (Ni urgente, Ni importante) - PIZARRA -->
+      <!-- ========================================== -->
+      <section class="bg-white rounded-xl border border-slate-200 shadow-xs flex flex-col overflow-hidden" aria-labelledby="heading-q4">
+        <!-- Header Cuadrante -->
+        <div class="px-5 py-3.5 bg-eisenhower-eliminate-bg border-b border-eisenhower-eliminate-border flex items-center justify-between">
+          <div class="flex items-center gap-2.5">
+            <div class="w-3.5 h-3.5 rounded-full bg-eisenhower-eliminate-accent ring-4 ring-slate-100 flex items-center justify-center">
+              <span class="sr-only">Cuadrante 4</span>
+            </div>
+            <h2 id="heading-q4" class="text-base font-bold text-eisenhower-eliminate-accent flex items-center gap-2">
+              <span>Eliminar</span>
+              <span class="text-xs font-normal text-slate-600 bg-white/80 px-2 py-0.5 rounded border border-slate-300">Ni urgente, Ni importante</span>
+            </h2>
+          </div>
+          <span class="text-xs font-semibold px-2 py-0.5 rounded-full bg-slate-200 text-slate-800">2 tareas</span>
+        </div>
+
+        <!-- Lista de Tarjetas -->
+        <div class="p-4 flex flex-col gap-3.5 flex-1 bg-slate-50/50">
+
+          <!-- Tarjeta 4.1: Personal eliminable -->
+          <article class="bg-white rounded-lg border border-slate-200 border-l-4 border-l-eisenhower-eliminate-accent p-3.5 shadow-xs hover:shadow-md transition-shadow relative">
+            <div class="flex items-start justify-between gap-3">
+              <div class="flex-1">
+                <div class="flex flex-wrap items-center gap-2 mb-1.5">
+                  <span class="inline-flex items-center gap-1 text-[11px] font-semibold text-[#0D9488] bg-teal-50 px-2 py-0.5 rounded">
+                    <span class="w-1.5 h-1.5 rounded-full bg-[#0D9488]"></span> Personal
+                  </span>
+                  <span class="text-xs text-slate-500 bg-slate-100 px-2 py-0.5 rounded font-medium">
+                    🗑️ Candidata a descarte
+                  </span>
+                </div>
+                <h3 class="text-sm font-semibold text-[#475569] line-through leading-snug">
+                  Reorganizar feeds RSS obsoletos y newsletters archivadas de 2023
+                </h3>
+              </div>
+
+              <!-- Acciones de tarjeta -->
+              <div class="flex items-center gap-1 shrink-0">
+                <button type="button" class="p-1.5 text-slate-400 hover:text-purple-600 hover:bg-purple-50 rounded transition-colors" title="Añadir a la misión">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/>
+                  </svg>
+                </button>
+                <button type="button" class="p-1.5 text-slate-400 hover:text-[#1D4ED8] hover:bg-slate-100 rounded" title="Fijar">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"/></svg>
+                </button>
+                <button type="button" class="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded" title="Editar">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
+                </button>
+                <button type="button" class="p-1.5 text-slate-400 hover:text-[#B91C1C] hover:bg-slate-100 rounded" title="Eliminar">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                </button>
+              </div>
+            </div>
+
+            <div class="mt-3 pt-2.5 border-t border-slate-100 flex items-center justify-between">
+              <span class="text-xs text-slate-400">Limpieza mental: +50 PTS</span>
+              <button type="button" class="px-3 py-1 bg-white hover:bg-rose-50 text-slate-700 hover:text-rose-700 border border-slate-300 font-semibold text-xs rounded-md flex items-center gap-1.5 transition-colors">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                <span>Descartar</span>
+              </button>
+            </div>
+          </article>
+
+          <!-- Tarjeta 4.2: Laboral descartable -->
+          <article class="bg-white rounded-lg border border-slate-200 border-l-4 border-l-eisenhower-eliminate-accent p-3.5 shadow-xs hover:shadow-md transition-shadow relative">
+            <div class="flex items-start justify-between gap-3">
+              <div class="flex-1">
+                <div class="flex flex-wrap items-center gap-2 mb-1.5">
+                  <span class="inline-flex items-center gap-1 text-[11px] font-semibold text-[#7C3AED] bg-purple-50 px-2 py-0.5 rounded">
+                    <span class="w-1.5 h-1.5 rounded-full bg-[#7C3AED]"></span> Laboral
+                  </span>
+                  <span class="text-xs text-slate-500 bg-slate-100 px-2 py-0.5 rounded font-medium">
+                    🗑️ Distracción identificada
+                  </span>
+                </div>
+                <h3 class="text-sm font-semibold text-[#475569] leading-snug">
+                  Depurar suscripciones de software antiguo sin uso en la nube
+                </h3>
+              </div>
+
+              <!-- Acciones de tarjeta -->
+              <div class="flex items-center gap-1 shrink-0">
+                <button type="button" class="p-1.5 text-slate-400 hover:text-purple-600 hover:bg-purple-50 rounded transition-colors" title="Añadir a la misión">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/>
+                  </svg>
+                </button>
+                <button type="button" class="p-1.5 text-slate-400 hover:text-[#1D4ED8] hover:bg-slate-100 rounded" title="Fijar">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"/></svg>
+                </button>
+                <button type="button" class="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded" title="Editar">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
+                </button>
+                <button type="button" class="p-1.5 text-slate-400 hover:text-[#B91C1C] hover:bg-slate-100 rounded" title="Eliminar">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                </button>
+              </div>
+            </div>
+
+            <div class="mt-3 pt-2.5 border-t border-slate-100 flex items-center justify-between">
+              <span class="text-xs text-slate-400">Limpieza mental: +50 PTS</span>
+              <button type="button" class="px-3 py-1 bg-white hover:bg-rose-50 text-slate-700 hover:text-rose-700 border border-slate-300 font-semibold text-xs rounded-md flex items-center gap-1.5 transition-colors">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                <span>Descartar</span>
+              </button>
+            </div>
+          </article>
+
+        </div>
+      </section>
+
+    </div>
+
+  </main>
+
+  <!-- PIE DE PÁGINA ESCRITORIO -->
+  <footer class="w-full bg-white border-t border-slate-200 mt-auto py-5">
+    <div class="max-w-[1440px] mx-auto px-8 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-500">
+      <div class="flex items-center gap-2">
+        <span class="font-pixel text-[11px] text-slate-700">InsertTasks</span>
+        <span>• Enfoque de productividad con matriz de Dwight D. Eisenhower y micro-recompensas.</span>
+      </div>
+      <div class="flex items-center gap-6">
+        <a href="#" class="hover:text-slate-800 transition-colors">Privacidad</a>
+        <a href="#" class="hover:text-slate-800 transition-colors">Términos</a>
+        <a href="#" class="hover:text-slate-800 transition-colors">Ayuda y Atajos</a>
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>
