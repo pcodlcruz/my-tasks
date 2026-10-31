@@ -354,22 +354,22 @@ Fase 5; en esta fase solo se muestra la celebración mínima de meta cumplida (U
 
 ### Tests de la Fase 3 (escribirlos primero; deben fallar)
 
-- [ ] T049 [P] [US1] Tests unitarios de los hooks en `frontend/tests/unit/api/progress.test.ts`:
+- [X] T049 [P] [US1] Tests unitarios de los hooks en `frontend/tests/unit/api/progress.test.ts`:
   - `useProgress` (consulta `GET /me/progress`, `staleTime` 0, vuelve a pedirla al volver a la pestaña);
   - completar o reabrir una tarea invalida `progress` y `tasks`;
   - un error de red deja el último valor y marca el error.
-- [ ] T050 [P] [US1] Tests unitarios del marcador en `frontend/tests/unit/features/progress/DayScoreboard.test.tsx` y `EnergyBar.test.tsx`:
+- [X] T050 [P] [US1] Tests unitarios del marcador en `frontend/tests/unit/features/progress/DayScoreboard.test.tsx` y `EnergyBar.test.tsx`:
   - 0/3, 2/3, 3/3 (fase superada) y 5/3 (segmentos extra);
   - racha y «en juego»;
   - texto accesible («2 de 3 tareas completadas hoy»);
   - aviso discreto si falla la carga (FR-034).
-- [ ] T051 [P] [US1] Tests unitarios de la sección «Progreso y juego» en `frontend/tests/unit/features/profile/ProgressSettings.test.tsx`:
+- [X] T051 [P] [US1] Tests unitarios de la sección «Progreso y juego» en `frontend/tests/unit/features/profile/ProgressSettings.test.tsx`:
   - meta 1–20;
   - no se pueden desmarcar todos los días;
   - se detecta la zona horaria con `Intl` y se envía la primera vez que el perfil no tiene ninguna;
   - si la detectada es distinta de la guardada, «Usar esta» la cambia y nunca se cambia sola;
   - un error al guardar vuelve al valor anterior con un aviso.
-- [ ] T052 [US1] Test e2e `frontend/tests/e2e/progress-day.spec.ts`, con los emuladores, `page.clock` y `X-Test-Now`:
+- [X] T052 [US1] Test e2e `frontend/tests/e2e/progress-day.spec.ts`, con los emuladores, `page.clock` y `X-Test-Now`:
   - cuenta nueva con «HOY 0/3»;
   - completar 3 tareas: 3/3 sin recargar y la celebración de meta cumplida;
   - reabrir una: 2/3;
@@ -378,20 +378,41 @@ Fase 5; en esta fase solo se muestra la celebración mínima de meta cumplida (U
 
 ### Implementación de la Fase 3
 
-- [ ] T053 [P] [US1] Añadir la fuente «Press Start 2P» (`frontend/src/assets/fonts/press-start-2p.woff2` y su `OFL.txt`) y su `@font-face` con `font-display: swap` en `frontend/src/index.css`, junto con los tokens arcade de T002 como variables CSS en claro y oscuro, conectados en `frontend/tailwind.config.ts`
-- [ ] T054 [US1] Añadir los tipos `ProgressOut`, `ProgressDayOut`, `AnnouncementOut` y `NoticeOut` a `frontend/src/api/types.ts` y crear `frontend/src/api/progress.ts` con `useProgress`, hasta que pase T049. En `frontend/src/api/tasks.ts`, invalidar `progress` tras completar, reabrir y mandar a la papelera
-- [ ] T055 [US1] Crear `frontend/src/features/progress/EnergyBar.tsx` y `frontend/src/features/progress/DayScoreboard.tsx` según S3 v3, hasta que pase T050:
+- [X] T053 [P] [US1] Añadir la fuente «Press Start 2P» (`frontend/src/assets/fonts/press-start-2p.woff2` y su `OFL.txt`) y su `@font-face` con `font-display: swap` en `frontend/src/index.css`, junto con los tokens arcade de T002 como variables CSS en claro y oscuro, conectados en `frontend/tailwind.config.ts`
+- [X] T054 [US1] Añadir los tipos `ProgressOut`, `ProgressDayOut`, `AnnouncementOut` y `NoticeOut` a `frontend/src/api/types.ts` y crear `frontend/src/api/progress.ts` con `useProgress`, hasta que pase T049. En `frontend/src/api/tasks.ts`, invalidar `progress` tras completar, reabrir y mandar a la papelera
+- [X] T055 [US1] Crear `frontend/src/features/progress/EnergyBar.tsx` y `frontend/src/features/progress/DayScoreboard.tsx` según S3 v3, hasta que pase T050:
   - la cifra con la fuente pixel y el texto accesible con la normal;
   - región `aria-live="polite"` para «¡FASE SUPERADA!».
-- [ ] T056 [US1] Integrar el marcador en `frontend/src/features/board/BoardPage.tsx`:
+- [X] T056 [US1] Integrar el marcador en `frontend/src/features/board/BoardPage.tsx`:
   - pedir `useProgress` **antes** que el tablero, de modo que la puesta al día ocurre primero;
   - si el progreso falla, el tablero se carga igual (FR-034).
-- [ ] T057 [US1] Añadir los campos nuevos al perfil en `frontend/src/api/profile.ts` y crear `frontend/src/features/profile/ProgressSettings.tsx` (meta, días activos, zona horaria con detección; los interruptores del inicio de jornada y del modo arcade llegan en las Fases 4 y 5) en `frontend/src/features/profile/ProfilePage.tsx`, hasta que pase T051
-- [ ] T058 [US1] Cambiar la cabecera de `frontend/src/app/AppHeader.tsx` según la cabecera aprobada en T012, aunque las pestañas «Progreso» y «Programadas» se añadan en las Fases 6 y 7: dejar la estructura preparada para que quepan a 320 px con «Accesos»
-- [ ] T059 [US1] Ampliar `frontend/tests/e2e/a11y.spec.ts`: axe sin incumplimientos AA en el tablero con el marcador y en «Perfil» con «Progreso y juego», en claro y oscuro, y reflujo a 320 px con la cuenta de administrador
-- [ ] T060 Ejecutar `npm --prefix frontend run lint`, `typecheck`, `test` y `test:e2e` (con los emuladores; e2e lanzado solo, sin tuberías) y dejarlos en verde, y marcar T049–T060 como hechas en este fichero
+- [X] T057 [US1] Añadir los campos nuevos al perfil en `frontend/src/api/profile.ts` y crear `frontend/src/features/profile/ProgressSettings.tsx` (meta, días activos, zona horaria con detección; los interruptores del inicio de jornada y del modo arcade llegan en las Fases 4 y 5) en `frontend/src/features/profile/ProfilePage.tsx`, hasta que pase T051
+- [X] T058 [US1] Cambiar la cabecera de `frontend/src/app/AppHeader.tsx` según la cabecera aprobada en T012, aunque las pestañas «Progreso» y «Programadas» se añadan en las Fases 6 y 7: dejar la estructura preparada para que quepan a 320 px con «Accesos»
+- [X] T059 [US1] Ampliar `frontend/tests/e2e/a11y.spec.ts`: axe sin incumplimientos AA en el tablero con el marcador y en «Perfil» con «Progreso y juego», en claro y oscuro, y reflujo a 320 px con la cuenta de administrador
+- [X] T060 Ejecutar `npm --prefix frontend run lint`, `typecheck`, `test` y `test:e2e` (con los emuladores; e2e lanzado solo, sin tuberías) y dejarlos en verde, y marcar T049–T060 como hechas en este fichero
 
 **Checkpoint**: US1 completa y desplegable; es el **MVP** de la feature.
+
+**Avance (2026-10-31)**: Fase 3 completa (T049–T060).
+- **Tests**: 431 unitarios (Vitest) y 78 e2e (Playwright, con los emuladores) en verde; `lint`,
+  `prettier` y `tsc -b` en verde en un clon limpio, y `vite build` empaqueta la fuente como fichero
+  propio (la CSP `font-src 'self'` no cambia).
+- **Desviaciones**:
+  - Los tipos se llaman `Progress`, `ProgressDay`, `Announcement` y `Notice`, sin el sufijo `Out`,
+    como el resto de `types.ts` (`Task`, `Profile`).
+  - El test de los hooks es `progress.test.tsx`, porque necesita JSX para el proveedor de consultas.
+  - La zona horaria del dispositivo se envía desde el hook `useTimezoneSync`, montado en todas las
+    pantallas protegidas, y no solo desde «Perfil»: quien nunca abriera «Perfil» se quedaría con
+    `Europe/Madrid`. Sus tests están en `ProgressSettings.test.tsx`.
+  - El e2e no usa `page.clock`: el backend comprueba los tokens de Firebase con la hora real, y
+    adelantar el reloj del navegador los invalidaría. La hora del servidor se fija con `X-Test-Now`,
+    que Playwright añade a cada petición con `page.route`. No ha hecho falta añadir la cabecera al
+    CORS en local (LOW-002 de la Fase 2), porque esa cabecera no pasa por la petición previa del
+    navegador.
+  - «Restaurar» también invalida el progreso, porque una tarea completada que vuelve de la papelera
+    cuenta otra vez.
+  - El texto de «Restablecer» dice ahora «No cambia tu nombre, tu avatar ni «Progreso y juego»», como
+    en S7 v2.
 
 ---
 
