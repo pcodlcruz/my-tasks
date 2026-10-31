@@ -41,6 +41,8 @@ const USER_FACING_ERROR_CODES = [
   'already_active',
   'invitation_limit_reached',
   'admin_protected',
+  'schedule_limit',
+  'schedule_finished',
 ]
 
 export function isUserFacingError(error: unknown): error is ApiClientError {

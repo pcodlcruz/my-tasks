@@ -52,3 +52,11 @@ export function formatPurgeNotice(iso: string, now: Date = new Date()): string {
 export function formatDay(iso: string): string {
   return DAY_AND_MONTH.format(new Date(iso))
 }
+
+// Today's date in the browser's zone as "YYYY-MM-DD", for when the server's progress day (which
+// starts at 04:00) is not known yet.
+export function localDateKey(date: Date = new Date()): string {
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  return `${date.getFullYear()}-${month}-${day}`
+}

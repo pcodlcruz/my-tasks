@@ -130,7 +130,12 @@ class ProgressOut(BaseModel):
                 else []
             ),
             notices=[
-                NoticeOut(id=item.id, schedule_id=item.schedule_id, day=item.day)
+                NoticeOut(
+                    id=item.id,
+                    schedule_id=item.schedule_id,
+                    schedule_title=snapshot.notice_titles.get(item.schedule_id),
+                    day=item.day,
+                )
                 for item in state.notices
             ],
         )

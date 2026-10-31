@@ -245,3 +245,78 @@ def test_export_matches_the_progress_contract_of_feature_007(tmp_path: Path) -> 
         "achievement",
         "new_record",
     }
+
+
+def test_export_contains_the_schedule_endpoints_each_with_401_and_403(tmp_path: Path) -> None:
+    target = tmp_path / "openapi.json"
+
+    export_openapi(target)
+    contract = json.loads(target.read_text(encoding="utf-8"))
+
+    paths = {path: set(methods) for path, methods in contract["paths"].items()}
+    assert paths["/api/v1/schedules"] == {"get", "post"}
+    assert paths["/api/v1/schedules/{schedule_id}"] == {"patch", "delete"}
+    assert paths["/api/v1/schedules/{schedule_id}/pause"] == {"post"}
+    assert paths["/api/v1/schedules/{schedule_id}/resume"] == {"post"}
+    for path, methods in contract["paths"].items():
+        if path.startswith("/api/v1/schedules"):
+            for operation in methods.values():
+                assert {"401", "403"} <= set(operation["responses"]), path
+    create = contract["paths"]["/api/v1/schedules"]["post"]["responses"]
+    assert {"201", "409", "422"} <= set(create)
+    for action in ("pause", "resume"):
+        assert (
+            "409"
+            in contract["paths"][f"/api/v1/schedules/{{schedule_id}}/{action}"]["post"]["responses"]
+        )
+
+
+def test_export_schedule_schemas_are_closed_and_tell_the_repetitions_apart(
+    tmp_path: Path,
+) -> None:
+    target = tmp_path / "openapi.json"
+
+    export_openapi(target)
+    schemas = json.loads(target.read_text(encoding="utf-8"))["components"]["schemas"]
+
+    for name in ("ScheduleIn", "ScheduleUpdateIn", "OnceIn", "DailyIn", "WeeklyIn", "MonthlyIn"):
+        assert schemas[name]["additionalProperties"] is False, name
+    recurrence = schemas["ScheduleIn"]["properties"]["recurrence"]
+    assert recurrence["discriminator"]["propertyName"] == "kind"
+    assert set(recurrence["discriminator"]["mapping"]) == {"once", "daily", "weekly", "monthly"}
+    assert set(schemas["ScheduleOut"]["required"]) == {
+        "id",
+        "title",
+        "description",
+        "urgent",
+        "important",
+        "scope",
+        "quadrant",
+        "recurrence",
+        "status",
+        "next_occurrence",
+        "last_generated_for",
+        "created_at",
+    }
+
+
+def test_export_task_out_always_carries_the_schedule_fields(tmp_path: Path) -> None:
+    target = tmp_path / "openapi.json"
+
+    export_openapi(target)
+    task_out = json.loads(target.read_text(encoding="utf-8"))["components"]["schemas"]["TaskOut"]
+
+    assert {"schedule_id", "scheduled_for"} <= set(task_out["required"])
+    # Read-only: the create and update bodies do not take them.
+    schemas = json.loads(target.read_text(encoding="utf-8"))["components"]["schemas"]
+    assert "schedule_id" not in schemas["TaskCreate"]["properties"]
+    assert "scheduled_for" not in schemas["TaskUpdate"]["properties"]
+
+
+def test_export_notice_carries_the_schedule_title(tmp_path: Path) -> None:
+    target = tmp_path / "openapi.json"
+
+    export_openapi(target)
+    notice = json.loads(target.read_text(encoding="utf-8"))["components"]["schemas"]["NoticeOut"]
+
+    assert "schedule_title" in notice["properties"]

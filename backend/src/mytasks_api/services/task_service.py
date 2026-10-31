@@ -65,6 +65,7 @@ def _facts(task: Task) -> TaskFacts:
         completed_day=task.completed_day,
         points_awarded_on=task.points_awarded_on,
         is_do_now=task.quadrant is Quadrant.DO_NOW,
+        is_scheduled=task.schedule_id is not None,
     )
 
 

@@ -39,9 +39,13 @@ const TASK: Task = {
   scheduled_for: null,
 }
 
-async function renderCard(missionTaskIds?: string[]): Promise<void> {
+async function renderCard(
+  missionTaskIds?: string[],
+  task: Task = TASK,
+  today?: string,
+): Promise<void> {
   const { TaskCard } = await import('../../../../src/features/board/TaskCard')
-  render(<TaskCard task={TASK} onEdit={vi.fn()} missionTaskIds={missionTaskIds} />)
+  render(<TaskCard task={task} onEdit={vi.fn()} missionTaskIds={missionTaskIds} today={today} />)
 }
 
 describe('<TaskCard> · misión del día', () => {
@@ -114,5 +118,45 @@ describe('<TaskCard> · misión del día', () => {
     await renderCard(undefined)
 
     expect(screen.queryByRole('button', { name: /misión/ })).not.toBeInTheDocument()
+  })
+})
+
+describe('<TaskCard> · tareas programadas', () => {
+  const SCHEDULED: Task = { ...TASK, schedule_id: 's1', scheduled_for: '2026-11-04' }
+
+  it('una tarea normal no lleva la marca', async () => {
+    await renderCard(undefined, TASK, '2026-11-04')
+
+    expect(screen.queryByText('Programada')).not.toBeInTheDocument()
+    expect(screen.queryByText(/Pendiente desde/)).not.toBeInTheDocument()
+  })
+
+  it('una programada lleva icono y el texto «Programada»', async () => {
+    await renderCard(undefined, SCHEDULED, '2026-11-04')
+
+    const mark = screen.getByText('Programada')
+    expect(mark.parentElement?.querySelector('svg')).toHaveAttribute('aria-hidden', 'true')
+    expect(screen.queryByText(/Pendiente desde/)).not.toBeInTheDocument()
+  })
+
+  it('si su día ya pasó dice desde cuándo está pendiente', async () => {
+    await renderCard(undefined, { ...SCHEDULED, scheduled_for: '2026-11-02' }, '2026-11-04')
+
+    expect(screen.getByText('Programada')).toBeInTheDocument()
+    expect(screen.getByText('Pendiente desde el lun 2')).toBeInTheDocument()
+  })
+
+  it('sin saber qué día es hoy (el progreso no cargó) no habla de pendiente', async () => {
+    await renderCard(undefined, { ...SCHEDULED, scheduled_for: '2026-11-02' }, undefined)
+
+    expect(screen.getByText('Programada')).toBeInTheDocument()
+    expect(screen.queryByText(/Pendiente desde/)).not.toBeInTheDocument()
+  })
+
+  it('puede ser a la vez programada y de la misión', async () => {
+    await renderCard(['task-1'], SCHEDULED, '2026-11-04')
+
+    expect(screen.getByText('Programada')).toBeInTheDocument()
+    expect(screen.getByText('Misión del día')).toBeInTheDocument()
   })
 })

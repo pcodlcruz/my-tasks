@@ -1,4 +1,4 @@
-import type { ArcadeScore, Progress } from '../../api/types'
+import type { ArcadeScore, Notice, Progress } from '../../api/types'
 import { formatScore } from './arcadeCatalog'
 import { EnergyBar } from './EnergyBar'
 
@@ -8,6 +8,8 @@ interface DayScoreboardProps {
   isError: boolean
   onRetry: () => void
   onOpenReview: () => void
+  // Closes a notice of a schedule that did not fit (it is confirmed, so it does not come back).
+  onDismissNotice: (noticeId: string) => void
 }
 
 function completedText(completed: number, goal: number): string {
@@ -26,6 +28,7 @@ export function DayScoreboard({
   isError,
   onRetry,
   onOpenReview,
+  onDismissNotice,
 }: DayScoreboardProps): JSX.Element {
   return (
     <section
@@ -41,6 +44,30 @@ export function DayScoreboard({
       )}
 
       {progress !== undefined && <Scoreboard progress={progress} onOpenReview={onOpenReview} />}
+
+      {progress !== undefined && progress.notices.length > 0 && (
+        <ul
+          role="status"
+          aria-label="Avisos de programaciones"
+          className="mt-3 flex flex-col gap-2 border-t border-border pt-3"
+        >
+          {progress.notices.map((notice) => (
+            <li
+              key={notice.id}
+              className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-border bg-surface-alt px-3 py-2 text-caption text-text"
+            >
+              <span>{noticeText(notice)}</span>
+              <button
+                type="button"
+                onClick={() => onDismissNotice(notice.id)}
+                className="rounded-md border border-border bg-surface px-3 py-1 font-semibold text-text hover:bg-surface-alt"
+              >
+                Entendido
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
 
       {isError && (
         <p className="mt-2 text-caption text-text-muted first:mt-0">
@@ -58,6 +85,15 @@ export function DayScoreboard({
       )}
     </section>
   )
+}
+
+// The 500-active-task limit is what stops a schedule from creating its task (research R7).
+function noticeText(notice: Notice): string {
+  const subject =
+    notice.schedule_title !== null
+      ? `La tarea programada «${notice.schedule_title}»`
+      : 'Una tarea programada'
+  return `${subject} no cupo: tienes 500 tareas activas.`
 }
 
 interface ScoreboardProps {

@@ -1,5 +1,7 @@
 import logging
-from dataclasses import dataclass
+from collections.abc import Mapping
+from dataclasses import dataclass, field
+from datetime import date
 
 from fastapi import Depends
 
@@ -20,6 +22,7 @@ from mytasks_api.repositories.progress_repository import (
     ProgressRepository,
     get_progress_repository,
 )
+from mytasks_api.services.schedule_service import ScheduleService, get_schedule_service
 from mytasks_api.services.task_service import day_settings
 
 logger = logging.getLogger(__name__)
@@ -33,24 +36,35 @@ class ProgressSnapshot:
     today: TodayView
     state: PlayerState
     last_day: ProgressDay | None
+    # Schedule id → title, to word the notices of schedules that still exist.
+    notice_titles: Mapping[str, str] = field(default_factory=dict)
 
 
 class ProgressService:
     def __init__(
-        self, repository: ProgressRepository, profiles: ProfileRepository, clock: Clock
+        self,
+        repository: ProgressRepository,
+        profiles: ProfileRepository,
+        clock: Clock,
+        schedules: ScheduleService | None = None,
     ) -> None:
         self._repository = repository
         self._profiles = profiles
         self._clock = clock
+        # Without it (unit tests of the plain progress rules) no scheduled task is generated.
+        self._schedules = schedules
 
     async def _context(self, uid: str) -> tuple[Profile, str]:
         profile = await self._profiles.get(uid)
         return profile, day_key(self._clock.now(), profile.effective_timezone)
 
     async def get_progress(self, uid: str) -> ProgressSnapshot:
-        """Today's scoreboard. First closes the days left behind (the lazy catch-up of research
-        R1): repeating the call changes nothing."""
+        """Today's scoreboard. First generates today's scheduled tasks and closes the days left
+        behind (the lazy catch-up of research R1, R7): repeating the call changes nothing."""
         profile, today = await self._context(uid)
+        if self._schedules is not None:
+            # Before closing the days: a notice it leaves is in the state read next.
+            await self._schedules.generate_due(uid, date.fromisoformat(today), self._clock.now())
         state = await self._repository.close_days(
             uid, day_settings(profile), today, self._clock.now()
         )
@@ -66,11 +80,17 @@ class ProgressService:
             if state.last_active_closed_day is not None
             else None
         )
+        notice_titles = (
+            await self._schedules.notice_titles(uid, [n.schedule_id for n in state.notices])
+            if self._schedules is not None
+            else {}
+        )
         return ProgressSnapshot(
             profile=profile,
             today=today_view(current, state, morning_review=profile.morning_review),
             state=state,
             last_day=last_day,
+            notice_titles=notice_titles,
         )
 
     async def mark_review_seen(self, uid: str) -> ProgressSnapshot:
@@ -118,5 +138,6 @@ def get_progress_service(
     repository: ProgressRepository = Depends(get_progress_repository),
     profiles: ProfileRepository = Depends(get_profile_repository),
     clock: Clock = Depends(get_clock),
+    schedules: ScheduleService = Depends(get_schedule_service),
 ) -> ProgressService:
-    return ProgressService(repository, profiles, clock)
+    return ProgressService(repository, profiles, clock, schedules)

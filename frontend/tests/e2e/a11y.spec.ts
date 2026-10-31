@@ -41,7 +41,10 @@ const ONE_TASK_PER_QUADRANT: NewTask[] = [
   { title: 'Tarea eliminar', urgent: false, important: false, scope: 'Personal' },
 ]
 
-async function goTo(page: Page, link: 'Tablero' | 'Historial' | 'Papelera'): Promise<void> {
+async function goTo(
+  page: Page,
+  link: 'Tablero' | 'Programadas' | 'Historial' | 'Papelera',
+): Promise<void> {
   await page
     .getByRole('navigation', { name: 'Navegación principal' })
     .getByRole('link', { name: link })
@@ -217,6 +220,15 @@ test.describe('Accesibilidad WCAG 2.1 AA', () => {
     expect(
       overflow,
       'Desbordamiento horizontal de la cabecera y el marcador a 320 px',
+    ).toBeLessThanOrEqual(0)
+    await goTo(page, 'Programadas')
+    await expect(page.getByRole('heading', { name: 'Tareas programadas', level: 1 })).toBeVisible()
+    const schedulesOverflow = await page.evaluate(
+      () => document.documentElement.scrollWidth - window.innerWidth,
+    )
+    expect(
+      schedulesOverflow,
+      'Desbordamiento horizontal en Programadas a 320 px',
     ).toBeLessThanOrEqual(0)
     await page.getByRole('link', { name: 'Perfil' }).click()
     await expect(page.getByRole('region', { name: 'Progreso y juego' })).toBeVisible()
@@ -435,6 +447,49 @@ test.describe('Accesibilidad WCAG 2.1 AA', () => {
         'Hoy 1 de 3',
       )
       await expectNoViolations(page, `S3 v3 · Tablero sin modo arcade (${colorScheme})`)
+    })
+  }
+
+  for (const colorScheme of ['light', 'dark'] as const) {
+    test(`las tareas programadas y su formulario no tienen violaciones en tema ${colorScheme === 'light' ? 'claro' : 'oscuro'}`, async ({
+      page,
+      loginAsGoogleUser,
+    }) => {
+      await page.emulateMedia({ colorScheme })
+      await loginAsGoogleUser(`a11y-programadas-${colorScheme}-${crypto.randomUUID()}@example.com`)
+      await goTo(page, 'Programadas')
+      await expect(page.getByText('Aún no tienes tareas programadas')).toBeVisible()
+      await expectNoViolations(page, `S10 · Programadas vacía (${colorScheme})`)
+
+      await page.getByRole('button', { name: 'Crear la primera programación' }).click()
+      const form = page.getByRole('dialog', { name: 'Nueva programación' })
+      await expect(form).toBeVisible()
+      await expectNoViolations(page, `S11 · Formulario (${colorScheme})`)
+
+      await form
+        .getByRole('radiogroup', { name: 'Repetición' })
+        .getByRole('radio', { name: 'Días de la semana' })
+        .check()
+      await form.getByRole('button', { name: 'Guardar' }).click()
+      await expect(form.getByText('Elige al menos un día de la semana.')).toBeVisible()
+      await expectNoViolations(page, `S11 · Formulario con errores en línea (${colorScheme})`)
+
+      await form.getByLabel('Título').fill('Informe semanal')
+      await form.getByLabel('Descripción').fill('Enviar el resumen')
+      await form.getByRole('radio', { name: 'Laboral' }).check()
+      await form
+        .getByRole('group', { name: 'Días de la semana' })
+        .getByRole('button', { name: 'Lunes' })
+        .click()
+      await expect(form.getByText(/^Próxima aparición:/)).toBeVisible()
+      await form.getByRole('button', { name: 'Guardar' }).click()
+      await expect(page.getByRole('dialog')).toHaveCount(0)
+      await expect(page.getByRole('heading', { name: 'Informe semanal' })).toBeVisible()
+      await expectNoViolations(page, `S10 · Con una programación (${colorScheme})`)
+
+      await page.getByRole('button', { name: 'Eliminar' }).click()
+      await expect(page.getByRole('alertdialog')).toBeVisible()
+      await expectNoViolations(page, `S10 · Confirmar eliminar (${colorScheme})`)
     })
   }
 

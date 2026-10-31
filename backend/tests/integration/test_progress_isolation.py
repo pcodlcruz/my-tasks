@@ -96,3 +96,67 @@ async def test_a_revoked_account_keeps_its_progress_for_when_it_comes_back(
     assert denied.status_code == 403
     assert (await state_document(firestore_client, user.uid))["score"] == 100
     assert back["completed_count"] == 1
+
+
+async def test_no_account_lists_edits_pauses_or_deletes_the_schedules_of_another(
+    client: httpx.AsyncClient, google_user: GoogleUserFactory
+) -> None:
+    ana = await google_user("ana@example.com")
+    luis = await google_user("luis@example.com")
+    created = await client.post(
+        "/api/v1/schedules",
+        json={
+            "title": "Secreto de Luis",
+            "description": "Solo suyo",
+            "urgent": True,
+            "important": True,
+            "scope": "personal",
+            "recurrence": {"kind": "daily"},
+        },
+        headers=headers(luis.id_token),
+    )
+    assert created.status_code == 201
+    luis_schedule = created.json()["id"]
+    url = f"/api/v1/schedules/{luis_schedule}"
+
+    listed = await client.get("/api/v1/schedules", headers=headers(ana.id_token))
+    attempts = [
+        await client.patch(url, json={"title": "Mío"}, headers=headers(ana.id_token)),
+        await client.post(f"{url}/pause", headers=headers(ana.id_token)),
+        await client.post(f"{url}/resume", headers=headers(ana.id_token)),
+        await client.delete(url, headers=headers(ana.id_token)),
+    ]
+
+    assert listed.json()["items"] == []
+    assert [response.status_code for response in attempts] == [404, 404, 404, 404]
+    luis_list = await client.get("/api/v1/schedules", headers=headers(luis.id_token))
+    assert [(item["title"], item["status"]) for item in luis_list.json()["items"]] == [
+        ("Secreto de Luis", "active")
+    ]
+
+
+async def test_the_generation_only_creates_tasks_in_the_owner_account(
+    client: httpx.AsyncClient, google_user: GoogleUserFactory
+) -> None:
+    ana = await google_user("ana@example.com")
+    luis = await google_user("luis@example.com")
+    await client.post(
+        "/api/v1/schedules",
+        json={
+            "title": "De Luis",
+            "description": "Diaria",
+            "urgent": True,
+            "important": True,
+            "scope": "personal",
+            "recurrence": {"kind": "daily"},
+        },
+        headers=headers(luis.id_token),
+    )
+
+    await get_progress(client, ana.id_token)
+    await get_progress(client, luis.id_token)
+
+    ana_board = await client.get("/api/v1/tasks?view=board", headers=headers(ana.id_token))
+    luis_board = await client.get("/api/v1/tasks?view=board", headers=headers(luis.id_token))
+    assert ana_board.json()["items"] == []
+    assert [task["title"] for task in luis_board.json()["items"]] == ["De Luis"]
