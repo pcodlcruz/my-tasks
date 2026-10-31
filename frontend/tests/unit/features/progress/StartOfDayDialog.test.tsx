@@ -2,7 +2,7 @@ import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { useState } from 'react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import type { Progress, Task } from '../../../../src/api/types'
+import type { Progress, ProgressDay, Task } from '../../../../src/api/types'
 
 interface MutateOptions {
   onSuccess?: () => void
@@ -20,6 +20,17 @@ vi.mock('../../../../src/api/progress', async (importOriginal) => ({
 
 vi.mock('../../../../src/lib/firebase', () => ({ auth: { currentUser: null, signOut: vi.fn() } }))
 
+const LAST_DAY: ProgressDay = {
+  date: '2026-11-02',
+  active: true,
+  goal: 3,
+  completed_count: 4,
+  goal_met: true,
+  mission_cleared: false,
+  points: 200,
+  closed: true,
+}
+
 const PROGRESS: Progress = {
   today: '2026-11-03',
   goal: 3,
@@ -31,16 +42,7 @@ const PROGRESS: Progress = {
   streak: 4,
   streak_at_stake: true,
   arcade: { score: 0, level: 1, level_name: 'Novato', next_level_at: 1000, points_today: 0 },
-  last_day: {
-    date: '2026-11-02',
-    active: true,
-    goal: 3,
-    completed_count: 4,
-    goal_met: true,
-    mission_cleared: false,
-    points: 200,
-    closed: true,
-  },
+  last_day: LAST_DAY,
   announcements: [],
   notices: [],
 }
@@ -133,7 +135,7 @@ describe('<StartOfDayDialog>', () => {
     await renderDialog({
       progress: {
         ...PROGRESS,
-        last_day: { ...PROGRESS.last_day!, date: '2026-10-30', goal_met: false },
+        last_day: { ...LAST_DAY, date: '2026-10-30', goal_met: false },
       },
     })
 

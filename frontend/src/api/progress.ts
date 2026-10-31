@@ -40,23 +40,22 @@ export function setMission(taskIds: string[]): Promise<Progress> {
 
 // Both answer with today's whole scoreboard, which replaces the cached one. Neither is applied
 // ahead of time: a mission the server refuses must not show as chosen.
-function useProgressMutation<TVariables>(mutationFn: (variables: TVariables) => Promise<Progress>) {
+function useStoreProgress(): (progress: Progress) => void {
   const queryClient = useQueryClient()
-  return useMutation({
-    mutationFn,
-    onSuccess: (progress) => {
-      queryClient.setQueryData(PROGRESS_QUERY_KEY, progress)
-    },
-  })
+  return (progress) => {
+    queryClient.setQueryData(PROGRESS_QUERY_KEY, progress)
+  }
 }
 
 // Idempotent: after it, `show_review` is false on every device for the rest of the day.
 export function useMarkReviewSeen() {
-  return useProgressMutation<void>(() => markReviewSeen())
+  const storeProgress = useStoreProgress()
+  return useMutation({ mutationFn: markReviewSeen, onSuccess: storeProgress })
 }
 
 export function useSetMission() {
-  return useProgressMutation<string[]>(setMission)
+  const storeProgress = useStoreProgress()
+  return useMutation({ mutationFn: setMission, onSuccess: storeProgress })
 }
 
 const MISSION_INVALID_MESSAGE =

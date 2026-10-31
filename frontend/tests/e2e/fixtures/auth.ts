@@ -25,7 +25,7 @@ interface StartOfDayOptions {
 }
 
 interface StartOfDayFixtures {
-  hideStartOfDay: void
+  hideStartOfDay: undefined
 }
 
 const PROGRESS_URL = /\/api\/v1\/me\/progress$/
@@ -83,7 +83,7 @@ export const test = base.extend<AuthFixtures & StartOfDayOptions & StartOfDayFix
   hideStartOfDay: [
     async ({ page, startOfDay }, use) => {
       if (!startOfDay) await hideStartOfDay(page)
-      await use()
+      await use(undefined)
     },
     { auto: true },
   ],
