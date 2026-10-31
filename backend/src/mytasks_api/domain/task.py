@@ -84,6 +84,10 @@ class Task:
     # task gave its points (a task only scores once in its life). Internal: never in `TaskOut`.
     completed_day: str | None = None
     points_awarded_on: str | None = None
+    # Scheduled tasks (feature 007, US4): the schedule that generated it and the occurrence
+    # (progress day) it is for, the "pending since" of FR-023. Set when generated, never edited.
+    schedule_id: str | None = None
+    scheduled_for: str | None = None
 
     @property
     def quadrant(self) -> Quadrant:

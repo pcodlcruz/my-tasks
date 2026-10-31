@@ -15,6 +15,7 @@ _LOGGED_FIELDS = (
     "action",
     "uid",
     "task_id",
+    "schedule_id",
     "reason",
     "actor_uid",
     "target",

@@ -50,6 +50,8 @@ def _document_to_task(task_id: str, data: dict[str, Any]) -> Task:
         purge_at=_to_utc(data.get("purge_at")),
         completed_day=data.get("completed_day"),
         points_awarded_on=data.get("points_awarded_on"),
+        schedule_id=data.get("schedule_id"),
+        scheduled_for=data.get("scheduled_for"),
     )
 
 
