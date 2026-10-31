@@ -225,6 +225,37 @@ export interface ArcadeScore {
   points_today: number
 }
 
+// `GET /me/progress/days/{day}` (feature 007, US5): the day and its completed tasks that are still
+// outside the trash. The day keeps its count even if some of its tasks are gone.
+export interface ProgressDayDetail extends ProgressDay {
+  tasks: Task[]
+}
+
+export interface AchievementStatus {
+  id: string
+  name: string
+  condition: string
+  // `null` while it is still locked.
+  unlocked_at: string | null
+}
+
+export interface Stats {
+  best_day_count: number
+  best_day_date: ProgressDate | null
+  current_streak: number
+  best_streak: number
+  tasks_scored: number
+  started_at: string | null
+  // `null` with the arcade mode off.
+  arcade: {
+    score: number
+    level: number
+    level_name: string
+    // The whole catalog, with the date of those already won.
+    achievements: AchievementStatus[]
+  } | null
+}
+
 export interface Progress {
   today: ProgressDate
   goal: number

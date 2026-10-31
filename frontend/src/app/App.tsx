@@ -8,6 +8,7 @@ import { ProfilePage } from '../features/profile/ProfilePage'
 import { useAppearance } from '../features/profile/useAppearance'
 import { useTimezoneSync } from '../features/profile/useTimezoneSync'
 import { HistoryPage } from '../features/history/HistoryPage'
+import { ProgressPage } from '../features/progress/ProgressPage'
 import { SchedulesPage } from '../features/schedules/SchedulesPage'
 import { TrashPage } from '../features/trash/TrashPage'
 import { AdminRoute } from './AdminRoute'
@@ -50,6 +51,7 @@ export function App(): JSX.Element {
           <Route path="/login" element={<LoginPage />} />
           <Route element={<ProtectedLayout />}>
             <Route path="/" element={<BoardPage />} />
+            <Route path="/progreso" element={<ProgressPage />} />
             <Route path="/programadas" element={<SchedulesPage />} />
             <Route path="/historial" element={<HistoryPage />} />
             <Route path="/papelera" element={<TrashPage />} />

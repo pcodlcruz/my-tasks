@@ -1,7 +1,7 @@
 import { type QueryClient, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useEffect, useRef } from 'react'
 import { ApiClientError, apiFetch } from '../lib/apiClient'
-import type { Acknowledgement, Progress } from './types'
+import type { Acknowledgement, Progress, ProgressDay, ProgressDayDetail, Stats } from './types'
 
 export const PROGRESS_QUERY_KEY = ['progress'] as const
 
@@ -106,4 +106,41 @@ export function missionErrorMessage(error: unknown): string {
     return MISSION_INVALID_MESSAGE
   }
   return MISSION_GENERIC_ERROR
+}
+
+// The history (US5) is read-only and closes no day, so a minute of staleness is fine; any
+// completion or reopening invalidates it with the rest of the progress (see `invalidateProgress`).
+const HISTORY_STALE_MS = 60_000
+
+export function useProgressDays(from: string, to: string) {
+  return useQuery({
+    queryKey: [...PROGRESS_QUERY_KEY, 'days', from, to],
+    queryFn: () =>
+      apiFetch<{ items: ProgressDay[] }>(
+        `/api/v1/me/progress/days?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`,
+      ),
+    select: (page) => page.items,
+    staleTime: HISTORY_STALE_MS,
+    retry: 1,
+  })
+}
+
+// `day` is `null` until one is chosen, and for a day without a document (the server answers 404).
+export function useProgressDay(day: string | null) {
+  return useQuery({
+    queryKey: [...PROGRESS_QUERY_KEY, 'day', day],
+    queryFn: () => apiFetch<ProgressDayDetail>(`/api/v1/me/progress/days/${day ?? ''}`),
+    enabled: day !== null,
+    staleTime: HISTORY_STALE_MS,
+    retry: 1,
+  })
+}
+
+export function useStats() {
+  return useQuery({
+    queryKey: [...PROGRESS_QUERY_KEY, 'stats'],
+    queryFn: () => apiFetch<Stats>('/api/v1/me/progress/stats'),
+    staleTime: HISTORY_STALE_MS,
+    retry: 1,
+  })
 }
