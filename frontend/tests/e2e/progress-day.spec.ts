@@ -48,7 +48,7 @@ test.describe('Progreso del día (US1)', () => {
 
     // A new account: the default goal of 3 and nothing done yet.
     await expect(scoreboard(page)).toContainText('0 de 3 tareas completadas hoy')
-    await expect(scoreboard(page)).not.toContainText('¡FASE SUPERADA!')
+    await expect(scoreboard(page)).not.toContainText('Meta cumplida')
 
     for (const title of ['Primera', 'Segunda', 'Tercera']) {
       await createTask(page, title)
@@ -61,7 +61,11 @@ test.describe('Progreso del día (US1)', () => {
     // The third one meets the goal: no reload, and the goal is celebrated.
     await complete(page, 'Tercera')
     await expect(scoreboard(page)).toContainText('3 de 3 tareas completadas hoy')
-    await expect(scoreboard(page)).toContainText('¡FASE SUPERADA!')
+    await expect(scoreboard(page)).toContainText('Meta cumplida')
+    // Celebrated once by the arcade notices (S3-c), after the first coin of the first task.
+    await expect(page.locator('[data-celebrations]')).toContainText('¡FASE SUPERADA! +500', {
+      timeout: 10_000,
+    })
 
     // Reopening one the same day takes it out of today's progress.
     await goTo(page, 'Historial')
@@ -72,7 +76,7 @@ test.describe('Progreso del día (US1)', () => {
     await expect(page.locator('article', { hasText: 'Segunda' })).toHaveCount(0)
     await goTo(page, 'Tablero')
     await expect(scoreboard(page)).toContainText('2 de 3 tareas completadas hoy')
-    await expect(scoreboard(page)).not.toContainText('¡FASE SUPERADA!')
+    await expect(scoreboard(page)).not.toContainText('Meta cumplida')
 
     // At 04:01 a new progress day starts from zero.
     setNow(TUESDAY_0401)
