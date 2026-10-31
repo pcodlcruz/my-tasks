@@ -1,5 +1,5 @@
 import type { Page } from '@playwright/test'
-import { expect, test } from './fixtures/auth'
+import { expect, hideStartOfDay, test } from './fixtures/auth'
 
 function uniqueEmail(prefix: string): string {
   return `${prefix}-${crypto.randomUUID()}@example.com`
@@ -196,6 +196,7 @@ test.describe('Perfil · identidad', () => {
 
     const invited = await browser.newContext()
     const invitedPage = await invited.newPage()
+    await hideStartOfDay(invitedPage)
     await invitedPage.goto('/login')
     await invitedPage.waitForFunction(() => typeof window.__mytasksTestLogin === 'function')
     await invitedPage.evaluate(async (userEmail) => {

@@ -20,6 +20,17 @@ vi.mock('../../../../src/api/progress', () => ({
   useProgress: () => useProgressMock(),
 }))
 
+// The dialog is tested on its own; here only when the board opens and closes it.
+vi.mock('../../../../src/features/progress/StartOfDayDialog', () => ({
+  StartOfDayDialog: ({ onClose }: { onClose: () => void }) => (
+    <div role="dialog" aria-label="PULSA START">
+      <button type="button" onClick={onClose}>
+        Empezar
+      </button>
+    </div>
+  ),
+}))
+
 const PROFILE: Profile = {
   theme: 'system',
   density: 'comfortable',
@@ -92,6 +103,39 @@ describe('<BoardPage>', () => {
     useProgressMock.mockReset()
     useProgressMock.mockReturnValue(progressResult())
     useUiStore.getState().reset()
+  })
+
+  describe('inicio de jornada', () => {
+    it('se abre solo cuando el servidor dice que toca (show_review)', async () => {
+      useProgressMock.mockReturnValue(progressResult({ data: { ...PROGRESS, show_review: true } }))
+
+      await renderBoardPage()
+
+      expect(screen.getByRole('dialog', { name: 'PULSA START' })).toBeInTheDocument()
+    })
+
+    it('no se abre si ya se vio hoy, está desactivado o no es día activo', async () => {
+      await renderBoardPage()
+
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+    })
+
+    it('al cerrarlo no vuelve a abrirse aunque el progreso aún diga que toca', async () => {
+      useProgressMock.mockReturnValue(progressResult({ data: { ...PROGRESS, show_review: true } }))
+      await renderBoardPage()
+
+      await userEvent.click(screen.getByRole('button', { name: 'Empezar' }))
+
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+    })
+
+    it('se reabre a mano desde «PULSA START» del marcador', async () => {
+      await renderBoardPage()
+
+      await userEvent.click(screen.getByRole('button', { name: /PULSA START/ }))
+
+      expect(screen.getByRole('dialog', { name: 'PULSA START' })).toBeInTheDocument()
+    })
   })
 
   describe('marcador del día', () => {

@@ -29,6 +29,7 @@ interface RenderOptions {
   isLoading?: boolean
   isError?: boolean
   onRetry?: () => void
+  onOpenReview?: () => void
 }
 
 function renderScoreboard({
@@ -36,9 +37,16 @@ function renderScoreboard({
   isLoading = false,
   isError = false,
   onRetry = vi.fn(),
+  onOpenReview = vi.fn(),
 }: RenderOptions = {}): ReturnType<typeof render> {
   return render(
-    <DayScoreboard progress={data} isLoading={isLoading} isError={isError} onRetry={onRetry} />,
+    <DayScoreboard
+      progress={data}
+      isLoading={isLoading}
+      isError={isError}
+      onRetry={onRetry}
+      onOpenReview={onOpenReview}
+    />,
   )
 }
 
@@ -151,5 +159,43 @@ describe('<DayScoreboard>', () => {
 
     expect(screen.getByText(textMatcher('HOY 2/3'))).toBeInTheDocument()
     expect(scoreboard()).toHaveTextContent('No se pudo actualizar tu progreso.')
+  })
+
+  describe('inicio de jornada y misión', () => {
+    it('«PULSA START» reabre la pantalla de inicio de jornada', async () => {
+      const onOpenReview = vi.fn()
+      renderScoreboard({ progress: progress(), onOpenReview })
+
+      await userEvent.click(screen.getByRole('button', { name: /PULSA START/ }))
+
+      expect(onOpenReview).toHaveBeenCalledOnce()
+    })
+
+    it('sin misión no muestra su recuento', () => {
+      renderScoreboard({ progress: progress() })
+
+      expect(scoreboard()).not.toHaveTextContent(/misión/i)
+    })
+
+    it('con misión muestra cuántas lleva completadas, con estrella y texto', () => {
+      renderScoreboard({
+        progress: progress({
+          mission: { task_ids: ['a', 'b', 'c'], completed_ids: ['a'], cleared: false },
+        }),
+      })
+
+      expect(scoreboard()).toHaveTextContent('Misión 1/3')
+      expect(scoreboard()).toHaveTextContent('★')
+    })
+
+    it('con la misión cumplida lo dice', () => {
+      renderScoreboard({
+        progress: progress({
+          mission: { task_ids: ['a', 'b'], completed_ids: ['a', 'b'], cleared: true },
+        }),
+      })
+
+      expect(scoreboard()).toHaveTextContent('Misión 2/2 cumplida')
+    })
   })
 })

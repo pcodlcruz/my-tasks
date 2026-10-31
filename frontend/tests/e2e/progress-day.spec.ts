@@ -1,11 +1,6 @@
 import type { Page } from '@playwright/test'
 import { expect, test } from './fixtures/auth'
-
-// The progress day is computed by the server from its clock, which `X-Test-Now` sets in local
-// only (research R15). Every API request of the page carries it, so completing a task and
-// reading the scoreboard happen at the same simulated instant. The browser keeps the real
-// clock (no page.clock): the Firebase ID tokens are checked against real time.
-const API = 'http://localhost:8000/api/**'
+import { useServerClock } from './fixtures/clock'
 
 // Monday 2 November 2026, 10:00 in Madrid (UTC+1), and the next day at 04:01, just after the
 // day changes.
@@ -13,16 +8,6 @@ const MONDAY_MORNING = '2026-11-02T09:00:00Z'
 const TUESDAY_0401 = '2026-11-03T03:01:00Z'
 
 test.use({ timezoneId: 'Europe/Madrid' })
-
-async function useServerClock(page: Page): Promise<(instant: string) => void> {
-  let now = MONDAY_MORNING
-  await page.route(API, async (route) => {
-    await route.continue({ headers: { ...route.request().headers(), 'x-test-now': now } })
-  })
-  return (instant: string) => {
-    now = instant
-  }
-}
 
 function scoreboard(page: Page) {
   return page.getByRole('region', { name: 'Marcador del día' })
@@ -58,7 +43,7 @@ test.describe('Progreso del día (US1)', () => {
     page,
     loginAsGoogleUser,
   }) => {
-    const setNow = await useServerClock(page)
+    const setNow = await useServerClock(page, MONDAY_MORNING)
     await loginAsGoogleUser(`progreso-dia-${crypto.randomUUID()}@example.com`)
 
     // A new account: the default goal of 3 and nothing done yet.
@@ -110,7 +95,7 @@ test.describe('Progreso del día (US1)', () => {
     page,
     loginAsGoogleUser,
   }) => {
-    await useServerClock(page)
+    await useServerClock(page, MONDAY_MORNING)
     await loginAsGoogleUser(`progreso-zona-${crypto.randomUUID()}@example.com`)
     await expect(scoreboard(page)).toContainText('0 de 3 tareas completadas hoy')
 
