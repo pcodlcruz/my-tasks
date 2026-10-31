@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+
+<html class="h-full bg-background text-on-surface" lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>S3-c · Celebraciones sobre el tablero (claro) - InsertTasks v3</title>
+<!-- Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Inter & Arcade Typography (Press Start 2P) -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Press+Start+2P&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "on-primary-fixed-variant": "#0039b5",
+            "scope-personal": "#0D9488",
+            "border": "#CBD5E1",
+            "on-secondary": "#ffffff",
+            "inverse-surface": "#2e3039",
+            "error": "#B91C1C",
+            "secondary-fixed": "#89f5e7",
+            "tertiary-fixed": "#ffdbcf",
+            "primary-fixed-dim": "#b7c4ff",
+            "surface-tint": "#2151da",
+            "on-tertiary": "#ffffff",
+            "on-surface": "#1a1b23",
+            "tertiary-fixed-dim": "#ffb59c",
+            "surface-container": "#ededf9",
+            "on-secondary-container": "#006f66",
+            "on-primary-fixed": "#001551",
+            "on-error": "#ffffff",
+            "inverse-primary": "#b7c4ff",
+            "tertiary-container": "#a73400",
+            "surface-container-lowest": "#ffffff",
+            "surface-dim": "#d9d9e5",
+            "secondary-fixed-dim": "#6bd8cb",
+            "on-primary-container": "#cad3ff",
+            "surface-container-low": "#f3f2fe",
+            "on-tertiary-fixed-variant": "#832700",
+            "success": "#15803D",
+            "on-secondary-fixed-variant": "#005049",
+            "error-container": "#ffdad6",
+            "surface-container-highest": "#e2e1ed",
+            "text-muted": "#475569",
+            "text": "#0F172A",
+            "surface": "#FFFFFF",
+            "on-error-container": "#93000a",
+            "on-tertiary-fixed": "#390c00",
+            "on-background": "#1a1b23",
+            "do-now": "#B91C1C",
+            "surface-bright": "#faf8ff",
+            "background": "#faf8ff",
+            "secondary-container": "#86f2e4",
+            "schedule": "#1D4ED8",
+            "on-primary": "#ffffff",
+            "secondary": "#006a61",
+            "tertiary": "#7f2500",
+            "primary-container": "#1d4ed8",
+            "inverse-on-surface": "#f0f0fb",
+            "surface-container-high": "#e8e7f3",
+            "scope-work": "#7C3AED",
+            "surface-alt": "#F8FAFC",
+            "primary-fixed": "#dce1ff",
+            "primary": "#0037b0",
+            "outline": "#747686",
+            "outline-variant": "#c4c5d7",
+            "on-tertiary-container": "#ffc9b7",
+            "on-surface-variant": "#434655",
+            "delegate": "#B45309",
+            "eliminate": "#475569",
+            "on-secondary-fixed": "#00201d",
+            "surface-variant": "#e2e1ed",
+            /* Dedicated Arcade Tokens */
+            "energy-fill": "#0E7490",
+            "energy-extra": "#A21CAF",
+            "gold": "#A16207",
+            "on-gold": "#FFFFFF"
+          },
+          borderRadius: {
+            "DEFAULT": "0.125rem",
+            "lg": "0.25rem",
+            "xl": "0.5rem",
+            "full": "0.75rem"
+          },
+          spacing: {
+            "margin": "24px",
+            "space-2xl": "48px",
+            "space-sm": "8px",
+            "space-xs": "4px",
+            "space-md": "12px",
+            "gutter": "24px",
+            "space-lg": "16px",
+            "space-xl": "32px"
+          },
+          fontFamily: {
+            "heading": ["Inter"],
+            "body": ["Inter"],
+            "display": ["Inter"],
+            "caption": ["Inter"],
+            "body-strong": ["Inter"],
+            "arcade": ["'Press Start 2P'", "monospace"]
+          },
+          fontSize: {
+            "heading": ["20px", { lineHeight: "28px", fontWeight: "600" }],
+            "body": ["16px", { lineHeight: "24px", fontWeight: "400" }],
+            "display": ["28px", { lineHeight: "36px", fontWeight: "700" }],
+            "caption": ["13px", { lineHeight: "18px", fontWeight: "400" }],
+            "body-strong": ["16px", { lineHeight: "24px", fontWeight: "600" }]
+          }
+        }
+      }
+    };
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      display: inline-block;
+      vertical-align: middle;
+      line-height: 1;
+    }
+    .material-symbols-outlined.fill-icon {
+      font-variation-settings: 'FILL' 1, 'wght' 500, 'GRAD' 0, 'opsz' 24;
+    }
+    /* Pixel shadow accent for subtle arcade touch */
+    .arcade-card-shadow {
+      box-shadow: 0 4px 14px rgba(15, 23, 42, 0.08), 0 1px 3px rgba(15, 23, 42, 0.04);
+    }
+  </style>
+</head>
+<body class="min-h-full flex flex-col bg-background text-on-surface antialiased">
+<!-- ================= TOP APP BAR (Shared Components JSON execution) ================= -->
+<header class="flex items-center justify-between px-margin py-space-md w-full border-b border-outline-variant bg-surface-container-low shadow-sm sticky top-0 z-30">
+<div class="flex items-center gap-space-lg">
+<div class="flex items-center gap-space-sm">
+<span class="text-heading font-heading font-bold text-primary tracking-tight flex items-center gap-1.5">
+<span class="material-symbols-outlined text-primary fill-icon" data-icon="sports_esports">sports_esports</span>
+          InsertTasks v3
+        </span>
+<span class="px-2 py-0.5 text-[10px] font-mono tracking-widest font-bold bg-primary text-on-primary rounded-lg border border-primary-fixed uppercase">
+          ARCADE EDT.
+        </span>
+</div>
+<!-- Navigation Links -->
+<nav aria-label="Navegación principal" class="hidden md:flex items-center gap-space-lg ml-6">
+<a aria-current="page" class="text-primary border-b-2 border-primary font-body-strong text-body-strong pb-1 flex items-center gap-1" href="#tablero">
+<span class="material-symbols-outlined text-sm" data-icon="dashboard">dashboard</span>
+          Tablero
+        </a>
+<a class="text-on-surface-variant hover:text-on-surface font-body text-body pb-1 transition-colors flex items-center gap-1" href="#progreso">
+<span class="material-symbols-outlined text-sm" data-icon="trending_up">trending_up</span>
+          Progreso
+        </a>
+<a class="text-on-surface-variant hover:text-on-surface font-body text-body pb-1 transition-colors flex items-center gap-1" href="#programadas">
+<span class="material-symbols-outlined text-sm" data-icon="calendar_month">calendar_month</span>
+          Programadas
+        </a>
+<a class="text-on-surface-variant hover:text-on-surface font-body text-body pb-1 transition-colors flex items-center gap-1" href="#historial">
+<span class="material-symbols-outlined text-sm" data-icon="history">history</span>
+          Historial
+        </a>
+<a class="text-on-surface-variant hover:text-on-surface font-body text-body pb-1 transition-colors flex items-center gap-1" href="#papelera">
+<span class="material-symbols-outlined text-sm" data-icon="delete">delete</span>
+          Papelera
+        </a>
+</nav>
+</div>
+<!-- Trailing Actions & Profile -->
+<div class="flex items-center gap-space-md">
+<div class="hidden lg:flex items-center bg-surface-container-highest px-3 py-1 rounded-lg border border-outline-variant gap-2 text-caption font-caption text-on-surface-variant">
+<span class="w-2 h-2 rounded-full bg-success"></span>
+<span>Temporada 1 activa</span>
+</div>
+<div class="h-6 w-px bg-outline-variant hidden sm:block"></div>
+<!-- User Chip -->
+<div class="flex items-center gap-space-sm pl-2">
+<div class="w-8 h-8 rounded-full bg-primary-fixed flex items-center justify-center text-primary font-bold text-caption border border-primary-fixed-dim ring-2 ring-surface shadow-sm">
+          AC
+        </div>
+<div class="hidden sm:flex flex-col text-left">
+<span class="text-caption font-body-strong leading-tight text-on-surface">Ana Cruz</span>
+<span class="text-[11px] font-caption text-on-surface-variant">Nivel 3 · Jugador</span>
+</div>
+</div>
+<button class="ml-2 px-3 py-1.5 text-caption font-body rounded-lg hover:bg-surface-container-high text-on-surface-variant transition-colors flex items-center gap-1" title="Cerrar sesión" type="button">
+<span class="material-symbols-outlined text-sm" data-icon="logout">logout</span>
+<span class="hidden md:inline">Cerrar sesión</span>
+</button>
+</div>
+</header>
+<!-- ================= ARCADE HUD / MARCADOR SUPERIOR ================= -->
+<section class="w-full bg-surface-container-lowest border-b border-outline-variant py-space-md px-margin relative z-20">
+<div class="max-w-[1440px] mx-auto flex flex-wrap items-center justify-between gap-space-md">
+<!-- Bloque 1: Batería Hoy 3/3 & Energía -->
+<div class="flex items-center gap-space-md bg-surface-container-low px-4 py-2.5 rounded-xl border border-outline-variant">
+<div class="flex flex-col">
+<div class="flex items-center gap-2">
+<span class="font-arcade text-[10px] text-energy-fill tracking-wider">HOY 3/3</span>
+<span class="material-symbols-outlined text-base text-energy-fill fill-icon" data-icon="bolt">bolt</span>
+</div>
+<span class="text-caption font-caption text-text-muted">Energía diaria completada</span>
+</div>
+<!-- 3 Segmentos de batería llenos con #0E7490 -->
+<div aria-label="3 de 3 segmentos de batería cargados" class="flex items-center gap-1.5 pl-2">
+<div class="w-4 h-7 bg-energy-fill rounded-sm shadow-sm border border-cyan-800"></div>
+<div class="w-4 h-7 bg-energy-fill rounded-sm shadow-sm border border-cyan-800"></div>
+<div class="w-4 h-7 bg-energy-fill rounded-sm shadow-sm border border-cyan-800"></div>
+<div class="w-1.5 h-3 bg-energy-fill rounded-r-xs"></div>
+</div>
+</div>
+<!-- Bloque 2: Racha en juego -->
+<div class="flex items-center gap-space-sm bg-surface-container-low px-4 py-2.5 rounded-xl border border-outline-variant">
+<div class="w-9 h-9 rounded-lg bg-orange-100 flex items-center justify-center text-delegate border border-orange-200">
+<span class="material-symbols-outlined text-xl fill-icon" data-icon="local_fire_department">local_fire_department</span>
+</div>
+<div class="flex flex-col">
+<div class="flex items-center gap-2">
+<span class="font-arcade text-[10px] text-text">RACHA 4 DÍAS</span>
+<span class="inline-flex items-center px-1.5 py-0.2 rounded text-[10px] font-caption bg-green-100 text-success font-medium">
+              En juego
+            </span>
+</div>
+<span class="text-caption font-caption text-text-muted">Multiplicador 1.5x activo</span>
+</div>
+</div>
+<!-- Bloque 3: Nivel 3 · Jugador - 3.950 PTS -->
+<div class="flex items-center gap-space-md bg-surface-container-low px-4 py-2.5 rounded-xl border border-outline-variant">
+<div class="flex flex-col">
+<div class="flex items-center gap-1.5">
+<span class="text-amber-500 font-bold">★</span>
+<span class="font-arcade text-[10px] text-primary">NIVEL 3 · JUGADOR</span>
+<span class="font-arcade text-[10px] text-gold font-bold ml-1">3.950 PTS</span>
+</div>
+<div class="w-48 bg-surface-container-high h-2 rounded-full mt-1.5 overflow-hidden">
+<div aria-label="Progreso de nivel: 78%" class="bg-primary h-full rounded-full" style="width: 78%;"></div>
+</div>
+</div>
+<button class="px-2.5 py-1.5 bg-primary text-on-primary rounded-lg font-arcade text-[9px] hover:bg-primary-container transition-colors shadow-sm flex items-center gap-1" type="button">
+<span class="material-symbols-outlined text-xs" data-icon="play_arrow">play_arrow</span>
+          PULSA START
+        </button>
+</div>
+<!-- Bloque 4: Misión completada -->
+<div class="flex items-center gap-space-sm bg-purple-50 px-4 py-2.5 rounded-xl border border-purple-200">
+<div class="w-9 h-9 rounded-lg bg-purple-100 flex items-center justify-center text-scope-work border border-purple-200">
+<span class="material-symbols-outlined text-xl fill-icon" data-icon="military_tech">military_tech</span>
+</div>
+<div class="flex flex-col">
+<div class="flex items-center gap-1.5">
+<span class="text-scope-work font-bold">★</span>
+<span class="font-arcade text-[10px] text-scope-work">MISIÓN 2/2</span>
+<span class="text-caption font-body-strong text-scope-work font-bold">(+300 PTS)</span>
+</div>
+<span class="text-caption font-caption text-text-muted">2 tareas clave completadas</span>
+</div>
+</div>
+</div>
+</section>
+<!-- ================= CONTENEDOR PRINCIPAL: TABLERO + PILA DE AVISOS FLOTANTES ================= -->
+<main class="flex-1 w-full max-w-[1440px] mx-auto px-margin py-space-lg relative" id="tablero">
+<!-- Header del Dashboard & Filtros -->
+<div class="flex flex-col sm:flex-row sm:items-center justify-between pb-space-lg gap-4">
+<div>
+<div class="flex items-center gap-2">
+<h1 class="text-display font-display text-text tracking-tight">Matriz de Priorización</h1>
+<span class="px-2.5 py-0.5 rounded-full bg-emerald-100 text-success text-caption font-body-strong flex items-center gap-1">
+<span class="w-2 h-2 rounded-full bg-success"></span>
+            Modo Campaña Completado
+          </span>
+</div>
+<p class="text-body font-body text-text-muted mt-0.5">
+          Todas las tareas de alta prioridad procesadas hoy con éxito. Cuadrícula limpia y sincronizada.
+        </p>
+</div>
+<!-- Controles de vista & Nueva Tarea -->
+<div class="flex items-center gap-space-sm">
+<div class="inline-flex rounded-lg border border-outline-variant bg-surface-container-low p-0.5 text-caption">
+<button class="px-3 py-1 rounded bg-surface font-body-strong text-primary shadow-xs">Todos (12)</button>
+<button class="px-3 py-1 rounded text-on-surface-variant hover:text-on-surface font-body">Laboral (7)</button>
+<button class="px-3 py-1 rounded text-on-surface-variant hover:text-on-surface font-body">Personal (5)</button>
+</div>
+<button class="px-4 py-2 bg-primary text-on-primary rounded-lg text-body-strong font-body-strong hover:bg-primary-container transition-colors shadow-sm flex items-center gap-1.5" type="button">
+<span class="material-symbols-outlined text-lg" data-icon="add">add</span>
+          Nueva Tarea
+        </button>
+</div>
+</div>
+<!-- CUADRÍCULA 2x2 EISENHOWER (Tema Claro, Limpio, Alta Visibilidad) -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-space-lg">
+<!-- CUADRANTE 1: HACER AHORA (Urgente e Importante) -->
+<section aria-labelledby="heading-q1" class="bg-surface rounded-xl border border-outline-variant p-space-lg shadow-sm flex flex-col min-h-[340px]">
+<div class="flex items-center justify-between pb-space-md border-b border-outline-variant">
+<div class="flex items-center gap-2">
+<span class="w-3 h-3 rounded-full bg-do-now"></span>
+<h2 class="text-heading font-heading text-text" id="heading-q1">Hacer ahora</h2>
+<span class="text-caption font-caption text-text-muted">(Urgente e Importante)</span>
+</div>
+<span class="px-2 py-0.5 rounded text-caption font-body-strong bg-red-50 text-do-now border border-red-200">
+            3 tareas
+          </span>
+</div>
+<!-- Lista de tareas Q1 -->
+<div class="mt-3 space-y-2.5 flex-1">
+<!-- Tarea 1 (Completada hoy en misión) -->
+<article class="bg-surface-alt rounded-lg border-l-4 border-l-do-now border border-outline-variant p-3 flex items-start justify-between hover:border-slate-400 transition-colors">
+<div class="flex items-start gap-2.5">
+<input aria-label="Tarea finalizada: Entregar memoria técnica v3" checked="" class="mt-1 h-4 w-4 rounded border-outline text-primary focus:ring-primary" type="checkbox"/>
+<div>
+<p class="text-body font-body-strong text-text line-through text-opacity-70">Entregar memoria técnica v3</p>
+<div class="flex items-center gap-2 mt-1">
+<span class="px-2 py-0.2 rounded text-[11px] font-caption bg-purple-100 text-scope-work font-medium">Laboral</span>
+<span class="text-caption font-caption text-text-muted flex items-center gap-1">
+<span class="material-symbols-outlined text-xs" data-icon="schedule">schedule</span> Hoy 11:30
+                  </span>
+<span class="text-[11px] font-arcade text-energy-fill">+150 PTS</span>
+</div>
+</div>
+</div>
+<button aria-label="Opciones de tarea" class="text-on-surface-variant hover:text-on-surface p-1" title="Opciones">
+<span class="material-symbols-outlined text-sm" data-icon="more_vert">more_vert</span>
+</button>
+</article>
+<!-- Tarea 2 -->
+<article class="bg-surface-alt rounded-lg border-l-4 border-l-do-now border border-outline-variant p-3 flex items-start justify-between hover:border-slate-400 transition-colors">
+<div class="flex items-start gap-2.5">
+<input aria-label="Tarea finalizada: Revisión de bugs críticos con DevOps" checked="" class="mt-1 h-4 w-4 rounded border-outline text-primary focus:ring-primary" type="checkbox"/>
+<div>
+<p class="text-body font-body-strong text-text line-through text-opacity-70">Revisión de bugs críticos con DevOps</p>
+<div class="flex items-center gap-2 mt-1">
+<span class="px-2 py-0.2 rounded text-[11px] font-caption bg-purple-100 text-scope-work font-medium">Laboral</span>
+<span class="text-caption font-caption text-text-muted flex items-center gap-1">
+<span class="material-symbols-outlined text-xs" data-icon="schedule">schedule</span> Hoy 14:00
+                  </span>
+<span class="text-[11px] font-arcade text-energy-fill">+150 PTS</span>
+</div>
+</div>
+</div>
+<button aria-label="Opciones de tarea" class="text-on-surface-variant hover:text-on-surface p-1" title="Opciones">
+<span class="material-symbols-outlined text-sm" data-icon="more_vert">more_vert</span>
+</button>
+</article>
+<!-- Tarea 3 pendiente -->
+<article class="bg-surface rounded-lg border-l-4 border-l-do-now border border-outline-variant p-3 flex items-start justify-between hover:border-slate-400 transition-colors">
+<div class="flex items-start gap-2.5">
+<input aria-label="Marcar completada: Confirmar guardia fin de semana" class="mt-1 h-4 w-4 rounded border-outline text-primary focus:ring-primary" type="checkbox"/>
+<div>
+<p class="text-body font-body-strong text-text">Confirmar guardia fin de semana</p>
+<div class="flex items-center gap-2 mt-1">
+<span class="px-2 py-0.2 rounded text-[11px] font-caption bg-teal-100 text-scope-personal font-medium">Personal</span>
+<span class="text-caption font-caption text-text-muted flex items-center gap-1">
+<span class="material-symbols-outlined text-xs" data-icon="schedule">schedule</span> Antes de 18:00
+                  </span>
+</div>
+</div>
+</div>
+<button aria-label="Opciones de tarea" class="text-on-surface-variant hover:text-on-surface p-1" title="Opciones">
+<span class="material-symbols-outlined text-sm" data-icon="more_vert">more_vert</span>
+</button>
+</article>
+</div>
+</section>
+<!-- CUADRANTE 2: PLANIFICAR (No urgente, Importante) -->
+<section aria-labelledby="heading-q2" class="bg-surface rounded-xl border border-outline-variant p-space-lg shadow-sm flex flex-col min-h-[340px]">
+<div class="flex items-center justify-between pb-space-md border-b border-outline-variant">
+<div class="flex items-center gap-2">
+<span class="w-3 h-3 rounded-full bg-schedule"></span>
+<h2 class="text-heading font-heading text-text" id="heading-q2">Planificar</h2>
+<span class="text-caption font-caption text-text-muted">(No urgente, Importante)</span>
+</div>
+<span class="px-2 py-0.5 rounded text-caption font-body-strong bg-blue-50 text-schedule border border-blue-200">
+            3 tareas
+          </span>
+</div>
+<div class="mt-3 space-y-2.5 flex-1">
+<article class="bg-surface rounded-lg border-l-4 border-l-schedule border border-outline-variant p-3 flex items-start justify-between hover:border-slate-400 transition-colors">
+<div class="flex items-start gap-2.5">
+<input aria-label="Tarea: Redacción de Roadmap Q3" class="mt-1 h-4 w-4 rounded border-outline text-primary focus:ring-primary" type="checkbox"/>
+<div>
+<p class="text-body font-body-strong text-text">Redacción de Roadmap Q3</p>
+<div class="flex items-center gap-2 mt-1">
+<span class="px-2 py-0.2 rounded text-[11px] font-caption bg-purple-100 text-scope-work font-medium">Laboral</span>
+<span class="text-caption font-caption text-text-muted flex items-center gap-1">
+<span class="material-symbols-outlined text-xs" data-icon="event">event</span> Jueves próx.
+                  </span>
+</div>
+</div>
+</div>
+<button aria-label="Opciones de tarea" class="text-on-surface-variant hover:text-on-surface p-1" title="Opciones">
+<span class="material-symbols-outlined text-sm" data-icon="more_vert">more_vert</span>
+</button>
+</article>
+<article class="bg-surface rounded-lg border-l-4 border-l-schedule border border-outline-variant p-3 flex items-start justify-between hover:border-slate-400 transition-colors">
+<div class="flex items-start gap-2.5">
+<input aria-label="Tarea: Sesión de feedback con clientes beta" class="mt-1 h-4 w-4 rounded border-outline text-primary focus:ring-primary" type="checkbox"/>
+<div>
+<p class="text-body font-body-strong text-text">Sesión de feedback con clientes beta</p>
+<div class="flex items-center gap-2 mt-1">
+<span class="px-2 py-0.2 rounded text-[11px] font-caption bg-purple-100 text-scope-work font-medium">Laboral</span>
+<span class="text-caption font-caption text-text-muted flex items-center gap-1">
+<span class="material-symbols-outlined text-xs" data-icon="event">event</span> 28 Mayo
+                  </span>
+</div>
+</div>
+</div>
+<button aria-label="Opciones de tarea" class="text-on-surface-variant hover:text-on-surface p-1" title="Opciones">
+<span class="material-symbols-outlined text-sm" data-icon="more_vert">more_vert</span>
+</button>
+</article>
+<article class="bg-surface rounded-lg border-l-4 border-l-schedule border border-outline-variant p-3 flex items-start justify-between hover:border-slate-400 transition-colors">
+<div class="flex items-start gap-2.5">
+<input aria-label="Tarea: Cita médica de rutina" class="mt-1 h-4 w-4 rounded border-outline text-primary focus:ring-primary" type="checkbox"/>
+<div>
+<p class="text-body font-body-strong text-text">Cita médica de rutina</p>
+<div class="flex items-center gap-2 mt-1">
+<span class="px-2 py-0.2 rounded text-[11px] font-caption bg-teal-100 text-scope-personal font-medium">Personal</span>
+<span class="text-caption font-caption text-text-muted flex items-center gap-1">
+<span class="material-symbols-outlined text-xs" data-icon="event">event</span> Viernes
+                  </span>
+</div>
+</div>
+</div>
+<button aria-label="Opciones de tarea" class="text-on-surface-variant hover:text-on-surface p-1" title="Opciones">
+<span class="material-symbols-outlined text-sm" data-icon="more_vert">more_vert</span>
+</button>
+</article>
+</div>
+</section>
+<!-- CUADRANTE 3: DELEGAR (Urgente, No importante) -->
+<section aria-labelledby="heading-q3" class="bg-surface rounded-xl border border-outline-variant p-space-lg shadow-sm flex flex-col min-h-[340px]">
+<div class="flex items-center justify-between pb-space-md border-b border-outline-variant">
+<div class="flex items-center gap-2">
+<span class="w-3 h-3 rounded-full bg-delegate"></span>
+<h2 class="text-heading font-heading text-text" id="heading-q3">Delegar</h2>
+<span class="text-caption font-caption text-text-muted">(Urgente, No importante)</span>
+</div>
+<span class="px-2 py-0.5 rounded text-caption font-body-strong bg-amber-50 text-delegate border border-amber-200">
+            2 tareas
+          </span>
+</div>
+<div class="mt-3 space-y-2.5 flex-1">
+<article class="bg-surface rounded-lg border-l-4 border-l-delegate border border-outline-variant p-3 flex items-start justify-between hover:border-slate-400 transition-colors">
+<div class="flex items-start gap-2.5">
+<input aria-label="Tarea: Enviar facturas proveedor licencias" class="mt-1 h-4 w-4 rounded border-outline text-primary focus:ring-primary" type="checkbox"/>
+<div>
+<p class="text-body font-body-strong text-text">Enviar facturas proveedor licencias</p>
+<div class="flex items-center gap-2 mt-1">
+<span class="px-2 py-0.2 rounded text-[11px] font-caption bg-amber-100 text-delegate font-medium">Asignado a: Carlos M.</span>
+<span class="text-caption font-caption text-text-muted flex items-center gap-1">
+<span class="material-symbols-outlined text-xs" data-icon="schedule">schedule</span> 17:00
+                  </span>
+</div>
+</div>
+</div>
+<button aria-label="Opciones de tarea" class="text-on-surface-variant hover:text-on-surface p-1" title="Opciones">
+<span class="material-symbols-outlined text-sm" data-icon="more_vert">more_vert</span>
+</button>
+</article>
+<article class="bg-surface rounded-lg border-l-4 border-l-delegate border border-outline-variant p-3 flex items-start justify-between hover:border-slate-400 transition-colors">
+<div class="flex items-start gap-2.5">
+<input aria-label="Tarea: Coordinar catering para taller interno" class="mt-1 h-4 w-4 rounded border-outline text-primary focus:ring-primary" type="checkbox"/>
+<div>
+<p class="text-body font-body-strong text-text">Coordinar catering para taller interno</p>
+<div class="flex items-center gap-2 mt-1">
+<span class="px-2 py-0.2 rounded text-[11px] font-caption bg-amber-100 text-delegate font-medium">Asignado a: Recepción</span>
+</div>
+</div>
+</div>
+<button aria-label="Opciones de tarea" class="text-on-surface-variant hover:text-on-surface p-1" title="Opciones">
+<span class="material-symbols-outlined text-sm" data-icon="more_vert">more_vert</span>
+</button>
+</article>
+</div>
+</section>
+<!-- CUADRANTE 4: ELIMINAR (Ni urgente, Ni importante) -->
+<section aria-labelledby="heading-q4" class="bg-surface rounded-xl border border-outline-variant p-space-lg shadow-sm flex flex-col min-h-[340px]">
+<div class="flex items-center justify-between pb-space-md border-b border-outline-variant">
+<div class="flex items-center gap-2">
+<span class="w-3 h-3 rounded-full bg-eliminate"></span>
+<h2 class="text-heading font-heading text-text" id="heading-q4">Eliminar</h2>
+<span class="text-caption font-caption text-text-muted">(Ni urgente, Ni importante)</span>
+</div>
+<span class="px-2 py-0.5 rounded text-caption font-body-strong bg-slate-100 text-eliminate border border-slate-300">
+            1 tarea
+          </span>
+</div>
+<div class="mt-3 space-y-2.5 flex-1">
+<article class="bg-surface rounded-lg border-l-4 border-l-eliminate border border-outline-variant p-3 flex items-start justify-between hover:border-slate-400 transition-colors">
+<div class="flex items-start gap-2.5">
+<input aria-label="Tarea: Limpieza de newsletters secundarias" class="mt-1 h-4 w-4 rounded border-outline text-primary focus:ring-primary" type="checkbox"/>
+<div>
+<p class="text-body font-body-strong text-text text-opacity-80">Limpieza de newsletters secundarias</p>
+<div class="flex items-center gap-2 mt-1">
+<span class="px-2 py-0.2 rounded text-[11px] font-caption bg-slate-100 text-eliminate font-medium">Descartable</span>
+<span class="text-caption font-caption text-text-muted">Baja prioridad</span>
+</div>
+</div>
+</div>
+<button aria-label="Opciones de tarea" class="text-on-surface-variant hover:text-on-surface p-1" title="Opciones">
+<span class="material-symbols-outlined text-sm" data-icon="more_vert">more_vert</span>
+</button>
+</article>
+<!-- Zona de depósito limpia -->
+<div class="border-2 border-dashed border-outline-variant rounded-lg p-4 text-center flex flex-col items-center justify-center text-text-muted gap-1 bg-surface-alt/50">
+<span class="material-symbols-outlined text-xl text-outline" data-icon="auto_delete">auto_delete</span>
+<span class="text-caption font-caption">Arrastra aquí tareas sin impacto para archivarlas</span>
+</div>
+</div>
+</section>
+</div>
+<!-- ================= PILA DE AVISOS NO MODALES (TOASTS DE CELEBRACIÓN) ================= -->
+<!-- Posicionados en la esquina superior derecha sin ocultar el contenido central -->
+<aside aria-label="Notificaciones de celebración" class="fixed top-20 right-6 w-96 max-w-[calc(100vw-3rem)] z-50 flex flex-col gap-2.5 pointer-events-none" role="region">
+<!-- 1. ¡FASE SUPERADA! +500 (Insignia dorada #A16207 con on-gold #FFFFFF) -->
+<div class="pointer-events-auto bg-surface rounded-xl border border-gold arcade-card-shadow p-3.5 flex items-start gap-3 bg-gradient-to-r from-amber-50/90 to-surface">
+<div class="w-10 h-10 rounded-lg bg-gold text-on-gold flex items-center justify-center flex-shrink-0 shadow-sm border border-amber-700">
+<span class="material-symbols-outlined text-2xl fill-icon" data-icon="emoji_events">emoji_events</span>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex items-center justify-between gap-1">
+<span class="font-arcade text-[11px] text-gold tracking-tight">¡FASE SUPERADA! +500</span>
+<button aria-label="Cerrar aviso de fase superada" class="text-text-muted hover:text-text p-0.5 rounded transition-colors" type="button">
+<span class="material-symbols-outlined text-base" data-icon="close">close</span>
+</button>
+</div>
+<p class="text-caption font-body text-text mt-0.5">
+            Has completado las tareas críticas de la mañana sin interrupciones.
+          </p>
+<div class="mt-2 flex items-center gap-2">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-gold text-on-gold">
+              ★ GOLD BONUS
+            </span>
+<span class="text-[11px] font-caption text-text-muted">+500 PTS directos a la cuenta</span>
+</div>
+</div>
+</div>
+<!-- 2. ¡MISIÓN CUMPLIDA! +300 (Estrella y bono especial) -->
+<div class="pointer-events-auto bg-surface rounded-xl border border-purple-300 arcade-card-shadow p-3.5 flex items-start gap-3 bg-gradient-to-r from-purple-50/90 to-surface">
+<div class="w-10 h-10 rounded-lg bg-energy-extra text-white flex items-center justify-center flex-shrink-0 shadow-sm border border-purple-800">
+<span class="material-symbols-outlined text-2xl fill-icon" data-icon="stars">stars</span>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex items-center justify-between gap-1">
+<span class="font-arcade text-[11px] text-energy-extra tracking-tight">¡MISIÓN CUMPLIDA! +300</span>
+<button aria-label="Cerrar aviso de misión cumplida" class="text-text-muted hover:text-text p-0.5 rounded transition-colors" type="button">
+<span class="material-symbols-outlined text-base" data-icon="close">close</span>
+</button>
+</div>
+<p class="text-caption font-body text-text mt-0.5">
+            Misión "2 tareas clave completadas" finalizada antes de las 14:00h.
+          </p>
+<div class="mt-1 flex items-center gap-1.5 text-caption font-caption text-scope-work font-medium">
+<span class="w-1.5 h-1.5 rounded-full bg-energy-extra"></span>
+            Recompensa desbloqueada en tu panel
+          </div>
+</div>
+</div>
+<!-- 3. ¡SUBES DE NIVEL! Nivel 3 · Jugador -->
+<div class="pointer-events-auto bg-surface rounded-xl border border-primary-fixed-dim arcade-card-shadow p-3.5 flex items-start gap-3 bg-gradient-to-r from-blue-50/90 to-surface">
+<div class="w-10 h-10 rounded-lg bg-primary text-on-primary flex items-center justify-center flex-shrink-0 shadow-sm border border-primary-container">
+<span class="material-symbols-outlined text-2xl fill-icon" data-icon="sports_esports">sports_esports</span>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex items-center justify-between gap-1">
+<span class="font-arcade text-[10px] text-primary tracking-tight">¡SUBES DE NIVEL!</span>
+<button aria-label="Cerrar aviso de subida de nivel" class="text-text-muted hover:text-text p-0.5 rounded transition-colors" type="button">
+<span class="material-symbols-outlined text-base" data-icon="close">close</span>
+</button>
+</div>
+<p class="text-caption font-body-strong text-text mt-0.5">
+            Nivel 3 · Jugador
+          </p>
+<p class="text-caption font-caption text-text-muted">
+            Nuevo multiplicador desbloqueado para tus próximas ejecuciones.
+          </p>
+</div>
+</div>
+<!-- 4. Logro desbloqueado: Primera moneda -->
+<div class="pointer-events-auto bg-surface rounded-xl border border-amber-200 arcade-card-shadow p-3.5 flex items-start gap-3 bg-gradient-to-r from-yellow-50/70 to-surface">
+<div class="w-10 h-10 rounded-lg bg-amber-100 text-gold flex items-center justify-center flex-shrink-0 shadow-sm border border-amber-300">
+<span class="material-symbols-outlined text-2xl fill-icon" data-icon="monetization_on">monetization_on</span>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex items-center justify-between gap-1">
+<span class="font-arcade text-[9px] text-gold tracking-tight">LOGRO DESBLOQUEADO</span>
+<button aria-label="Cerrar aviso de logro" class="text-text-muted hover:text-text p-0.5 rounded transition-colors" type="button">
+<span class="material-symbols-outlined text-base" data-icon="close">close</span>
+</button>
+</div>
+<p class="text-caption font-body-strong text-text mt-0.5">
+            Primera moneda arcade
+          </p>
+<p class="text-caption font-caption text-text-muted">
+            Has canjeado tu primer combo de enfoque diario.
+          </p>
+</div>
+</div>
+<!-- 5. ¡NUEVO RÉCORD! 8 tareas -->
+<div class="pointer-events-auto bg-surface rounded-xl border border-orange-200 arcade-card-shadow p-3.5 flex items-start gap-3 bg-gradient-to-r from-orange-50/80 to-surface">
+<div class="w-10 h-10 rounded-lg bg-orange-600 text-white flex items-center justify-center flex-shrink-0 shadow-sm border border-orange-700">
+<span class="material-symbols-outlined text-2xl fill-icon" data-icon="local_fire_department">local_fire_department</span>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex items-center justify-between gap-1">
+<span class="font-arcade text-[10px] text-orange-700 tracking-tight">¡NUEVO RÉCORD!</span>
+<button aria-label="Cerrar aviso de nuevo récord" class="text-text-muted hover:text-text p-0.5 rounded transition-colors" type="button">
+<span class="material-symbols-outlined text-base" data-icon="close">close</span>
+</button>
+</div>
+<p class="text-caption font-body-strong text-text mt-0.5">
+            8 tareas organizadas
+          </p>
+<p class="text-caption font-caption text-text-muted">
+            Superaste tu marca semanal en gestión sin procrastinación.
+          </p>
+</div>
+</div>
+</aside>
+</main>
+<!-- ================= NOTA DE DISEÑO ACCESIBLE (Badge Discreto) ================= -->
+<aside aria-label="Aviso de accesibilidad" class="fixed bottom-6 left-6 z-40 bg-surface/95 backdrop-blur border border-outline-variant shadow-md rounded-full px-3.5 py-1.5 flex items-center gap-2 text-caption font-caption text-text-muted">
+<span class="material-symbols-outlined text-base text-primary" data-icon="accessibility_new">accessibility_new</span>
+<span>Accesibilidad · Con movimiento reducido: sin animación</span>
+</aside>
+<!-- ================= FOOTER (Shared Components JSON execution) ================= -->
+<footer class="flex flex-col md:flex-row items-center justify-between px-margin py-space-lg w-full border-t border-outline-variant bg-surface-container-lowest mt-auto z-10">
+<div class="flex items-center gap-space-md mb-3 md:mb-0">
+<span class="text-body-strong font-body-strong text-on-surface">InsertTasks v3</span>
+<span class="text-caption font-caption text-on-surface-variant">© 2024 MyTasks. Todos los derechos reservados.</span>
+</div>
+<div class="flex items-center gap-space-lg">
+<a class="text-on-surface-variant hover:text-primary transition-colors text-caption font-caption" href="#privacidad">Privacidad</a>
+<a class="text-on-surface-variant hover:text-primary transition-colors text-caption font-caption" href="#terminos">Términos</a>
+<a class="text-on-surface-variant hover:text-primary transition-colors text-caption font-caption" href="#ayuda">Ayuda</a>
+<span class="text-caption font-caption text-text-muted px-2 py-0.5 bg-surface-container-high rounded text-xs font-mono">v3.4.1-light</span>
+</div>
+</footer>
+</body></html>

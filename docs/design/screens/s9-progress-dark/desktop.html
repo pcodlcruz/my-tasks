@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>InsertTasks v3.0 — Progreso y Estadísticas</title>
+<!-- Tailwind CSS v3 -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Fonts: Inter + Material Symbols + Press Start 2P -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Press+Start+2P&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "surface-dim": "#081425",
+            "primary-container": "#60a5fa",
+            "on-surface": "#d8e3fb",
+            "on-secondary-fixed-variant": "#005047",
+            "secondary-fixed": "#62fae3",
+            "primary-fixed": "#d4e3ff",
+            "tertiary-fixed": "#e8ddff",
+            "on-tertiary-fixed-variant": "#4f319c",
+            "error": "#ffb4ab",
+            "tertiary-container": "#ad91ff",
+            "primary-fixed-dim": "#a4c9ff",
+            "outline-variant": "#414751",
+            "outline": "#8b919d",
+            "secondary-container": "#03c6b2",
+            "inverse-surface": "#d8e3fb",
+            "tertiary-fixed-dim": "#cebdff",
+            "on-primary-fixed": "#001c39",
+            "inverse-primary": "#0060ac",
+            "surface": "#081425",
+            "surface-tint": "#a4c9ff",
+            "on-error": "#690005",
+            "on-tertiary": "#381385",
+            "error-container": "#93000a",
+            "tertiary": "#cebdff",
+            "surface-variant": "#2a3548",
+            "on-secondary-container": "#004d44",
+            "surface-container-low": "#111c2d",
+            "on-tertiary-container": "#40208d",
+            "on-secondary": "#003731",
+            "surface-container-lowest": "#040e1f",
+            "surface-container-highest": "#2a3548",
+            "surface-bright": "#2f3a4c",
+            "on-tertiary-fixed": "#21005e",
+            "surface-container": "#152031",
+            "on-primary-fixed-variant": "#004883",
+            "on-error-container": "#ffdad6",
+            "primary": "#a4c9ff",
+            "on-secondary-fixed": "#00201c",
+            "on-surface-variant": "#c1c7d3",
+            "surface-container-high": "#1f2a3c",
+            "secondary": "#44e2cd",
+            "background": "#081425",
+            "on-primary-container": "#003a6b",
+            "on-primary": "#00315d",
+            "on-background": "#d8e3fb",
+            "inverse-on-surface": "#263143",
+            "secondary-fixed-dim": "#3cddc7"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.125rem",
+            "lg": "0.25rem",
+            "xl": "0.5rem",
+            "full": "0.75rem"
+          },
+          "spacing": {
+            "space-lg": "1rem",
+            "space-xl": "2rem",
+            "margin": "1.5rem",
+            "space-sm": "0.5rem",
+            "space-md": "0.75rem",
+            "space-2xl": "3rem",
+            "gutter": "1.5rem",
+            "space-xs": "0.25rem"
+          },
+          "fontFamily": {
+            "caption": ["Inter"],
+            "body": ["Inter"],
+            "heading": ["Inter"],
+            "body-strong": ["Inter"],
+            "display": ["Inter"],
+            "pixel": ["'Press Start 2P'", "monospace"]
+          },
+          "fontSize": {
+            "caption": ["13px", { "lineHeight": "18px", "fontWeight": "400" }],
+            "body": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+            "heading": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+            "body-strong": ["16px", { "lineHeight": "24px", "fontWeight": "600" }],
+            "display": ["28px", { "lineHeight": "36px", "fontWeight": "700" }]
+          }
+        },
+      },
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      line-height: 1;
+    }
+    .material-symbols-fill {
+      font-variation-settings: 'FILL' 1, 'wght' 500, 'GRAD' 0, 'opsz' 24;
+    }
+    /* Diagonal hatched texture for rest / off days */
+    .bg-hatched {
+      background-image: repeating-linear-gradient(45deg, rgba(65, 71, 81, 0.35), rgba(65, 71, 81, 0.35) 2px, transparent 2px, transparent 6px);
+    }
+    .pixel-text {
+      font-family: 'Press Start 2P', monospace;
+      letter-spacing: -0.05em;
+    }
+  </style>
+</head>
+<body class="bg-background text-on-surface antialiased min-h-screen selection:bg-secondary selection:text-surface-dim font-body">
+<!-- ================= TOP NAV BAR (Shared Components JSON Anchor) ================= -->
+<header class="bg-surface-container dark:bg-surface-container border-b border-outline-variant dark:border-outline-variant shadow-sm dark:shadow-none docked full-width top-0 sticky z-50">
+<div class="flex justify-between items-center w-full px-gutter h-16 max-w-[1440px] mx-auto">
+<!-- Brand Logo / Product Name -->
+<div class="flex items-center gap-3">
+<div class="flex items-center gap-2">
+<div class="w-8 h-8 rounded bg-surface-container-high border border-outline flex items-center justify-center text-secondary">
+<span class="material-symbols-outlined text-[20px]">videogame_asset</span>
+</div>
+<span class="text-heading font-heading font-bold text-primary dark:text-primary tracking-wide">InsertTasks</span>
+</div>
+<span class="text-[10px] pixel-text px-1.5 py-0.5 rounded bg-surface-container-highest text-secondary border border-outline-variant">v3.0</span>
+</div>
+<!-- Navigation Links (Active: Progreso activo) -->
+<nav class="hidden md:flex items-center gap-6 h-full pt-1">
+<a class="text-on-surface-variant dark:text-on-surface-variant pb-1 font-body hover:text-primary dark:hover:text-primary hover:bg-surface-container-high dark:hover:bg-surface-container-high transition-colors duration-150 cursor-pointer" href="#">
+          Tablero
+        </a>
+<a class="text-primary dark:text-primary border-b-2 border-primary dark:border-primary pb-1 font-body-strong flex items-center gap-1.5 cursor-pointer" href="#">
+<span class="material-symbols-outlined text-[18px]">equalizer</span>
+          Progreso activo
+        </a>
+<a class="text-on-surface-variant dark:text-on-surface-variant pb-1 font-body hover:text-primary dark:hover:text-primary hover:bg-surface-container-high dark:hover:bg-surface-container-high transition-colors duration-150 cursor-pointer" href="#">
+          Programadas
+        </a>
+<a class="text-on-surface-variant dark:text-on-surface-variant pb-1 font-body hover:text-primary dark:hover:text-primary hover:bg-surface-container-high dark:hover:bg-surface-container-high transition-colors duration-150 cursor-pointer" href="#">
+          Historial
+        </a>
+<a class="text-on-surface-variant dark:text-on-surface-variant pb-1 font-body hover:text-primary dark:hover:text-primary hover:bg-surface-container-high dark:hover:bg-surface-container-high transition-colors duration-150 cursor-pointer" href="#">
+          Papelera
+        </a>
+</nav>
+<!-- Trailing actions: Level Badge, Icons, User Profile, Cerrar sesión -->
+<div class="flex items-center gap-3">
+<!-- Nivel 3 / Arcade Status -->
+<div class="hidden lg:flex items-center gap-2 px-2.5 py-1 rounded bg-surface-container-high border border-outline-variant">
+<span class="text-[10px] pixel-text text-secondary">Nivel 3</span>
+<span class="text-outline-variant">|</span>
+<span class="text-[9px] pixel-text text-primary">3.450 PTS</span>
+</div>
+<!-- Trailing Icon Actions -->
+<button class="w-8 h-8 rounded flex items-center justify-center text-on-surface-variant hover:text-primary hover:bg-surface-container-high transition-colors duration-150 cursor-pointer" title="Notificaciones">
+<span class="material-symbols-outlined text-[20px]">notifications</span>
+</button>
+<button class="w-8 h-8 rounded flex items-center justify-center text-on-surface-variant hover:text-primary hover:bg-surface-container-high transition-colors duration-150 cursor-pointer" title="Ayuda">
+<span class="material-symbols-outlined text-[20px]">help</span>
+</button>
+<div class="h-5 w-px bg-outline-variant mx-0.5"></div>
+<!-- User Chip & Avatar -->
+<div class="flex items-center gap-2">
+<div class="w-8 h-8 rounded-full bg-surface-container-highest border border-outline flex items-center justify-center text-on-surface font-body-strong text-caption" title="Avatar AC del usuario">
+            AC
+          </div>
+<div class="hidden xl:flex flex-col text-left">
+<span class="text-caption font-body-strong leading-none text-on-surface">Ana Cruz</span>
+<span class="text-[10px] text-outline leading-tight">Product Lead</span>
+</div>
+</div>
+<!-- Trailing Primary Action -->
+<button class="text-caption font-body text-outline hover:text-error hover:bg-surface-container-high px-2 py-1 rounded transition-colors duration-150 cursor-pointer active:scale-95 ml-1">
+          Cerrar sesión
+        </button>
+</div>
+</div>
+</header>
+<!-- ================= MAIN CANVAS ================= -->
+<main class="max-w-[1440px] mx-auto px-gutter py-space-xl">
+<!-- CABECERA DE PÁGINA -->
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-4 pb-space-lg mb-space-xl border-b border-outline-variant">
+<div>
+<div class="flex items-center gap-3 mb-1">
+<h1 class="text-display font-display text-on-surface">Progreso y Estadísticas</h1>
+<span class="text-[10px] pixel-text px-2 py-0.5 rounded bg-surface-container-highest text-secondary border border-secondary/30 tracking-tight">
+            MODO ARCADE
+          </span>
+</div>
+<p class="text-body font-body text-on-surface-variant max-w-3xl">
+          Historial de actividad, consistencia diaria y sala de trofeos de tu productividad personal y laboral.
+        </p>
+</div>
+<!-- Badges superiores (Racha & Multiplicador) -->
+<div class="flex items-center gap-3 flex-wrap">
+<!-- Racha activa (#FB923C) -->
+<div class="flex items-center gap-2.5 px-3 py-1.5 rounded bg-surface-container border border-outline-variant">
+<span class="material-symbols-outlined text-[20px] text-[#FB923C] material-symbols-fill animate-pulse">local_fire_department</span>
+<div class="flex flex-col">
+<span class="text-[10px] text-on-surface-variant font-caption uppercase tracking-wider">Racha activa</span>
+<span class="text-[11px] pixel-text text-[#FB923C]">4 DÍAS</span>
+</div>
+</div>
+<!-- Multiplicador EXP (#FACC15) -->
+<div class="flex items-center gap-2.5 px-3 py-1.5 rounded bg-surface-container border border-outline-variant">
+<span class="material-symbols-outlined text-[20px] text-[#FACC15] material-symbols-fill">bolt</span>
+<div class="flex flex-col">
+<span class="text-[10px] text-on-surface-variant font-caption uppercase tracking-wider">Multiplicador</span>
+<span class="text-[11px] pixel-text text-[#FACC15]">x1.5 EXP</span>
+</div>
+</div>
+</div>
+</div>
+<!-- CUADRÍCULA PRINCIPAL (Layout 2 Columnas) -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-gutter items-start">
+<!-- ================= COLUMNA IZQUIERDA (7 / 12) ================= -->
+<section class="lg:col-span-7 flex flex-col gap-gutter">
+<!-- CALENDARIO DE ACTIVIDAD 12 SEMANAS -->
+<div class="bg-surface-container rounded-xl border border-outline-variant p-space-lg shadow-sm">
+<div class="flex items-center justify-between pb-space-md border-b border-outline-variant mb-space-md">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-secondary text-[20px]">calendar_month</span>
+<h2 class="text-heading font-heading text-on-surface">Actividad de 12 Semanas</h2>
+</div>
+<span class="text-caption font-caption text-outline">Ago 11 — Nov 02</span>
+</div>
+<!-- Matriz de Días: Eje Y (Lunes a Domingo) × 12 Columnas -->
+<div class="overflow-x-auto pb-2">
+<div class="inline-grid grid-cols-[32px_repeat(12,minmax(34px,1fr))] gap-1.5 items-center w-full min-w-[480px]">
+<!-- Encabezado de Semanas (S01 - S12) -->
+<div class="text-[10px] text-outline text-center"></div>
+<div class="text-[9px] pixel-text text-outline text-center">S1</div>
+<div class="text-[9px] pixel-text text-outline text-center">S2</div>
+<div class="text-[9px] pixel-text text-outline text-center">S3</div>
+<div class="text-[9px] pixel-text text-outline text-center">S4</div>
+<div class="text-[9px] pixel-text text-outline text-center">S5</div>
+<div class="text-[9px] pixel-text text-outline text-center">S6</div>
+<div class="text-[9px] pixel-text text-outline text-center">S7</div>
+<div class="text-[9px] pixel-text text-outline text-center">S8</div>
+<div class="text-[9px] pixel-text text-outline text-center">S9</div>
+<div class="text-[9px] pixel-text text-outline text-center">S10</div>
+<div class="text-[9px] pixel-text text-outline text-center">S11</div>
+<div class="text-[9px] pixel-text text-outline text-center">S12</div>
+<!-- Lunes -->
+<div class="text-caption font-body-strong text-outline text-center">L</div>
+<div class="h-8 rounded flex items-center justify-center text-xs bg-[#22D3EE]/20 border border-[#22D3EE]/40 text-[#22D3EE]">1</div>
+<div class="h-8 rounded flex items-center justify-center text-xs bg-[#22D3EE]/50 border border-[#22D3EE]/60 text-surface-dim font-bold">2</div>
+<div class="h-8 rounded flex items-center justify-center text-xs bg-[#22D3EE] text-surface-dim font-bold">✓</div>
+<div class="h-8 rounded flex items-center justify-center text-xs bg-[#22D3EE]/20 border border-[#22D3EE]/40 text-[#22D3EE]">1</div>
+<div class="h-8 rounded flex items-center justify-center text-xs bg-[#22D3EE] text-surface-dim font-bold">✓</div>
+<div class="h-8 rounded flex items-center justify-center text-xs bg-[#22D3EE]/80 text-surface-dim font-bold">✓</div>
+<div class="h-8 rounded flex items-center justify-center text-xs bg-[#22D3EE]/50 border border-[#22D3EE]/60 text-surface-dim font-bold">2</div>
+<div class="h-8 rounded flex items-center justify-center text-xs bg-[#22D3EE] text-surface-dim font-bold">✓</div>
+<div class="h-8 rounded flex items-center justify-center text-xs bg-[#22D3EE]/20 border border-[#22D3EE]/40 text-[#22D3EE]">1</div>
+<div class="h-8 rounded flex items-center justify-center text-xs bg-[#22D3EE] text-surface-dim font-bold">✓</div>
+<div class="h-8 rounded flex items-center justify-center text-xs bg-[#22D3EE] text-surface-dim font-bold">✓</div>
+<div class="h-8 rounded flex items-center justify-center text-xs border border-dashed border-outline text-outline">·</div>
+<!-- Martes -->
+<div class="text-caption font-body-strong text-outline text-center">M</div>
+<div class="h-8 rounded flex items-center justify-center text-xs bg-[#22D3EE]/50 border border-[#22D3EE]/60 text-surface-dim font-bold">2</div>
+<div class="h-8 rounded flex items-center justify-center text-xs bg-[#22D3EE] text-surface-dim font-bold">✓</div>
+<div class="h-8 rounded flex items-center justify-center text-xs bg-[#22D3EE] text-surface-dim font-bold">✓</div>
+<div class="h-8 rounded flex items-center justify-center text-xs bg-[#22D3EE]/50 border border-[#22D3EE]/60 text-surface-dim font-bold">2</div>
+<div class="h-8 rounded flex items-center justify-center text-xs bg-[#22D3EE]/20 border border-[#22D3EE]/40 text-[#22D3EE]">1</div>
+<div class="h-8 rounded flex items-center justify-center text-xs bg-[#22D3EE] text-surface-dim font-bold">✓</div>
+<div class="h-8 rounded flex items-center justify-center text-xs bg-[#22D3EE] text-surface-dim font-bold">✓</div>
+<div class="h-8 rounded flex items-center justify-center text-xs bg-[#22D3EE]/20 border border-[#22D3EE]/40 text-[#22D3EE]">1</div>
+<div class="h-8 rounded flex items-center justify-center text-xs bg-[#22D3EE] text-surface-dim font-bold">✓</div>
+<div class="h-8 rounded flex items-center justify-center text-xs bg-[#22D3EE]/50 border border-[#22D3EE]/60 text-surface-dim font-bold">2</div>
+<!-- HOY: S11 Martes destacado con borde grueso visible cian #22D3EE -->
+<div class="h-8 rounded flex items-center justify-center text-xs bg-[#22D3EE] text-surface-dim font-bold ring-2 ring-[#22D3EE] ring-offset-2 ring-offset-surface-container">
+                ★
+              </div>
+<div class="h-8 rounded flex items-center justify-center text-xs border border-dashed border-outline text-outline">·</div>
+<!-- Miércoles -->
+<div class="text-caption font-body-strong text-outline text-center">X</div>
+<div class="h-8 rounded flex items-center justify-center text-xs bg-surface-container-high border border-outline-variant text-outline">0</div>
+<div class="h-8 rounded flex items-center justify-center text-xs bg-[#22D3EE]/20 border border-[#22D3EE]/40 text-[#22D3EE]">1</div>
+<div class="h-8 rounded flex items-center justify-center text-xs bg-[#22D3EE] text-surface-dim font-bold">✓</div>
+<div class="h-8 rounded flex items-center justify-center text-xs bg-[#22D3EE] text-surface-dim font-bold">✓</div>
+<div class="h-8 rounded flex items-center justify-center text-xs bg-[#22D3EE]/50 border border-[#22D3EE]/60 text-surface-dim font-bold">2</div>
+<div class="h-8 rounded flex items-center justify-center text-xs bg-[#22D3EE] text-surface-dim font-bold">✓</div>
+<div class="h-8 rounded flex items-center justify-center text-xs bg-[#22D3EE]/20 border border-[#22D3EE]/40 text-[#22D3EE]">1</div>
+<div class="h-8 rounded flex items-center justify-center text-xs bg-[#22D3EE] text-surface-dim font-bold">✓</div>
+<div class="h-8 rounded flex items-center justify-center text-xs bg-[#22D3EE]/50 border border-[#22D3EE]/60 text-surface-dim font-bold">2</div>
+<div class="h-8 rounded flex items-center justify-center text-xs bg-[#22D3EE] text-surface-dim font-bold">✓</div>
+<div class="h-8 rounded flex items-center justify-center text-xs border border-dashed border-outline text-outline">·</div>
+<div class="h-8 rounded flex items-center justify-center text-xs border border-dashed border-outline text-outline">·</div>
+<!-- Jueves -->
+<div class="text-caption font-body-strong text-outline text-center">J</div>
+<div class="h-8 rounded flex items-center justify-center text-xs bg-[#22D3EE]/50 border border-[#22D3EE]/60 text-surface-dim font-bold">2</div>
+<div class="h-8 rounded flex items-center justify-center text-xs bg-[#22D3EE] text-surface-dim font-bold">✓</div>
+<div class="h-8 rounded flex items-center justify-center text-xs bg-[#22D3EE]/20 border border-[#22D3EE]/40 text-[#22D3EE]">1</div>
+<div class="h-8 rounded flex items-center justify-center text-xs bg-[#22D3EE] text-surface-dim font-bold">✓</div>
+<div class="h-8 rounded flex items-center justify-center text-xs bg-[#22D3EE] text-surface-dim font-bold">✓</div>
+<div class="h-8 rounded flex items-center justify-center text-xs bg-[#22D3EE]/50 border border-[#22D3EE]/60 text-surface-dim font-bold">2</div>
+<div class="h-8 rounded flex items-center justify-center text-xs bg-surface-container-high border border-outline-variant text-outline">0</div>
+<div class="h-8 rounded flex items-center justify-center text-xs bg-[#22D3EE] text-surface-dim font-bold">✓</div>
+<div class="h-8 rounded flex items-center justify-center text-xs bg-[#22D3EE] text-surface-dim font-bold">✓</div>
+<div class="h-8 rounded flex items-center justify-center text-xs bg-[#22D3EE]/20 border border-[#22D3EE]/40 text-[#22D3EE]">1</div>
+<div class="h-8 rounded flex items-center justify-center text-xs border border-dashed border-outline text-outline">·</div>
+<div class="h-8 rounded flex items-center justify-center text-xs border border-dashed border-outline text-outline">·</div>
+<!-- Viernes -->
+<div class="text-caption font-body-strong text-outline text-center">V</div>
+<div class="h-8 rounded flex items-center justify-center text-xs bg-[#22D3EE] text-surface-dim font-bold">✓</div>
+<div class="h-8 rounded flex items-center justify-center text-xs bg-[#22D3EE]/20 border border-[#22D3EE]/40 text-[#22D3EE]">1</div>
+<div class="h-8 rounded flex items-center justify-center text-xs bg-[#22D3EE] text-surface-dim font-bold">✓</div>
+<div class="h-8 rounded flex items-center justify-center text-xs bg-[#22D3EE]/50 border border-[#22D3EE]/60 text-surface-dim font-bold">2</div>
+<div class="h-8 rounded flex items-center justify-center text-xs bg-[#22D3EE] text-surface-dim font-bold">✓</div>
+<div class="h-8 rounded flex items-center justify-center text-xs bg-[#22D3EE] text-surface-dim font-bold">✓</div>
+<div class="h-8 rounded flex items-center justify-center text-xs bg-[#22D3EE]/20 border border-[#22D3EE]/40 text-[#22D3EE]">1</div>
+<div class="h-8 rounded flex items-center justify-center text-xs bg-[#22D3EE]/50 border border-[#22D3EE]/60 text-surface-dim font-bold">2</div>
+<div class="h-8 rounded flex items-center justify-center text-xs bg-[#22D3EE] text-surface-dim font-bold">✓</div>
+<div class="h-8 rounded flex items-center justify-center text-xs bg-[#22D3EE] text-surface-dim font-bold">✓</div>
+<div class="h-8 rounded flex items-center justify-center text-xs border border-dashed border-outline text-outline">·</div>
+<div class="h-8 rounded flex items-center justify-center text-xs border border-dashed border-outline text-outline">·</div>
+<!-- Sábado (Días no activos / descanso rayado) -->
+<div class="text-caption font-body-strong text-outline text-center">S</div>
+<div class="h-8 rounded bg-hatched border border-outline-variant flex items-center justify-center text-[10px] text-outline">/</div>
+<div class="h-8 rounded bg-hatched border border-outline-variant flex items-center justify-center text-[10px] text-outline">/</div>
+<div class="h-8 rounded flex items-center justify-center text-xs bg-[#22D3EE]/20 border border-[#22D3EE]/40 text-[#22D3EE]">1</div>
+<div class="h-8 rounded bg-hatched border border-outline-variant flex items-center justify-center text-[10px] text-outline">/</div>
+<div class="h-8 rounded bg-hatched border border-outline-variant flex items-center justify-center text-[10px] text-outline">/</div>
+<div class="h-8 rounded bg-hatched border border-outline-variant flex items-center justify-center text-[10px] text-outline">/</div>
+<div class="h-8 rounded flex items-center justify-center text-xs bg-[#22D3EE]/20 border border-[#22D3EE]/40 text-[#22D3EE]">1</div>
+<div class="h-8 rounded bg-hatched border border-outline-variant flex items-center justify-center text-[10px] text-outline">/</div>
+<div class="h-8 rounded bg-hatched border border-outline-variant flex items-center justify-center text-[10px] text-outline">/</div>
+<div class="h-8 rounded bg-hatched border border-outline-variant flex items-center justify-center text-[10px] text-outline">/</div>
+<div class="h-8 rounded flex items-center justify-center text-xs border border-dashed border-outline text-outline">·</div>
+<div class="h-8 rounded flex items-center justify-center text-xs border border-dashed border-outline text-outline">·</div>
+<!-- Domingo (Días no activos / descanso rayado) -->
+<div class="text-caption font-body-strong text-outline text-center">D</div>
+<div class="h-8 rounded bg-hatched border border-outline-variant flex items-center justify-center text-[10px] text-outline">/</div>
+<div class="h-8 rounded bg-hatched border border-outline-variant flex items-center justify-center text-[10px] text-outline">/</div>
+<div class="h-8 rounded bg-hatched border border-outline-variant flex items-center justify-center text-[10px] text-outline">/</div>
+<div class="h-8 rounded bg-hatched border border-outline-variant flex items-center justify-center text-[10px] text-outline">/</div>
+<div class="h-8 rounded bg-hatched border border-outline-variant flex items-center justify-center text-[10px] text-outline">/</div>
+<div class="h-8 rounded bg-hatched border border-outline-variant flex items-center justify-center text-[10px] text-outline">/</div>
+<div class="h-8 rounded bg-hatched border border-outline-variant flex items-center justify-center text-[10px] text-outline">/</div>
+<div class="h-8 rounded bg-hatched border border-outline-variant flex items-center justify-center text-[10px] text-outline">/</div>
+<div class="h-8 rounded bg-hatched border border-outline-variant flex items-center justify-center text-[10px] text-outline">/</div>
+<div class="h-8 rounded bg-hatched border border-outline-variant flex items-center justify-center text-[10px] text-outline">/</div>
+<div class="h-8 rounded flex items-center justify-center text-xs border border-dashed border-outline text-outline">·</div>
+<div class="h-8 rounded flex items-center justify-center text-xs border border-dashed border-outline text-outline">·</div>
+</div>
+</div>
+<!-- LEYENDA DESCRIPTIVA -->
+<div class="pt-space-md mt-space-md border-t border-outline-variant flex items-center justify-between flex-wrap gap-2 text-caption">
+<span class="text-outline font-caption">Convenciones:</span>
+<div class="flex items-center gap-3 flex-wrap">
+<span class="inline-flex items-center gap-1.5 text-on-surface-variant">
+<span class="w-3.5 h-3.5 rounded bg-surface-container-high border border-outline-variant inline-block"></span>
+                Sin actividad
+              </span>
+<span class="inline-flex items-center gap-1.5 text-on-surface-variant">
+<span class="w-3.5 h-3.5 rounded bg-[#22D3EE]/30 border border-[#22D3EE]/50 inline-block"></span>
+                1-2 tareas
+              </span>
+<span class="inline-flex items-center gap-1.5 text-on-surface-variant">
+<span class="w-3.5 h-3.5 rounded bg-[#22D3EE] text-surface-dim font-bold flex items-center justify-center text-[9px]">✓</span>
+                Meta diaria (3)
+              </span>
+<span class="inline-flex items-center gap-1.5 text-on-surface-variant">
+<span class="w-3.5 h-3.5 rounded bg-[#22D3EE] text-surface-dim font-bold flex items-center justify-center text-[9px]">★</span>
+                Superada (4+)
+              </span>
+<span class="inline-flex items-center gap-1.5 text-on-surface-variant">
+<span class="w-3.5 h-3.5 rounded bg-hatched border border-outline-variant inline-block"></span>
+                Descanso
+              </span>
+<span class="inline-flex items-center gap-1.5 text-on-surface-variant">
+<span class="w-3.5 h-3.5 rounded border border-dashed border-outline inline-block"></span>
+                Futuro
+              </span>
+</div>
+</div>
+</div>
+<!-- DETALLE DEL DÍA SELECCIONADO (Martes 28 de octubre) -->
+<div class="bg-surface-container rounded-xl border border-outline-variant p-space-lg shadow-sm">
+<div class="flex flex-col sm:flex-row sm:items-center justify-between pb-space-md border-b border-outline-variant mb-space-md gap-3">
+<div>
+<div class="flex items-center gap-2 flex-wrap mb-1">
+<h3 class="text-heading font-heading text-on-surface">Martes 28 de octubre</h3>
+<span class="px-2 py-0.5 rounded-full text-caption font-body-strong bg-[#22D3EE]/15 text-[#22D3EE] border border-[#22D3EE]/30">
+                  ✓ Meta cumplida
+                </span>
+<span class="px-2 py-0.5 rounded-full text-caption font-body-strong bg-[#FACC15]/15 text-[#FACC15] border border-[#FACC15]/30">
+                  ★ Misión cumplida
+                </span>
+</div>
+<p class="text-caption font-caption text-outline">
+                Rendimiento: <strong class="text-on-surface">4 de 3 tareas</strong> completadas (133% de la meta)
+              </p>
+</div>
+<div class="px-3 py-1.5 rounded bg-surface-container-high border border-outline-variant flex items-center gap-2 self-start sm:self-auto">
+<span class="material-symbols-outlined text-[18px] text-secondary">trending_up</span>
+<span class="text-caption pixel-text text-secondary">+950 PTS</span>
+</div>
+</div>
+<!-- LISTA DE 4 TAREAS COMPLETADAS -->
+<div class="space-y-3">
+<!-- Tarea 1 -->
+<div class="p-space-md rounded bg-surface-container-high border border-outline-variant hover:border-outline transition-colors duration-150 flex flex-col md:flex-row md:items-center justify-between gap-3">
+<div class="flex items-start gap-3">
+<div class="w-5 h-5 rounded-sm bg-[#60A5FA] flex items-center justify-center text-surface-dim font-bold text-xs mt-0.5">
+                  ✓
+                </div>
+<div>
+<h4 class="text-body-strong font-body-strong text-on-surface">Resolver caída de servidor de pagos Stripe en producción</h4>
+<div class="flex items-center gap-2 mt-1 flex-wrap">
+<span class="px-1.5 py-0.5 rounded text-[11px] font-caption bg-red-950/70 text-red-300 border border-red-800">
+                      Q1 · Hacer ahora
+                    </span>
+<span class="px-2 py-0.5 rounded-full text-[11px] font-caption bg-[#A78BFA]/15 text-[#A78BFA] border border-[#A78BFA]/30 flex items-center gap-1">
+<span class="material-symbols-outlined text-[12px]">work</span>
+                      Laboral
+                    </span>
+<span class="text-caption font-caption text-outline flex items-center gap-1">
+<span class="material-symbols-outlined text-[13px]">schedule</span>
+                      10:45 AM
+                    </span>
+</div>
+</div>
+</div>
+<div class="self-end md:self-center">
+<span class="text-caption pixel-text text-secondary px-2 py-1 rounded bg-surface-container-highest border border-outline-variant">
+                  +350 PTS
+                </span>
+</div>
+</div>
+<!-- Tarea 2 -->
+<div class="p-space-md rounded bg-surface-container-high border border-outline-variant hover:border-outline transition-colors duration-150 flex flex-col md:flex-row md:items-center justify-between gap-3">
+<div class="flex items-start gap-3">
+<div class="w-5 h-5 rounded-sm bg-[#60A5FA] flex items-center justify-center text-surface-dim font-bold text-xs mt-0.5">
+                  ✓
+                </div>
+<div>
+<h4 class="text-body-strong font-body-strong text-on-surface">Comprar receta médica en farmacia de turno</h4>
+<div class="flex items-center gap-2 mt-1 flex-wrap">
+<span class="px-1.5 py-0.5 rounded text-[11px] font-caption bg-red-950/70 text-red-300 border border-red-800">
+                      Q1 · Hacer ahora
+                    </span>
+<span class="px-2 py-0.5 rounded-full text-[11px] font-caption bg-[#2DD4BF]/15 text-[#2DD4BF] border border-[#2DD4BF]/30 flex items-center gap-1">
+<span class="material-symbols-outlined text-[12px]">person</span>
+                      Personal
+                    </span>
+<span class="text-caption font-caption text-outline flex items-center gap-1">
+<span class="material-symbols-outlined text-[13px]">schedule</span>
+                      13:10 PM
+                    </span>
+</div>
+</div>
+</div>
+<div class="self-end md:self-center">
+<span class="text-caption pixel-text text-secondary px-2 py-1 rounded bg-surface-container-highest border border-outline-variant">
+                  +200 PTS
+                </span>
+</div>
+</div>
+<!-- Tarea 3 -->
+<div class="p-space-md rounded bg-surface-container-high border border-outline-variant hover:border-outline transition-colors duration-150 flex flex-col md:flex-row md:items-center justify-between gap-3">
+<div class="flex items-start gap-3">
+<div class="w-5 h-5 rounded-sm bg-[#60A5FA] flex items-center justify-center text-surface-dim font-bold text-xs mt-0.5">
+                  ✓
+                </div>
+<div>
+<h4 class="text-body-strong font-body-strong text-on-surface">Definir arquitectura v2 para microservicios</h4>
+<div class="flex items-center gap-2 mt-1 flex-wrap">
+<span class="px-1.5 py-0.5 rounded text-[11px] font-caption bg-blue-950/70 text-blue-300 border border-blue-800">
+                      Q2 · Planificar
+                    </span>
+<span class="px-2 py-0.5 rounded-full text-[11px] font-caption bg-[#A78BFA]/15 text-[#A78BFA] border border-[#A78BFA]/30 flex items-center gap-1">
+<span class="material-symbols-outlined text-[12px]">work</span>
+                      Laboral
+                    </span>
+<span class="text-caption font-caption text-outline flex items-center gap-1">
+<span class="material-symbols-outlined text-[13px]">schedule</span>
+                      16:30 PM
+                    </span>
+</div>
+</div>
+</div>
+<div class="self-end md:self-center">
+<span class="text-caption pixel-text text-secondary px-2 py-1 rounded bg-surface-container-highest border border-outline-variant">
+                  +250 PTS
+                </span>
+</div>
+</div>
+<!-- Tarea 4 -->
+<div class="p-space-md rounded bg-surface-container-high border border-outline-variant hover:border-outline transition-colors duration-150 flex flex-col md:flex-row md:items-center justify-between gap-3">
+<div class="flex items-start gap-3">
+<div class="w-5 h-5 rounded-sm bg-[#60A5FA] flex items-center justify-center text-surface-dim font-bold text-xs mt-0.5">
+                  ✓
+                </div>
+<div>
+<h4 class="text-body-strong font-body-strong text-on-surface">Sesión de entrenamiento de fuerza y cardio</h4>
+<div class="flex items-center gap-2 mt-1 flex-wrap">
+<span class="px-1.5 py-0.5 rounded text-[11px] font-caption bg-blue-950/70 text-blue-300 border border-blue-800">
+                      Q2 · Planificar
+                    </span>
+<span class="px-2 py-0.5 rounded-full text-[11px] font-caption bg-[#2DD4BF]/15 text-[#2DD4BF] border border-[#2DD4BF]/30 flex items-center gap-1">
+<span class="material-symbols-outlined text-[12px]">person</span>
+                      Personal
+                    </span>
+<span class="text-caption font-caption text-outline flex items-center gap-1">
+<span class="material-symbols-outlined text-[13px]">schedule</span>
+                      19:20 PM
+                    </span>
+</div>
+</div>
+</div>
+<div class="self-end md:self-center">
+<span class="text-caption pixel-text text-secondary px-2 py-1 rounded bg-surface-container-highest border border-outline-variant">
+                  +150 PTS
+                </span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- ================= COLUMNA DERECHA (5 / 12) ================= -->
+<section class="lg:col-span-5 flex flex-col gap-gutter">
+<!-- TARJETA DE RANGO DE USUARIO -->
+<div class="bg-surface-container rounded-xl border border-outline-variant p-space-lg shadow-sm">
+<div class="flex items-center justify-between mb-2">
+<span class="text-[10px] pixel-text text-secondary">Rango de usuario</span>
+<span class="text-caption font-caption text-outline">Temporada Q4</span>
+</div>
+<div class="flex items-baseline justify-between mb-3">
+<h3 class="text-caption pixel-text text-on-surface">NIVEL 3 · Jugador</h3>
+<span class="text-caption pixel-text text-[#FACC15]">3.450 PTS</span>
+</div>
+<!-- Barra de progreso energética (#22D3EE) -->
+<div class="w-full bg-surface-container-highest rounded-full h-3.5 p-0.5 border border-outline-variant overflow-hidden mb-2">
+<div class="bg-[#22D3EE] h-full rounded-full transition-all duration-500 shadow-[0_0_8px_rgba(34,211,238,0.5)]" style="width: 70%"></div>
+</div>
+<div class="flex items-center justify-between text-caption font-caption text-outline">
+<span>Progreso hacia Nivel 4: <strong class="text-on-surface">70%</strong></span>
+<span>Faltan <strong class="text-secondary font-body-strong">1.050 PTS</strong></span>
+</div>
+</div>
+<!-- CUADRÍCULA DE 4 MÉTRICAS CLAVE -->
+<div class="grid grid-cols-2 gap-space-md">
+<!-- Mejor Día -->
+<div class="bg-surface-container rounded-lg border border-outline-variant p-space-md">
+<div class="flex items-center justify-between mb-2">
+<span class="text-caption font-caption text-outline">Mejor día</span>
+<span class="material-symbols-outlined text-[18px] text-[#FACC15]">military_tech</span>
+</div>
+<div class="text-caption pixel-text text-on-surface mb-1">7 TAREAS</div>
+<span class="text-[11px] font-caption text-outline">14 de octubre</span>
+</div>
+<!-- Racha Actual -->
+<div class="bg-surface-container rounded-lg border border-outline-variant p-space-md">
+<div class="flex items-center justify-between mb-2">
+<span class="text-caption font-caption text-outline">Racha actual</span>
+<span class="material-symbols-outlined text-[18px] text-[#FB923C] material-symbols-fill">local_fire_department</span>
+</div>
+<div class="text-caption pixel-text text-[#FB923C] mb-1">4 DÍAS</div>
+<span class="text-[11px] font-caption text-[#FB923C]/90">¡Racha activa hoy!</span>
+</div>
+<!-- Mejor Racha -->
+<div class="bg-surface-container rounded-lg border border-outline-variant p-space-md">
+<div class="flex items-center justify-between mb-2">
+<span class="text-caption font-caption text-outline">Mejor racha</span>
+<span class="material-symbols-outlined text-[18px] text-[#22D3EE]">bolt</span>
+</div>
+<div class="text-caption pixel-text text-[#22D3EE] mb-1">9 DÍAS</div>
+<span class="text-[11px] font-caption text-outline">Récord de constancia</span>
+</div>
+<!-- Tareas Distintas Completadas -->
+<div class="bg-surface-container rounded-lg border border-outline-variant p-space-md">
+<div class="flex items-center justify-between mb-2">
+<span class="text-caption font-caption text-outline">Completadas</span>
+<span class="material-symbols-outlined text-[18px] text-secondary">task_alt</span>
+</div>
+<div class="text-caption pixel-text text-on-surface mb-1">86 TAREAS</div>
+<span class="text-[11px] font-caption text-outline">Total acumulado</span>
+</div>
+</div>
+<!-- BANNER DE BONIFICACIÓN -->
+<div class="p-space-md rounded-lg bg-surface-container-high border border-[#FACC15]/30 flex items-center justify-between gap-3">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded bg-[#FACC15]/10 border border-[#FACC15]/30 flex items-center justify-center text-[#FACC15]">
+<span class="material-symbols-outlined text-[20px] material-symbols-fill">stars</span>
+</div>
+<div>
+<div class="text-caption pixel-text text-[#FACC15]">x1.5 EXP ACTIVO</div>
+<p class="text-caption font-caption text-outline-variant text-[12px] text-on-surface-variant">
+                Multiplicador semanal activo por consistencia en días hábiles.
+              </p>
+</div>
+</div>
+<span class="text-[10px] pixel-text px-2 py-1 rounded bg-[#FACC15]/20 text-[#FACC15] shrink-0">
+            BOOST
+          </span>
+</div>
+<!-- SALA DE TROFEOS (5 Desbloqueados + 7 Bloqueados = 12 Logros) -->
+<div class="bg-surface-container rounded-xl border border-outline-variant p-space-lg shadow-sm">
+<div class="flex items-center justify-between pb-space-md border-b border-outline-variant mb-space-md">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[#FACC15] text-[20px] material-symbols-fill">emoji_events</span>
+<h2 class="text-heading font-heading text-on-surface">Sala de Trofeos</h2>
+</div>
+<span class="text-[10px] pixel-text px-2 py-0.5 rounded bg-surface-container-highest text-[#FACC15] border border-[#FACC15]/30">
+              5 / 12 DESBLOQUEADOS
+            </span>
+</div>
+<div class="space-y-2.5 max-h-[480px] overflow-y-auto pr-1">
+<!-- --- CONSEGUIDOS (5) --- -->
+<!-- 1. Primera moneda -->
+<div class="p-2.5 rounded bg-[#FACC15]/5 border border-[#FACC15]/30 flex items-center justify-between gap-2">
+<div class="flex items-center gap-2.5">
+<span class="material-symbols-outlined text-[20px] text-[#FACC15] material-symbols-fill">monetization_on</span>
+<div>
+<h5 class="text-caption font-body-strong text-on-surface">Primera moneda</h5>
+<p class="text-[11px] font-caption text-outline">Completada 3 oct</p>
+</div>
+</div>
+<span class="text-[9px] pixel-text text-[#FACC15] bg-[#FACC15]/10 px-1.5 py-0.5 rounded">✓ OBTENIDO</span>
+</div>
+<!-- 2. Fase superada -->
+<div class="p-2.5 rounded bg-[#FACC15]/5 border border-[#FACC15]/30 flex items-center justify-between gap-2">
+<div class="flex items-center gap-2.5">
+<span class="material-symbols-outlined text-[20px] text-[#FACC15] material-symbols-fill">military_tech</span>
+<div>
+<h5 class="text-caption font-body-strong text-on-surface">Fase superada</h5>
+<p class="text-[11px] font-caption text-outline">Cumple la meta diaria 3 días seguidos · 12 oct</p>
+</div>
+</div>
+<span class="text-[9px] pixel-text text-[#FACC15] bg-[#FACC15]/10 px-1.5 py-0.5 rounded">✓ OBTENIDO</span>
+</div>
+<!-- 3. Racha de 3 -->
+<div class="p-2.5 rounded bg-[#FACC15]/5 border border-[#FACC15]/30 flex items-center justify-between gap-2">
+<div class="flex items-center gap-2.5">
+<span class="material-symbols-outlined text-[20px] text-[#FB923C] material-symbols-fill">local_fire_department</span>
+<div>
+<h5 class="text-caption font-body-strong text-on-surface">Racha de 3</h5>
+<p class="text-[11px] font-caption text-outline">Mantén la racha durante 3 días · 18 oct</p>
+</div>
+</div>
+<span class="text-[9px] pixel-text text-[#FACC15] bg-[#FACC15]/10 px-1.5 py-0.5 rounded">✓ OBTENIDO</span>
+</div>
+<!-- 4. 10 tareas -->
+<div class="p-2.5 rounded bg-[#FACC15]/5 border border-[#FACC15]/30 flex items-center justify-between gap-2">
+<div class="flex items-center gap-2.5">
+<span class="material-symbols-outlined text-[20px] text-[#FACC15] material-symbols-fill">workspace_premium</span>
+<div>
+<h5 class="text-caption font-body-strong text-on-surface">10 tareas</h5>
+<p class="text-[11px] font-caption text-outline">Acumula 10 tareas completadas · 20 oct</p>
+</div>
+</div>
+<span class="text-[9px] pixel-text text-[#FACC15] bg-[#FACC15]/10 px-1.5 py-0.5 rounded">✓ OBTENIDO</span>
+</div>
+<!-- 5. Puntual -->
+<div class="p-2.5 rounded bg-[#FACC15]/5 border border-[#FACC15]/30 flex items-center justify-between gap-2">
+<div class="flex items-center gap-2.5">
+<span class="material-symbols-outlined text-[20px] text-[#22D3EE] material-symbols-fill">timer</span>
+<div>
+<h5 class="text-caption font-body-strong text-on-surface">Puntual</h5>
+<p class="text-[11px] font-caption text-outline">Finaliza una tarea urgente a tiempo · 25 oct</p>
+</div>
+</div>
+<span class="text-[9px] pixel-text text-[#FACC15] bg-[#FACC15]/10 px-1.5 py-0.5 rounded">✓ OBTENIDO</span>
+</div>
+<!-- --- BLOQUEADOS (7) --- -->
+<!-- 6. Racha de 30 días -->
+<div class="p-2.5 rounded bg-surface-container-high/60 border border-outline-variant/60 opacity-80 flex items-center justify-between gap-2">
+<div class="flex items-center gap-2.5">
+<span class="material-symbols-outlined text-[20px] text-outline">lock</span>
+<div>
+<h5 class="text-caption font-body text-on-surface-variant">Racha de 30 días</h5>
+<p class="text-[11px] font-caption text-outline">Mantén el ritmo durante un mes</p>
+</div>
+</div>
+<span class="text-[9px] pixel-text text-secondary bg-surface-container-highest px-1.5 py-0.5 rounded">4/30</span>
+</div>
+<!-- 7. 500 tareas -->
+<div class="p-2.5 rounded bg-surface-container-high/60 border border-outline-variant/60 opacity-80 flex items-center justify-between gap-2">
+<div class="flex items-center gap-2.5">
+<span class="material-symbols-outlined text-[20px] text-outline">lock</span>
+<div>
+<h5 class="text-caption font-body text-on-surface-variant">500 tareas</h5>
+<p class="text-[11px] font-caption text-outline">Medio millar de tareas concluidas</p>
+</div>
+</div>
+<span class="text-[9px] pixel-text text-secondary bg-surface-container-highest px-1.5 py-0.5 rounded">86/500</span>
+</div>
+<!-- 8. Nuevo récord -->
+<div class="p-2.5 rounded bg-surface-container-high/60 border border-outline-variant/60 opacity-80 flex items-center justify-between gap-2">
+<div class="flex items-center gap-2.5">
+<span class="material-symbols-outlined text-[20px] text-outline">lock</span>
+<div>
+<h5 class="text-caption font-body text-on-surface-variant">Nuevo récord</h5>
+<p class="text-[11px] font-caption text-outline">Supera el récord de 7 en un solo día</p>
+</div>
+</div>
+<span class="text-[9px] pixel-text text-secondary bg-surface-container-highest px-1.5 py-0.5 rounded">0/8</span>
+</div>
+<!-- 9. Sin urgencias -->
+<div class="p-2.5 rounded bg-surface-container-high/60 border border-outline-variant/60 opacity-80 flex items-center justify-between gap-2">
+<div class="flex items-center gap-2.5">
+<span class="material-symbols-outlined text-[20px] text-outline">lock</span>
+<div>
+<h5 class="text-caption font-body text-on-surface-variant">Sin urgencias</h5>
+<p class="text-[11px] font-caption text-outline">Vacía Hacer Ahora 5 días seguidos</p>
+</div>
+</div>
+<span class="text-[9px] pixel-text text-secondary bg-surface-container-highest px-1.5 py-0.5 rounded">2/5</span>
+</div>
+<!-- 10. Maestro Eisenhower -->
+<div class="p-2.5 rounded bg-surface-container-high/60 border border-outline-variant/60 opacity-80 flex items-center justify-between gap-2">
+<div class="flex items-center gap-2.5">
+<span class="material-symbols-outlined text-[20px] text-outline">lock</span>
+<div>
+<h5 class="text-caption font-body text-on-surface-variant">Maestro Eisenhower</h5>
+<p class="text-[11px] font-caption text-outline">2 tareas en cada cuadrante semanal</p>
+</div>
+</div>
+<span class="text-[9px] pixel-text text-outline bg-surface-container-highest px-1.5 py-0.5 rounded">BLOQ</span>
+</div>
+<!-- 11. Combo perfecto -->
+<div class="p-2.5 rounded bg-surface-container-high/60 border border-outline-variant/60 opacity-80 flex items-center justify-between gap-2">
+<div class="flex items-center gap-2.5">
+<span class="material-symbols-outlined text-[20px] text-outline">lock</span>
+<div>
+<h5 class="text-caption font-body text-on-surface-variant">Combo perfecto</h5>
+<p class="text-[11px] font-caption text-outline">Completa todas las misiones por 7 días</p>
+</div>
+</div>
+<span class="text-[9px] pixel-text text-outline bg-surface-container-highest px-1.5 py-0.5 rounded">BLOQ</span>
+</div>
+<!-- 12. Gran estratega -->
+<div class="p-2.5 rounded bg-surface-container-high/60 border border-outline-variant/60 opacity-80 flex items-center justify-between gap-2">
+<div class="flex items-center gap-2.5">
+<span class="material-symbols-outlined text-[20px] text-outline">lock</span>
+<div>
+<h5 class="text-caption font-body text-on-surface-variant">Gran estratega</h5>
+<p class="text-[11px] font-caption text-outline">Completa 50 tareas en Planificar</p>
+</div>
+</div>
+<span class="text-[9px] pixel-text text-secondary bg-surface-container-highest px-1.5 py-0.5 rounded">28/50</span>
+</div>
+</div>
+</div>
+</section>
+</div>
+</main>
+<!-- ================= FOOTER INSTITUCIONAL ================= -->
+<footer class="mt-space-2xl border-t border-outline-variant bg-surface-container py-space-lg">
+<div class="max-w-[1440px] mx-auto px-gutter flex flex-col md:flex-row items-center justify-between gap-4 text-caption font-caption text-outline">
+<div class="flex items-center gap-2">
+<span class="text-on-surface font-body-strong">InsertTasks</span>
+<span>·</span>
+<span>Sistema de Productividad & Matriz Eisenhower</span>
+</div>
+<div class="flex items-center gap-6">
+<a class="hover:text-primary transition-colors duration-150" href="#">Privacidad</a>
+<a class="hover:text-primary transition-colors duration-150" href="#">Términos de servicio</a>
+<a class="hover:text-primary transition-colors duration-150" href="#">Centro de ayuda</a>
+</div>
+</div>
+</footer>
+</body></html>

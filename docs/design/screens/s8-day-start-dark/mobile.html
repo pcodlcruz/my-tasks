@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>S8 · Inicio de jornada «PULSA START» (Móvil Oscuro) - InsertTasks</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Press+Start+2P&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            pixel: ['"Press Start 2P"', 'monospace'],
+          },
+          colors: {
+            background: '#0B0F19',
+            surface: {
+              DEFAULT: '#111827',
+              alt: '#161F33',
+              card: '#1A243B',
+              border: '#2A3654'
+            },
+            arcade: {
+              yellow: '#FACC15',
+              orange: '#FB923C',
+              cyan: '#38BDF8',
+              emerald: '#34D399',
+              red: '#F87171',
+              blue: '#60A5FA'
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    .font-pixel {
+      font-family: 'Press Start 2P', monospace;
+      letter-spacing: -0.04em;
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 4px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: #0B0F19;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #2A3654;
+      border-radius: 4px;
+    }
+    .pixel-glow {
+      text-shadow: 0 0 10px rgba(250, 204, 21, 0.45);
+    }
+    .cyan-glow {
+      text-shadow: 0 0 10px rgba(56, 189, 248, 0.4);
+    }
+    /* Touch target guarantee */
+    .touch-target-min {
+      min-width: 44px;
+      min-height: 44px;
+    }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 flex justify-center items-center min-h-screen p-0 sm:p-4 font-sans antialiased selection:bg-cyan-500/30">
+
+  <!-- Mobile Screen Container (390px standard) -->
+  <main class="w-full max-w-[390px] h-[844px] bg-[#0A0E1A] border-0 sm:border border-slate-800 sm:rounded-[36px] overflow-hidden flex flex-col relative shadow-2xl shadow-cyan-950/40">
+
+    <!-- Top Status Bar & App Header (Full-screen Modal Header) -->
+    <header class="flex-none bg-[#0E1526]/90 backdrop-blur-md border-b border-slate-800/80 px-4 pt-3 pb-3 z-30">
+      <!-- iOS style dynamic bar / indicators -->
+      <div class="flex items-center justify-between text-[11px] text-slate-400 font-medium mb-2.5 px-0.5">
+        <span class="font-pixel text-[10px] text-cyan-400">9:41</span>
+        <div class="flex items-center gap-1.5 text-slate-400">
+          <span class="material-symbols-outlined text-[15px]">signal_cellular_4_bar</span>
+          <span class="material-symbols-outlined text-[15px]">wifi</span>
+          <span class="material-symbols-outlined text-[15px] text-cyan-400">battery_charging_full</span>
+        </div>
+      </div>
+
+      <!-- App Title Bar with Close Button -->
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-lg bg-blue-600/20 border border-blue-500/40 flex items-center justify-center text-blue-400 font-pixel text-xs shadow-inner">
+            IT
+          </div>
+          <div>
+            <div class="flex items-center gap-1.5">
+              <span class="font-bold text-sm tracking-tight text-white">InsertTasks</span>
+              <span class="font-pixel text-[8px] bg-amber-400/15 text-amber-300 border border-amber-400/40 px-1.5 py-0.5 rounded tracking-wide">ARCADE</span>
+            </div>
+            <p class="text-[10px] text-slate-400 font-medium">Inicio de jornada diaria</p>
+          </div>
+        </div>
+
+        <!-- Botón Cerrar (Diálogo a pantalla completa) -->
+        <button type="button" aria-label="Cerrar inicio de jornada" class="touch-target-min flex items-center justify-center rounded-xl bg-slate-800/80 hover:bg-slate-700/80 active:scale-95 text-slate-300 hover:text-white border border-slate-700/60 transition-all">
+          <span class="material-symbols-outlined text-xl">close</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Scrollable Dialog Content Area -->
+    <div class="flex-1 overflow-y-auto custom-scrollbar px-4 pt-4 pb-28 space-y-4">
+
+      <!-- Hero Header «PULSA START» -->
+      <section class="bg-gradient-to-b from-[#131D33] to-[#0F172A] border border-blue-500/30 rounded-2xl p-4 relative overflow-hidden shadow-lg shadow-blue-950/20">
+        <div class="absolute -right-6 -bottom-6 w-28 h-28 bg-blue-500/10 rounded-full blur-2xl pointer-events-none"></div>
+        <div class="absolute -left-6 -top-6 w-24 h-24 bg-amber-500/10 rounded-full blur-2xl pointer-events-none"></div>
+
+        <div class="flex items-center justify-between mb-2">
+          <div class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-blue-950/80 border border-blue-400/30 text-blue-300">
+            <span class="font-pixel text-[8px]">STAGE 1</span>
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+            <span class="text-[10px] font-medium text-slate-300">Sesión activa</span>
+          </div>
+          <span class="font-pixel text-[9px] text-slate-400">LVL 3</span>
+        </div>
+
+        <h1 class="font-pixel text-lg text-amber-300 pixel-glow tracking-wider flex items-center gap-2 mt-1 mb-1.5">
+          <span>PULSA</span>
+          <span class="text-cyan-400 cyan-glow">START</span>
+        </h1>
+        <p class="text-xs text-slate-300 leading-relaxed font-normal">
+          Buenos días, Ana. Selecciona tus tareas clave y activa tu racha diaria.
+        </p>
+
+        <!-- Micro stats chips: Ayer 4/3 ✓, Racha 4, Meta 3 -->
+        <div class="grid grid-cols-3 gap-2 mt-3.5 pt-3 border-t border-slate-800/80">
+          <!-- Chip Ayer -->
+          <div class="bg-slate-900/90 border border-emerald-500/30 rounded-xl p-2 flex flex-col justify-between">
+            <div class="flex items-center justify-between">
+              <span class="text-[9px] font-medium text-slate-400 uppercase tracking-wider">Ayer</span>
+              <span class="material-symbols-outlined text-emerald-400 text-xs">check_circle</span>
+            </div>
+            <div class="mt-1 flex items-baseline gap-1">
+              <span class="font-pixel text-xs text-emerald-400">4/3</span>
+              <span class="text-[11px] text-emerald-400 font-bold">✓</span>
+            </div>
+            <span class="text-[9px] text-slate-400 font-medium mt-0.5">Superada</span>
+          </div>
+
+          <!-- Chip Racha -->
+          <div class="bg-slate-900/90 border border-amber-500/30 rounded-xl p-2 flex flex-col justify-between">
+            <div class="flex items-center justify-between">
+              <span class="text-[9px] font-medium text-slate-400 uppercase tracking-wider">Racha</span>
+              <span class="text-xs">🔥</span>
+            </div>
+            <div class="mt-1 flex items-baseline gap-1">
+              <span class="font-pixel text-xs text-amber-400">4</span>
+              <span class="text-[9px] text-slate-300">días</span>
+            </div>
+            <span class="text-[9px] text-amber-400/90 font-medium mt-0.5">En juego</span>
+          </div>
+
+          <!-- Chip Meta -->
+          <div class="bg-slate-900/90 border border-cyan-500/30 rounded-xl p-2 flex flex-col justify-between">
+            <div class="flex items-center justify-between">
+              <span class="text-[9px] font-medium text-slate-400 uppercase tracking-wider">Meta</span>
+              <span class="material-symbols-outlined text-cyan-400 text-xs">flag</span>
+            </div>
+            <div class="mt-1 flex items-baseline gap-1">
+              <span class="font-pixel text-xs text-cyan-400">3</span>
+              <span class="text-[9px] text-slate-300">objs</span>
+            </div>
+            <span class="text-[9px] text-slate-400 font-medium mt-0.5">Diaria</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Misión del día: 2 de 5 Banner -->
+      <section class="bg-[#121A2E] border border-amber-500/30 rounded-2xl p-3.5 shadow-sm">
+        <div class="flex items-center justify-between mb-2">
+          <div class="flex items-center gap-1.5">
+            <span class="material-symbols-outlined text-amber-400 text-base" style="font-variation-settings: 'FILL' 1;">star</span>
+            <span class="text-xs font-semibold text-white">Misión del día:</span>
+          </div>
+          <div class="flex items-center gap-1.5">
+            <span class="font-pixel text-xs text-amber-300 bg-amber-400/10 border border-amber-400/30 px-2 py-0.5 rounded-lg">
+              2 de 5
+            </span>
+          </div>
+        </div>
+
+        <!-- Barra de progreso segmentada de 5 cupos -->
+        <div class="grid grid-cols-5 gap-1.5 my-2">
+          <div class="h-2 rounded-full bg-cyan-400 shadow-sm shadow-cyan-400/50"></div>
+          <div class="h-2 rounded-full bg-cyan-400 shadow-sm shadow-cyan-400/50"></div>
+          <div class="h-2 rounded-full bg-slate-800 border border-slate-700"></div>
+          <div class="h-2 rounded-full bg-slate-800 border border-slate-700"></div>
+          <div class="h-2 rounded-full bg-slate-800 border border-slate-700"></div>
+        </div>
+
+        <div class="flex items-center justify-between text-[10px] text-slate-400 font-medium">
+          <span class="text-cyan-300">2 seleccionadas para tu partida</span>
+          <span class="text-slate-400 font-pixel text-[8px]">3 CUPOS LIBRES</span>
+        </div>
+      </section>
+
+      <!-- SECCIÓN 1: Hacer ahora (3 tareas) -->
+      <section class="space-y-2.5">
+        <div class="flex items-center justify-between px-0.5">
+          <div class="flex items-center gap-2">
+            <span class="w-2.5 h-2.5 rounded-full bg-rose-500 shadow-sm shadow-rose-500/50"></span>
+            <h2 class="text-xs font-bold text-white uppercase tracking-wider">Hacer ahora</h2>
+            <span class="font-pixel text-[9px] bg-rose-950/80 text-rose-300 border border-rose-500/40 px-1.5 py-0.5 rounded">
+              3
+            </span>
+          </div>
+          <span class="text-[10px] font-medium text-rose-400/90 bg-rose-950/40 px-2 py-0.5 rounded-md border border-rose-900/50">
+            Urgente e Importante
+          </span>
+        </div>
+
+        <!-- Tarea 1 (En misión / Seleccionada) -->
+        <article class="bg-[#111A2D] border-l-4 border-l-rose-500 border border-slate-800 rounded-xl p-3 shadow-md hover:border-slate-700 transition-all flex items-start justify-between gap-2.5">
+          <div class="space-y-1.5 flex-1 min-w-0">
+            <div class="flex items-center gap-1.5 flex-wrap">
+              <span class="text-[9px] font-semibold bg-purple-950/80 text-purple-300 border border-purple-700/40 px-1.5 py-0.5 rounded">
+                Laboral
+              </span>
+              <span class="text-[10px] text-rose-300 font-medium flex items-center gap-1">
+                <span class="material-symbols-outlined text-[13px]">schedule</span>
+                Hoy 17:00
+              </span>
+              <span class="text-[9px] text-amber-300 font-pixel bg-amber-950/50 px-1.5 py-0.5 rounded border border-amber-500/30">
+                CRÍTICO
+              </span>
+            </div>
+            <h3 class="text-xs font-semibold text-slate-100 leading-snug">
+              Resolver caída de servidor de pagos en producción
+            </h3>
+            <div class="flex items-center gap-1.5 text-[10px] text-emerald-400 font-medium">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span>
+              <span>En misión actual (+150 PTS)</span>
+            </div>
+          </div>
+
+          <!-- Casilla Estrella interactiva (≥ 44px) -->
+          <button type="button" aria-pressed="true" aria-label="Quitar de misión: Resolver caída de servidor de pagos" class="touch-target-min flex-none flex flex-col items-center justify-center rounded-xl bg-amber-400/15 border border-amber-400/60 text-amber-300 hover:bg-amber-400/25 active:scale-95 transition-all shadow-sm">
+            <span class="material-symbols-outlined text-2xl text-amber-400" style="font-variation-settings: 'FILL' 1;">star</span>
+            <span class="font-pixel text-[6px] tracking-tight text-amber-300 mt-0.5">ACTIVA</span>
+          </button>
+        </article>
+
+        <!-- Tarea 2 (En misión / Seleccionada) -->
+        <article class="bg-[#111A2D] border-l-4 border-l-rose-500 border border-slate-800 rounded-xl p-3 shadow-md hover:border-slate-700 transition-all flex items-start justify-between gap-2.5">
+          <div class="space-y-1.5 flex-1 min-w-0">
+            <div class="flex items-center gap-1.5 flex-wrap">
+              <span class="text-[9px] font-semibold bg-emerald-950/80 text-emerald-300 border border-emerald-700/40 px-1.5 py-0.5 rounded">
+                Personal
+              </span>
+              <span class="text-[10px] text-rose-300 font-medium flex items-center gap-1">
+                <span class="material-symbols-outlined text-[13px]">schedule</span>
+                Antes de 20:30
+              </span>
+            </div>
+            <h3 class="text-xs font-semibold text-slate-100 leading-snug">
+              Comprar antibiótico recetado en farmacia de turno
+            </h3>
+            <div class="flex items-center gap-1.5 text-[10px] text-emerald-400 font-medium">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+              <span>En misión actual (+100 PTS)</span>
+            </div>
+          </div>
+
+          <!-- Casilla Estrella interactiva (≥ 44px) -->
+          <button type="button" aria-pressed="true" aria-label="Quitar de misión: Comprar antibiótico recetado" class="touch-target-min flex-none flex flex-col items-center justify-center rounded-xl bg-amber-400/15 border border-amber-400/60 text-amber-300 hover:bg-amber-400/25 active:scale-95 transition-all shadow-sm">
+            <span class="material-symbols-outlined text-2xl text-amber-400" style="font-variation-settings: 'FILL' 1;">star</span>
+            <span class="font-pixel text-[6px] tracking-tight text-amber-300 mt-0.5">ACTIVA</span>
+          </button>
+        </article>
+
+        <!-- Tarea 3 (Disponible / No seleccionada) -->
+        <article class="bg-[#0E1526] border-l-4 border-l-rose-500/60 border border-slate-800/90 rounded-xl p-3 shadow-sm hover:border-slate-700 transition-all flex items-start justify-between gap-2.5">
+          <div class="space-y-1.5 flex-1 min-w-0">
+            <div class="flex items-center gap-1.5 flex-wrap">
+              <span class="text-[9px] font-semibold bg-purple-950/80 text-purple-300 border border-purple-700/40 px-1.5 py-0.5 rounded">
+                Laboral
+              </span>
+              <span class="text-[10px] text-slate-400 font-medium flex items-center gap-1">
+                <span class="material-symbols-outlined text-[13px]">schedule</span>
+                Hoy 19:00
+              </span>
+            </div>
+            <h3 class="text-xs font-medium text-slate-300 leading-snug">
+              Revisar despliegue de base de datos Postgres y réplicas
+            </h3>
+            <p class="text-[10px] text-slate-400">
+              Disponible para sumar a la meta del día
+            </p>
+          </div>
+
+          <!-- Casilla Estrella interactiva (≥ 44px) -->
+          <button type="button" aria-pressed="false" aria-label="Añadir a misión: Revisar despliegue de base de datos" class="touch-target-min flex-none flex flex-col items-center justify-center rounded-xl bg-slate-900 border border-slate-700 text-slate-400 hover:text-amber-300 hover:border-amber-400/50 hover:bg-amber-950/20 active:scale-95 transition-all">
+            <span class="material-symbols-outlined text-2xl text-slate-400" style="font-variation-settings: 'FILL' 0;">star</span>
+            <span class="font-pixel text-[6px] text-slate-400 mt-0.5">+STAR</span>
+          </button>
+        </article>
+      </section>
+
+      <!-- SECCIÓN 2: Programadas de hoy (2 tareas) -->
+      <section class="space-y-2.5 pt-1">
+        <div class="flex items-center justify-between px-0.5">
+          <div class="flex items-center gap-2">
+            <span class="w-2.5 h-2.5 rounded-full bg-blue-500 shadow-sm shadow-blue-500/50"></span>
+            <h2 class="text-xs font-bold text-white uppercase tracking-wider">Programadas de hoy</h2>
+            <span class="font-pixel text-[9px] bg-blue-950/80 text-blue-300 border border-blue-500/40 px-1.5 py-0.5 rounded">
+              2
+            </span>
+          </div>
+          <span class="text-[10px] font-medium text-blue-300/90 bg-blue-950/40 px-2 py-0.5 rounded-md border border-blue-900/50">
+            No urgente pero Importante
+          </span>
+        </div>
+
+        <!-- Tarea Programada 1 -->
+        <article class="bg-[#0E1526] border-l-4 border-l-blue-500 border border-slate-800/90 rounded-xl p-3 shadow-sm hover:border-slate-700 transition-all flex items-start justify-between gap-2.5">
+          <div class="space-y-1.5 flex-1 min-w-0">
+            <div class="flex items-center gap-1.5 flex-wrap">
+              <span class="text-[9px] font-semibold bg-purple-950/80 text-purple-300 border border-purple-700/40 px-1.5 py-0.5 rounded">
+                Laboral
+              </span>
+              <span class="text-[10px] text-blue-300 font-medium flex items-center gap-1">
+                <span class="material-symbols-outlined text-[13px]">calendar_today</span>
+                Jueves 16, 10:00
+              </span>
+            </div>
+            <h3 class="text-xs font-medium text-slate-200 leading-snug">
+              Diseñar arquitectura de microservicios de inventario v2
+            </h3>
+            <p class="text-[10px] text-slate-400">
+              Planificada en agenda · Enfoque profundo 90 min
+            </p>
+          </div>
+
+          <!-- Casilla Estrella interactiva (≥ 44px) -->
+          <button type="button" aria-pressed="false" aria-label="Añadir a misión: Diseñar arquitectura de microservicios" class="touch-target-min flex-none flex flex-col items-center justify-center rounded-xl bg-slate-900 border border-slate-700 text-slate-400 hover:text-amber-300 hover:border-amber-400/50 hover:bg-amber-950/20 active:scale-95 transition-all">
+            <span class="material-symbols-outlined text-2xl text-slate-400" style="font-variation-settings: 'FILL' 0;">star</span>
+            <span class="font-pixel text-[6px] text-slate-400 mt-0.5">+STAR</span>
+          </button>
+        </article>
+
+        <!-- Tarea Programada 2 -->
+        <article class="bg-[#0E1526] border-l-4 border-l-blue-500 border border-slate-800/90 rounded-xl p-3 shadow-sm hover:border-slate-700 transition-all flex items-start justify-between gap-2.5">
+          <div class="space-y-1.5 flex-1 min-w-0">
+            <div class="flex items-center gap-1.5 flex-wrap">
+              <span class="text-[9px] font-semibold bg-emerald-950/80 text-emerald-300 border border-emerald-700/40 px-1.5 py-0.5 rounded">
+                Personal
+              </span>
+              <span class="text-[10px] text-blue-300 font-medium flex items-center gap-1">
+                <span class="material-symbols-outlined text-[13px]">calendar_today</span>
+                Hoy 18:00
+              </span>
+            </div>
+            <h3 class="text-xs font-medium text-slate-200 leading-snug">
+              Sesión de entrenamiento de fuerza y cardio 45 min
+            </h3>
+            <p class="text-[10px] text-slate-400">
+              Bloque de salud y bienestar diario
+            </p>
+          </div>
+
+          <!-- Casilla Estrella interactiva (≥ 44px) -->
+          <button type="button" aria-pressed="false" aria-label="Añadir a misión: Sesión de entrenamiento" class="touch-target-min flex-none flex flex-col items-center justify-center rounded-xl bg-slate-900 border border-slate-700 text-slate-400 hover:text-amber-300 hover:border-amber-400/50 hover:bg-amber-950/20 active:scale-95 transition-all">
+            <span class="material-symbols-outlined text-2xl text-slate-400" style="font-variation-settings: 'FILL' 0;">star</span>
+            <span class="font-pixel text-[6px] text-slate-400 mt-0.5">+STAR</span>
+          </button>
+        </article>
+      </section>
+
+      <!-- Bonus Arcade Banner -->
+      <section class="bg-gradient-to-r from-blue-950/50 via-slate-900/60 to-purple-950/50 border border-slate-800 rounded-xl p-3 flex items-center gap-3">
+        <div class="w-9 h-9 rounded-xl bg-amber-400/15 border border-amber-400/30 flex items-center justify-center text-amber-300 flex-none">
+          <span class="material-symbols-outlined text-lg">military_tech</span>
+        </div>
+        <div class="text-[11px] leading-tight">
+          <p class="text-slate-200 font-medium">Recompensa diaria en juego</p>
+          <p class="text-slate-400 text-[10px] mt-0.5">Supera la meta para obtener <span class="text-amber-300 font-pixel text-[8px]">+100 EXP</span> y asegurar tu racha.</p>
+        </div>
+      </section>
+
+    </div>
+
+    <!-- Botón fijo al pie «Empezar» (Footer Bar) -->
+    <footer class="absolute bottom-0 left-0 right-0 bg-[#0A0E1A]/95 backdrop-blur-md border-t border-slate-800 px-4 py-3 z-30 flex flex-col gap-2">
+      <!-- Status meta strip -->
+      <div class="flex items-center justify-between text-[11px] text-slate-400 px-1">
+        <span class="flex items-center gap-1.5">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span>Partida lista: <strong class="text-slate-200">2 tareas activas</strong></span>
+        </span>
+        <span class="font-pixel text-[9px] text-amber-400">COIN: 1/1</span>
+      </div>
+
+      <!-- Botón principal «Empezar» / START -->
+      <button type="button" class="touch-target-min w-full bg-gradient-to-r from-blue-600 via-blue-500 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 active:scale-[0.98] text-white font-bold rounded-2xl px-4 py-3 shadow-lg shadow-blue-600/30 border border-blue-400/30 flex items-center justify-between transition-all group">
+        <div class="flex items-center gap-2.5">
+          <div class="w-7 h-7 rounded-lg bg-white/20 flex items-center justify-center text-white">
+            <span class="material-symbols-outlined text-base">play_arrow</span>
+          </div>
+          <span class="text-sm tracking-wide font-semibold">Empezar jornada</span>
+        </div>
+
+        <div class="flex items-center gap-1.5 bg-black/30 border border-white/20 px-2.5 py-1 rounded-xl">
+          <span class="font-pixel text-[10px] text-amber-300 tracking-wider">START</span>
+          <span class="material-symbols-outlined text-sm text-amber-300 group-hover:translate-x-0.5 transition-transform">arrow_forward</span>
+        </div>
+      </button>
+
+      <!-- Home bar indicator iOS -->
+      <div class="w-32 h-1 bg-slate-700/80 rounded-full mx-auto mt-1"></div>
+    </footer>
+
+  </main>
+
+  <script>
+    // Interacción ligera accesible para alternar estrellas de misión
+    document.querySelectorAll('button[aria-pressed]').forEach(button => {
+      button.addEventListener('click', () => {
+        const isPressed = button.getAttribute('aria-pressed') === 'true';
+        button.setAttribute('aria-pressed', String(!isPressed));
+
+        const icon = button.querySelector('.material-symbols-outlined');
+        const label = button.querySelector('.font-pixel');
+
+        if (!isPressed) {
+          button.classList.remove('bg-slate-900', 'border-slate-700', 'text-slate-400');
+          button.classList.add('bg-amber-400/15', 'border-amber-400/60', 'text-amber-300');
+          if (icon) {
+            icon.style.fontVariationSettings = "'FILL' 1";
+            icon.classList.remove('text-slate-400');
+            icon.classList.add('text-amber-400');
+          }
+          if (label) {
+            label.textContent = 'ACTIVA';
+            label.classList.remove('text-slate-400');
+            label.classList.add('text-amber-300');
+          }
+        } else {
+          button.classList.remove('bg-amber-400/15', 'border-amber-400/60', 'text-amber-300');
+          button.classList.add('bg-slate-900', 'border-slate-700', 'text-slate-400');
+          if (icon) {
+            icon.style.fontVariationSettings = "'FILL' 0";
+            icon.classList.remove('text-amber-400');
+            icon.classList.add('text-slate-400');
+          }
+          if (label) {
+            label.textContent = '+STAR';
+            label.classList.remove('text-amber-300');
+            label.classList.add('text-slate-400');
+          }
+        }
+      });
+    });
+  </script>
+</body>
+</html>

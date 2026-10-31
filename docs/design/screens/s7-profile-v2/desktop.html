@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+
+<html class="h-full bg-background" lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Perfil - InsertTasks</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "on-tertiary": "#ffffff",
+            "on-primary": "#ffffff",
+            "primary-container": "#1d4ed8",
+            "surface-container-highest": "#e2e1ed",
+            "text": "#0F172A",
+            "on-error": "#ffffff",
+            "primary-fixed": "#dce1ff",
+            "on-surface-variant": "#434655",
+            "delegate": "#B45309",
+            "secondary-fixed": "#89f5e7",
+            "on-tertiary-fixed": "#390c00",
+            "secondary": "#006a61",
+            "surface-container": "#ededf9",
+            "border": "#CBD5E1",
+            "tertiary-fixed": "#ffdbcf",
+            "inverse-on-surface": "#f0f0fb",
+            "outline": "#747686",
+            "tertiary-fixed-dim": "#ffb59c",
+            "surface-container-high": "#e8e7f3",
+            "surface-container-lowest": "#ffffff",
+            "on-primary-fixed-variant": "#0039b5",
+            "on-background": "#1a1b23",
+            "surface-container-low": "#f3f2fe",
+            "on-secondary-fixed-variant": "#005049",
+            "tertiary": "#7f2500",
+            "surface-dim": "#d9d9e5",
+            "text-muted": "#475569",
+            "on-secondary-container": "#006f66",
+            "outline-variant": "#c4c5d7",
+            "on-primary-fixed": "#001551",
+            "scope-personal": "#0D9488",
+            "on-surface": "#1a1b23",
+            "do-now": "#B91C1C",
+            "secondary-fixed-dim": "#6bd8cb",
+            "on-tertiary-container": "#ffc9b7",
+            "on-tertiary-fixed-variant": "#832700",
+            "error-container": "#ffdad6",
+            "primary-fixed-dim": "#b7c4ff",
+            "primary": "#0037b0",
+            "error": "#B91C1C",
+            "schedule": "#1D4ED8",
+            "background": "#faf8ff",
+            "secondary-container": "#86f2e4",
+            "on-secondary-fixed": "#00201d",
+            "on-primary-container": "#cad3ff",
+            "surface-alt": "#F8FAFC",
+            "surface-variant": "#e2e1ed",
+            "on-secondary": "#ffffff",
+            "tertiary-container": "#a73400",
+            "surface-tint": "#2151da",
+            "surface": "#FFFFFF",
+            "success": "#15803D",
+            "eliminate": "#475569",
+            "surface-bright": "#faf8ff",
+            "on-error-container": "#93000a",
+            "inverse-surface": "#2e3039",
+            "inverse-primary": "#b7c4ff",
+            "scope-work": "#7C3AED"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.125rem",
+            "lg": "0.25rem",
+            "xl": "0.5rem",
+            "card": "10px",
+            "full": "0.75rem"
+          },
+          "spacing": {
+            "space-xl": "32px",
+            "margin": "24px",
+            "space-sm": "8px",
+            "space-2xl": "48px",
+            "space-xs": "4px",
+            "space-md": "12px",
+            "space-lg": "16px",
+            "gutter": "24px"
+          },
+          "fontFamily": {
+            "heading": ["Inter", "sans-serif"],
+            "display": ["Inter", "sans-serif"],
+            "body-strong": ["Inter", "sans-serif"],
+            "body": ["Inter", "sans-serif"],
+            "caption": ["Inter", "sans-serif"]
+          },
+          "fontSize": {
+            "heading": [
+              "20px",
+              {
+                "lineHeight": "28px",
+                "fontWeight": "600"
+              }
+            ],
+            "display": [
+              "28px",
+              {
+                "lineHeight": "36px",
+                "fontWeight": "700"
+              }
+            ],
+            "body-strong": [
+              "16px",
+              {
+                "lineHeight": "24px",
+                "fontWeight": "600"
+              }
+            ],
+            "body": [
+              "16px",
+              {
+                "lineHeight": "24px",
+                "fontWeight": "400"
+              }
+            ],
+            "caption": [
+              "13px",
+              {
+                "lineHeight": "18px",
+                "fontWeight": "400"
+              }
+            ]
+          }
+        }
+      }
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      display: inline-block;
+      vertical-align: middle;
+      line-height: 1;
+    }
+    .material-symbols-outlined.fill-icon {
+      font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+    .custom-shadow {
+      box-shadow: 0 1px 3px 0 rgba(15, 23, 42, 0.08), 0 1px 2px -1px rgba(15, 23, 42, 0.05);
+    }
+  </style>
+</head>
+<body class="min-h-full flex flex-col font-body text-body text-text bg-background antialiased selection:bg-primary-fixed selection:text-primary">
+<!-- CABECERA SUPERIOR DE ESCRITORIO -->
+<header class="w-full border-b border-border bg-surface px-margin sticky top-0 z-50 flex items-center justify-between h-16 shadow-sm">
+<!-- Lado Izquierdo: Logotipo y Navegación principal -->
+<div class="flex items-center gap-8">
+<a aria-label="Ir al inicio de InsertTasks" class="flex items-center gap-2.5 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded" href="#tablero"><div class="w-9 h-9 rounded-lg bg-schedule text-on-primary flex items-center justify-center shadow-sm"><span class="material-symbols-outlined text-[22px]">grid_view</span></div><div class="flex items-center gap-2"><span class="font-display text-heading text-primary font-bold tracking-tight">InsertTasks</span><span class="text-[11px] font-semibold uppercase px-1.5 py-0.5 rounded bg-blue-50 text-schedule border border-blue-200 tracking-wider">v2.0</span></div></a>
+<!-- Enlaces de navegación global (no activos en la pantalla actual) -->
+<nav aria-label="Navegación principal" class="hidden md:flex items-center space-x-6"><a class="text-text-muted font-body text-body hover:text-text hover:text-primary transition-colors duration-150 py-2" href="#tablero">Tablero</a><a class="text-text-muted font-body text-body hover:text-text hover:text-primary transition-colors duration-150 py-2" href="#progreso">Progreso</a><a class="text-text-muted font-body text-body hover:text-text hover:text-primary transition-colors duration-150 py-2" href="#programadas">Programadas</a><a class="text-text-muted font-body text-body hover:text-text hover:text-primary transition-colors duration-150 py-2" href="#historial">Historial</a><a class="text-text-muted font-body text-body hover:text-text hover:text-primary transition-colors duration-150 py-2" href="#papelera">Papelera</a></nav>
+</div>
+<!-- Lado Derecho: Enlace de perfil activo y Cerrar sesión -->
+<div class="flex items-center gap-4">
+<!-- Enlace Perfil Activo correspondiente a la ruta actual -->
+<a aria-current="page" aria-label="Perfil de Ana Cruz" class="flex items-center gap-2.5 px-2 py-1 text-primary font-body-strong text-body-strong border-b-2 border-primary transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2" href="#perfil">
+<span aria-hidden="true" class="w-8 h-8 rounded-full bg-[#EDE9FE] text-scope-work font-bold text-xs flex items-center justify-center border border-[#DDD6FE] shadow-xs">
+          AC
+        </span>
+<span class="text-text font-body-strong text-body">Ana Cruz</span>
+</a>
+<div aria-hidden="true" class="h-5 w-px bg-border"></div>
+<!-- Botón de texto Cerrar sesión -->
+<button class="flex items-center gap-1.5 px-2.5 py-1.5 text-text-muted hover:text-error text-body font-body transition-colors duration-150 rounded focus:outline-none focus:ring-2 focus:ring-error focus:ring-offset-2" title="Cerrar la sesión de usuario actual" type="button">
+<span aria-hidden="true" class="material-symbols-outlined text-[20px]">logout</span>
+<span>Cerrar sesión</span>
+</button>
+</div>
+</header>
+<!-- CONTENEDOR PRINCIPAL -->
+<main class="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+<!-- ENCABEZADO DE PÁGINA -->
+<header class="mb-8">
+<div class="flex items-center gap-3">
+<h1 class="font-display text-display text-text font-bold tracking-tight">Perfil</h1>
+</div>
+<p class="font-body text-body text-text-muted mt-1.5">Gestiona tu identidad, preferencias de visualización, hábitos de productividad y configuración del tablero.</p>
+</header>
+<!-- LAYOUT DE DOS COLUMNAS (Desktop Grid gap-6) -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-gutter items-start">
+<!-- COLUMNA IZQUIERDA: IDENTIDAD (5 columnas) -->
+<section aria-labelledby="seccion-identidad-title" class="lg:col-span-5 bg-surface rounded-card border border-border p-6 custom-shadow space-y-6">
+<div class="flex items-center justify-between border-b border-border pb-4">
+<h2 class="font-heading text-heading text-text font-semibold flex items-center gap-2" id="seccion-identidad-title">
+<span aria-hidden="true" class="material-symbols-outlined text-schedule text-[22px]">badge</span>
+            Identidad
+          </h2>
+<span class="text-caption font-caption text-text-muted bg-surface-alt px-2.5 py-1 rounded border border-border">Usuario activo</span>
+</div>
+<!-- Sección de Avatar -->
+<div class="flex flex-col items-center sm:flex-row sm:items-center gap-5 pt-1">
+<div aria-label="Avatar actual con iniciales AC" class="w-24 h-24 rounded-full bg-schedule text-on-primary flex items-center justify-center font-bold text-[32px] tracking-tight shadow-md flex-shrink-0 border-2 border-surface ring-2 ring-schedule/20">
+            AC
+          </div>
+<div class="flex flex-col gap-2 w-full sm:w-auto">
+<div class="flex flex-wrap gap-2">
+<button class="px-3.5 py-2 text-caption sm:text-body font-body-strong text-text bg-surface border border-border hover:bg-surface-alt hover:border-slate-400 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 flex items-center justify-center gap-1.5 shadow-xs" type="button">
+<span aria-hidden="true" class="material-symbols-outlined text-[18px]">photo_camera</span>
+                Elegir avatar
+              </button>
+<button class="px-3.5 py-2 text-caption sm:text-body font-body text-text-muted hover:text-error hover:bg-red-50 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-error focus:ring-offset-2 flex items-center justify-center gap-1.5" type="button">
+<span aria-hidden="true" class="material-symbols-outlined text-[18px]">delete_outline</span>
+                Quitar avatar
+              </button>
+</div>
+<p class="font-caption text-caption text-text-muted">JPG, PNG o SVG. Tamaño recomendado de 256×256px.</p>
+</div>
+</div>
+<!-- Formulario de Nombre para Mostrar -->
+<div class="space-y-4 pt-2">
+<div>
+<div class="flex items-center justify-between mb-1.5">
+<label class="font-body-strong text-body text-text flex items-center gap-1" for="display-name-input">
+                Nombre para mostrar
+                <span aria-hidden="true" class="text-error">*</span>
+</label>
+<span aria-live="polite" class="font-caption text-caption text-text-muted" id="name-counter">8/50</span>
+</div>
+<div class="relative">
+<input aria-describedby="display-name-help name-counter" class="w-full px-3.5 py-2.5 rounded-lg border border-border bg-surface text-text font-body text-body focus:outline-none focus:ring-2 focus:ring-schedule focus:border-schedule transition shadow-xs" id="display-name-input" maxlength="50" type="text" value="Ana Cruz"/>
+</div>
+<p class="font-caption text-caption text-text-muted mt-1.5 flex items-start gap-1" id="display-name-help">
+<span aria-hidden="true" class="material-symbols-outlined text-[16px] text-text-muted mt-0.5">info</span>
+              Si lo dejas en blanco se usará el de tu cuenta de Google: <strong>Ana Cruz López</strong>.
+            </p>
+</div>
+<!-- Acciones del campo nombre -->
+<div class="flex items-center gap-3 pt-1">
+<button class="px-4 py-2 bg-schedule hover:bg-blue-700 text-on-primary font-body-strong text-body rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-schedule focus:ring-offset-2 flex items-center gap-2 shadow-xs" type="button">
+<span aria-hidden="true" class="material-symbols-outlined text-[18px]">check</span>
+              Guardar
+            </button>
+<button class="px-3.5 py-2 bg-surface hover:bg-surface-alt border border-border text-text font-body text-body rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2" type="button">
+              Usar el de Google
+            </button>
+</div>
+</div>
+<!-- Campo de correo en solo lectura -->
+<div class="pt-4 border-t border-border">
+<div class="flex items-center justify-between mb-1.5">
+<label class="font-body-strong text-body text-text flex items-center gap-1.5" for="email-readonly-field">
+<span aria-hidden="true" class="material-symbols-outlined text-text-muted text-[17px]">lock</span>
+              Correo (no editable)
+            </label>
+<span class="inline-flex items-center gap-1 text-[11px] font-medium text-schedule bg-blue-50 px-2 py-0.5 rounded-full border border-blue-200">
+<span aria-hidden="true" class="material-symbols-outlined text-[13px]">verified</span>
+              Cuenta Google vinculada
+            </span>
+</div>
+<div class="relative">
+<input aria-readonly="true" class="w-full px-3.5 py-2.5 rounded-lg border border-border bg-surface-alt text-text-muted font-body text-body cursor-not-allowed select-none shadow-inner" id="email-readonly-field" readonly="" type="email" value="ana@example.com"/>
+</div>
+<p class="font-caption text-caption text-text-muted mt-1.5">
+            Administrado a través de Google Workspace. Para modificarlo, contacta a tu administrador.
+          </p>
+</div>
+</section>
+<!-- COLUMNA DERECHA: APARIENCIA, TABLERO Y RESTABLECIMIENTO (7 columnas) -->
+<div class="lg:col-span-7 space-y-gutter">
+<!-- 1) TARJETA 'Apariencia' -->
+<section aria-labelledby="seccion-apariencia-title" class="bg-surface rounded-card border border-border p-6 custom-shadow space-y-6">
+<div class="flex items-center justify-between border-b border-border pb-4">
+<h2 class="font-heading text-heading text-text font-semibold flex items-center gap-2" id="seccion-apariencia-title">
+<span aria-hidden="true" class="material-symbols-outlined text-schedule text-[22px]">palette</span>
+              Apariencia
+            </h2>
+<!-- Badge de guardado instantáneo -->
+<div aria-label="Cambios guardados automáticamente" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#DCFCE7] text-success border border-[#BBF7D0] text-caption font-body-strong" role="status">
+<span aria-hidden="true" class="material-symbols-outlined text-[16px] font-bold">check</span>
+              Guardado
+            </div>
+</div>
+<!-- Grupo 'Tema' -->
+<div class="space-y-3">
+<div class="flex items-center justify-between">
+<span class="font-body-strong text-body text-text" id="theme-group-label">Tema visual</span>
+<span class="font-caption text-caption text-text-muted">Afecta a todo el entorno de trabajo</span>
+</div>
+<div aria-labelledby="theme-group-label" class="grid grid-cols-3 gap-3" role="radiogroup">
+<!-- Opción Claro -->
+<button aria-checked="false" class="flex flex-col items-center justify-center p-3.5 rounded-lg border border-border bg-surface hover:bg-surface-alt transition focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 group text-left" role="radio" type="button">
+<span aria-hidden="true" class="material-symbols-outlined text-[24px] text-text-muted group-hover:text-text mb-1">light_mode</span>
+<span class="font-body text-body text-text">Claro</span>
+</button>
+<!-- Opción Oscuro -->
+<button aria-checked="false" class="flex flex-col items-center justify-center p-3.5 rounded-lg border border-border bg-surface hover:bg-surface-alt transition focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 group text-left" role="radio" type="button">
+<span aria-hidden="true" class="material-symbols-outlined text-[24px] text-text-muted group-hover:text-text mb-1">dark_mode</span>
+<span class="font-body text-body text-text">Oscuro</span>
+</button>
+<!-- Opción Sistema (SELECCIONADA: 2px borde azul, fondo azul suave #EFF6FF, check icon) -->
+<button aria-checked="true" class="relative flex flex-col items-center justify-center p-3.5 rounded-lg border-2 border-schedule bg-[#EFF6FF] text-schedule transition focus:outline-none focus:ring-2 focus:ring-schedule focus:ring-offset-2 shadow-xs" role="radio" type="button">
+<span aria-hidden="true" class="absolute top-2 right-2 flex items-center justify-center w-5 h-5 bg-schedule text-on-primary rounded-full">
+<span class="material-symbols-outlined text-[14px] font-bold">check</span>
+</span>
+<span aria-hidden="true" class="material-symbols-outlined text-[24px] text-schedule mb-1">devices</span>
+<span class="font-body-strong text-body text-schedule">Sistema</span>
+</button>
+</div>
+</div>
+<!-- Grupo 'Densidad' -->
+<div class="space-y-3 pt-2">
+<span class="font-body-strong text-body text-text block" id="density-group-label">Densidad del tablero</span>
+<div aria-labelledby="density-group-label" class="grid grid-cols-1 sm:grid-cols-2 gap-4" role="radiogroup">
+<!-- Cómoda (SELECCIONADA) -->
+<button aria-checked="true" class="relative flex items-start gap-3.5 p-4 rounded-lg border-2 border-schedule bg-[#EFF6FF] text-left transition focus:outline-none focus:ring-2 focus:ring-schedule focus:ring-offset-2 shadow-xs" role="radio" type="button">
+<span aria-hidden="true" class="absolute top-3 right-3 flex items-center justify-center w-5 h-5 bg-schedule text-on-primary rounded-full">
+<span class="material-symbols-outlined text-[14px] font-bold">check</span>
+</span>
+<!-- Miniatura ilustrativa Cómoda -->
+<div aria-hidden="true" class="w-16 h-16 rounded border border-blue-200 bg-white p-1.5 flex flex-col justify-between flex-shrink-0 shadow-2xs">
+<div class="w-full h-5 rounded bg-blue-100 border-l-2 border-schedule flex items-center px-1">
+<div class="w-2/3 h-1.5 bg-blue-300 rounded"></div>
+</div>
+<div class="w-full h-5 rounded bg-slate-100 border-l-2 border-slate-400 flex items-center px-1">
+<div class="w-1/2 h-1.5 bg-slate-300 rounded"></div>
+</div>
+</div>
+<div class="pr-6">
+<div class="font-body-strong text-body text-schedule">Cómoda</div>
+<div class="font-caption text-caption text-text-muted mt-0.5">Espaciado amplio para lectura ágil y foco relajado.</div>
+</div>
+</button>
+<!-- Compacta -->
+<button aria-checked="false" class="relative flex items-start gap-3.5 p-4 rounded-lg border border-border bg-surface hover:bg-surface-alt text-left transition focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2" role="radio" type="button">
+<!-- Miniatura ilustrativa Compacta -->
+<div aria-hidden="true" class="w-16 h-16 rounded border border-border bg-white p-1 flex flex-col justify-between flex-shrink-0">
+<div class="w-full h-3 rounded bg-slate-100 border-l-2 border-schedule flex items-center px-1">
+<div class="w-2/3 h-1 bg-slate-300 rounded"></div>
+</div>
+<div class="w-full h-3 rounded bg-slate-100 border-l-2 border-slate-300 flex items-center px-1">
+<div class="w-3/4 h-1 bg-slate-300 rounded"></div>
+</div>
+<div class="w-full h-3 rounded bg-slate-100 border-l-2 border-slate-400 flex items-center px-1">
+<div class="w-1/2 h-1 bg-slate-300 rounded"></div>
+</div>
+</div>
+<div>
+<div class="font-body-strong text-body text-text">Compacta</div>
+<div class="font-caption text-caption text-text-muted mt-0.5">Máxima información por cuadrante para pantallas densas.</div>
+</div>
+</button>
+</div>
+</div>
+</section>
+<!-- 2) TARJETA 'Tablero e historial' -->
+<section aria-labelledby="seccion-tablero-title" class="bg-surface rounded-card border border-border p-6 custom-shadow space-y-6">
+<div class="flex items-center justify-between border-b border-border pb-4">
+<h2 class="font-heading text-heading text-text font-semibold flex items-center gap-2" id="seccion-tablero-title">
+<span aria-hidden="true" class="material-symbols-outlined text-schedule text-[22px]">tune</span>
+              Tablero e historial
+            </h2>
+<span class="text-caption font-caption text-text-muted">Eisenhower Matrix</span>
+</div>
+<!-- Tablero por defecto -->
+<div class="space-y-2.5">
+<label class="font-body-strong text-body text-text block" id="default-scope-label">Tablero por defecto al iniciar</label>
+<div aria-labelledby="default-scope-label" class="flex flex-wrap gap-2.5" role="radiogroup">
+<!-- Todas (Seleccionada) -->
+<button aria-checked="true" class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border-2 border-schedule bg-[#EFF6FF] text-schedule font-body-strong text-caption shadow-xs focus:outline-none focus:ring-2 focus:ring-schedule focus:ring-offset-2" role="radio" type="button">
+<span aria-hidden="true" class="material-symbols-outlined text-[16px] font-bold">check</span>
+<span>Todas</span>
+</button>
+<!-- Laboral -->
+<button aria-checked="false" class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full border border-border bg-surface hover:bg-surface-alt text-text font-body text-caption transition focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2" role="radio" type="button">
+<span aria-hidden="true" class="w-2 h-2 rounded-full bg-scope-work"></span>
+<span>Laboral</span>
+</button>
+<!-- Personal -->
+<button aria-checked="false" class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full border border-border bg-surface hover:bg-surface-alt text-text font-body text-caption transition focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2" role="radio" type="button">
+<span aria-hidden="true" class="w-2 h-2 rounded-full bg-scope-personal"></span>
+<span>Personal</span>
+</button>
+</div>
+</div>
+<!-- Orden de las tareas -->
+<div class="space-y-2 pt-2 border-t border-border">
+<label class="font-body-strong text-body text-text block" id="task-sort-label">Orden de las tareas en cada cuadrante</label>
+<div aria-labelledby="task-sort-label" class="grid grid-cols-1 sm:grid-cols-2 gap-3" role="radiogroup">
+<!-- Más antiguas primero (Seleccionada) -->
+<button aria-checked="true" class="flex items-center justify-between px-4 py-2.5 rounded-lg border-2 border-schedule bg-[#EFF6FF] text-schedule font-body-strong text-body transition focus:outline-none focus:ring-2 focus:ring-schedule focus:ring-offset-2" role="radio" type="button">
+<span class="flex items-center gap-2">
+<span aria-hidden="true" class="material-symbols-outlined text-[20px]">schedule</span>
+                  Más antiguas primero
+                </span>
+<span aria-hidden="true" class="material-symbols-outlined text-[18px] font-bold">check</span>
+</button>
+<!-- Más recientes primero -->
+<button aria-checked="false" class="flex items-center justify-between px-4 py-2.5 rounded-lg border border-border bg-surface hover:bg-surface-alt text-text font-body text-body transition focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2" role="radio" type="button">
+<span class="flex items-center gap-2">
+<span aria-hidden="true" class="material-symbols-outlined text-[20px] text-text-muted">update</span>
+                  Más recientes primero
+                </span>
+</button>
+</div>
+<p class="font-caption text-caption text-text-muted flex items-center gap-1 pt-0.5">
+<span aria-hidden="true" class="material-symbols-outlined text-[16px] text-text-muted">push_pin</span>
+              Las tareas fijadas siempre aparecen arriba de cada lista independientemente del orden.
+            </p>
+</div>
+<!-- Historial -->
+<div class="space-y-2.5 pt-2 border-t border-border">
+<div class="flex items-center justify-between">
+<label class="font-body-strong text-body text-text" id="history-range-label">Rango de tiempo visible en Historial</label>
+<span class="font-caption text-caption text-text-muted">Tareas completadas</span>
+</div>
+<div aria-labelledby="history-range-label" class="grid grid-cols-3 gap-3" role="radiogroup">
+<!-- Últimos 30 días -->
+<button aria-checked="false" class="px-3 py-2 rounded-lg border border-border bg-surface hover:bg-surface-alt text-center text-text font-body text-caption transition focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2" role="radio" type="button">
+                Últimos 30 días
+              </button>
+<!-- Últimos 90 días -->
+<button aria-checked="false" class="px-3 py-2 rounded-lg border border-border bg-surface hover:bg-surface-alt text-center text-text font-body text-caption transition focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2" role="radio" type="button">
+                Últimos 90 días
+              </button>
+<!-- Todo (Seleccionada) -->
+<button aria-checked="true" class="px-3 py-2 rounded-lg border-2 border-schedule bg-[#EFF6FF] text-schedule font-body-strong text-caption transition flex items-center justify-center gap-1.5 focus:outline-none focus:ring-2 focus:ring-schedule focus:ring-offset-2" role="radio" type="button">
+<span aria-hidden="true" class="material-symbols-outlined text-[16px] font-bold">check</span>
+<span>Todo</span>
+</button>
+</div>
+</div>
+</section><section aria-labelledby="seccion-progreso-title" class="bg-surface rounded-card border border-border p-6 custom-shadow space-y-6"><div class="flex items-center justify-between border-b border-border pb-4"><h2 class="font-heading text-heading text-text font-semibold flex items-center gap-2" id="seccion-progreso-title"><span aria-hidden="true" class="material-symbols-outlined text-schedule text-[22px]">sports_esports</span>Progreso y juego</h2><span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-blue-50 text-schedule border border-blue-200 text-caption font-body-strong"><span aria-hidden="true" class="material-symbols-outlined text-[16px]">military_tech</span>Gamificación</span></div><div class="space-y-2"><div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3"><div><label class="font-body-strong text-body text-text block" id="meta-diaria-label">Meta diaria</label><p class="font-caption text-caption text-text-muted mt-0.5">Tareas que quieres completar cada día</p></div><div class="flex items-center gap-3 bg-surface-alt p-1.5 rounded-lg border border-border"><button aria-label="Disminuir meta diaria" class="w-8 h-8 rounded border border-border bg-surface hover:bg-slate-100 text-text font-bold flex items-center justify-center transition focus:outline-none focus:ring-2 focus:ring-schedule" type="button"><span class="material-symbols-outlined text-[18px]">remove</span></button><span aria-labelledby="meta-diaria-label" class="font-body-strong text-body text-text px-2 min-w-[5rem] text-center select-none">3 tareas</span><button aria-label="Aumentar meta diaria" class="w-8 h-8 rounded border border-border bg-surface hover:bg-slate-100 text-text font-bold flex items-center justify-center transition focus:outline-none focus:ring-2 focus:ring-schedule" type="button"><span class="material-symbols-outlined text-[18px]">add</span></button></div></div></div><div class="space-y-2.5 pt-4 border-t border-border"><div><label class="font-body-strong text-body text-text block" id="dias-activos-label">Días activos</label><p class="font-caption text-caption text-text-muted mt-0.5">En los días no activos no se rompe la racha. Al menos un día.</p></div><div aria-labelledby="dias-activos-label" class="flex flex-wrap gap-2 pt-1"><button aria-pressed="true" class="w-9 h-9 rounded-lg border-2 border-schedule bg-[#EFF6FF] text-schedule font-body-strong text-caption flex items-center justify-center shadow-xs transition focus:outline-none focus:ring-2 focus:ring-schedule" type="button">L</button><button aria-pressed="true" class="w-9 h-9 rounded-lg border-2 border-schedule bg-[#EFF6FF] text-schedule font-body-strong text-caption flex items-center justify-center shadow-xs transition focus:outline-none focus:ring-2 focus:ring-schedule" type="button">M</button><button aria-pressed="true" class="w-9 h-9 rounded-lg border-2 border-schedule bg-[#EFF6FF] text-schedule font-body-strong text-caption flex items-center justify-center shadow-xs transition focus:outline-none focus:ring-2 focus:ring-schedule" type="button">X</button><button aria-pressed="true" class="w-9 h-9 rounded-lg border-2 border-schedule bg-[#EFF6FF] text-schedule font-body-strong text-caption flex items-center justify-center shadow-xs transition focus:outline-none focus:ring-2 focus:ring-schedule" type="button">J</button><button aria-pressed="true" class="w-9 h-9 rounded-lg border-2 border-schedule bg-[#EFF6FF] text-schedule font-body-strong text-caption flex items-center justify-center shadow-xs transition focus:outline-none focus:ring-2 focus:ring-schedule" type="button">V</button><button aria-pressed="true" class="w-9 h-9 rounded-lg border-2 border-schedule bg-[#EFF6FF] text-schedule font-body-strong text-caption flex items-center justify-center shadow-xs transition focus:outline-none focus:ring-2 focus:ring-schedule" type="button">S</button><button aria-pressed="false" class="w-9 h-9 rounded-lg border border-border bg-surface hover:bg-surface-alt text-text-muted font-body text-caption flex items-center justify-center transition focus:outline-none focus:ring-2 focus:ring-primary" type="button">D</button></div></div><div class="space-y-2 pt-4 border-t border-border"><label class="font-body-strong text-body text-text block" for="timezone-select">Zona horaria</label><div class="relative max-w-md"><select class="w-full px-3.5 py-2.5 rounded-lg border border-border bg-surface text-text font-body text-body focus:outline-none focus:ring-2 focus:ring-schedule focus:border-schedule transition shadow-xs appearance-none pr-10" id="timezone-select"><option selected="" value="Europe/Madrid">Europe/Madrid (GMT+1 / GMT+2)</option><option value="Atlantic/Canary">Atlantic/Canary (GMT+0 / GMT+1)</option><option value="UTC">UTC (GMT+0)</option><option value="America/Mexico_City">America/Mexico_City (GMT-6)</option><option value="America/Bogota">America/Bogota (GMT-5)</option><option value="America/Buenos_Aires">America/Buenos_Aires (GMT-3)</option></select><span aria-hidden="true" class="pointer-events-none absolute right-3 top-3 material-symbols-outlined text-text-muted text-[20px]">expand_more</span></div><p class="font-caption text-caption text-text-muted mt-1.5 flex items-center gap-1"><span aria-hidden="true" class="material-symbols-outlined text-[16px]">schedule</span>Detectada en este dispositivo: Atlantic/Canary · <button class="text-primary font-medium hover:underline focus:outline-none" type="button">Usar esta</button></p></div><div class="space-y-4 pt-4 border-t border-border"><div class="flex items-start justify-between gap-4"><div><label class="font-body-strong text-body text-text block cursor-pointer" for="toggle-start-day">Mostrar el inicio de jornada</label><p class="font-caption text-caption text-text-muted mt-0.5">La primera vez que abres la app cada día</p></div><button aria-checked="true" class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent bg-schedule transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-schedule focus:ring-offset-2" id="toggle-start-day" role="switch" type="button"><span aria-hidden="true" class="translate-x-5 pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out"></span></button></div><div class="flex items-start justify-between gap-4 pt-2 border-t border-border"><div><div class="flex items-center gap-2"><label class="font-body-strong text-body text-text block cursor-pointer" for="toggle-arcade-mode">Modo arcade</label><span class="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-[#EDE9FE] text-scope-work border border-[#DDD6FE]">Recompensas</span></div><p class="font-caption text-caption text-text-muted mt-0.5">Puntuación, niveles, logros y celebraciones. Si lo desactivas, sigues viendo tu progreso y tu racha.</p></div><button aria-checked="true" class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent bg-schedule transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-schedule focus:ring-offset-2" id="toggle-arcade-mode" role="switch" type="button"><span aria-hidden="true" class="translate-x-5 pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out"></span></button></div></div><div class="pt-2 border-t border-border"><p class="font-caption text-caption text-text-muted flex items-center gap-1.5"><span aria-hidden="true" class="material-symbols-outlined text-[16px] text-text-muted">info</span>«Restablecer valores por defecto» no cambia esta sección.</p></div></section>
+<!-- 3) PIE / TARJETA DE RESTABLECIMIENTO -->
+<div class="bg-surface rounded-card border border-border p-4.5 custom-shadow flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+<div class="flex items-center gap-2.5">
+<div aria-hidden="true" class="w-8 h-8 rounded-full bg-surface-alt border border-border flex items-center justify-center text-text-muted flex-shrink-0">
+<span class="material-symbols-outlined text-[18px]">restart_alt</span>
+</div>
+<p class="font-caption text-caption text-text-muted">¿Deseas restaurar la configuración visual estándar? <strong class="text-text">No cambia tu nombre, avatar ni la configuración de progreso y juego.</strong></p>
+</div>
+<button class="px-4 py-2 border border-border hover:bg-surface-alt text-text font-body text-body rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 flex items-center justify-center gap-2 whitespace-nowrap shadow-xs" type="button">
+<span aria-hidden="true" class="material-symbols-outlined text-[18px]">restart_alt</span>
+            Restablecer valores por defecto
+          </button>
+</div>
+</div>
+</div>
+</main>
+<!-- PIE DE PÁGINA INSTITUCIONAL -->
+<footer class="w-full border-t border-border bg-surface mt-12 py-6 text-center text-caption font-caption text-text-muted">
+<div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-3">
+<p class="text-text-muted">© 2025 <strong class="font-body-strong text-text">InsertTasks</strong> • Enfoque estructurado con la matriz de Dwight D. Eisenhower y micro-recompensas.</p>
+<div class="flex items-center space-x-4">
+<a class="hover:text-primary transition-colors" href="#privacidad">Privacidad</a>
+<span aria-hidden="true">·</span>
+<a class="hover:text-primary transition-colors" href="#terminos">Términos</a>
+<span aria-hidden="true">·</span>
+<a class="hover:text-primary transition-colors" href="#ayuda">Ayuda</a>
+</div>
+</div>
+</footer>
+<!-- SCRIPT PARA INTERACCIÓN DEL CONTADOR Y RADIOS ACCESIBLES -->
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // Contador interactivo de caracteres del nombre
+      const nameInput = document.getElementById('display-name-input');
+      const counter = document.getElementById('name-counter');
+      if (nameInput && counter) {
+        nameInput.addEventListener('input', () => {
+          counter.textContent = `${nameInput.value.length}/50`;
+        });
+      }
+
+      // Manejo accesible simple de grupos radio segmentados en cliente
+      const radioGroups = document.querySelectorAll('[role="radiogroup"]');
+      radioGroups.forEach(group => {
+        const buttons = group.querySelectorAll('[role="radio"]');
+        buttons.forEach(btn => {
+          btn.addEventListener('click', () => {
+            // Desmarcar hermanos
+            buttons.forEach(b => {
+              b.setAttribute('aria-checked', 'false');
+              b.classList.remove('border-2', 'border-schedule', 'bg-[#EFF6FF]', 'text-schedule', 'font-body-strong');
+              b.classList.add('border-border', 'bg-surface', 'text-text');
+              const checkIcon = b.querySelector('.check-indicator');
+              if (checkIcon) checkIcon.remove();
+            });
+
+            // Marcar actual
+            btn.setAttribute('aria-checked', 'true');
+            btn.classList.add('border-2', 'border-schedule', 'bg-[#EFF6FF]', 'text-schedule', 'font-body-strong');
+            btn.classList.remove('border-border', 'bg-surface', 'text-text');
+          });
+        });
+      });
+    });
+  </script>
+</body></html>

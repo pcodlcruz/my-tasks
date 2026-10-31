@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="es" class="h-full">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>S11 · Formulario de programación - InsertTasks</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'Segoe UI', 'system-ui', 'sans-serif'],
+          },
+          colors: {
+            primary: {
+              DEFAULT: '#1D4ED8',
+              hover: '#1E40AF',
+            },
+            surface: '#FFFFFF',
+            'surface-alt': '#F8FAFC',
+            border: '#CBD5E1',
+            text: '#0F172A',
+            'text-muted': '#475569',
+            error: '#B91C1C',
+            'error-surface': '#FEF2F2',
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+    }
+  </style>
+</head>
+<body class="bg-slate-100 text-[#0F172A] min-h-screen relative antialiased flex flex-col justify-between">
+
+  <!-- FONDO: VISTA PREVIA DESENFOCADA DE S10 (TAREAS PROGRAMADAS DE INSERTTASKS) -->
+  <div class="fixed inset-0 pointer-events-none select-none filter blur-[3px] opacity-60 bg-slate-50 flex flex-col justify-between">
+    <!-- Barra superior simulada -->
+    <header class="w-full bg-white border-b border-slate-200 px-8 py-3.5 flex items-center justify-between shadow-sm">
+      <div class="flex items-center gap-6">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-lg bg-blue-700 text-white font-bold flex items-center justify-center text-sm shadow-sm">IT</div>
+          <span class="font-bold text-lg tracking-tight text-slate-900">InsertTasks</span>
+          <span class="text-xs px-2 py-0.5 rounded font-semibold bg-blue-100 text-blue-800 ml-1">v2.0</span>
+        </div>
+        <nav class="flex items-center gap-1 text-sm font-medium text-slate-600 ml-4">
+          <span class="px-3 py-1.5 rounded-md hover:bg-slate-100">Tablero</span>
+          <span class="px-3 py-1.5 rounded-md hover:bg-slate-100">Progreso</span>
+          <span class="px-3 py-1.5 rounded-md bg-blue-50 text-blue-700 font-semibold border-b-2 border-blue-700">Programadas</span>
+          <span class="px-3 py-1.5 rounded-md hover:bg-slate-100">Historial</span>
+          <span class="px-3 py-1.5 rounded-md hover:bg-slate-100">Papelera</span>
+        </nav>
+      </div>
+      <div class="flex items-center gap-4">
+        <div class="flex items-center gap-2">
+          <div class="w-8 h-8 rounded-full bg-blue-600 text-white font-medium flex items-center justify-center text-xs">AC</div>
+          <span class="text-sm font-medium text-slate-800">Ana Cruz</span>
+        </div>
+        <span class="text-sm text-slate-500">Cerrar sesión</span>
+      </div>
+    </header>
+
+    <!-- Contenido simulado de fondo -->
+    <main class="max-w-6xl w-full mx-auto px-6 py-8 flex-1">
+      <div class="flex items-center justify-between mb-6">
+        <div>
+          <h1 class="text-2xl font-bold text-slate-900">Tareas programadas <span class="text-xs font-medium px-2 py-0.5 bg-slate-200 text-slate-700 rounded-full ml-2">12 de 50</span></h1>
+          <p class="text-sm text-slate-500 mt-1">Aparecen solas en tu tablero el día que toca.</p>
+        </div>
+        <button class="bg-blue-700 text-white px-4 py-2 rounded-lg font-medium text-sm flex items-center gap-1.5 shadow-sm">
+          <span>+</span> Nueva programación
+        </button>
+      </div>
+
+      <div class="space-y-3">
+        <div class="p-4 bg-white rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <span class="w-1.5 h-10 bg-red-600 rounded-full"></span>
+            <div>
+              <p class="font-semibold text-slate-800">Revisar balance y tesorería semanal</p>
+              <p class="text-xs text-slate-500">Lunes y miércoles · Próxima: lun 3 nov</p>
+            </div>
+          </div>
+          <span class="text-xs font-medium text-green-700 bg-green-50 px-2.5 py-1 rounded-full border border-green-200">Activa</span>
+        </div>
+        <div class="p-4 bg-white rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <span class="w-1.5 h-10 bg-blue-600 rounded-full"></span>
+            <div>
+              <p class="font-semibold text-slate-800">Planificar comidas y compras saludables</p>
+              <p class="text-xs text-slate-500">Cada día · Próxima: lun 3 nov</p>
+            </div>
+          </div>
+          <span class="text-xs font-medium text-green-700 bg-green-50 px-2.5 py-1 rounded-full border border-green-200">Activa</span>
+        </div>
+      </div>
+    </main>
+
+    <!-- Pie simulado -->
+    <footer class="w-full bg-white border-t border-slate-200 px-8 py-3 text-xs text-slate-500 flex justify-between">
+      <span>InsertTasks • Enfoque estructurado con la matriz de Dwight D. Eisenhower y micro-recompensas.</span>
+      <div class="flex gap-4">
+        <span>Privacidad</span>
+        <span>Términos</span>
+        <span>Ayuda</span>
+      </div>
+    </footer>
+  </div>
+
+  <!-- OVERLAY / TELÓN DE FONDO DEL MODAL -->
+  <div class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-40 flex items-center justify-center p-4 sm:p-6 overflow-y-auto" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+
+    <!-- DIÁLOGO MODAL PRINCIPAL -->
+    <div class="relative w-full max-w-[620px] bg-white rounded-2xl shadow-2xl border border-slate-200/90 overflow-hidden my-auto animate-in fade-in zoom-in-95 duration-200">
+
+      <!-- CABECERA DEL MODAL -->
+      <div class="px-7 pt-6 pb-4 border-b border-slate-100 flex items-center justify-between bg-white">
+        <div class="flex items-center gap-3">
+          <div class="w-9 h-9 rounded-xl bg-blue-50 border border-blue-100 flex items-center justify-center text-blue-700">
+            <!-- Icono calendario con reloj/recurrencia -->
+            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+          </div>
+          <div>
+            <h2 id="modal-title" class="text-xl font-bold tracking-tight text-slate-900">Nueva programación</h2>
+            <p class="text-xs text-slate-500 mt-0.5">Configura una tarea recurrente que se generará automáticamente.</p>
+          </div>
+        </div>
+        <button type="button" aria-label="Cerrar modal" class="w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-1">
+          <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+
+      <!-- CUERPO DEL FORMULARIO CON SCROLL SUAVE SI SE REQUIERE -->
+      <form class="p-7 space-y-5 max-h-[calc(90vh-140px)] overflow-y-auto">
+
+        <!-- CAMPO 1: TÍTULO -->
+        <div>
+          <div class="flex justify-between items-center mb-1.5">
+            <label for="task-title" class="text-xs font-semibold uppercase tracking-wider text-slate-700">
+              Título <span class="text-red-600 font-bold" title="Obligatorio">*</span>
+            </label>
+            <span class="text-xs text-slate-400 font-mono">0 / 200</span>
+          </div>
+          <input
+            id="task-title"
+            type="text"
+            maxlength="200"
+            required
+            placeholder="Ej. Revisar balance de tesorería y arqueo de caja..."
+            class="w-full px-3.5 py-2.5 text-sm bg-white border border-slate-300 rounded-lg text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-blue-600 transition-all shadow-sm"
+          />
+        </div>
+
+        <!-- CAMPO 2: DESCRIPCIÓN CON ERROR EN LÍNEA (OBLIGATORIA) -->
+        <div>
+          <div class="flex justify-between items-center mb-1.5">
+            <label for="task-desc" class="text-xs font-semibold uppercase tracking-wider text-slate-700">
+              Descripción <span class="text-red-600 font-bold" title="Obligatorio">*</span>
+            </label>
+            <span class="text-xs text-slate-400 font-mono">0 / 2000</span>
+          </div>
+          <div class="relative">
+            <textarea
+              id="task-desc"
+              rows="3"
+              maxlength="2000"
+              required
+              aria-invalid="true"
+              aria-describedby="desc-error-msg"
+              placeholder="Detalla los pasos o notas clave para cuando aparezca en tu tablero..."
+              class="w-full px-3.5 py-2.5 text-sm bg-red-50/20 border-2 border-red-500 rounded-lg text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-red-600 transition-all shadow-sm resize-none"
+            ></textarea>
+            <!-- Icono de alerta en el borde del input con error -->
+            <div class="absolute top-2.5 right-3 pointer-events-none text-red-500">
+              <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+              </svg>
+            </div>
+          </div>
+          <!-- MENSAJE DE ERROR EN LÍNEA SOLICITADO -->
+          <div id="desc-error-msg" class="flex items-center gap-1.5 mt-1.5 text-xs font-medium text-red-700">
+            <svg class="w-4 h-4 flex-shrink-0 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+            </svg>
+            <span>La descripción es obligatoria.</span>
+          </div>
+        </div>
+
+        <!-- CAMPO 3: PRIORIZACIÓN EISENHOWER CON SWITCHES/CASILLAS Y VISTA PREVIA «IRÁ A: HACER AHORA» -->
+        <div class="bg-slate-50/80 rounded-xl p-4 border border-slate-200">
+          <div class="flex items-center justify-between mb-3">
+            <span class="text-xs font-bold uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
+              <svg class="w-4 h-4 text-blue-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+              </svg>
+              Priorización Eisenhower
+            </span>
+            <span class="text-[11px] text-slate-400">Determina el cuadrante</span>
+          </div>
+
+          <!-- Casillas / Toggles Urgente e Importante (Ambos marcados para ir a Hacer ahora) -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
+            <!-- Casilla / Switch Urgente: MARCADO -->
+            <label class="flex items-center justify-between p-3 rounded-lg bg-white border border-slate-200 hover:border-slate-300 cursor-pointer shadow-xs transition-colors">
+              <div class="flex items-center gap-2.5">
+                <div class="w-2.5 h-2.5 rounded-full bg-red-600"></div>
+                <div>
+                  <span class="text-xs font-semibold text-slate-800 block">¿Es Urgente?</span>
+                  <span class="text-[11px] text-slate-500 block">Requiere atención inmediata</span>
+                </div>
+              </div>
+              <!-- Toggle switch activo -->
+              <input type="checkbox" checked class="sr-only peer">
+              <div class="w-9 h-5 bg-blue-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all relative"></div>
+            </label>
+
+            <!-- Casilla / Switch Importante: MARCADO -->
+            <label class="flex items-center justify-between p-3 rounded-lg bg-white border border-slate-200 hover:border-slate-300 cursor-pointer shadow-xs transition-colors">
+              <div class="flex items-center gap-2.5">
+                <div class="w-2.5 h-2.5 rounded-full bg-blue-600"></div>
+                <div>
+                  <span class="text-xs font-semibold text-slate-800 block">¿Es Importante?</span>
+                  <span class="text-[11px] text-slate-500 block">Aporta valor estratégico clave</span>
+                </div>
+              </div>
+              <!-- Toggle switch activo -->
+              <input type="checkbox" checked class="sr-only peer">
+              <div class="w-9 h-5 bg-blue-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all relative"></div>
+            </label>
+          </div>
+
+          <!-- BANNER VISTA PREVIA DEL CUADRANTE RESULTANTE: «Irá a: Hacer ahora» -->
+          <div class="p-3 bg-red-50 border border-red-200 rounded-lg flex items-center justify-between">
+            <div class="flex items-center gap-2.5">
+              <div class="w-7 h-7 rounded-md bg-red-700 text-white flex items-center justify-center font-bold text-xs shadow-xs">
+                Q1
+              </div>
+              <div>
+                <div class="flex items-center gap-2">
+                  <span class="text-xs font-medium text-slate-600">Destino previsto:</span>
+                  <span class="text-xs font-bold text-red-700 uppercase tracking-wide">Irá a: Hacer ahora</span>
+                </div>
+                <p class="text-[11px] text-slate-500">Urgente e importante — Se colocará prioritariamente en la cabecera del tablero.</p>
+              </div>
+            </div>
+            <span class="text-xs font-bold bg-white text-red-700 border border-red-300 px-2 py-0.5 rounded-full shadow-2xs">
+              Cuadrante I
+            </span>
+          </div>
+        </div>
+
+        <!-- CAMPO 4: ÁMBITO (LABORAL / PERSONAL) -->
+        <div>
+          <label class="text-xs font-semibold uppercase tracking-wider text-slate-700 block mb-1.5">
+            Ámbito de la tarea
+          </label>
+          <div class="grid grid-cols-2 gap-3">
+            <!-- Opción Laboral (Seleccionada) -->
+            <label class="flex items-center justify-center gap-2.5 p-2.5 rounded-lg border-2 border-violet-600 bg-violet-50/50 cursor-pointer transition-all shadow-xs">
+              <input type="radio" name="scope" value="work" checked class="w-4 h-4 text-violet-600 focus:ring-violet-500 border-slate-300">
+              <span class="w-2 h-2 rounded-full bg-violet-600"></span>
+              <span class="text-sm font-semibold text-violet-900">Laboral</span>
+            </label>
+
+            <!-- Opción Personal -->
+            <label class="flex items-center justify-center gap-2.5 p-2.5 rounded-lg border border-slate-200 hover:border-slate-300 bg-white cursor-pointer transition-all">
+              <input type="radio" name="scope" value="personal" class="w-4 h-4 text-teal-600 focus:ring-teal-500 border-slate-300">
+              <span class="w-2 h-2 rounded-full bg-teal-600"></span>
+              <span class="text-sm font-medium text-slate-700">Personal</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- SECCIÓN NUEVA: REPETICIÓN -->
+        <div class="bg-slate-50/80 rounded-xl p-4 border border-slate-200 space-y-3.5">
+          <div class="flex items-center justify-between">
+            <label class="text-xs font-bold uppercase tracking-wider text-slate-800 flex items-center gap-1.5">
+              <svg class="w-4 h-4 text-blue-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
+              Repetición
+            </label>
+            <span class="text-[11px] font-medium text-blue-700 bg-blue-50 px-2 py-0.5 rounded border border-blue-200">
+              Frecuencia activa
+            </span>
+          </div>
+
+          <!-- CONTROL SEGMENTADO: «Una vez · Cada día · Días de la semana · Día del mes» -->
+          <!-- Con «Días de la semana» SELECCIONADO -->
+          <div class="grid grid-cols-4 p-1 bg-slate-200/80 rounded-lg text-xs font-medium text-slate-600">
+            <button type="button" class="py-1.5 px-2 text-center rounded-md hover:text-slate-900 transition-colors">
+              Una vez
+            </button>
+            <button type="button" class="py-1.5 px-2 text-center rounded-md hover:text-slate-900 transition-colors">
+              Cada día
+            </button>
+            <button type="button" class="py-1.5 px-2 text-center rounded-md bg-white text-blue-700 font-bold shadow-sm border border-slate-200/60">
+              Días de la semana
+            </button>
+            <button type="button" class="py-1.5 px-2 text-center rounded-md hover:text-slate-900 transition-colors">
+              Día del mes
+            </button>
+          </div>
+
+          <!-- 7 CASILLAS L M X J V S D CON L Y X MARCADAS -->
+          <div>
+            <div class="flex justify-between items-center mb-1.5">
+              <span class="text-[11px] font-semibold text-slate-500">Selecciona los días activos de la semana:</span>
+              <span class="text-[11px] font-medium text-slate-600">2 seleccionados</span>
+            </div>
+            <div class="grid grid-cols-7 gap-2">
+              <!-- Lunes (L) - MARCADA -->
+              <label class="flex flex-col items-center justify-center h-11 rounded-lg border-2 border-blue-600 bg-blue-600 text-white font-bold text-sm cursor-pointer shadow-sm transition-transform active:scale-95">
+                <input type="checkbox" checked class="sr-only">
+                <span>L</span>
+                <span class="text-[9px] font-normal leading-none opacity-90">Lun</span>
+              </label>
+
+              <!-- Martes (M) - NO MARCADA -->
+              <label class="flex flex-col items-center justify-center h-11 rounded-lg border border-slate-200 bg-white text-slate-700 font-semibold text-sm hover:border-slate-300 hover:bg-slate-50 cursor-pointer transition-colors active:scale-95">
+                <input type="checkbox" class="sr-only">
+                <span>M</span>
+                <span class="text-[9px] font-normal leading-none text-slate-400">Mar</span>
+              </label>
+
+              <!-- Miércoles (X) - MARCADA -->
+              <label class="flex flex-col items-center justify-center h-11 rounded-lg border-2 border-blue-600 bg-blue-600 text-white font-bold text-sm cursor-pointer shadow-sm transition-transform active:scale-95">
+                <input type="checkbox" checked class="sr-only">
+                <span>X</span>
+                <span class="text-[9px] font-normal leading-none opacity-90">Mié</span>
+              </label>
+
+              <!-- Jueves (J) - NO MARCADA -->
+              <label class="flex flex-col items-center justify-center h-11 rounded-lg border border-slate-200 bg-white text-slate-700 font-semibold text-sm hover:border-slate-300 hover:bg-slate-50 cursor-pointer transition-colors active:scale-95">
+                <input type="checkbox" class="sr-only">
+                <span>J</span>
+                <span class="text-[9px] font-normal leading-none text-slate-400">Jue</span>
+              </label>
+
+              <!-- Viernes (V) - NO MARCADA -->
+              <label class="flex flex-col items-center justify-center h-11 rounded-lg border border-slate-200 bg-white text-slate-700 font-semibold text-sm hover:border-slate-300 hover:bg-slate-50 cursor-pointer transition-colors active:scale-95">
+                <input type="checkbox" class="sr-only">
+                <span>V</span>
+                <span class="text-[9px] font-normal leading-none text-slate-400">Vie</span>
+              </label>
+
+              <!-- Sábado (S) - NO MARCADA -->
+              <label class="flex flex-col items-center justify-center h-11 rounded-lg border border-slate-200 bg-white text-slate-700 font-semibold text-sm hover:border-slate-300 hover:bg-slate-50 cursor-pointer transition-colors active:scale-95">
+                <input type="checkbox" class="sr-only">
+                <span>S</span>
+                <span class="text-[9px] font-normal leading-none text-slate-400">Sáb</span>
+              </label>
+
+              <!-- Domingo (D) - NO MARCADA -->
+              <label class="flex flex-col items-center justify-center h-11 rounded-lg border border-slate-200 bg-white text-slate-700 font-semibold text-sm hover:border-slate-300 hover:bg-slate-50 cursor-pointer transition-colors active:scale-95">
+                <input type="checkbox" class="sr-only">
+                <span>D</span>
+                <span class="text-[9px] font-normal leading-none text-slate-400">Dom</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- VISTA PREVIA DESTACADA SOLICITADA: «Próxima aparición: lunes 3 de noviembre» -->
+          <div class="p-3 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg flex items-center justify-between">
+            <div class="flex items-center gap-2.5">
+              <div class="w-8 h-8 rounded-lg bg-blue-600 text-white flex items-center justify-center flex-shrink-0 shadow-xs">
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <div>
+                <span class="text-[11px] font-medium text-slate-500 uppercase tracking-wider block">Cálculo de recurrencia</span>
+                <span class="text-xs font-bold text-blue-900 block">
+                  Próxima aparición: lunes 3 de noviembre
+                </span>
+              </div>
+            </div>
+            <span class="text-[11px] font-semibold text-blue-700 bg-white px-2.5 py-1 rounded-md border border-blue-200 shadow-2xs">
+              08:00 AM (Apertura)
+            </span>
+          </div>
+        </div>
+
+      </form>
+
+      <!-- PIE DEL MODAL: CANCELAR Y GUARDAR PROGRAMACIÓN -->
+      <div class="px-7 py-4 bg-slate-50 border-t border-slate-200 flex items-center justify-end gap-3">
+        <button
+          type="button"
+          class="px-5 py-2.5 text-sm font-semibold text-slate-700 hover:text-slate-900 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors shadow-2xs focus:outline-none focus:ring-2 focus:ring-slate-300">
+          Cancelar
+        </button>
+        <button
+          type="button"
+          class="px-5 py-2.5 text-sm font-semibold text-white bg-blue-700 hover:bg-blue-800 rounded-lg transition-colors shadow-sm flex items-center gap-2 focus:outline-none focus:ring-2 focus:ring-blue-700 focus:ring-offset-2">
+          <!-- Icono guardar / check -->
+          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+          </svg>
+          <span>Guardar programación</span>
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+</body>
+</html>

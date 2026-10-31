@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>InsertTasks v3 · S10 · Tareas programadas</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Press+Start+2P&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "surface-container-high": "#1f2a3c",
+            "on-surface-variant": "#c1c7d3",
+            "tertiary-container": "#ad91ff",
+            "on-secondary-container": "#004d44",
+            "surface-bright": "#2f3a4c",
+            "inverse-on-surface": "#263143",
+            "primary-container": "#60a5fa",
+            "outline-variant": "#414751",
+            "on-background": "#d8e3fb",
+            "on-surface": "#d8e3fb",
+            "surface-tint": "#a4c9ff",
+            "tertiary": "#cebdff",
+            "surface-container-low": "#111c2d",
+            "background": "#081425",
+            "primary-fixed": "#d4e3ff",
+            "surface-dim": "#081425",
+            "error-container": "#93000a",
+            "error": "#ffb4ab",
+            "on-primary": "#00315d",
+            "secondary-container": "#03c6b2",
+            "primary-fixed-dim": "#a4c9ff",
+            "on-secondary-fixed": "#00201c",
+            "surface-container-highest": "#2a3548",
+            "on-primary-container": "#003a6b",
+            "surface-variant": "#2a3548",
+            "on-secondary-fixed-variant": "#005047",
+            "on-tertiary-fixed-variant": "#4f319c",
+            "on-tertiary": "#381385",
+            "tertiary-fixed-dim": "#cebdff",
+            "tertiary-fixed": "#e8ddff",
+            "on-secondary": "#003731",
+            "on-primary-fixed-variant": "#004883",
+            "secondary-fixed": "#62fae3",
+            "secondary": "#44e2cd",
+            "inverse-surface": "#d8e3fb",
+            "secondary-fixed-dim": "#3cddc7",
+            "surface-container": "#152031",
+            "inverse-primary": "#0060ac",
+            "surface-container-lowest": "#040e1f",
+            "primary": "#a4c9ff",
+            "outline": "#8b919d",
+            "on-tertiary-fixed": "#21005e",
+            "on-error-container": "#ffdad6",
+            "on-primary-fixed": "#001c39",
+            "surface": "#081425",
+            "on-error": "#690005",
+            "on-tertiary-container": "#40208d"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.125rem",
+            "lg": "0.25rem",
+            "xl": "0.5rem",
+            "full": "0.75rem"
+          },
+          "spacing": {
+            "space-xs": "0.25rem",
+            "space-sm": "0.5rem",
+            "space-md": "0.75rem",
+            "margin": "1.5rem",
+            "space-xl": "2rem",
+            "space-2xl": "3rem",
+            "space-lg": "1rem",
+            "gutter": "1.5rem"
+          },
+          "fontFamily": {
+            "caption": ["Inter"],
+            "body": ["Inter"],
+            "heading": ["Inter"],
+            "display": ["Inter"],
+            "body-strong": ["Inter"],
+            "arcade": ['"Press Start 2P"', "monospace"]
+          },
+          "fontSize": {
+            "caption": ["13px", { "lineHeight": "18px", "fontWeight": "400" }],
+            "body": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+            "heading": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+            "display": ["28px", { "lineHeight": "36px", "fontWeight": "700" }],
+            "body-strong": ["16px", { "lineHeight": "24px", "fontWeight": "600" }]
+          }
+        },
+      },
+    }
+  </script>
+</head>
+<body class="bg-background text-on-surface antialiased min-h-screen flex flex-col font-body text-body selection:bg-primary-container selection:text-on-primary-container">
+<!-- TOP NAV BAR (Shared Component Exact Schema & Blueprint) -->
+<header class="w-full sticky top-0 z-50 flex items-center justify-between px-margin h-16 bg-surface-container border-b border-outline-variant shadow-sm">
+<!-- Brand Cluster -->
+<div class="flex items-center gap-space-xl">
+<div class="flex items-center gap-space-md">
+<a class="text-heading font-heading font-bold text-primary dark:text-primary flex items-center gap-space-xs tracking-tight" href="#">
+<span class="material-symbols-outlined text-primary" data-icon="sports_esports" style="font-variation-settings: 'FILL' 1;">sports_esports</span>
+<span>InsertTasks</span>
+</a>
+<span class="bg-surface-container-highest text-secondary text-caption font-caption px-space-sm py-0.5 rounded-full border border-outline-variant font-medium">v3.0 ARCADE</span>
+</div>
+<!-- Navigation Links -->
+<nav class="hidden md:flex items-center gap-space-xs">
+<a class="text-on-surface-variant dark:text-on-surface-variant font-body text-body py-space-sm px-space-md hover:text-on-surface hover:bg-surface-container-high dark:hover:bg-surface-container-high transition-colors duration-150 rounded-DEFAULT" href="#">Tablero</a>
+<a class="text-on-surface-variant dark:text-on-surface-variant font-body text-body py-space-sm px-space-md hover:text-on-surface hover:bg-surface-container-high dark:hover:bg-surface-container-high transition-colors duration-150 rounded-DEFAULT" href="#">Progreso</a>
+<a aria-current="page" class="border-b-2 border-primary text-primary dark:text-primary font-body-strong text-body py-space-sm px-space-md flex items-center gap-space-xs" href="#">
+<span>Programadas</span>
+<span class="w-1.5 h-1.5 rounded-full bg-primary inline-block"></span>
+</a>
+<a class="text-on-surface-variant dark:text-on-surface-variant font-body text-body py-space-sm px-space-md hover:text-on-surface hover:bg-surface-container-high dark:hover:bg-surface-container-high transition-colors duration-150 rounded-DEFAULT" href="#">Historial</a>
+<a class="text-on-surface-variant dark:text-on-surface-variant font-body text-body py-space-sm px-space-md hover:text-on-surface hover:bg-surface-container-high dark:hover:bg-surface-container-high transition-colors duration-150 rounded-DEFAULT" href="#">Papelera</a>
+</nav>
+</div>
+<!-- Trailing Actions & User Level Profile -->
+<div class="flex items-center gap-space-md">
+<!-- Arcade Status Chip -->
+<div class="hidden lg:flex items-center gap-space-sm px-space-md py-1 bg-surface-container-low border border-outline-variant rounded-full">
+<span class="material-symbols-outlined text-secondary text-[18px]" data-icon="token" style="font-variation-settings: 'FILL' 1;">token</span>
+<div class="flex flex-col">
+<span class="font-arcade text-[9px] text-secondary tracking-wider">NIVEL 3</span>
+<span class="text-caption font-caption text-on-surface-variant font-medium text-[11px] leading-tight">3.950 PTS</span>
+</div>
+</div>
+<!-- User Avatar Cluster -->
+<div class="flex items-center gap-space-sm pl-space-xs">
+<div class="w-9 h-9 rounded-full bg-primary-container text-on-primary-container font-heading font-bold text-caption flex items-center justify-center border border-outline-variant shadow-inner" title="Avatar del usuario con nivel y puntos arcade">
+          AC
+        </div>
+<div class="hidden sm:flex flex-col text-left">
+<span class="text-caption font-body-strong text-on-surface leading-tight">Ana Cruz</span>
+<span class="text-[11px] font-caption text-on-surface-variant">ana.cruz@arcade.org</span>
+</div>
+</div>
+<!-- Notifications Icon Action -->
+<button aria-label="Notificaciones" class="w-9 h-9 flex items-center justify-center rounded-DEFAULT text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors duration-150 active:scale-95 transition-transform duration-100" type="button">
+<span class="material-symbols-outlined text-[20px]" data-icon="notifications">notifications</span>
+</button>
+<!-- Logout Action -->
+<button class="hidden sm:inline-flex items-center gap-space-xs text-caption font-body px-space-sm py-1.5 rounded-DEFAULT text-on-surface-variant hover:text-error hover:bg-surface-container-high transition-colors border border-outline-variant active:scale-95" type="button">
+<span class="material-symbols-outlined text-[16px]" data-icon="logout">logout</span>
+<span>Cerrar sesión</span>
+</button>
+</div>
+</header>
+<!-- MAIN CANVAS -->
+<main class="flex-1 w-full max-w-[1440px] mx-auto px-margin py-space-xl flex flex-col gap-space-lg">
+<!-- HEADER SECTION -->
+<section class="flex flex-col md:flex-row md:items-end justify-between gap-space-lg pb-space-xs">
+<div class="flex flex-col gap-space-xs">
+<div class="flex items-center gap-space-md">
+<h1 class="text-display font-display text-on-surface tracking-tight">Tareas programadas</h1>
+<span class="px-space-md py-0.5 rounded-full bg-surface-container-highest border border-outline-variant text-caption font-body-strong text-primary">
+            12 de 50
+          </span>
+</div>
+<p class="text-body font-body text-on-surface-variant">Aparecen solas en tu tablero el día que toca.</p>
+</div>
+<!-- Action Button -->
+<div>
+<button class="inline-flex items-center gap-space-sm bg-primary-container text-on-primary-container font-body-strong text-body px-space-lg py-2.5 rounded-DEFAULT hover:opacity-95 active:scale-95 transition-all shadow-sm" type="button">
+<span class="material-symbols-outlined text-[20px]" data-icon="add_circle" style="font-variation-settings: 'FILL' 1;">add_circle</span>
+<span>+ Nueva programación</span>
+</button>
+</div>
+</section>
+<!-- STATUS FILTERS BAR -->
+<div class="flex flex-wrap items-center justify-between gap-space-md border-b border-outline-variant pb-space-md">
+<div class="flex items-center gap-space-xs">
+<button class="px-space-md py-1.5 rounded-full bg-primary-container text-on-primary-container font-body-strong text-caption transition-all shadow-sm" type="button">
+          Todas (12)
+        </button>
+<button class="px-space-md py-1.5 rounded-full bg-surface-container text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high font-body text-caption border border-outline-variant transition-colors" type="button">
+          Activas (9)
+        </button>
+<button class="px-space-md py-1.5 rounded-full bg-surface-container text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high font-body text-caption border border-outline-variant transition-colors" type="button">
+          Pausadas (2)
+        </button>
+<button class="px-space-md py-1.5 rounded-full bg-surface-container text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high font-body text-caption border border-outline-variant transition-colors" type="button">
+          Terminadas (1)
+        </button>
+</div>
+<!-- Quadrant Eisenhower Legend Indicator -->
+<div class="hidden xl:flex items-center gap-space-md text-caption font-caption text-on-surface-variant">
+<span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-error"></span> Hacer ahora</span>
+<span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-primary"></span> Planificar</span>
+<span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-secondary"></span> Delegar</span>
+<span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-outline"></span> Eliminar / Descartable</span>
+</div>
+</div>
+<!-- SEARCH & CAPACITY WARNING BAR -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-space-md items-center">
+<!-- Search Input -->
+<div class="lg:col-span-6 relative">
+<span class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-outline text-[20px]" data-icon="search">search</span>
+<input class="w-full bg-surface-container-low border border-outline-variant rounded-DEFAULT pl-10 pr-4 py-2 text-body font-body text-on-surface placeholder:text-outline focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all" placeholder="Buscar por título o etiqueta..." type="text"/>
+</div>
+<!-- Capacity Info Note -->
+<div class="lg:col-span-6 bg-surface-container border border-outline-variant rounded-DEFAULT px-space-md py-2 flex items-center gap-space-sm text-caption font-caption text-on-surface-variant">
+<span class="material-symbols-outlined text-primary text-[18px] shrink-0" data-icon="info">info</span>
+<span>Límite de 50 programaciones activas por cuenta para garantizar agilidad en la matriz diaria.</span>
+</div>
+</div>
+<!-- SCHEDULED TASKS HORIZONTAL CARDS LIST -->
+<div class="flex flex-col gap-space-md mt-space-xs">
+<!-- TASK 1: Hacer ahora (Red) - Activa -->
+<article class="bg-surface-container hover:bg-surface-container-high transition-colors duration-150 border border-outline-variant rounded-DEFAULT border-l-4 border-l-error p-space-lg shadow-sm flex flex-col xl:flex-row xl:items-center justify-between gap-space-md">
+<div class="flex flex-col gap-space-xs max-w-2xl">
+<div class="flex flex-wrap items-center gap-space-sm">
+<span class="inline-flex items-center gap-1 text-caption font-body-strong text-error bg-error-container/20 border border-error/30 px-space-sm py-0.5 rounded-full">
+<span class="w-1.5 h-1.5 rounded-full bg-error"></span>
+              ● Hacer ahora
+            </span>
+<span class="text-caption font-body text-tertiary bg-surface-container-highest border border-tertiary/30 px-space-sm py-0.5 rounded-full">
+              Laboral
+            </span>
+<span class="inline-flex items-center gap-1 text-caption font-body text-secondary bg-surface-container-highest border border-secondary/30 px-space-sm py-0.5 rounded-full">
+<span class="material-symbols-outlined text-[14px]" data-icon="check_circle">check_circle</span>
+              ✓ Activa
+            </span>
+</div>
+<h2 class="text-heading font-heading text-on-surface font-semibold tracking-tight">Revisar balance y tesorería semanal</h2>
+<div class="flex flex-wrap items-center gap-x-space-lg gap-y-space-xs text-caption font-caption text-on-surface-variant">
+<span class="inline-flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px] text-outline" data-icon="sync">sync</span>
+              Lunes y miércoles
+            </span>
+<span class="inline-flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px] text-outline" data-icon="calendar_today">calendar_today</span>
+              Próxima: lun 3 nov
+            </span>
+<span class="inline-flex items-center gap-1 text-outline">
+<span class="material-symbols-outlined text-[16px]" data-icon="alarm">alarm</span>
+              09:00 AM
+            </span>
+</div>
+</div>
+<!-- Task Actions -->
+<div class="flex items-center gap-space-xs shrink-0 self-end xl:self-center">
+<button class="inline-flex items-center gap-space-xs text-caption font-body px-space-md py-1.5 rounded-DEFAULT bg-surface-container-highest text-on-surface hover:bg-surface-bright transition-colors border border-outline-variant active:scale-95" type="button">
+<span class="material-symbols-outlined text-[16px]" data-icon="edit">edit</span>
+<span>Editar</span>
+</button>
+<button class="inline-flex items-center gap-space-xs text-caption font-body px-space-md py-1.5 rounded-DEFAULT bg-surface-container-highest text-on-surface hover:bg-surface-bright transition-colors border border-outline-variant active:scale-95" type="button">
+<span class="material-symbols-outlined text-[16px]" data-icon="pause">pause</span>
+<span>⏸ Pausar</span>
+</button>
+<button class="inline-flex items-center gap-space-xs text-caption font-body px-space-md py-1.5 rounded-DEFAULT text-error hover:bg-error-container/20 transition-colors border border-outline-variant hover:border-error/40 active:scale-95" type="button">
+<span class="material-symbols-outlined text-[16px]" data-icon="delete">delete</span>
+<span>Eliminar</span>
+</button>
+</div>
+</article>
+<!-- TASK 2: Planificar (Blue) - Activa -->
+<article class="bg-surface-container hover:bg-surface-container-high transition-colors duration-150 border border-outline-variant rounded-DEFAULT border-l-4 border-l-primary p-space-lg shadow-sm flex flex-col xl:flex-row xl:items-center justify-between gap-space-md">
+<div class="flex flex-col gap-space-xs max-w-2xl">
+<div class="flex flex-wrap items-center gap-space-sm">
+<span class="inline-flex items-center gap-1 text-caption font-body-strong text-primary bg-primary-container/20 border border-primary/30 px-space-sm py-0.5 rounded-full">
+<span class="w-1.5 h-1.5 rounded-full bg-primary"></span>
+              ● Planificar
+            </span>
+<span class="text-caption font-body text-secondary bg-surface-container-highest border border-secondary/30 px-space-sm py-0.5 rounded-full">
+              Personal
+            </span>
+<span class="inline-flex items-center gap-1 text-caption font-body text-secondary bg-surface-container-highest border border-secondary/30 px-space-sm py-0.5 rounded-full">
+<span class="material-symbols-outlined text-[14px]" data-icon="check_circle">check_circle</span>
+              ✓ Activa
+            </span>
+</div>
+<h2 class="text-heading font-heading text-on-surface font-semibold tracking-tight">Planificar comidas y compras saludables</h2>
+<div class="flex flex-wrap items-center gap-x-space-lg gap-y-space-xs text-caption font-caption text-on-surface-variant">
+<span class="inline-flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px] text-outline" data-icon="sync">sync</span>
+              Cada domingo
+            </span>
+<span class="inline-flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px] text-outline" data-icon="calendar_today">calendar_today</span>
+              Próxima: dom 30 nov
+            </span>
+<span class="inline-flex items-center gap-1 text-outline">
+<span class="material-symbols-outlined text-[16px]" data-icon="alarm">alarm</span>
+              11:30 AM
+            </span>
+</div>
+</div>
+<!-- Task Actions -->
+<div class="flex items-center gap-space-xs shrink-0 self-end xl:self-center">
+<button class="inline-flex items-center gap-space-xs text-caption font-body px-space-md py-1.5 rounded-DEFAULT bg-surface-container-highest text-on-surface hover:bg-surface-bright transition-colors border border-outline-variant active:scale-95" type="button">
+<span class="material-symbols-outlined text-[16px]" data-icon="edit">edit</span>
+<span>Editar</span>
+</button>
+<button class="inline-flex items-center gap-space-xs text-caption font-body px-space-md py-1.5 rounded-DEFAULT bg-surface-container-highest text-on-surface hover:bg-surface-bright transition-colors border border-outline-variant active:scale-95" type="button">
+<span class="material-symbols-outlined text-[16px]" data-icon="pause">pause</span>
+<span>⏸ Pausar</span>
+</button>
+<button class="inline-flex items-center gap-space-xs text-caption font-body px-space-md py-1.5 rounded-DEFAULT text-error hover:bg-error-container/20 transition-colors border border-outline-variant hover:border-error/40 active:scale-95" type="button">
+<span class="material-symbols-outlined text-[16px]" data-icon="delete">delete</span>
+<span>Eliminar</span>
+</button>
+</div>
+</article>
+<!-- TASK 3: Delegar (Amber) - Pausada -->
+<article class="bg-surface-container/80 hover:bg-surface-container-high transition-colors duration-150 border border-outline-variant rounded-DEFAULT border-l-4 border-l-secondary p-space-lg shadow-sm flex flex-col xl:flex-row xl:items-center justify-between gap-space-md opacity-90">
+<div class="flex flex-col gap-space-xs max-w-2xl">
+<div class="flex flex-wrap items-center gap-space-sm">
+<span class="inline-flex items-center gap-1 text-caption font-body-strong text-secondary bg-secondary-container/20 border border-secondary/30 px-space-sm py-0.5 rounded-full">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+              ● Delegar
+            </span>
+<span class="text-caption font-body text-tertiary bg-surface-container-highest border border-tertiary/30 px-space-sm py-0.5 rounded-full">
+              Laboral
+            </span>
+<span class="inline-flex items-center gap-1 text-caption font-body text-primary-fixed-dim bg-surface-container-highest border border-primary-fixed-dim/30 px-space-sm py-0.5 rounded-full">
+<span class="material-symbols-outlined text-[14px]" data-icon="pause_circle">pause_circle</span>
+              ⏸ Pausada
+            </span>
+</div>
+<h2 class="text-heading font-heading text-on-surface font-semibold tracking-tight">Revisar correo</h2>
+<div class="flex flex-wrap items-center gap-x-space-lg gap-y-space-xs text-caption font-caption text-on-surface-variant">
+<span class="inline-flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px] text-outline" data-icon="sync">sync</span>
+              Cada día
+            </span>
+<span class="inline-flex items-center gap-1 text-outline">
+<span class="material-symbols-outlined text-[16px]" data-icon="calendar_today">calendar_today</span>
+              Próxima: —
+            </span>
+<span class="inline-flex items-center gap-1 text-outline">
+<span class="material-symbols-outlined text-[16px]" data-icon="pause">pause</span>
+              En pausa temporal
+            </span>
+</div>
+</div>
+<!-- Task Actions (Shows Reanudar) -->
+<div class="flex items-center gap-space-xs shrink-0 self-end xl:self-center">
+<button class="inline-flex items-center gap-space-xs text-caption font-body px-space-md py-1.5 rounded-DEFAULT bg-surface-container-highest text-on-surface hover:bg-surface-bright transition-colors border border-outline-variant active:scale-95" type="button">
+<span class="material-symbols-outlined text-[16px]" data-icon="edit">edit</span>
+<span>Editar</span>
+</button>
+<button class="inline-flex items-center gap-space-xs text-caption font-body px-space-md py-1.5 rounded-DEFAULT bg-secondary text-on-secondary hover:bg-secondary-fixed transition-colors font-body-strong active:scale-95" type="button">
+<span class="material-symbols-outlined text-[16px]" data-icon="play_arrow">play_arrow</span>
+<span>▶ Reanudar</span>
+</button>
+<button class="inline-flex items-center gap-space-xs text-caption font-body px-space-md py-1.5 rounded-DEFAULT text-error hover:bg-error-container/20 transition-colors border border-outline-variant hover:border-error/40 active:scale-95" type="button">
+<span class="material-symbols-outlined text-[16px]" data-icon="delete">delete</span>
+<span>Eliminar</span>
+</button>
+</div>
+</article>
+<!-- TASK 4: Eliminar / Descartable (Slate) - Activa -->
+<article class="bg-surface-container hover:bg-surface-container-high transition-colors duration-150 border border-outline-variant rounded-DEFAULT border-l-4 border-l-outline p-space-lg shadow-sm flex flex-col xl:flex-row xl:items-center justify-between gap-space-md">
+<div class="flex flex-col gap-space-xs max-w-2xl">
+<div class="flex flex-wrap items-center gap-space-sm">
+<span class="inline-flex items-center gap-1 text-caption font-body-strong text-outline bg-surface-container-highest border border-outline-variant px-space-sm py-0.5 rounded-full">
+<span class="w-1.5 h-1.5 rounded-full bg-outline"></span>
+              ● Eliminar / Descartable
+            </span>
+<span class="text-caption font-body text-secondary bg-surface-container-highest border border-secondary/30 px-space-sm py-0.5 rounded-full">
+              Personal
+            </span>
+<span class="inline-flex items-center gap-1 text-caption font-body text-secondary bg-surface-container-highest border border-secondary/30 px-space-sm py-0.5 rounded-full">
+<span class="material-symbols-outlined text-[14px]" data-icon="check_circle">check_circle</span>
+              ✓ Activa
+            </span>
+</div>
+<h2 class="text-heading font-heading text-on-surface font-semibold tracking-tight">Limpieza de suscripciones y carpetas de descargas</h2>
+<div class="flex flex-wrap items-center gap-x-space-lg gap-y-space-xs text-caption font-caption text-on-surface-variant">
+<span class="inline-flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px] text-outline" data-icon="sync">sync</span>
+              Día 31 de cada mes (o el último)
+            </span>
+<span class="inline-flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px] text-outline" data-icon="calendar_today">calendar_today</span>
+              Próxima: dom 30 nov
+            </span>
+<span class="inline-flex items-center gap-1 text-outline">
+<span class="material-symbols-outlined text-[16px]" data-icon="folder_delete">folder_delete</span>
+              Mantenimiento
+            </span>
+</div>
+</div>
+<!-- Task Actions -->
+<div class="flex items-center gap-space-xs shrink-0 self-end xl:self-center">
+<button class="inline-flex items-center gap-space-xs text-caption font-body px-space-md py-1.5 rounded-DEFAULT bg-surface-container-highest text-on-surface hover:bg-surface-bright transition-colors border border-outline-variant active:scale-95" type="button">
+<span class="material-symbols-outlined text-[16px]" data-icon="edit">edit</span>
+<span>Editar</span>
+</button>
+<button class="inline-flex items-center gap-space-xs text-caption font-body px-space-md py-1.5 rounded-DEFAULT bg-surface-container-highest text-on-surface hover:bg-surface-bright transition-colors border border-outline-variant active:scale-95" type="button">
+<span class="material-symbols-outlined text-[16px]" data-icon="pause">pause</span>
+<span>⏸ Pausar</span>
+</button>
+<button class="inline-flex items-center gap-space-xs text-caption font-body px-space-md py-1.5 rounded-DEFAULT text-error hover:bg-error-container/20 transition-colors border border-outline-variant hover:border-error/40 active:scale-95" type="button">
+<span class="material-symbols-outlined text-[16px]" data-icon="delete">delete</span>
+<span>Eliminar</span>
+</button>
+</div>
+</article>
+<!-- TASK 5: Hacer ahora (Red) - Terminada -->
+<article class="bg-surface-container/70 hover:bg-surface-container-high transition-colors duration-150 border border-outline-variant rounded-DEFAULT border-l-4 border-l-error/60 p-space-lg shadow-sm flex flex-col xl:flex-row xl:items-center justify-between gap-space-md opacity-85">
+<div class="flex flex-col gap-space-xs max-w-2xl">
+<div class="flex flex-wrap items-center gap-space-sm">
+<span class="inline-flex items-center gap-1 text-caption font-body-strong text-error/80 bg-error-container/10 border border-error/20 px-space-sm py-0.5 rounded-full">
+<span class="w-1.5 h-1.5 rounded-full bg-error/80"></span>
+              ● Hacer ahora
+            </span>
+<span class="text-caption font-body text-tertiary/80 bg-surface-container-highest border border-tertiary/20 px-space-sm py-0.5 rounded-full">
+              Laboral
+            </span>
+<span class="inline-flex items-center gap-1 text-caption font-body text-outline bg-surface-container-highest border border-outline/30 px-space-sm py-0.5 rounded-full">
+<span class="material-symbols-outlined text-[14px]" data-icon="task_alt">task_alt</span>
+              ✓ Terminada
+            </span>
+</div>
+<h2 class="text-heading font-heading text-on-surface/90 font-semibold tracking-tight">Auditoría fiscal extraordinaria Q3</h2>
+<div class="flex flex-wrap items-center gap-x-space-lg gap-y-space-xs text-caption font-caption text-on-surface-variant">
+<span class="inline-flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px] text-outline" data-icon="event">event</span>
+              Una vez · 5 nov
+            </span>
+<span class="inline-flex items-center gap-1 text-outline">
+<span class="material-symbols-outlined text-[16px]" data-icon="history">history</span>
+              Ciclo completado con éxito
+            </span>
+</div>
+</div>
+<!-- Task Actions -->
+<div class="flex items-center gap-space-xs shrink-0 self-end xl:self-center">
+<button class="inline-flex items-center gap-space-xs text-caption font-body px-space-md py-1.5 rounded-DEFAULT bg-surface-container-highest text-on-surface hover:bg-surface-bright transition-colors border border-outline-variant active:scale-95" type="button">
+<span class="material-symbols-outlined text-[16px]" data-icon="restart_alt">restart_alt</span>
+<span>Reactivar</span>
+</button>
+<button class="inline-flex items-center gap-space-xs text-caption font-body px-space-md py-1.5 rounded-DEFAULT text-error hover:bg-error-container/20 transition-colors border border-outline-variant hover:border-error/40 active:scale-95" type="button">
+<span class="material-symbols-outlined text-[16px]" data-icon="delete">delete</span>
+<span>Eliminar</span>
+</button>
+</div>
+</article>
+</div>
+<!-- PAGINATION & FOOTER METRICS -->
+<div class="flex flex-col sm:flex-row items-center justify-between gap-space-md pt-space-lg border-t border-outline-variant mt-space-sm">
+<span class="text-caption font-caption text-on-surface-variant">
+        Mostrando 5 de 12 tareas programadas
+      </span>
+<div class="flex items-center gap-space-xs">
+<button class="px-space-md py-1.5 rounded-DEFAULT bg-surface-container-low text-outline border border-outline-variant cursor-not-allowed text-caption font-body" disabled="" type="button">
+          Anterior
+        </button>
+<button class="px-space-md py-1.5 rounded-DEFAULT bg-surface-container-highest text-on-surface border border-outline-variant hover:bg-surface-bright transition-colors text-caption font-body-strong active:scale-95" type="button">
+          Siguiente
+        </button>
+</div>
+</div>
+</main>
+<!-- DISCREET FOOTER -->
+<footer class="w-full bg-surface-container-lowest border-t border-outline-variant py-space-lg mt-space-2xl">
+<div class="max-w-[1440px] mx-auto px-margin flex flex-col md:flex-row items-center justify-between gap-space-md text-caption font-caption text-on-surface-variant">
+<p class="text-center md:text-left">
+        InsertTasks · Enfoque estructurado con la matriz de Dwight D. Eisenhower y micro-recompensas arcade.
+      </p>
+<div class="flex items-center gap-space-lg">
+<a class="hover:text-primary transition-colors" href="#">Privacidad</a>
+<a class="hover:text-primary transition-colors" href="#">Términos</a>
+<a class="hover:text-primary transition-colors" href="#">Ayuda</a>
+</div>
+</div>
+</footer>
+</body></html>

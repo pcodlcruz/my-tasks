@@ -99,16 +99,16 @@ modifican ni se borran**: cada cambio es una versión nueva (FR-036).
 > móvil oscura, se acepta como **solo color**. Si una pantalla falla tras los reintentos, se avisa en
 > el punto de control en lugar de bloquear la fase.
 
-- [ ] T001 Comprobar el acceso al proyecto Stitch «MyTasks» con `mcp__stitch__get_project` y `mcp__stitch__list_screens`, leer `docs/design/DESIGN.md` y `docs/design/screens/README.md`, y anotar en `docs/design/screens/README.md` una sección «Feature 007 · pantallas nuevas y versiones» con los identificadores de las bases vigentes (S3 v2, S3 compacta, S4 v2 y S7, en claro y oscuro y en escritorio y móvil)
-- [ ] T002 Añadir a `docs/design/DESIGN.md` una sección «Estética arcade»:
+- [X] T001 Comprobar el acceso al proyecto Stitch «MyTasks» con `mcp__stitch__get_project` y `mcp__stitch__list_screens`, leer `docs/design/DESIGN.md` y `docs/design/screens/README.md`, y anotar en `docs/design/screens/README.md` una sección «Feature 007 · pantallas nuevas y versiones» con los identificadores de las bases vigentes (S3 v2, S3 compacta, S4 v2 y S7, en claro y oscuro y en escritorio y móvil) *Hecho: bases vigentes en `docs/design/screens/README.md` § Feature 007.*
+- [X] T002 Añadir a `docs/design/DESIGN.md` una sección «Estética arcade»:
   - tipografía «Press Start 2P», solo para cifras y rótulos cortos;
   - tokens nuevos en claro y oscuro: barra de energía (segmento lleno, vacío y extra), oro de logros y racha en juego, con los mismos nombres semánticos que `frontend/tailwind.config.ts`;
   - patrón de celebración no modal y su versión con movimiento reducido;
   - regla de no comunicar estados solo por color.
 
   Después, ampliar `docs/design/check-contrast.py` con los pares nuevos y pegar su salida en `DESIGN.md`, con 0 pares por debajo de AA.
-- [ ] T003 Añadir los tokens arcade al *design system* de Stitch sin tocar los aprobados (como *asset* aparte si `update_design_system` cambiaría el modo de color, igual que T003 de la feature 004) y anotar el identificador en `docs/design/screens/README.md`
-- [ ] T004 Generar **S3 v3 · Tablero** claro en escritorio y móvil a partir de S3 v2, según `contracts/ui-screens.md`:
+- [X] T003 Añadir los tokens arcade al *design system* de Stitch sin tocar los aprobados (como *asset* aparte si `update_design_system` cambiaría el modo de color, igual que T003 de la feature 004) y anotar el identificador en `docs/design/screens/README.md` *Hecho sin tocar los sistemas: los tokens arcade van en cada prompt (Stitch admite un solo modo de color por sistema y `update_design_system` recalcula `namedColors`); ver README § Design systems (T003).*
+- [X] T004 Generar **S3 v3 · Tablero** claro en escritorio y móvil a partir de S3 v2, según `contracts/ui-screens.md`:
   - marcador «HOY 2/3» con barra de energía, racha con «en juego», y puntuación y nivel;
   - botón para reabrir el inicio de jornada;
   - marcas de misión y de programada, y «pendiente desde»;
@@ -117,26 +117,36 @@ modifican ni se borran**: cada cambio es una versión nueva (FR-036).
   - cabecera con «Tablero · Progreso · Programadas · Historial · Papelera» que cabe a 320 px con «Accesos».
 
   Registrar los identificadores en `docs/design/screens/README.md`.
-- [ ] T005 Generar **S8 · Inicio de jornada («PULSA START»)** claro en escritorio y móvil: resultado del último día activo, racha, meta de hoy, «Hacer ahora», programadas de hoy, selector de misión (hasta 5), botón «Empezar», estado sin tareas y estado «PARTIDA NUEVA»
-- [ ] T006 Generar **S7 v2 · Perfil** claro en escritorio y móvil con la sección «Progreso y juego»: meta 1–20, días activos (7 casillas, al menos uno), zona horaria con «Detectada: … · Usar esta», interruptores del inicio de jornada y del modo arcade, y la nota de que «Restablecer» no cambia esta sección
-- [ ] T007 Generar las versiones **oscuras** de S3 v3, S8 y S7 v2 (escritorio y móvil) con los tokens de T002–T003
-- [ ] T008 Generar **S10 · Tareas programadas** y **S11 · Formulario de programación** en claro y oscuro y en escritorio y móvil:
+- [X] T005 Generar **S8 · Inicio de jornada («PULSA START»)** claro en escritorio y móvil: resultado del último día activo, racha, meta de hoy, «Hacer ahora», programadas de hoy, selector de misión (hasta 5), botón «Empezar», estado sin tareas y estado «PARTIDA NUEVA»
+- [X] T006 Generar **S7 v2 · Perfil** claro en escritorio y móvil con la sección «Progreso y juego»: meta 1–20, días activos (7 casillas, al menos uno), zona horaria con «Detectada: … · Usar esta», interruptores del inicio de jornada y del modo arcade, y la nota de que «Restablecer» no cambia esta sección
+- [X] T007 Generar las versiones **oscuras** de S3 v3, S8 y S7 v2 (escritorio y móvil) con los tokens de T002–T003
+- [X] T008 Generar **S10 · Tareas programadas** y **S11 · Formulario de programación** en claro y oscuro y en escritorio y móvil:
   - S10: lista con repetición en lenguaje natural, estado y próxima aparición; acciones de editar, pausar o reanudar y eliminar, con la confirmación que aclara que las tareas generadas se quedan; estado vacío; aviso al llegar a 50;
   - S11: los campos de S4 v2 más «Repetición» (fecha única, diaria, días de la semana o día del mes) con «Próxima aparición: …» y errores en línea.
-- [ ] T009 Generar **S9 · Progreso** en claro y oscuro y en escritorio y móvil:
+- [X] T009 Generar **S9 · Progreso** en claro y oscuro y en escritorio y móvil:
   - calendario de 12 semanas con leyenda (meta cumplida, no activo, futuro y hoy, distinguibles sin color);
   - detalle del día;
   - estadísticas;
   - sala de trofeos con 12 logros, conseguidos con su fecha y bloqueados con su condición;
   - estado vacío del primer día.
-- [ ] T010 Generar **S3-c · Celebración** sobre S3 v3 (claro y oscuro): «¡FASE SUPERADA! +500», «¡MISIÓN CUMPLIDA! +300», «¡SUBES DE NIVEL! Nivel 3 · Jugador», «Logro: Primera moneda» y «¡NUEVO RÉCORD!», más su versión estática para movimiento reducido. Añadir también la variante de S3 v3 **sin modo arcade** (sin puntuación ni nivel)
-- [ ] T011 Exportar el HTML y la captura PNG de cada pantalla generada (T004–T010) a `docs/design/screens/<id>/` (`desktop.html`, `desktop.png`, `mobile.html` y `mobile.png`, como las existentes) y marcarlas como **pendientes de aprobación** en la tabla de `docs/design/screens/README.md`
-- [ ] T012 (propietario) **Punto de control humano**: revisar en Stitch y en `docs/design/screens/` las pantallas de T004–T010 y la salida de `check-contrast.py`, y aprobar o pedir cambios. Si pide cambios, se repite el paso afectado. Si el propietario lo decide, se puede aprobar en dos rondas:
+- [X] T010 Generar **S3-c · Celebración** sobre S3 v3 (claro y oscuro): «¡FASE SUPERADA! +500», «¡MISIÓN CUMPLIDA! +300», «¡SUBES DE NIVEL! Nivel 3 · Jugador», «Logro: Primera moneda» y «¡NUEVO RÉCORD!», más su versión estática para movimiento reducido. Añadir también la variante de S3 v3 **sin modo arcade** (sin puntuación ni nivel)
+- [x] T011 *(2026-10-31: exportadas por el propietario con `docs/design/export-stitch.py` y su propio token; ver `docs/design/screens/README.md`)* Exportar el HTML y la captura PNG de cada pantalla generada (T004–T010) a `docs/design/screens/<id>/` (`desktop.html`, `desktop.png`, `mobile.html` y `mobile.png`, como las existentes) y marcarlas como **pendientes de aprobación** en la tabla de `docs/design/screens/README.md`
+- [x] T012 (propietario) *(2026-10-31: las 24 aprobadas en una sola ronda; S3 v3 claro móvil usa la maquetación de S3 v2 móvil)* **Punto de control humano**: revisar en Stitch y en `docs/design/screens/` las pantallas de T004–T010 y la salida de `check-contrast.py`, y aprobar o pedir cambios. Si pide cambios, se repite el paso afectado. Si el propietario lo decide, se puede aprobar en dos rondas:
   - **ronda 1**, antes de la Fase 3: S3 v3, S7 v2 y la cabecera;
   - **ronda 2**, antes de cada fase que la use: S8 antes de la Fase 4, S3-c antes de la 5, S10 y S11 antes de la 6, y S9 antes de la 7.
-- [ ] T013 Registrar las aprobaciones en `docs/design/screens/README.md` (identificador de Stitch, fecha y **pantalla vigente** de cada una; las aprobadas anteriores siguen intactas) y marcar el avance de esta fase en este fichero
+- [x] T013 Registrar las aprobaciones en `docs/design/screens/README.md` (identificador de Stitch, fecha y **pantalla vigente** de cada una; las aprobadas anteriores siguen intactas) y marcar el avance de esta fase en este fichero
 
 **Checkpoint**: diseños aprobados (o la ronda 1) y registrados. La Fase 2 no depende del diseño.
+
+**Avance (2026-10-31)**:
+- **Hecho (T001–T010)**: tokens arcade con 0 pares por debajo de AA, y las 24 pantallas
+  generadas en Stitch, con sus identificadores en `docs/design/screens/README.md`.
+- **Hecho (T011–T013)**: el propietario aprobó las 24 pantallas en una sola ronda; HTML y PNG
+  exportados a `docs/design/screens/` con `docs/design/export-stitch.py`, ejecutado por el
+  propietario con su token.
+- **S3 v3 claro móvil** salió como lienzo de escritorio: la maquetación móvil vigente es la de
+  S3 v2 móvil, por decisión del propietario.
+- **Fase 1 terminada.**
 
 ---
 

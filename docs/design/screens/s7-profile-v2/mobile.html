@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+
+<html class="h-full bg-background" lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+<title>Perfil - InsertTasks</title>
+<!-- Inter Google Font -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS CDN -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Tailwind Configuration -->
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "on-secondary": "#ffffff",
+            "inverse-primary": "#b7c4ff",
+            "secondary": "#006a61",
+            "primary-container": "#1d4ed8",
+            "on-secondary-container": "#006f66",
+            "primary-fixed": "#dce1ff",
+            "scope-work": "#7C3AED",
+            "delegate": "#B45309",
+            "surface-container-lowest": "#ffffff",
+            "secondary-fixed": "#89f5e7",
+            "on-error": "#ffffff",
+            "on-primary-container": "#cad3ff",
+            "success": "#15803D",
+            "background": "#faf8ff",
+            "do-now": "#B91C1C",
+            "on-surface-variant": "#434655",
+            "on-error-container": "#93000a",
+            "surface-container-low": "#f3f2fe",
+            "surface-variant": "#e2e1ed",
+            "primary": "#0037b0",
+            "text-muted": "#475569",
+            "border": "#CBD5E1",
+            "outline-variant": "#c4c5d7",
+            "on-tertiary-fixed-variant": "#832700",
+            "surface-tint": "#2151da",
+            "on-tertiary-fixed": "#390c00",
+            "inverse-on-surface": "#f0f0fb",
+            "surface-dim": "#d9d9e5",
+            "on-tertiary": "#ffffff",
+            "on-surface": "#1a1b23",
+            "outline": "#747686",
+            "error-container": "#ffdad6",
+            "secondary-container": "#86f2e4",
+            "inverse-surface": "#2e3039",
+            "error": "#B91C1C",
+            "scope-personal": "#0D9488",
+            "surface-container-highest": "#e2e1ed",
+            "primary-fixed-dim": "#b7c4ff",
+            "on-secondary-fixed-variant": "#005049",
+            "tertiary": "#7f2500",
+            "on-secondary-fixed": "#00201d",
+            "on-primary": "#ffffff",
+            "surface": "#FFFFFF",
+            "on-primary-fixed": "#001551",
+            "text": "#0F172A",
+            "tertiary-fixed": "#ffdbcf",
+            "tertiary-container": "#a73400",
+            "on-primary-fixed-variant": "#0039b5",
+            "secondary-fixed-dim": "#6bd8cb",
+            "on-background": "#1a1b23",
+            "surface-container": "#ededf9",
+            "on-tertiary-container": "#ffc9b7",
+            "eliminate": "#475569",
+            "surface-alt": "#F8FAFC",
+            "surface-container-high": "#e8e7f3",
+            "surface-bright": "#faf8ff",
+            "tertiary-fixed-dim": "#ffb59c",
+            "schedule": "#1D4ED8"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.125rem",
+            "lg": "0.25rem",
+            "xl": "0.5rem",
+            "full": "0.75rem"
+          },
+          "spacing": {
+            "gutter": "24px",
+            "space-sm": "8px",
+            "space-lg": "16px",
+            "space-md": "12px",
+            "space-xs": "4px",
+            "margin": "24px",
+            "space-xl": "32px",
+            "space-2xl": "48px"
+          },
+          "fontFamily": {
+            "display": ["Inter"],
+            "heading": ["Inter"],
+            "body-strong": ["Inter"],
+            "body": ["Inter"],
+            "caption": ["Inter"]
+          },
+          "fontSize": {
+            "display": ["28px", { "lineHeight": "36px", "fontWeight": "700" }],
+            "heading": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+            "body-strong": ["16px", { "lineHeight": "24px", "fontWeight": "600" }],
+            "body": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+            "caption": ["13px", { "lineHeight": "18px", "fontWeight": "400" }]
+          }
+        },
+      },
+    }
+  </script>
+<style>
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+    .tap-highlight-transparent {
+      -webkit-tap-highlight-color: transparent;
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-text min-h-screen flex justify-center items-start antialiased font-body">
+<!-- Mobile Screen Container (Strict 390px Max Viewport Simulation) -->
+<main class="w-full max-w-[390px] min-h-screen bg-background border-x border-border/60 flex flex-col relative shadow-xl overflow-x-hidden pb-12">
+<!-- Top App Bar (Shared Component Anchor Execution) -->
+<header class="fixed top-0 left-0 right-0 max-w-[390px] mx-auto w-full z-50 flex justify-between items-center px-4 h-14 bg-surface shadow-sm border-b border-border/80">
+<!-- Brand Cluster -->
+<div class="flex items-center gap-2">
+<div class="w-8 h-8 rounded-lg bg-gradient-to-tr from-primary to-schedule flex items-center justify-center text-on-primary shadow-sm">
+<span class="material-symbols-outlined text-[20px]" data-icon="sports_esports" data-weight="fill">sports_esports</span>
+</div>
+<div class="flex items-baseline gap-1.5">
+<span class="font-display text-[19px] tracking-tight font-bold text-primary">InsertTasks</span>
+<span class="font-caption text-[10px] font-bold px-1.5 py-0.5 rounded bg-surface-container-high text-primary uppercase tracking-wider">v2.0</span>
+</div>
+</div>
+<!-- User & Session Controls -->
+<div class="flex items-center gap-2">
+<div aria-label="Avatar de Ana Cruz" class="w-8 h-8 rounded-full bg-primary-fixed text-primary font-body-strong text-caption flex items-center justify-center border border-primary/20 shadow-sm">
+          AC
+        </div>
+<button aria-label="Cerrar sesión" class="min-w-[44px] min-h-[44px] flex items-center justify-center text-text-muted hover:text-error active:scale-95 transition-all" title="Cerrar sesión" type="button">
+<span class="material-symbols-outlined text-[22px]" data-icon="logout">logout</span>
+</button>
+</div>
+</header>
+<!-- Sub-navigation: Horizontal Scrollable Tabs -->
+<nav aria-label="Navegación secundaria" class="sticky top-14 left-0 w-full z-40 bg-surface border-b border-border shadow-xs">
+<div class="flex items-center gap-1 overflow-x-auto no-scrollbar px-3 py-2">
+<a class="whitespace-nowrap px-3.5 py-2 text-caption font-body text-text-muted hover:text-text rounded-full min-h-[40px] flex items-center justify-center active:scale-95 transition-all" href="#tablero">
+          Tablero
+        </a>
+<a class="whitespace-nowrap px-3.5 py-2 text-caption font-body text-text-muted hover:text-text rounded-full min-h-[40px] flex items-center justify-center active:scale-95 transition-all" href="#progreso">
+          Progreso
+        </a>
+<a class="whitespace-nowrap px-3.5 py-2 text-caption font-body text-text-muted hover:text-text rounded-full min-h-[40px] flex items-center justify-center active:scale-95 transition-all" href="#programadas">
+          Programadas
+        </a>
+<a class="whitespace-nowrap px-3.5 py-2 text-caption font-body text-text-muted hover:text-text rounded-full min-h-[40px] flex items-center justify-center active:scale-95 transition-all" href="#historial">
+          Historial
+        </a>
+<a class="whitespace-nowrap px-3.5 py-2 text-caption font-body text-text-muted hover:text-text rounded-full min-h-[40px] flex items-center justify-center active:scale-95 transition-all" href="#papelera">
+          Papelera
+        </a>
+<!-- Active Tab: Perfil -->
+<a aria-current="page" class="whitespace-nowrap px-4 py-2 text-caption font-body-strong text-on-primary bg-primary rounded-full shadow-sm min-h-[40px] flex items-center justify-center active:scale-95 transition-all" href="#perfil">
+          Perfil
+        </a>
+</div>
+</nav>
+<!-- Page Content Container -->
+<div class="px-4 pt-5 space-y-4">
+<!-- Page Headline -->
+<section class="space-y-1">
+<h1 class="font-display text-[26px] leading-[32px] font-bold text-text tracking-tight">Perfil</h1>
+<p class="font-body text-caption text-text-muted leading-relaxed">
+          Gestiona tu identidad, preferencias de visualización, hábitos de productividad y configuración del tablero.
+        </p>
+</section>
+<!-- 1. Tarjeta «Identidad» -->
+<section class="bg-surface rounded-xl p-4 border border-border shadow-sm space-y-4">
+<!-- Section Header -->
+<div class="flex items-center gap-2 pb-2 border-b border-surface-container">
+<div class="w-8 h-8 rounded-lg bg-surface-container-high flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[20px]" data-icon="badge">badge</span>
+</div>
+<h2 class="font-heading text-heading text-text">Identidad</h2>
+</div>
+<!-- Avatar Controls Row -->
+<div class="flex items-center gap-3 pt-1">
+<div class="w-16 h-16 rounded-full bg-primary text-on-primary font-display text-[22px] flex items-center justify-center font-bold shadow-md shrink-0 ring-4 ring-primary-fixed/40">
+            AC
+          </div>
+<div class="flex flex-col gap-2 w-full">
+<button class="min-h-[44px] w-full px-3 py-2 bg-surface-alt hover:bg-surface-container border border-border rounded-lg text-caption font-body-strong text-text flex items-center justify-center gap-1.5 active:scale-95 transition-all" type="button">
+<span class="material-symbols-outlined text-[18px] text-primary" data-icon="photo_camera">photo_camera</span>
+<span>Elegir avatar</span>
+</button>
+<button class="min-h-[44px] w-full px-3 py-2 bg-surface hover:bg-error-container/40 border border-error/30 rounded-lg text-caption font-body-strong text-error flex items-center justify-center gap-1.5 active:scale-95 transition-all" type="button">
+<span class="material-symbols-outlined text-[18px] text-error" data-icon="delete">delete</span>
+<span>Quitar avatar</span>
+</button>
+</div>
+</div>
+<!-- Campo Nombre para mostrar -->
+<div class="space-y-1.5">
+<div class="flex justify-between items-center">
+<label class="font-body-strong text-caption text-text" for="display-name">Nombre para mostrar</label>
+<span class="font-caption text-[11px] text-text-muted">8/50</span>
+</div>
+<input class="w-full min-h-[44px] px-3.5 rounded-lg border border-border text-body text-text focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all bg-surface" id="display-name" maxlength="50" type="text" value="Ana Cruz"/>
+</div>
+<!-- Botones de Acción Nombre -->
+<div class="grid grid-cols-2 gap-2 pt-1">
+<button class="min-h-[44px] px-4 rounded-lg bg-primary hover:bg-primary-container text-on-primary font-body-strong text-caption flex items-center justify-center shadow-sm active:scale-95 transition-all" type="button">
+            Guardar
+          </button>
+<button class="min-h-[44px] px-3 rounded-lg bg-surface border border-border text-text hover:bg-surface-alt font-body-strong text-caption flex items-center justify-center gap-1.5 active:scale-95 transition-all" type="button">
+<span class="material-symbols-outlined text-[18px] text-primary" data-icon="account_circle">account_circle</span>
+<span class="truncate">Usar el de Google</span>
+</button>
+</div>
+<!-- Campo Correo (No editable) -->
+<div class="space-y-1.5 pt-1">
+<label class="font-body-strong text-caption text-text-muted flex items-center gap-1" for="user-email">
+<span>Correo (no editable)</span>
+<span class="material-symbols-outlined text-[14px]" data-icon="lock">lock</span>
+</label>
+<input class="w-full min-h-[44px] px-3.5 rounded-lg border border-border bg-surface-container text-text-muted text-body cursor-not-allowed select-none" disabled="" id="user-email" type="email" value="ana@example.com"/>
+</div>
+</section>
+<!-- 2. Tarjeta «Apariencia» -->
+<section class="bg-surface rounded-xl p-4 border border-border shadow-sm space-y-4">
+<!-- Section Header with Saved Badge -->
+<div class="flex items-center justify-between pb-2 border-b border-surface-container">
+<div class="flex items-center gap-2">
+<div class="w-8 h-8 rounded-lg bg-surface-container-high flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[20px]" data-icon="palette">palette</span>
+</div>
+<h2 class="font-heading text-heading text-text">Apariencia</h2>
+</div>
+<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-success/10 text-success text-[12px] font-body-strong border border-success/20">
+<span class="material-symbols-outlined text-[14px]" data-icon="check">check</span>
+<span>Guardado</span>
+</span>
+</div>
+<!-- Selector Tema Visual -->
+<div class="space-y-2">
+<span class="font-body-strong text-caption text-text block">Tema visual</span>
+<div class="grid grid-cols-3 gap-2">
+<!-- Claro -->
+<button class="min-h-[44px] p-2 rounded-lg border border-border bg-surface hover:bg-surface-alt flex flex-col items-center justify-center gap-1 text-text active:scale-95 transition-all" type="button">
+<span class="material-symbols-outlined text-[20px] text-text-muted" data-icon="light_mode">light_mode</span>
+<span class="font-caption text-[12px]">Claro</span>
+</button>
+<!-- Oscuro -->
+<button class="min-h-[44px] p-2 rounded-lg border border-border bg-surface hover:bg-surface-alt flex flex-col items-center justify-center gap-1 text-text active:scale-95 transition-all" type="button">
+<span class="material-symbols-outlined text-[20px] text-text-muted" data-icon="dark_mode">dark_mode</span>
+<span class="font-caption text-[12px]">Oscuro</span>
+</button>
+<!-- Sistema (Seleccionado) -->
+<button class="min-h-[44px] p-2 rounded-lg border-2 border-primary bg-primary/5 flex flex-col items-center justify-center gap-1 text-primary relative active:scale-95 transition-all" type="button">
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[18px]" data-icon="devices">devices</span>
+<span class="material-symbols-outlined text-[14px] text-primary" data-icon="check_circle" data-weight="fill">check_circle</span>
+</div>
+<span class="font-body-strong text-[12px]">Sistema</span>
+</button>
+</div>
+</div>
+<!-- Selector Densidad del Tablero -->
+<div class="space-y-2">
+<span class="font-body-strong text-caption text-text block">Densidad del tablero</span>
+<div class="grid grid-cols-2 gap-2.5">
+<!-- Cómoda (Seleccionada) -->
+<div class="border-2 border-primary bg-primary/5 rounded-lg p-2.5 flex flex-col gap-2 min-h-[96px] cursor-pointer">
+<div class="flex items-center justify-between">
+<span class="font-body-strong text-caption text-primary">Cómoda</span>
+<span class="material-symbols-outlined text-[16px] text-primary" data-icon="radio_button_checked">radio_button_checked</span>
+</div>
+<!-- Mini Esquema Tarjeta Cómoda -->
+<div class="w-full bg-surface border border-primary/30 rounded p-1.5 shadow-xs space-y-1.5">
+<div class="h-2 w-3/4 bg-primary/20 rounded"></div>
+<div class="h-1.5 w-1/2 bg-text-muted/20 rounded"></div>
+<div class="flex gap-1 pt-0.5">
+<div class="h-2 w-5 bg-schedule/20 rounded"></div>
+<div class="h-2 w-5 bg-scope-personal/20 rounded"></div>
+</div>
+</div>
+</div>
+<!-- Compacta -->
+<div class="border border-border bg-surface hover:bg-surface-alt rounded-lg p-2.5 flex flex-col gap-2 min-h-[96px] cursor-pointer active:scale-95 transition-all">
+<div class="flex items-center justify-between">
+<span class="font-body text-caption text-text-muted">Compacta</span>
+<span class="material-symbols-outlined text-[16px] text-border" data-icon="radio_button_unchecked">radio_button_unchecked</span>
+</div>
+<!-- Mini Esquema Tarjeta Compacta -->
+<div class="w-full bg-surface-alt border border-border rounded p-1.5 space-y-1">
+<div class="h-1.5 w-4/5 bg-text-muted/30 rounded"></div>
+<div class="h-1 w-2/3 bg-text-muted/15 rounded"></div>
+<div class="h-1 w-1/3 bg-text-muted/15 rounded"></div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- 3. Tarjeta «Tablero e historial» -->
+<section class="bg-surface rounded-xl p-4 border border-border shadow-sm space-y-4">
+<!-- Section Header -->
+<div class="flex items-center gap-2 pb-2 border-b border-surface-container">
+<div class="w-8 h-8 rounded-lg bg-surface-container-high flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[20px]" data-icon="tune">tune</span>
+</div>
+<h2 class="font-heading text-heading text-text">Tablero e historial</h2>
+</div>
+<!-- Tablero por defecto al iniciar -->
+<div class="space-y-2">
+<span class="font-body-strong text-caption text-text block">Tablero por defecto al iniciar</span>
+<div class="flex flex-wrap gap-2">
+<!-- Todas (Seleccionado) -->
+<button class="min-h-[44px] px-4 py-2 rounded-lg bg-primary text-on-primary font-body-strong text-caption shadow-xs flex items-center gap-1.5 active:scale-95 transition-all" type="button">
+<span class="material-symbols-outlined text-[16px]" data-icon="check">check</span>
+<span>Todas</span>
+</button>
+<!-- Laboral -->
+<button class="min-h-[44px] px-4 py-2 rounded-lg bg-surface border border-border text-text hover:bg-surface-alt font-body text-caption flex items-center gap-1.5 active:scale-95 transition-all" type="button">
+<span class="w-2.5 h-2.5 rounded-full bg-scope-work"></span>
+<span>Laboral</span>
+</button>
+<!-- Personal -->
+<button class="min-h-[44px] px-4 py-2 rounded-lg bg-surface border border-border text-text hover:bg-surface-alt font-body text-caption flex items-center gap-1.5 active:scale-95 transition-all" type="button">
+<span class="w-2.5 h-2.5 rounded-full bg-scope-personal"></span>
+<span>Personal</span>
+</button>
+</div>
+</div>
+<!-- Orden de las tareas en cada cuadrante -->
+<div class="space-y-2">
+<span class="font-body-strong text-caption text-text block">Orden de las tareas en cada cuadrante</span>
+<div class="space-y-2">
+<!-- Más antiguas primero (Seleccionada) -->
+<label class="flex items-center gap-3 p-3 rounded-lg border-2 border-primary bg-primary/5 min-h-[44px] cursor-pointer">
+<input checked="" class="text-primary focus:ring-primary h-4 w-4" name="order-tasks" type="radio"/>
+<div class="flex flex-col">
+<span class="font-body-strong text-caption text-primary">Más antiguas primero</span>
+<span class="font-caption text-[11px] text-text-muted">Orden cronológico clásico de la matriz</span>
+</div>
+</label>
+<!-- Más recientes primero -->
+<label class="flex items-center gap-3 p-3 rounded-lg border border-border bg-surface hover:bg-surface-alt min-h-[44px] cursor-pointer">
+<input class="text-primary focus:ring-primary h-4 w-4" name="order-tasks" type="radio"/>
+<span class="font-body text-caption text-text">Más recientes primero</span>
+</label>
+</div>
+</div>
+<!-- Rango de tiempo visible en Historial -->
+<div class="space-y-2">
+<span class="font-body-strong text-caption text-text block">Rango de tiempo visible en Historial</span>
+<div class="grid grid-cols-3 gap-1.5">
+<button class="min-h-[44px] px-2 py-2 rounded-lg border border-border bg-surface hover:bg-surface-alt text-caption font-body text-text active:scale-95 transition-all text-center" type="button">
+              Últimos 30 días
+            </button>
+<button class="min-h-[44px] px-2 py-2 rounded-lg border border-border bg-surface hover:bg-surface-alt text-caption font-body text-text active:scale-95 transition-all text-center" type="button">
+              Últimos 90 días
+            </button>
+<!-- Todo (Seleccionado) -->
+<button class="min-h-[44px] px-2 py-2 rounded-lg border-2 border-primary bg-primary/10 text-primary text-caption font-body-strong active:scale-95 transition-all text-center flex items-center justify-center gap-1" type="button">
+<span class="material-symbols-outlined text-[14px]" data-icon="check">check</span>
+<span>Todo</span>
+</button>
+</div>
+</div>
+</section>
+<!-- 4. Tarjeta DESTACADA «Progreso y juego» -->
+<section class="bg-surface rounded-xl p-4 border-2 border-primary/40 shadow-md space-y-5 relative overflow-hidden">
+<!-- Visual Accent Header Ribbon -->
+<div class="absolute -top-10 -right-10 w-28 h-28 bg-primary/10 rounded-full blur-xl pointer-events-none"></div>
+<!-- Section Header with Gamification Pill -->
+<div class="flex items-center justify-between pb-3 border-b border-primary/15 relative">
+<div class="flex items-center gap-2">
+<div class="w-8 h-8 rounded-lg bg-primary text-on-primary flex items-center justify-center shadow-sm">
+<span class="material-symbols-outlined text-[20px]" data-icon="sports_esports" data-weight="fill">sports_esports</span>
+</div>
+<h2 class="font-heading text-heading text-text">Progreso y juego</h2>
+</div>
+<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-primary/10 text-primary text-[11px] font-body-strong tracking-wide border border-primary/20">
+<span class="material-symbols-outlined text-[14px]" data-icon="stars" data-weight="fill">stars</span>
+<span>Gamificación</span>
+</span>
+</div>
+<!-- Control «Meta diaria» con Stepper Táctil -->
+<div class="space-y-2">
+<div>
+<label class="font-body-strong text-caption text-text block">Meta diaria</label>
+<p class="font-caption text-[12px] text-text-muted">Tareas que quieres completar cada día</p>
+</div>
+<div class="flex items-center justify-between bg-surface-alt border border-border rounded-xl p-1.5 shadow-xs">
+<!-- Decrement Button -->
+<button aria-label="Disminuir meta diaria" class="w-12 h-12 rounded-lg bg-surface border border-border text-primary font-bold text-xl flex items-center justify-center hover:bg-surface-container active:scale-90 transition-all shadow-xs" type="button">
+              −
+            </button>
+<!-- Stepper Display -->
+<div class="flex flex-col items-center">
+<span class="font-display text-[20px] font-bold text-primary">3 tareas</span>
+<span class="font-caption text-[11px] text-text-muted">Recomendado Eisenhower</span>
+</div>
+<!-- Increment Button -->
+<button aria-label="Aumentar meta diaria" class="w-12 h-12 rounded-lg bg-surface border border-border text-primary font-bold text-xl flex items-center justify-center hover:bg-surface-container active:scale-90 transition-all shadow-xs" type="button">
+              +
+            </button>
+</div>
+</div>
+<!-- Control «Días activos» con 7 Casillas Táctiles (≥44px) -->
+<div class="space-y-2.5">
+<div>
+<span class="font-body-strong text-caption text-text block">Días activos</span>
+<p class="font-caption text-[12px] text-text-muted">En los días no activos no se rompe la racha. Al menos un día.</p>
+</div>
+<!-- 7 Square Touch Cells in Single Horizontal Row -->
+<div class="grid grid-cols-7 gap-1.5 pt-1">
+<!-- Lunes (Activo) -->
+<button aria-label="Lunes activo" class="h-11 rounded-lg bg-primary text-on-primary font-body-strong text-caption flex flex-col items-center justify-center shadow-xs active:scale-95 transition-all" type="button">
+<span>L</span>
+</button>
+<!-- Martes (Activo) -->
+<button aria-label="Martes activo" class="h-11 rounded-lg bg-primary text-on-primary font-body-strong text-caption flex flex-col items-center justify-center shadow-xs active:scale-95 transition-all" type="button">
+<span>M</span>
+</button>
+<!-- Miércoles (Activo) -->
+<button aria-label="Miércoles activo" class="h-11 rounded-lg bg-primary text-on-primary font-body-strong text-caption flex flex-col items-center justify-center shadow-xs active:scale-95 transition-all" type="button">
+<span>X</span>
+</button>
+<!-- Jueves (Activo) -->
+<button aria-label="Jueves activo" class="h-11 rounded-lg bg-primary text-on-primary font-body-strong text-caption flex flex-col items-center justify-center shadow-xs active:scale-95 transition-all" type="button">
+<span>J</span>
+</button>
+<!-- Viernes (Activo) -->
+<button aria-label="Viernes activo" class="h-11 rounded-lg bg-primary text-on-primary font-body-strong text-caption flex flex-col items-center justify-center shadow-xs active:scale-95 transition-all" type="button">
+<span>V</span>
+</button>
+<!-- Sábado (Activo) -->
+<button aria-label="Sábado activo" class="h-11 rounded-lg bg-primary text-on-primary font-body-strong text-caption flex flex-col items-center justify-center shadow-xs active:scale-95 transition-all" type="button">
+<span>S</span>
+</button>
+<!-- Domingo (Inactivo) -->
+<button aria-label="Domingo inactivo" class="h-11 rounded-lg bg-surface border-2 border-dashed border-border text-text-muted hover:border-text font-body-strong text-caption flex flex-col items-center justify-center active:scale-95 transition-all" type="button">
+<span>D</span>
+</button>
+</div>
+</div>
+<!-- Control «Zona horaria» -->
+<div class="space-y-1.5">
+<label class="font-body-strong text-caption text-text block" for="timezone-select">Zona horaria</label>
+<div class="relative">
+<select class="w-full min-h-[44px] pl-3.5 pr-10 rounded-lg border border-border bg-surface text-body text-text focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary appearance-none" id="timezone-select">
+<option selected="">Europe/Madrid (GMT+1 / GMT+2)</option>
+<option>Atlantic/Canary (GMT+0 / GMT+1)</option>
+<option>America/Mexico_City (GMT-6)</option>
+<option>America/Bogota (GMT-5)</option>
+</select>
+<div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-text-muted">
+<span class="material-symbols-outlined text-[20px]" data-icon="expand_more">expand_more</span>
+</div>
+</div>
+<!-- Device Timezone Hint with Action -->
+<div class="flex items-start gap-1.5 pt-1 px-1">
+<span class="material-symbols-outlined text-[16px] text-text-muted shrink-0 mt-0.5" data-icon="schedule">schedule</span>
+<p class="font-caption text-[11px] text-text-muted leading-tight">
+              Detectada en este dispositivo: <span class="font-body-strong text-text">Atlantic/Canary</span> · 
+              <button class="text-primary hover:underline font-body-strong active:opacity-70 inline-block min-h-[30px]" type="button">Usar esta</button>
+</p>
+</div>
+</div>
+<!-- Interruptor Toggle: Mostrar el inicio de jornada -->
+<div class="flex items-center justify-between gap-3 pt-2 border-t border-surface-container">
+<div class="space-y-0.5">
+<span class="font-body-strong text-caption text-text block">Mostrar el inicio de jornada</span>
+<p class="font-caption text-[12px] text-text-muted">La primera vez que abres la app cada día</p>
+</div>
+<!-- Toggle Switch Táctil (Activo) -->
+<button aria-checked="true" aria-label="Mostrar el inicio de jornada" class="w-12 h-7 bg-primary rounded-full p-0.5 transition-colors relative shrink-0 min-h-[44px] flex items-center justify-end px-1 focus:outline-none focus:ring-2 focus:ring-primary/40" role="switch" type="button">
+<div class="w-6 h-6 bg-surface rounded-full shadow-sm transform transition-transform"></div>
+</button>
+</div>
+<!-- Interruptor Toggle: Modo arcade -->
+<div class="flex items-center justify-between gap-3 pt-2 border-t border-surface-container">
+<div class="space-y-1">
+<div class="flex items-center gap-1.5">
+<span class="font-body-strong text-caption text-text">Modo arcade</span>
+<span class="px-1.5 py-0.5 rounded bg-tertiary-fixed text-tertiary font-body-strong text-[10px] uppercase tracking-wide">Recompensas</span>
+</div>
+<p class="font-caption text-[12px] text-text-muted leading-snug">
+              Puntuación, niveles, logros y celebraciones. Si lo desactivas, sigues viendo tu progreso y tu racha.
+            </p>
+</div>
+<!-- Toggle Switch Táctil (Activo) -->
+<button aria-checked="true" aria-label="Modo arcade" class="w-12 h-7 bg-primary rounded-full p-0.5 transition-colors relative shrink-0 min-h-[44px] flex items-center justify-end px-1 focus:outline-none focus:ring-2 focus:ring-primary/40" role="switch" type="button">
+<div class="w-6 h-6 bg-surface rounded-full shadow-sm transform transition-transform"></div>
+</button>
+</div>
+<!-- Nota al pie de la tarjeta -->
+<div class="flex items-center gap-2 pt-2 text-text-muted border-t border-surface-container">
+<span class="material-symbols-outlined text-[16px] text-text-muted shrink-0" data-icon="info">info</span>
+<p class="font-caption text-[11px] leading-tight italic">
+            «Restablecer valores por defecto» no cambia esta sección.
+          </p>
+</div>
+</section>
+<!-- 5. Bloque «Restablecer valores por defecto» -->
+<section class="bg-surface rounded-xl p-4 border border-border shadow-sm space-y-3">
+<button class="w-full min-h-[44px] px-4 py-2.5 bg-surface-alt hover:bg-surface-container border border-border hover:border-error/40 text-error font-body-strong text-caption rounded-lg flex items-center justify-center gap-2 active:scale-95 transition-all shadow-xs" type="button">
+<span class="material-symbols-outlined text-[18px]" data-icon="restart_alt">restart_alt</span>
+<span>Restablecer valores por defecto</span>
+</button>
+<p class="font-caption text-[12px] text-text-muted leading-relaxed text-center px-1">
+          ¿Deseas restaurar la configuración visual estándar? No cambia tu nombre ni la configuración de progreso y juego.
+        </p>
+</section>
+</div>
+<!-- Pie de página (Global Footer) -->
+<footer class="mt-8 px-5 pt-6 border-t border-border/80 text-center space-y-3 bg-surface/50">
+<div class="flex items-center justify-center gap-4 text-caption font-body text-text-muted">
+<a class="hover:text-primary transition-colors min-h-[44px] flex items-center" href="#privacidad">Privacidad</a>
+<span>•</span>
+<a class="hover:text-primary transition-colors min-h-[44px] flex items-center" href="#terminos">Términos</a>
+<span>•</span>
+<a class="hover:text-primary transition-colors min-h-[44px] flex items-center" href="#ayuda">Ayuda</a>
+</div>
+<p class="font-caption text-[11px] text-text-muted/80 leading-relaxed max-w-[320px] mx-auto pb-4">
+        Copyright 2025 InsertTasks • Enfoque estructurado con la matriz de Dwight D. Eisenhower y micro-recompensas.
+      </p>
+</footer>
+</main>
+<!-- Lightweight Inline Interaction Script for Mobile Ergonomics -->
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // Toggle Switch interactive logic
+      const toggles = document.querySelectorAll('button[role="switch"]');
+      toggles.forEach(toggle => {
+        toggle.addEventListener('click', () => {
+          const isChecked = toggle.getAttribute('aria-checked') === 'true';
+          const nextState = !isChecked;
+          toggle.setAttribute('aria-checked', String(nextState));
+          
+          if (nextState) {
+            toggle.classList.remove('bg-border', 'justify-start');
+            toggle.classList.add('bg-primary', 'justify-end');
+          } else {
+            toggle.classList.remove('bg-primary', 'justify-end');
+            toggle.classList.add('bg-border', 'justify-start');
+          }
+        });
+      });
+
+      // Day buttons interactive logic
+      const dayButtons = document.querySelectorAll('.grid-cols-7 button');
+      dayButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+          const isSelected = btn.classList.contains('bg-primary');
+          if (isSelected) {
+            // Count total selected to ensure at least one remains active
+            const activeCount = document.querySelectorAll('.grid-cols-7 button.bg-primary').length;
+            if (activeCount > 1) {
+              btn.classList.remove('bg-primary', 'text-on-primary', 'shadow-xs');
+              btn.classList.add('bg-surface', 'border-2', 'border-dashed', 'border-border', 'text-text-muted');
+            }
+          } else {
+            btn.classList.remove('bg-surface', 'border-2', 'border-dashed', 'border-border', 'text-text-muted');
+            btn.classList.add('bg-primary', 'text-on-primary', 'shadow-xs');
+          }
+        });
+      });
+    });
+  </script>
+</body></html>

@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>S7 v2 · Perfil - InsertTasks (Móvil Oscuro)</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Press+Start+2P&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              primary: '#60a5fa',
+              'primary-hover': '#3b82f6',
+              surface: '#0f172a',
+              'surface-card': '#1e293b',
+              'surface-card-subtle': '#162032',
+              border: '#334155',
+              'border-subtle': '#253347',
+              text: '#f8fafc',
+              'text-muted': '#94a3b8',
+              accent: '#38bdf8',
+              arcade: '#f59e0b',
+              emerald: '#10b981',
+              rose: '#f43f5e'
+            }
+          },
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            pixel: ['"Press Start 2P"', 'monospace'],
+            mono: ['"JetBrains Mono"', 'monospace']
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    .touch-target {
+      min-height: 44px;
+      min-width: 44px;
+    }
+    /* Custom arcade toggle */
+    .toggle-checkbox:checked {
+      transform: translateX(20px);
+    }
+    .toggle-checkbox:checked + .toggle-label {
+      background-color: #2563eb;
+    }
+  </style>
+</head>
+<body class="bg-[#0b1120] text-slate-100 font-sans min-h-screen antialiased flex justify-center selection:bg-blue-500/30 selection:text-blue-200">
+
+  <!-- Mobile Container (Max 390px / Full Screen View) -->
+  <main class="w-full max-w-[390px] min-h-screen bg-[#0d1527] border-x border-slate-800/80 flex flex-col pb-12 shadow-2xl relative">
+
+    <!-- Top App Bar / Header -->
+    <header class="sticky top-0 z-40 bg-[#0d1527]/95 backdrop-blur-md border-b border-slate-800 px-4 h-14 flex items-center justify-between">
+      <div class="flex items-center gap-2">
+        <div class="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center font-pixel text-[10px] text-white shadow-sm shadow-blue-500/20">
+          IT
+        </div>
+        <div class="flex items-baseline gap-1.5">
+          <span class="font-bold text-base tracking-tight text-white">InsertTasks</span>
+          <span class="font-pixel text-[8px] px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-400 border border-amber-500/30">ARCADE</span>
+        </div>
+      </div>
+      <div class="flex items-center gap-2">
+        <div class="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-xs font-bold text-white ring-2 ring-blue-500/40" title="Perfil de Ana Cruz">
+          AC
+        </div>
+        <button type="button" aria-label="Cerrar sesión" class="touch-target p-2 text-slate-400 hover:text-white rounded-lg transition-colors flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-blue-400">
+          <span class="material-symbols-outlined text-[20px]">logout</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Sub-navigation tabs -->
+    <nav class="flex items-center justify-around border-b border-slate-800 bg-[#0f172a] text-xs font-medium text-slate-400 px-2" aria-label="Navegación de secciones">
+      <a href="#" class="touch-target px-3 py-3 text-slate-400 hover:text-slate-200 flex items-center justify-center transition-colors">Tablero</a>
+      <a href="#" class="touch-target px-3 py-3 text-slate-400 hover:text-slate-200 flex items-center justify-center transition-colors">Progreso</a>
+      <a href="#" class="touch-target px-3 py-3 text-slate-400 hover:text-slate-200 flex items-center justify-center transition-colors">Programadas</a>
+      <a href="#" class="touch-target px-3 py-3 text-blue-400 border-b-2 border-blue-500 font-semibold flex items-center justify-center">Perfil</a>
+    </nav>
+
+    <!-- Content Body -->
+    <div class="p-4 space-y-4">
+      
+      <!-- Page Title & Subtitle -->
+      <div class="pt-1 pb-1">
+        <h1 class="text-xl font-bold tracking-tight text-white flex items-center gap-2">
+          <span>Perfil</span>
+          <span class="text-xs px-2 py-0.5 rounded-full font-mono bg-blue-500/10 text-blue-400 border border-blue-500/20 font-normal">v2.0</span>
+        </h1>
+        <p class="text-xs text-slate-400 mt-1 leading-relaxed">
+          Gestiona tu identidad, preferencias de visualización, hábitos de productividad y configuración del tablero.
+        </p>
+      </div>
+
+      <!-- Card 1: Identidad -->
+      <section class="bg-[#131f37] border border-slate-800/90 rounded-2xl p-4 shadow-sm space-y-4" aria-labelledby="heading-identidad">
+        <div class="flex items-center gap-2 border-b border-slate-800/70 pb-3">
+          <span class="material-symbols-outlined text-blue-400 text-[20px]">badge</span>
+          <h2 id="heading-identidad" class="text-sm font-semibold text-slate-200">Identidad</h2>
+        </div>
+
+        <div class="flex items-center gap-3">
+          <div class="w-16 h-16 rounded-2xl bg-blue-600 flex items-center justify-center text-xl font-bold text-white shadow-inner ring-2 ring-blue-500/30 shrink-0">
+            AC
+          </div>
+          <div class="flex flex-col gap-2 w-full">
+            <button type="button" class="touch-target w-full bg-[#1e2d4a] hover:bg-[#253759] text-blue-300 border border-blue-500/30 rounded-xl px-3 text-xs font-medium flex items-center justify-center gap-1.5 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-400">
+              <span class="material-symbols-outlined text-[18px]">photo_camera</span>
+              <span>Elegir avatar</span>
+            </button>
+            <button type="button" class="touch-target w-full bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 border border-rose-500/30 rounded-xl px-3 text-xs font-medium flex items-center justify-center gap-1.5 transition-colors focus:outline-none focus:ring-2 focus:ring-rose-400">
+              <span class="material-symbols-outlined text-[18px]">delete</span>
+              <span>Quitar avatar</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="space-y-1.5">
+          <div class="flex justify-between items-baseline">
+            <label for="display-name" class="text-xs font-medium text-slate-300">Nombre para mostrar</label>
+            <span class="text-[11px] font-mono text-slate-500">8/50</span>
+          </div>
+          <input id="display-name" type="text" value="Ana Cruz" class="w-full bg-[#0d1627] border border-slate-700/80 rounded-xl px-3 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500" />
+        </div>
+
+        <div class="grid grid-cols-2 gap-2 pt-1">
+          <button type="button" class="touch-target w-full bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-medium flex items-center justify-center transition-colors shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
+            Guardar
+          </button>
+          <button type="button" class="touch-target w-full bg-[#1b2843] hover:bg-[#223354] border border-slate-700/80 text-slate-300 rounded-xl text-xs font-medium flex items-center justify-center gap-1 transition-colors focus:outline-none focus:ring-2 focus:ring-slate-500">
+            <span class="material-symbols-outlined text-[16px]">account_circle</span>
+            <span>Usar de Google</span>
+          </button>
+        </div>
+
+        <div class="space-y-1.5 pt-1">
+          <div class="flex items-center gap-1 text-slate-400 text-xs">
+            <span>Correo (no editable)</span>
+            <span class="material-symbols-outlined text-[14px]">lock</span>
+          </div>
+          <input type="text" readonly value="ana@example.com" class="w-full bg-[#0a1120] border border-slate-800 text-slate-400 rounded-xl px-3 py-2 text-xs cursor-not-allowed select-all" />
+        </div>
+      </section>
+
+      <!-- Card 2: Apariencia -->
+      <section class="bg-[#131f37] border border-slate-800/90 rounded-2xl p-4 shadow-sm space-y-4" aria-labelledby="heading-apariencia">
+        <div class="flex items-center justify-between border-b border-slate-800/70 pb-3">
+          <div class="flex items-center gap-2">
+            <span class="material-symbols-outlined text-blue-400 text-[20px]">palette</span>
+            <h2 id="heading-apariencia" class="text-sm font-semibold text-slate-200">Apariencia</h2>
+          </div>
+          <span class="text-[11px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center gap-1 font-medium">
+            <span class="material-symbols-outlined text-[14px]">check</span> Guardado
+          </span>
+        </div>
+
+        <!-- Tema Visual -->
+        <div class="space-y-2">
+          <span class="text-xs font-medium text-slate-300">Tema visual</span>
+          <div class="grid grid-cols-3 gap-2">
+            <!-- Claro -->
+            <button type="button" class="touch-target p-2 rounded-xl bg-[#0e172a] hover:bg-[#16233d] border border-slate-800 text-slate-400 flex flex-col items-center justify-center gap-1 text-xs transition-colors">
+              <span class="material-symbols-outlined text-[18px]">light_mode</span>
+              <span>Claro</span>
+            </button>
+            <!-- Oscuro (Activo) -->
+            <button type="button" class="touch-target p-2 rounded-xl bg-blue-600/20 border-2 border-blue-500 text-blue-300 flex flex-col items-center justify-center gap-1 text-xs font-medium relative shadow-sm">
+              <span class="material-symbols-outlined text-[18px] text-blue-400">dark_mode</span>
+              <span>Oscuro</span>
+              <span class="material-symbols-outlined text-[12px] absolute top-1 right-1 text-blue-400">check_circle</span>
+            </button>
+            <!-- Sistema -->
+            <button type="button" class="touch-target p-2 rounded-xl bg-[#0e172a] hover:bg-[#16233d] border border-slate-800 text-slate-400 flex flex-col items-center justify-center gap-1 text-xs transition-colors">
+              <span class="material-symbols-outlined text-[18px]">devices</span>
+              <span>Sistema</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Densidad del tablero -->
+        <div class="space-y-2 pt-1">
+          <span class="text-xs font-medium text-slate-300">Densidad del tablero</span>
+          <div class="grid grid-cols-2 gap-2">
+            <label class="touch-target flex flex-col justify-between p-2.5 rounded-xl border-2 border-blue-500 bg-blue-600/15 cursor-pointer">
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-xs font-medium text-blue-200">Cómoda</span>
+                <span class="w-3.5 h-3.5 rounded-full border-2 border-blue-400 bg-blue-500 flex items-center justify-center">
+                  <span class="w-1.5 h-1.5 rounded-full bg-white"></span>
+                </span>
+              </div>
+              <div class="space-y-1 opacity-80">
+                <div class="h-2 w-3/4 bg-blue-400/40 rounded"></div>
+                <div class="h-1.5 w-1/2 bg-blue-400/20 rounded"></div>
+              </div>
+            </label>
+
+            <label class="touch-target flex flex-col justify-between p-2.5 rounded-xl border border-slate-800 bg-[#0e172a] hover:bg-[#16233d] cursor-pointer transition-colors">
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-xs font-medium text-slate-400">Compacta</span>
+                <span class="w-3.5 h-3.5 rounded-full border border-slate-600 bg-transparent"></span>
+              </div>
+              <div class="space-y-1 opacity-50">
+                <div class="h-1.5 w-full bg-slate-500 rounded"></div>
+                <div class="h-1.5 w-4/5 bg-slate-500 rounded"></div>
+              </div>
+            </label>
+          </div>
+        </div>
+      </section>
+
+      <!-- Card 3: Tablero e historial -->
+      <section class="bg-[#131f37] border border-slate-800/90 rounded-2xl p-4 shadow-sm space-y-4" aria-labelledby="heading-tablero">
+        <div class="flex items-center gap-2 border-b border-slate-800/70 pb-3">
+          <span class="material-symbols-outlined text-blue-400 text-[20px]">tune</span>
+          <h2 id="heading-tablero" class="text-sm font-semibold text-slate-200">Tablero e historial</h2>
+        </div>
+
+        <!-- Tablero por defecto -->
+        <div class="space-y-2">
+          <span class="text-xs font-medium text-slate-300">Tablero por defecto al iniciar</span>
+          <div class="flex flex-wrap gap-2">
+            <button type="button" class="touch-target px-3 py-2 rounded-xl bg-blue-600 text-white text-xs font-medium flex items-center gap-1.5 shadow-sm">
+              <span class="material-symbols-outlined text-[14px]">check</span> Todas
+            </button>
+            <button type="button" class="touch-target px-3 py-2 rounded-xl bg-[#0e172a] hover:bg-[#16233d] border border-slate-800 text-slate-300 text-xs font-medium flex items-center gap-1.5 transition-colors">
+              <span class="w-2 h-2 rounded-full bg-purple-400"></span> Laboral
+            </button>
+            <button type="button" class="touch-target px-3 py-2 rounded-xl bg-[#0e172a] hover:bg-[#16233d] border border-slate-800 text-slate-300 text-xs font-medium flex items-center gap-1.5 transition-colors">
+              <span class="w-2 h-2 rounded-full bg-teal-400"></span> Personal
+            </button>
+          </div>
+        </div>
+
+        <!-- Orden de tareas -->
+        <div class="space-y-2 pt-1">
+          <span class="text-xs font-medium text-slate-300">Orden de las tareas en cada cuadrante</span>
+          <div class="space-y-2">
+            <div class="touch-target p-3 rounded-xl border-2 border-blue-500 bg-blue-600/15 flex items-start gap-2.5">
+              <div class="w-4 h-4 rounded-full border-2 border-blue-400 bg-blue-500 flex items-center justify-center shrink-0 mt-0.5">
+                <span class="w-1.5 h-1.5 rounded-full bg-white"></span>
+              </div>
+              <div class="flex-1">
+                <div class="text-xs font-medium text-blue-200">Más antiguas primero</div>
+                <div class="text-[11px] text-slate-400 leading-tight">Orden cronológico clásico de la matriz</div>
+              </div>
+            </div>
+
+            <div class="touch-target p-3 rounded-xl border border-slate-800 bg-[#0e172a] hover:bg-[#16233d] flex items-start gap-2.5 transition-colors cursor-pointer">
+              <div class="w-4 h-4 rounded-full border border-slate-600 bg-transparent shrink-0 mt-0.5"></div>
+              <div class="flex-1">
+                <div class="text-xs font-medium text-slate-300">Más recientes primero</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Rango historial -->
+        <div class="space-y-2 pt-1">
+          <span class="text-xs font-medium text-slate-300">Rango de tiempo visible en Historial</span>
+          <div class="grid grid-cols-3 gap-2">
+            <button type="button" class="touch-target py-2 px-1 text-center rounded-xl bg-[#0e172a] hover:bg-[#16233d] border border-slate-800 text-slate-400 text-xs transition-colors">
+              Últimos 30 días
+            </button>
+            <button type="button" class="touch-target py-2 px-1 text-center rounded-xl bg-[#0e172a] hover:bg-[#16233d] border border-slate-800 text-slate-400 text-xs transition-colors">
+              Últimos 90 días
+            </button>
+            <button type="button" class="touch-target py-2 px-1 text-center rounded-xl bg-blue-600/20 border-2 border-blue-500 text-blue-300 text-xs font-medium flex items-center justify-center gap-1">
+              <span class="material-symbols-outlined text-[14px]">check</span> Todo
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Card 4: Progreso y juego (ESPECIFICACIÓN PRINCIPAL) -->
+      <section class="bg-[#131f37] border-2 border-blue-500/50 rounded-2xl p-4 shadow-lg shadow-blue-950/40 space-y-4 relative overflow-hidden" aria-labelledby="heading-progreso-juego">
+        <!-- Arcade Ambient Glow -->
+        <div class="absolute -top-12 -right-12 w-28 h-28 bg-amber-500/10 rounded-full blur-2xl pointer-events-none"></div>
+
+        <div class="flex items-center justify-between border-b border-slate-800/80 pb-3">
+          <div class="flex items-center gap-2">
+            <span class="material-symbols-outlined text-amber-400 text-[22px]">sports_esports</span>
+            <h2 id="heading-progreso-juego" class="text-sm font-semibold text-slate-100 flex items-center gap-2">
+              <span>Progreso y juego</span>
+            </h2>
+          </div>
+          <span class="text-[10px] px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-300 border border-blue-500/40 flex items-center gap-1 font-pixel">
+            <span class="material-symbols-outlined text-[12px] text-amber-400">emoji_events</span> GAMIFICACIÓN
+          </span>
+        </div>
+
+        <!-- Meta diaria: [-] 3 tareas [+] -->
+        <div class="space-y-1.5">
+          <div class="flex justify-between items-baseline">
+            <label class="text-xs font-medium text-slate-200">Meta diaria</label>
+            <span class="text-[11px] text-slate-400">Tareas que quieres completar cada día</span>
+          </div>
+
+          <div class="flex items-center justify-between bg-[#0b1222] border border-slate-700/80 rounded-xl p-1.5">
+            <button type="button" aria-label="Reducir meta diaria" class="touch-target w-11 h-11 rounded-lg bg-[#18253e] hover:bg-[#203152] active:scale-95 text-blue-400 flex items-center justify-center text-lg font-bold border border-slate-700 transition-all focus:outline-none focus:ring-2 focus:ring-blue-400">
+              <span class="material-symbols-outlined text-[20px]">remove</span>
+            </button>
+
+            <div class="text-center py-1">
+              <div class="text-base font-bold text-white flex items-center justify-center gap-1.5">
+                <span class="font-pixel text-sm text-amber-400">3</span>
+                <span>tareas</span>
+              </div>
+              <div class="text-[10px] text-blue-400/90 font-medium">Recomendado Eisenhower</div>
+            </div>
+
+            <button type="button" aria-label="Aumentar meta diaria" class="touch-target w-11 h-11 rounded-lg bg-[#18253e] hover:bg-[#203152] active:scale-95 text-blue-400 flex items-center justify-center text-lg font-bold border border-slate-700 transition-all focus:outline-none focus:ring-2 focus:ring-blue-400">
+              <span class="material-symbols-outlined text-[20px]">add</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Días activos: L M X J V S D (D desmarcada) en una sola fila -->
+        <div class="space-y-2 pt-1">
+          <div class="flex justify-between items-baseline">
+            <span class="text-xs font-medium text-slate-200">Días activos</span>
+            <span class="text-[11px] text-slate-400">Al menos 1 día</span>
+          </div>
+          <p class="text-[11px] text-slate-400 leading-snug">
+            En los días no activos no se rompe la racha.
+          </p>
+
+          <!-- 7-day row with touch-target >= 44px -->
+          <div class="grid grid-cols-7 gap-1.5 pt-1" role="group" aria-label="Selección de días activos de la semana">
+            <!-- Lunes (Activo) -->
+            <button type="button" aria-pressed="true" aria-label="Lunes activo" class="touch-target h-11 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-semibold text-xs flex items-center justify-center shadow-sm shadow-blue-900/30 transition-all focus:outline-none focus:ring-2 focus:ring-blue-400">
+              L
+            </button>
+            <!-- Martes (Activo) -->
+            <button type="button" aria-pressed="true" aria-label="Martes activo" class="touch-target h-11 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-semibold text-xs flex items-center justify-center shadow-sm shadow-blue-900/30 transition-all focus:outline-none focus:ring-2 focus:ring-blue-400">
+              M
+            </button>
+            <!-- Miércoles (Activo) -->
+            <button type="button" aria-pressed="true" aria-label="Miércoles activo" class="touch-target h-11 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-semibold text-xs flex items-center justify-center shadow-sm shadow-blue-900/30 transition-all focus:outline-none focus:ring-2 focus:ring-blue-400">
+              X
+            </button>
+            <!-- Jueves (Activo) -->
+            <button type="button" aria-pressed="true" aria-label="Jueves activo" class="touch-target h-11 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-semibold text-xs flex items-center justify-center shadow-sm shadow-blue-900/30 transition-all focus:outline-none focus:ring-2 focus:ring-blue-400">
+              J
+            </button>
+            <!-- Viernes (Activo) -->
+            <button type="button" aria-pressed="true" aria-label="Viernes activo" class="touch-target h-11 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-semibold text-xs flex items-center justify-center shadow-sm shadow-blue-900/30 transition-all focus:outline-none focus:ring-2 focus:ring-blue-400">
+              V
+            </button>
+            <!-- Sábado (Activo) -->
+            <button type="button" aria-pressed="true" aria-label="Sábado activo" class="touch-target h-11 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-semibold text-xs flex items-center justify-center shadow-sm shadow-blue-900/30 transition-all focus:outline-none focus:ring-2 focus:ring-blue-400">
+              S
+            </button>
+            <!-- Domingo (DESMARCADO) -->
+            <button type="button" aria-pressed="false" aria-label="Domingo inactivo" class="touch-target h-11 rounded-xl bg-[#0e172a] hover:bg-[#18253e] text-slate-500 border border-dashed border-slate-700 font-semibold text-xs flex items-center justify-center transition-all focus:outline-none focus:ring-2 focus:ring-slate-500">
+              D
+            </button>
+          </div>
+        </div>
+
+        <!-- Zona horaria: Europe/Madrid con Detectada: Atlantic/Canary · Usar esta -->
+        <div class="space-y-1.5 pt-1">
+          <label for="timezone-select" class="text-xs font-medium text-slate-200">Zona horaria</label>
+          <div class="relative">
+            <select id="timezone-select" class="touch-target w-full appearance-none bg-[#0b1222] border border-slate-700/80 rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 pr-9">
+              <option value="Europe/Madrid" selected>Europe/Madrid (GMT+1 / GMT+2)</option>
+              <option value="Atlantic/Canary">Atlantic/Canary (GMT+0 / GMT+1)</option>
+              <option value="Europe/Lisbon">Europe/Lisbon (GMT+0)</option>
+              <option value="UTC">UTC (GMT+0)</option>
+            </select>
+            <span class="material-symbols-outlined absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-[20px]">
+              expand_more
+            </span>
+          </div>
+
+          <div class="flex items-center gap-1.5 text-[11px] text-slate-400 pt-1">
+            <span class="material-symbols-outlined text-[15px] text-blue-400 shrink-0">schedule</span>
+            <span class="truncate">Detectada en este dispositivo: <strong class="text-slate-300 font-normal">Atlantic/Canary</strong></span>
+            <span class="text-slate-600">·</span>
+            <button type="button" class="touch-target px-1 text-blue-400 hover:text-blue-300 underline font-medium shrink-0 flex items-center focus:outline-none focus:ring-1 focus:ring-blue-400 rounded">
+              Usar esta
+            </button>
+          </div>
+        </div>
+
+        <!-- Interruptor 1: Mostrar el inicio de jornada -->
+        <div class="pt-2 border-t border-slate-800/80">
+          <div class="flex items-center justify-between gap-3 min-h-[44px]">
+            <div class="space-y-0.5">
+              <label for="toggle-start-day" class="text-xs font-medium text-slate-200 block cursor-pointer">
+                Mostrar el inicio de jornada
+              </label>
+              <p class="text-[11px] text-slate-400 leading-tight">
+                La primera vez que abres la app cada día
+              </p>
+            </div>
+            <!-- Switch toggle -->
+            <label class="touch-target relative inline-flex items-center cursor-pointer shrink-0">
+              <input type="checkbox" id="toggle-start-day" class="sr-only peer" checked>
+              <div class="w-12 h-6 bg-slate-800 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-blue-400 rounded-full peer peer-checked:after:translate-x-6 peer-checked:after:border-white after:content-[''] after:absolute after:top-[12px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600 shadow-inner"></div>
+            </label>
+          </div>
+        </div>
+
+        <!-- Interruptor 2: Modo arcade -->
+        <div class="pt-2 border-t border-slate-800/80">
+          <div class="flex items-center justify-between gap-3 min-h-[44px]">
+            <div class="space-y-0.5">
+              <div class="flex items-center gap-1.5">
+                <label for="toggle-arcade-mode" class="text-xs font-medium text-slate-200 cursor-pointer">
+                  Modo arcade
+                </label>
+                <span class="font-pixel text-[7px] px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-400 border border-amber-500/30">
+                  RECOMPENSAS
+                </span>
+              </div>
+              <p class="text-[11px] text-slate-400 leading-tight">
+                Puntuación, niveles, logros y celebraciones. Si lo desactivas, sigues viendo tu progreso y tu racha.
+              </p>
+            </div>
+            <!-- Switch toggle -->
+            <label class="touch-target relative inline-flex items-center cursor-pointer shrink-0">
+              <input type="checkbox" id="toggle-arcade-mode" class="sr-only peer" checked>
+              <div class="w-12 h-6 bg-slate-800 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-blue-400 rounded-full peer peer-checked:after:translate-x-6 peer-checked:after:border-white after:content-[''] after:absolute after:top-[12px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600 shadow-inner"></div>
+            </label>
+          </div>
+        </div>
+
+        <!-- Nota informativa sobre «Restablecer valores por defecto» -->
+        <div class="pt-1 flex items-start gap-2 text-[11px] text-slate-400 bg-[#0a1120] border border-slate-800 rounded-xl p-2.5">
+          <span class="material-symbols-outlined text-blue-400 text-[16px] shrink-0 mt-0.5">info</span>
+          <p class="leading-relaxed">
+            «Restablecer valores por defecto» no cambia esta sección.
+          </p>
+        </div>
+      </section>
+
+      <!-- Card 5: Restablecer valores por defecto -->
+      <section class="bg-[#131f37] border border-slate-800/90 rounded-2xl p-4 shadow-sm space-y-3" aria-label="Restablecer configuración">
+        <button type="button" class="touch-target w-full bg-[#1b253b] hover:bg-[#23304c] text-rose-300 border border-rose-500/30 rounded-xl px-4 text-xs font-semibold flex items-center justify-center gap-2 transition-colors focus:outline-none focus:ring-2 focus:ring-rose-400">
+          <span class="material-symbols-outlined text-[18px]">restart_alt</span>
+          <span>Restablecer valores por defecto</span>
+        </button>
+        <p class="text-[11px] text-slate-400 text-center leading-relaxed">
+          ¿Deseas restaurar la configuración visual estándar? No cambia tu nombre ni la configuración de progreso y juego.
+        </p>
+      </section>
+
+      <!-- Footer Info -->
+      <footer class="pt-4 pb-6 text-center space-y-2 border-t border-slate-800/60 mt-6">
+        <div class="flex items-center justify-center gap-3 text-xs text-slate-400">
+          <a href="#" class="touch-target hover:text-slate-200 transition-colors flex items-center">Privacidad</a>
+          <span class="text-slate-600">•</span>
+          <a href="#" class="touch-target hover:text-slate-200 transition-colors flex items-center">Términos</a>
+          <span class="text-slate-600">•</span>
+          <a href="#" class="touch-target hover:text-slate-200 transition-colors flex items-center">Ayuda</a>
+        </div>
+        <p class="text-[10px] text-slate-500 leading-normal px-4">
+          Copyright 2025 InsertTasks • Enfoque estructurado con la matriz de Dwight D. Eisenhower y micro-recompensas.
+        </p>
+      </footer>
+
+    </div>
+
+  </main>
+
+</body>
+</html>

@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+
+<html class="h-full bg-surface-bright" lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>S11 · Nueva programación - InsertTasks</title>
+<!-- Inter Google Font -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS v3 -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "surface-container": "#ededf9",
+            "tertiary-container": "#a73400",
+            "error": "#B91C1C",
+            "surface-bright": "#faf8ff",
+            "primary-fixed": "#dce1ff",
+            "on-primary-container": "#cad3ff",
+            "on-primary": "#ffffff",
+            "on-secondary-fixed-variant": "#005049",
+            "background": "#faf8ff",
+            "outline-variant": "#c4c5d7",
+            "success": "#15803D",
+            "secondary-fixed": "#89f5e7",
+            "do-now": "#B91C1C",
+            "on-tertiary": "#ffffff",
+            "surface-container-highest": "#e2e1ed",
+            "on-primary-fixed": "#001551",
+            "tertiary-fixed": "#ffdbcf",
+            "primary-fixed-dim": "#b7c4ff",
+            "border": "#CBD5E1",
+            "text-muted": "#475569",
+            "surface-container-high": "#e8e7f3",
+            "scope-personal": "#0D9488",
+            "on-tertiary-fixed-variant": "#832700",
+            "inverse-on-surface": "#f0f0fb",
+            "text": "#0F172A",
+            "surface": "#FFFFFF",
+            "on-secondary": "#ffffff",
+            "scope-work": "#7C3AED",
+            "eliminate": "#475569",
+            "tertiary-fixed-dim": "#ffb59c",
+            "error-container": "#ffdad6",
+            "surface-dim": "#d9d9e5",
+            "on-tertiary-fixed": "#390c00",
+            "surface-tint": "#2151da",
+            "schedule": "#1D4ED8",
+            "inverse-primary": "#b7c4ff",
+            "secondary-container": "#86f2e4",
+            "primary": "#0037b0",
+            "inverse-surface": "#2e3039",
+            "tertiary": "#7f2500",
+            "on-error": "#ffffff",
+            "surface-alt": "#F8FAFC",
+            "on-error-container": "#93000a",
+            "secondary": "#006a61",
+            "surface-container-lowest": "#ffffff",
+            "primary-container": "#1d4ed8",
+            "outline": "#747686",
+            "on-primary-fixed-variant": "#0039b5",
+            "on-surface": "#1a1b23",
+            "on-background": "#1a1b23",
+            "secondary-fixed-dim": "#6bd8cb",
+            "on-secondary-container": "#006f66",
+            "delegate": "#B45309",
+            "surface-variant": "#e2e1ed",
+            "on-surface-variant": "#434655",
+            "surface-container-low": "#f3f2fe",
+            "on-tertiary-container": "#ffc9b7",
+            "on-secondary-fixed": "#00201d"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.125rem",
+            "lg": "0.25rem",
+            "xl": "0.5rem",
+            "full": "0.75rem"
+          },
+          "spacing": {
+            "space-sm": "8px",
+            "space-2xl": "48px",
+            "gutter": "24px",
+            "space-xs": "4px",
+            "space-md": "12px",
+            "margin": "24px",
+            "space-lg": "16px",
+            "space-xl": "32px"
+          },
+          "fontFamily": {
+            "body": ["Inter"],
+            "caption": ["Inter"],
+            "heading": ["Inter"],
+            "body-strong": ["Inter"],
+            "display": ["Inter"]
+          },
+          "fontSize": {
+            "body": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+            "caption": ["13px", { "lineHeight": "18px", "fontWeight": "400" }],
+            "heading": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+            "body-strong": ["16px", { "lineHeight": "24px", "fontWeight": "600" }],
+            "display": ["28px", { "lineHeight": "36px", "fontWeight": "700" }]
+          }
+        },
+      },
+    }
+  </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface-dim/40 text-text font-body text-body antialiased min-h-full flex justify-center items-start sm:py-6">
+<!-- Mobile Viewport Container (390px strict optimized layout) -->
+<div class="w-full max-w-[390px] min-h-screen sm:min-h-0 sm:rounded-xl bg-surface shadow-2xl flex flex-col relative overflow-hidden border border-border">
+<!-- TopAppBar (from Shared Components JSON & Style Anchor) -->
+<header class="bg-surface text-primary border-b border-border shadow-sm flex justify-between items-center w-full px-space-lg py-space-md max-w-full sticky top-0 z-30">
+<div class="flex items-center gap-3">
+<div class="w-9 h-9 rounded-lg bg-primary-fixed/60 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[20px]" data-icon="calendar_month">calendar_month</span>
+</div>
+<div class="flex flex-col">
+<h1 class="font-heading text-heading text-on-surface tracking-tight leading-tight">Nueva programación</h1>
+<span class="text-[11px] text-text-muted font-body leading-none mt-0.5">InsertTasks</span>
+</div>
+</div>
+<button aria-label="Cerrar modal" class="w-8 h-8 rounded-lg flex items-center justify-center text-text-muted hover:bg-surface-container active:scale-95 transition-all" type="button">
+<span class="material-symbols-outlined text-[22px]" data-icon="close">close</span>
+</button>
+</header>
+<!-- Subtitle / Helper Context -->
+<div class="px-space-lg pt-3 pb-2 bg-surface-alt/70 border-b border-border/60">
+<p class="font-caption text-caption text-text-muted">
+        Configura una tarea recurrente que se generará automáticamente según tus parámetros estratégicos.
+      </p>
+</div>
+<!-- Form Main Scrollable Content -->
+<main class="flex-1 overflow-y-auto px-space-lg py-4 space-y-5">
+<form class="space-y-5" id="scheduleForm" onsubmit="event.preventDefault();">
+<!-- 1. Campo Título -->
+<div class="space-y-1.5">
+<div class="flex items-center justify-between">
+<label class="font-body-strong text-caption text-text font-semibold uppercase tracking-wider" for="task-title">
+              TÍTULO <span aria-hidden="true" class="text-error">*</span>
+</label>
+<span class="font-caption text-caption text-text-muted" id="title-counter">0 / 200</span>
+</div>
+<div class="relative">
+<input class="w-full rounded-lg border-border bg-surface text-text font-body text-[14px] placeholder:text-outline/70 focus:border-schedule focus:ring-1 focus:ring-schedule py-2.5 px-3 transition-colors shadow-sm" id="task-title" maxlength="200" name="title" oninput="document.getElementById('title-counter').textContent = `${this.value.length} / 200`" placeholder="Ej. Limpieza de suscripciones y carpetas de descargas..." required="" type="text"/>
+</div>
+</div>
+<!-- 2. Campo Descripción -->
+<div class="space-y-1.5">
+<div class="flex items-center justify-between">
+<label class="font-body-strong text-caption text-text font-semibold uppercase tracking-wider" for="task-desc">
+              DESCRIPCIÓN (Opcional)
+            </label>
+<span class="font-caption text-caption text-text-muted" id="desc-counter">0 / 2000</span>
+</div>
+<textarea class="w-full rounded-lg border-border bg-surface text-text font-body text-[14px] placeholder:text-outline/70 focus:border-schedule focus:ring-1 focus:ring-schedule py-2 px-3 resize-none transition-colors shadow-sm" id="task-desc" maxlength="2000" name="description" oninput="document.getElementById('desc-counter').textContent = `${this.value.length} / 2000`" placeholder="Detalla los pasos o notas clave para cuando aparezca en tu tablero..." rows="3"></textarea>
+</div>
+<!-- 3. Bloque PRIORIZACIÓN EISENHOWER -->
+<div class="space-y-3">
+<div class="flex items-center justify-between">
+<span class="font-body-strong text-caption text-text font-semibold uppercase tracking-wider">
+              PRIORIZACIÓN EISENHOWER
+            </span>
+<span class="font-caption text-[11px] text-text-muted bg-surface-container px-2 py-0.5 rounded-full font-medium">
+              Determina cuadrante
+            </span>
+</div>
+<!-- Switches Container Card -->
+<div class="bg-surface rounded-xl border border-border p-3.5 space-y-3 shadow-sm">
+<!-- Toggle 1: Urgente (Off) -->
+<div class="flex items-center justify-between gap-3">
+<div class="flex flex-col">
+<span class="font-body-strong text-[14px] text-text leading-tight">¿Es Urgente?</span>
+<span class="font-caption text-[12px] text-text-muted">Requiere atención inmediata</span>
+</div>
+<button aria-checked="false" class="w-12 h-6 bg-surface-container-highest rounded-full transition-colors relative flex items-center p-0.5 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2" id="toggle-urgent" onclick="toggleSwitch(this)" role="switch" type="button">
+<span class="sr-only">Marcar como urgente</span>
+<span class="w-5 h-5 bg-surface rounded-full shadow-md transform transition-transform translate-x-0"></span>
+</button>
+</div>
+<div class="h-px bg-surface-container"></div>
+<!-- Toggle 2: Importante (On) -->
+<div class="flex items-center justify-between gap-3">
+<div class="flex flex-col">
+<span class="font-body-strong text-[14px] text-text leading-tight">¿Es Importante?</span>
+<span class="font-caption text-[12px] text-text-muted">Aporta valor estratégico clave</span>
+</div>
+<button aria-checked="true" class="w-12 h-6 bg-schedule rounded-full transition-colors relative flex items-center p-0.5 focus:outline-none focus:ring-2 focus:ring-schedule focus:ring-offset-2" id="toggle-important" onclick="toggleSwitch(this)" role="switch" type="button">
+<span class="sr-only">Marcar como importante</span>
+<span class="w-5 h-5 bg-surface rounded-full shadow-md transform transition-transform translate-x-6"></span>
+</button>
+</div>
+</div>
+<!-- Banner reactivo de Cuadrante II (Planificar) -->
+<div class="bg-blue-50/90 border border-blue-200 rounded-xl p-3.5 flex items-start gap-3 transition-all duration-200" id="quadrant-banner">
+<div class="w-8 h-8 rounded-lg bg-schedule text-on-primary flex items-center justify-center font-heading text-[13px] font-bold shrink-0 shadow-sm">
+              Q2
+            </div>
+<div class="flex-1 space-y-0.5">
+<div class="flex items-center gap-2">
+<span class="font-body-strong text-[13px] font-bold text-schedule tracking-wide uppercase">
+                  IRÁ A: PLANIFICAR
+                </span>
+<span class="text-[11px] font-medium bg-blue-100 text-schedule px-2 py-0.2 rounded font-caption">
+                  Cuadrante II
+                </span>
+</div>
+<p class="font-caption text-[12px] text-text-muted leading-relaxed">
+                No urgente e importante — Se programará con antelación en tu agenda para evitar urgencias.
+              </p>
+</div>
+</div>
+</div>
+<!-- 4. Bloque ÁMBITO DE LA TAREA -->
+<div class="space-y-2">
+<label class="block font-body-strong text-caption text-text font-semibold uppercase tracking-wider">
+            ÁMBITO DE LA TAREA
+          </label>
+<div aria-label="Ámbito" class="grid grid-cols-2 gap-2.5" role="radiogroup">
+<!-- Opción Laboral -->
+<label class="cursor-pointer border border-border rounded-xl p-3 flex items-center gap-2.5 bg-surface hover:bg-surface-container-low transition-all" onclick="selectScope('work')">
+<input class="sr-only" id="scope-work" name="scope" type="radio" value="work"/>
+<div class="w-7 h-7 rounded-lg bg-purple-100 text-scope-work flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-[17px]" data-icon="work">work</span>
+</div>
+<div class="flex flex-col">
+<span class="font-body-strong text-[14px] text-text font-medium leading-none">Laboral</span>
+<span class="text-[11px] text-text-muted font-caption mt-0.5">Proyectos &amp; foco</span>
+</div>
+</label>
+<!-- Opción Personal (Seleccionada) -->
+<label class="cursor-pointer border-2 border-schedule bg-blue-50/60 rounded-xl p-3 flex items-center gap-2.5 relative transition-all" onclick="selectScope('personal')">
+<input checked="" class="sr-only" id="scope-personal" name="scope" type="radio" value="personal"/>
+<div class="w-7 h-7 rounded-lg bg-teal-100 text-scope-personal flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-[17px]" data-icon="person">person</span>
+</div>
+<div class="flex flex-col flex-1">
+<span class="font-body-strong text-[14px] text-schedule font-semibold leading-none">Personal</span>
+<span class="text-[11px] text-text-muted font-caption mt-0.5">Vida &amp; hábitos</span>
+</div>
+<div class="w-4 h-4 rounded-full bg-schedule text-on-primary flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-[12px] font-bold" data-icon="check">check</span>
+</div>
+</label>
+</div>
+</div>
+<!-- 5. Bloque REPETICIÓN -->
+<div class="space-y-3">
+<label class="block font-body-strong text-caption text-text font-semibold uppercase tracking-wider">
+            REPETICIÓN
+          </label>
+<!-- Segmented Tab Selector -->
+<div class="grid grid-cols-4 bg-surface-container rounded-lg p-1 text-center font-caption text-[12px] font-medium border border-border/40">
+<button class="py-1.5 rounded text-text-muted hover:text-text transition-colors" type="button">
+              Una vez
+            </button>
+<button class="py-1.5 rounded text-text-muted hover:text-text transition-colors" type="button">
+              Cada día
+            </button>
+<button class="py-1.5 rounded text-text-muted hover:text-text transition-colors" type="button">
+              Semanal
+            </button>
+<!-- Pestaña Activa: Día del mes -->
+<button class="py-1.5 rounded bg-surface text-schedule font-semibold shadow-sm border border-border/70" type="button">
+              Día del mes
+            </button>
+</div>
+<!-- Configuración Activa para «Día del mes» -->
+<div class="bg-surface rounded-xl border border-border p-3.5 space-y-3 shadow-sm">
+<div class="flex items-center justify-between">
+<div>
+<span class="font-body-strong text-[13px] text-text font-medium block">Día de ejecución</span>
+<span class="font-caption text-[12px] text-text-muted">Si el mes es más corto, el último día.</span>
+</div>
+<!-- Selector numérico táctil para el día "31" -->
+<div class="flex items-center border border-border rounded-lg bg-surface-container-low overflow-hidden shadow-xs">
+<button aria-label="Disminuir día" class="w-8 h-8 flex items-center justify-center text-text hover:bg-surface-container active:bg-surface-container-high transition-colors text-lg font-semibold" onclick="changeDay(-1)" type="button">
+                  −
+                </button>
+<div class="w-10 text-center font-body-strong text-[15px] font-bold text-schedule bg-surface py-1 border-x border-border/60">
+<span id="day-number">31</span>
+</div>
+<button aria-label="Aumentar día" class="w-8 h-8 flex items-center justify-center text-text hover:bg-surface-container active:bg-surface-container-high transition-colors text-lg font-semibold" onclick="changeDay(1)" type="button">
+                  +
+                </button>
+</div>
+</div>
+<!-- Preview Card Dinámica -->
+<div class="bg-surface-container-low border border-border/80 rounded-lg p-2.5 flex items-center gap-2.5">
+<div class="w-7 h-7 rounded-md bg-schedule/10 text-schedule flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-[17px]" data-icon="event_upcoming">event_upcoming</span>
+</div>
+<div class="flex flex-col">
+<span class="font-caption text-[11px] text-text-muted font-medium">VISTA PREVIA DE CICLO</span>
+<span class="font-body-strong text-[13px] text-text font-semibold">
+                  Próxima aparición: <span class="text-schedule font-bold">viernes 31 de octubre</span>
+</span>
+</div>
+</div>
+</div>
+</div>
+</form>
+</main>
+<!-- Sticky Bottom Actions Footer -->
+<footer class="sticky bottom-0 bg-surface border-t border-border px-space-lg py-3 flex items-center gap-3 z-30 shadow-[0_-4px_12px_rgba(15,23,42,0.06)]">
+<button class="w-1/3 py-2.5 px-3 rounded-lg border border-border text-text font-body-strong text-[14px] font-medium bg-surface hover:bg-surface-container text-center transition-colors active:scale-98" type="button">
+        Cancelar
+      </button>
+<button class="w-2/3 py-2.5 px-4 rounded-lg bg-schedule hover:bg-primary text-on-primary font-body-strong text-[14px] font-semibold flex items-center justify-center gap-2 shadow-md hover:shadow-lg transition-all active:scale-98 focus:outline-none focus:ring-2 focus:ring-schedule focus:ring-offset-2" form="scheduleForm" type="submit">
+<span class="material-symbols-outlined text-[18px]" data-icon="bookmark_added">bookmark_added</span>
+        Guardar programación
+      </button>
+</footer>
+</div>
+<!-- Micro-interactions Script -->
+<script>
+    let day = 31;
+    function changeDay(delta) {
+      day = Math.min(31, Math.max(1, day + delta));
+      document.getElementById('day-number').textContent = day;
+    }
+
+    function toggleSwitch(btn) {
+      const isChecked = btn.getAttribute('aria-checked') === 'true';
+      const newState = !isChecked;
+      btn.setAttribute('aria-checked', String(newState));
+      
+      const thumb = btn.querySelector('span:last-child');
+      if (newState) {
+        btn.classList.remove('bg-surface-container-highest');
+        btn.classList.add('bg-schedule');
+        thumb.classList.remove('translate-x-0');
+        thumb.classList.add('translate-x-6');
+      } else {
+        btn.classList.add('bg-surface-container-highest');
+        btn.classList.remove('bg-schedule');
+        thumb.classList.add('translate-x-0');
+        thumb.classList.remove('translate-x-6');
+      }
+    }
+
+    function selectScope(type) {
+      // Micro-selection trigger handled cleanly in DOM state
+    }
+  </script>
+</body></html>
