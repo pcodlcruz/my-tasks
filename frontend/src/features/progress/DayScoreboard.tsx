@@ -6,6 +6,7 @@ interface DayScoreboardProps {
   isLoading: boolean
   isError: boolean
   onRetry: () => void
+  onOpenReview: () => void
 }
 
 function completedText(completed: number, goal: number): string {
@@ -22,6 +23,7 @@ export function DayScoreboard({
   isLoading,
   isError,
   onRetry,
+  onOpenReview,
 }: DayScoreboardProps): JSX.Element {
   return (
     <section
@@ -36,7 +38,7 @@ export function DayScoreboard({
         />
       )}
 
-      {progress !== undefined && <Scoreboard progress={progress} />}
+      {progress !== undefined && <Scoreboard progress={progress} onOpenReview={onOpenReview} />}
 
       {isError && (
         <p className="mt-2 text-caption text-text-muted first:mt-0">
@@ -56,8 +58,13 @@ export function DayScoreboard({
   )
 }
 
-function Scoreboard({ progress }: { progress: Progress }): JSX.Element {
-  const { completed_count: completed, goal, goal_met: goalMet, streak } = progress
+interface ScoreboardProps {
+  progress: Progress
+  onOpenReview: () => void
+}
+
+function Scoreboard({ progress, onOpenReview }: ScoreboardProps): JSX.Element {
+  const { completed_count: completed, goal, goal_met: goalMet, streak, mission } = progress
   const overGoal = completed > goal
 
   return (
@@ -91,9 +98,28 @@ function Scoreboard({ progress }: { progress: Progress }): JSX.Element {
         </p>
       )}
 
+      {mission.task_ids.length > 0 && (
+        <p className="flex items-center gap-1.5 text-caption font-semibold text-text">
+          <span aria-hidden="true" className="text-gold">
+            ★
+          </span>
+          Misión {mission.completed_ids.length}/{mission.task_ids.length}
+          {mission.cleared && ' cumplida'}
+        </p>
+      )}
+
       {!progress.is_active_day && (
         <p className="text-caption text-text-muted">Hoy no es día activo: la racha no cambia.</p>
       )}
+
+      <button
+        type="button"
+        onClick={onOpenReview}
+        className="ml-auto flex items-center gap-2 rounded-md border-2 border-text-muted bg-surface px-3 py-2 text-text hover:border-primary hover:text-primary"
+      >
+        <span className="font-pixel text-xs leading-5">PULSA START</span>
+        <span className="sr-only">: abrir el inicio de jornada</span>
+      </button>
 
       <p aria-live="polite" className="font-pixel text-xs leading-5 text-gold">
         {goalMet && <span className="inline-block motion-safe:animate-pop">¡FASE SUPERADA!</span>}

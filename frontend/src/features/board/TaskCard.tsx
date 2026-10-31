@@ -1,10 +1,15 @@
+import { missionErrorMessage, useSetMission } from '../../api/progress'
 import { useCompleteTask, useTogglePin, useTrashTask } from '../../api/tasks'
 import type { Task } from '../../api/types'
+import { useToastStore } from '../../stores/toastStore'
+import { MAX_MISSION_TASKS } from '../progress/MissionPicker'
 import { ScopeBadge } from '../shared/TaskBadges'
 
 interface TaskCardProps {
   task: Task
   onEdit: (task: Task) => void
+  // Today's mission; `undefined` if the progress could not be loaded (no mission button then).
+  missionTaskIds?: string[]
 }
 
 const TEXT_BUTTON =
@@ -19,10 +24,26 @@ const HEADER =
 const FOOTER =
   'mt-[var(--card-inner-gap)] flex items-center justify-between border-t border-border/60 pt-[var(--card-footer-gap)] compact:mt-0 compact:shrink-0 compact:gap-3 compact:border-t-0 compact:pt-0'
 
-export function TaskCard({ task, onEdit }: TaskCardProps): JSX.Element {
+export function TaskCard({ task, onEdit, missionTaskIds }: TaskCardProps): JSX.Element {
   const { togglePin, isPending: isPinPending } = useTogglePin()
   const complete = useCompleteTask()
   const trash = useTrashTask()
+  const setMission = useSetMission()
+  const inMission = missionTaskIds?.includes(task.id) ?? false
+  const missionFull = (missionTaskIds?.length ?? 0) >= MAX_MISSION_TASKS
+  const reasonId = `mission-full-${task.id}`
+
+  // The whole mission is sent: the current one with this task added or taken out. Nothing changes
+  // on screen until the server accepts it.
+  function toggleMission(): void {
+    if (missionTaskIds === undefined) return
+    const next = inMission
+      ? missionTaskIds.filter((id) => id !== task.id)
+      : [...missionTaskIds, task.id]
+    setMission.mutate(next, {
+      onError: (error) => useToastStore.getState().show(missionErrorMessage(error)),
+    })
+  }
 
   return (
     <article className={ARTICLE}>
@@ -35,6 +56,12 @@ export function TaskCard({ task, onEdit }: TaskCardProps): JSX.Element {
           )}
           {task.title}
         </p>
+        {inMission && (
+          <p className="flex shrink-0 items-center gap-1 text-caption font-semibold text-gold">
+            <span aria-hidden="true">★</span>
+            <span>Misión del día</span>
+          </p>
+        )}
         <div className="flex shrink-0 flex-wrap items-center gap-1 sm:justify-end">
           <button
             type="button"
@@ -47,6 +74,24 @@ export function TaskCard({ task, onEdit }: TaskCardProps): JSX.Element {
           <button type="button" onClick={() => onEdit(task)} className={TEXT_BUTTON}>
             Editar
           </button>
+          {missionTaskIds !== undefined && (
+            <>
+              <button
+                type="button"
+                onClick={toggleMission}
+                disabled={setMission.isPending || (!inMission && missionFull)}
+                aria-describedby={!inMission && missionFull ? reasonId : undefined}
+                className={TEXT_BUTTON}
+              >
+                {inMission ? 'Quitar de la misión' : 'Añadir a la misión'}
+              </button>
+              {!inMission && missionFull && (
+                <span id={reasonId} className="sr-only">
+                  La misión ya tiene 5 tareas.
+                </span>
+              )}
+            </>
+          )}
           <button
             type="button"
             onClick={() => trash.mutate(task.id)}
