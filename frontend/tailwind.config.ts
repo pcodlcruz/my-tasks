@@ -112,12 +112,13 @@ export default {
         card: '0 1px 2px rgba(15, 23, 42, 0.08)',
         modal: '0 8px 24px rgba(15, 23, 42, 0.16)',
       },
-      // Arcade celebrations: at most 600 ms, and only with `motion-safe:` (DESIGN.md).
+      // Arcade celebrations: at most 600 ms, and only with `motion-safe:` (DESIGN.md). Only the
+      // scale moves: fading the opacity would leave the text below AA contrast while it plays.
       keyframes: {
         pop: {
-          '0%': { transform: 'scale(0.8)', opacity: '0' },
-          '60%': { transform: 'scale(1.1)', opacity: '1' },
-          '100%': { transform: 'scale(1)', opacity: '1' },
+          '0%': { transform: 'scale(0.8)' },
+          '60%': { transform: 'scale(1.1)' },
+          '100%': { transform: 'scale(1)' },
         },
       },
       animation: {
