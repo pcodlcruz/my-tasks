@@ -60,6 +60,11 @@ const PROFILE: Profile = {
   history_days: null,
   display_name: null,
   avatar: { kind: 'initials', preset: null, version: 0 },
+  daily_goal: 3,
+  active_weekdays: [1, 2, 3, 4, 5, 6, 7],
+  timezone: 'Europe/Madrid',
+  morning_review: true,
+  arcade_mode: true,
 }
 
 function profileResult(profile: Partial<Profile> = {}): Record<string, unknown> {

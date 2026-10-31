@@ -1,11 +1,12 @@
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import type { Profile } from '../../../../src/api/types'
+import type { Profile, Progress } from '../../../../src/api/types'
 import { useUiStore } from '../../../../src/stores/uiStore'
 
 const useBoardTasksMock = vi.fn()
 const useProfileMock = vi.fn()
+const useProgressMock = vi.fn()
 
 vi.mock('../../../../src/api/tasks', () => ({
   useBoardTasks: (...args: unknown[]) => useBoardTasksMock(...args),
@@ -13,6 +14,10 @@ vi.mock('../../../../src/api/tasks', () => ({
 
 vi.mock('../../../../src/api/profile', () => ({
   useProfile: () => useProfileMock(),
+}))
+
+vi.mock('../../../../src/api/progress', () => ({
+  useProgress: () => useProgressMock(),
 }))
 
 const PROFILE: Profile = {
@@ -23,6 +28,11 @@ const PROFILE: Profile = {
   history_days: null,
   display_name: null,
   avatar: { kind: 'initials', preset: null, version: 0 },
+  daily_goal: 3,
+  active_weekdays: [1, 2, 3, 4, 5, 6, 7],
+  timezone: 'Europe/Madrid',
+  morning_review: true,
+  arcade_mode: true,
 }
 
 function boardResult(overrides: Record<string, unknown> = {}): Record<string, unknown> {
@@ -37,6 +47,26 @@ function boardResult(overrides: Record<string, unknown> = {}): Record<string, un
 
 function profileResult(profile: Partial<Profile> = {}): Record<string, unknown> {
   return { data: { ...PROFILE, ...profile }, isPending: false, isError: false }
+}
+
+const PROGRESS: Progress = {
+  today: '2026-10-31',
+  goal: 3,
+  completed_count: 2,
+  goal_met: false,
+  is_active_day: true,
+  mission: { task_ids: [], completed_ids: [], cleared: false },
+  show_review: false,
+  streak: 0,
+  streak_at_stake: false,
+  arcade: { score: 0, level: 1, level_name: 'Novato', next_level_at: 500, points_today: 0 },
+  last_day: null,
+  announcements: [],
+  notices: [],
+}
+
+function progressResult(overrides: Record<string, unknown> = {}): Record<string, unknown> {
+  return { data: PROGRESS, isPending: false, isError: false, refetch: vi.fn(), ...overrides }
 }
 
 const PROFILE_PENDING = { data: undefined, isPending: true, isError: false }
@@ -59,7 +89,48 @@ describe('<BoardPage>', () => {
     useProfileMock.mockReset()
     useBoardTasksMock.mockReturnValue(boardResult())
     useProfileMock.mockReturnValue(profileResult())
+    useProgressMock.mockReset()
+    useProgressMock.mockReturnValue(progressResult())
     useUiStore.getState().reset()
+  })
+
+  describe('marcador del día', () => {
+    it('muestra el marcador encima de los cuadrantes', async () => {
+      await renderBoardPage()
+
+      const scoreboard = screen.getByRole('region', { name: 'Marcador del día' })
+      expect(scoreboard).toHaveTextContent('2 de 3 tareas completadas hoy')
+      expect(
+        scoreboard.compareDocumentPosition(screen.getByRole('heading', { name: 'Hacer ahora' })),
+      ).toBe(Node.DOCUMENT_POSITION_FOLLOWING)
+    })
+
+    it('no pide el tablero hasta que llega el progreso, que pone el día al corriente', async () => {
+      useProgressMock.mockReturnValue(progressResult({ data: undefined, isPending: true }))
+
+      await renderBoardPage()
+
+      expect(useBoardTasksMock.mock.calls.every(([, , enabled]) => enabled === false)).toBe(true)
+      expect(screen.getByRole('status', { name: 'Cargando progreso' })).toBeInTheDocument()
+    })
+
+    it('si el progreso falla, el tablero se carga igual con un aviso discreto (FR-034)', async () => {
+      const refetch = vi.fn()
+      useProgressMock.mockReturnValue(
+        progressResult({ data: undefined, isPending: false, isError: true, refetch }),
+      )
+
+      await renderBoardPage()
+
+      expect(lastBoardRequest().enabled).toBe(true)
+      expect(screen.getByRole('heading', { name: 'Hacer ahora' })).toBeInTheDocument()
+      expect(screen.getByRole('region', { name: 'Marcador del día' })).toHaveTextContent(
+        'No se pudo cargar tu progreso.',
+      )
+      expect(screen.queryByRole('alert')).not.toBeInTheDocument()
+      await userEvent.click(screen.getByRole('button', { name: 'Reintentar' }))
+      expect(refetch).toHaveBeenCalledOnce()
+    })
   })
 
   it('muestra siempre los 4 cuadrantes y el estado vacío de cada uno sin tareas', async () => {

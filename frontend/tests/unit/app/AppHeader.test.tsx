@@ -29,6 +29,11 @@ const PROFILE: Profile = {
   history_days: null,
   display_name: null,
   avatar: { kind: 'initials', preset: null, version: 0 },
+  daily_goal: 3,
+  active_weekdays: [1, 2, 3, 4, 5, 6, 7],
+  timezone: 'Europe/Madrid',
+  morning_review: true,
+  arcade_mode: true,
 }
 
 function profileResult(profile: Partial<Profile> = {}): Record<string, unknown> {
@@ -236,5 +241,36 @@ describe('<AppHeader>', () => {
 
     const nav = screen.getByRole('navigation', { name: 'Navegación principal' })
     expect(within(nav).getByRole('link', { name: 'Accesos' })).toBeInTheDocument()
+  })
+
+  describe('pestañas de S3 v3', () => {
+    it('cada pestaña lleva un icono decorativo y se llama solo por su texto', async () => {
+      useIsAdminMock.mockReturnValue(true)
+
+      await renderHeader()
+
+      const nav = screen.getByRole('navigation', { name: 'Navegación principal' })
+      const links = within(nav).getAllByRole('link')
+      expect(links.map((link) => link.textContent)).toEqual([
+        'Tablero',
+        'Historial',
+        'Papelera',
+        'Accesos',
+      ])
+      for (const link of links) {
+        expect(link.querySelector('svg')).toHaveAttribute('aria-hidden', 'true')
+      }
+    })
+
+    it('en móvil la fila de pestañas se desplaza sola en vez de ensanchar la página', async () => {
+      await renderHeader()
+
+      const nav = screen.getByRole('navigation', { name: 'Navegación principal' })
+      expect(nav.className).toContain('overflow-x-auto')
+      expect(nav.className).toContain('min-w-0')
+      for (const link of within(nav).getAllByRole('link')) {
+        expect(link.className).toContain('whitespace-nowrap')
+      }
+    })
   })
 })

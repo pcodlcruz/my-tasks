@@ -26,6 +26,11 @@ const PROFILE: Profile = {
   history_days: null,
   display_name: null,
   avatar: { kind: 'initials', preset: null, version: 0 },
+  daily_goal: 3,
+  active_weekdays: [1, 2, 3, 4, 5, 6, 7],
+  timezone: 'Europe/Madrid',
+  morning_review: true,
+  arcade_mode: true,
 }
 
 const SAVE_ERROR = 'No se pudo guardar el cambio. Inténtalo de nuevo.'
@@ -271,11 +276,34 @@ describe('<ProfilePage>', () => {
     expect(screen.getByRole('status')).toHaveTextContent('Guardado')
   })
 
-  it('aclara que restablecer no cambia el nombre ni el avatar', async () => {
+  it('aclara que restablecer no cambia el nombre, el avatar ni «Progreso y juego»', async () => {
     installBackend()
     await renderPage()
 
-    expect(await screen.findByText('No cambia tu nombre ni tu avatar.')).toBeInTheDocument()
+    expect(
+      await screen.findByText('No cambia tu nombre, tu avatar ni «Progreso y juego».'),
+    ).toBeInTheDocument()
+  })
+
+  it('muestra la sección «Progreso y juego» con la meta guardada', async () => {
+    installBackend()
+    await renderPage()
+
+    const section = await screen.findByRole('region', { name: 'Progreso y juego' })
+    expect(section).toHaveTextContent('3 tareas')
+  })
+
+  it('si falla al guardar la meta, avisa y vuelve a la meta guardada', async () => {
+    installBackend({ patchStatus: 500 })
+    await renderPage()
+
+    await userEvent.click(await screen.findByRole('button', { name: 'Aumentar meta diaria' }))
+
+    const alert = await screen.findByRole('alert')
+    expect(alert).toHaveTextContent(SAVE_ERROR)
+    const section = screen.getByRole('region', { name: 'Progreso y juego' })
+    await waitFor(() => expect(section).toHaveTextContent('3 tareas'))
+    expect(backend.patchBodies).toEqual([{ daily_goal: 4 }])
   })
 
   it('si falla el restablecimiento, avisa y mantiene los valores guardados', async () => {

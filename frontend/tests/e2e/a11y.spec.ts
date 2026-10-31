@@ -200,7 +200,7 @@ test.describe('Accesibilidad WCAG 2.1 AA', () => {
   // 320 CSS px is the width WCAG 1.4.10 uses for reflow, and the administrator has the most
   // tabs. The header must wrap instead of overflowing: its content differs in width between
   // fonts, so a layout that only just fits at 390 px fails on another machine.
-  test('la cabecera no desborda a 320 px ni con las pestañas del administrador', async ({
+  test('la cabecera, el marcador y «Perfil» no desbordan a 320 px con las pestañas del administrador', async ({
     page,
     loginAsAdmin,
   }) => {
@@ -208,10 +208,22 @@ test.describe('Accesibilidad WCAG 2.1 AA', () => {
     await loginAsAdmin()
     await expect(page.getByRole('navigation', { name: 'Navegación principal' })).toBeVisible()
 
+    await expect(page.getByRole('region', { name: 'Marcador del día' })).toContainText(
+      'tareas completadas hoy',
+    )
     const overflow = await page.evaluate(
       () => document.documentElement.scrollWidth - window.innerWidth,
     )
-    expect(overflow, 'Desbordamiento horizontal de la cabecera a 320 px').toBeLessThanOrEqual(0)
+    expect(
+      overflow,
+      'Desbordamiento horizontal de la cabecera y el marcador a 320 px',
+    ).toBeLessThanOrEqual(0)
+    await page.getByRole('link', { name: 'Perfil' }).click()
+    await expect(page.getByRole('region', { name: 'Progreso y juego' })).toBeVisible()
+    const profileOverflow = await page.evaluate(
+      () => document.documentElement.scrollWidth - window.innerWidth,
+    )
+    expect(profileOverflow, 'Desbordamiento horizontal en Perfil a 320 px').toBeLessThanOrEqual(0)
     await goToAdmin(page)
     const adminOverflow = await page.evaluate(
       () => document.documentElement.scrollWidth - window.innerWidth,
@@ -287,7 +299,10 @@ test.describe('Accesibilidad WCAG 2.1 AA', () => {
       await expect(page.locator('html')).toHaveAttribute('data-theme', colorScheme)
 
       await expect(page.getByRole('heading', { name: 'Hacer ahora' })).toBeVisible()
-      await expectNoViolations(page, `S3 · Tablero (${colorScheme})`)
+      await expect(page.getByRole('region', { name: 'Marcador del día' })).toContainText(
+        'tareas completadas hoy',
+      )
+      await expectNoViolations(page, `S3 v3 · Tablero con el marcador (${colorScheme})`)
 
       await goTo(page, 'Historial')
       await expect(page.getByText('Aún no has completado ninguna tarea')).toBeVisible()
@@ -299,7 +314,40 @@ test.describe('Accesibilidad WCAG 2.1 AA', () => {
 
       await page.getByRole('link', { name: 'Perfil' }).click()
       await expect(page.getByRole('radiogroup', { name: 'Tema' })).toBeVisible()
-      await expectNoViolations(page, `S7 · Perfil (${colorScheme})`)
+      await expect(page.getByRole('region', { name: 'Progreso y juego' })).toBeVisible()
+      await expectNoViolations(page, `S7 v2 · Perfil con «Progreso y juego» (${colorScheme})`)
+    })
+
+    test(`el marcador con la meta cumplida no tiene violaciones en tema ${colorScheme === 'light' ? 'claro' : 'oscuro'}`, async ({
+      page,
+      loginAsGoogleUser,
+    }) => {
+      await page.emulateMedia({ colorScheme })
+      await loginAsGoogleUser(`a11y-marcador-${colorScheme}-${crypto.randomUUID()}@example.com`)
+      await page.getByRole('link', { name: 'Perfil' }).click()
+      const settings = page.getByRole('region', { name: 'Progreso y juego' })
+      await settings.getByRole('button', { name: 'Disminuir meta diaria' }).click()
+      await expect(settings).toContainText('2 tareas')
+      await settings.getByRole('button', { name: 'Disminuir meta diaria' }).click()
+      await expect(settings).toContainText('1 tarea')
+      await expect(page.getByRole('status').filter({ hasText: 'Guardado' })).toBeVisible()
+
+      await goTo(page, 'Tablero')
+      await createTask(page, ONE_TASK_PER_QUADRANT[0] as NewTask)
+      await createTask(page, ONE_TASK_PER_QUADRANT[1] as NewTask)
+      await page
+        .locator('article', { hasText: 'Tarea hacer ahora' })
+        .getByRole('button', { name: 'Completar' })
+        .click()
+      await page
+        .locator('article', { hasText: 'Tarea planificar' })
+        .getByRole('button', { name: 'Completar' })
+        .click()
+      const scoreboard = page.getByRole('region', { name: 'Marcador del día' })
+      await expect(scoreboard).toContainText('2 de 1 tarea completada hoy')
+      await expect(scoreboard).toContainText('¡FASE SUPERADA!')
+
+      await expectNoViolations(page, `S3 v3 · Marcador por encima de la meta (${colorScheme})`)
     })
 
     test(`el formulario y la confirmación no tienen violaciones en tema ${colorScheme === 'light' ? 'claro' : 'oscuro'}`, async ({
