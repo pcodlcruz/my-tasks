@@ -204,6 +204,12 @@ export interface Notice {
   day: ProgressDate
 }
 
+// What `POST /me/progress/ack` confirms as shown (at least one of the two lists).
+export interface Acknowledgement {
+  announcement_ids?: string[]
+  notice_ids?: string[]
+}
+
 export interface Mission {
   task_ids: string[]
   completed_ids: string[]

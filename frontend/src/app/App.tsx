@@ -3,6 +3,7 @@ import { BrowserRouter, Outlet, Route, Routes } from 'react-router-dom'
 import { AccessPage } from '../features/admin/AccessPage'
 import { LoginPage } from '../features/auth/LoginPage'
 import { BoardPage } from '../features/board/BoardPage'
+import { Celebrations } from '../features/progress/Celebrations'
 import { ProfilePage } from '../features/profile/ProfilePage'
 import { useAppearance } from '../features/profile/useAppearance'
 import { useTimezoneSync } from '../features/profile/useTimezoneSync'
@@ -34,6 +35,7 @@ function ProtectedLayout(): JSX.Element {
       <TimezoneSync />
       <AppHeader />
       <Outlet />
+      <Celebrations />
     </ProtectedRoute>
   )
 }

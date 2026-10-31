@@ -57,7 +57,7 @@ export function useUpdateProfile() {
     },
     onSuccess: (profile, update) => {
       queryClient.setQueryData(PROFILE_QUERY_KEY, profile)
-      // The goal, the active days, the time zone and the morning review decide today's scoreboard.
+      // These settings decide today's scoreboard (the arcade mode shows or hides its score).
       if (PROGRESS_SETTINGS.some((field) => update[field] !== undefined)) {
         invalidateProgress(queryClient)
       }
@@ -65,7 +65,13 @@ export function useUpdateProfile() {
   })
 }
 
-const PROGRESS_SETTINGS = ['daily_goal', 'active_weekdays', 'timezone', 'morning_review'] as const
+const PROGRESS_SETTINGS = [
+  'daily_goal',
+  'active_weekdays',
+  'timezone',
+  'morning_review',
+  'arcade_mode',
+] as const
 
 export function useResetProfile() {
   const queryClient = useQueryClient()
