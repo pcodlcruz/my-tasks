@@ -77,6 +77,26 @@ const APPROVED_DARK: Record<string, string> = {
   'on-accent': '#0F172A',
 }
 
+// Arcade tokens added by feature 007 (docs/design/DESIGN.md § Estética arcade). They are new, so
+// they do not change any original color: they are checked apart from ORIGINAL_LIGHT.
+const ARCADE_LIGHT: Record<string, string> = {
+  'energy-fill': '#0E7490',
+  'energy-extra': '#A21CAF',
+  'energy-empty-border': '#64748B',
+  gold: '#A16207',
+  'on-gold': '#FFFFFF',
+  streak: '#C2410C',
+}
+
+const ARCADE_DARK: Record<string, string> = {
+  'energy-fill': '#22D3EE',
+  'energy-extra': '#F0ABFC',
+  'energy-empty-border': '#94A3B8',
+  gold: '#FACC15',
+  'on-gold': '#0F172A',
+  streak: '#FB923C',
+}
+
 function block(selector: string): string {
   const start = CSS.indexOf(selector)
   expect(start, `Falta el bloque ${selector} en index.css`).toBeGreaterThanOrEqual(0)
@@ -118,7 +138,24 @@ function flattenColors(node: unknown, path: string[] = []): Record<string, strin
 
 describe('tokens de color', () => {
   it('los valores claros de :root son idénticos a los originales (FR-004, SC-009)', () => {
-    expect(colorVariables(':root {')).toEqual(ORIGINAL_LIGHT)
+    const light = colorVariables(':root {')
+    const original = Object.fromEntries(
+      Object.entries(light).filter(([name]) => !(name in ARCADE_LIGHT)),
+    )
+
+    expect(original).toEqual(ORIGINAL_LIGHT)
+  })
+
+  it('los tokens arcade valen lo aprobado en claro y en oscuro (feature 007)', () => {
+    const light = colorVariables(':root {')
+    const dark = colorVariables(":root[data-theme='dark']")
+
+    for (const [name, hex] of Object.entries(ARCADE_LIGHT)) {
+      expect(light[name], `token arcade claro ${name}`).toBe(hex)
+    }
+    for (const [name, hex] of Object.entries(ARCADE_DARK)) {
+      expect(dark[name], `token arcade oscuro ${name}`).toBe(hex)
+    }
   })
 
   it("los valores oscuros de :root[data-theme='dark'] son los aprobados en la Fase 1", () => {

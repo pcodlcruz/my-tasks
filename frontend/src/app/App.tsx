@@ -5,6 +5,7 @@ import { LoginPage } from '../features/auth/LoginPage'
 import { BoardPage } from '../features/board/BoardPage'
 import { ProfilePage } from '../features/profile/ProfilePage'
 import { useAppearance } from '../features/profile/useAppearance'
+import { useTimezoneSync } from '../features/profile/useTimezoneSync'
 import { HistoryPage } from '../features/history/HistoryPage'
 import { TrashPage } from '../features/trash/TrashPage'
 import { AdminRoute } from './AdminRoute'
@@ -21,10 +22,16 @@ function AppearanceSync(): null {
   return null
 }
 
+function TimezoneSync(): null {
+  useTimezoneSync()
+  return null
+}
+
 function ProtectedLayout(): JSX.Element {
   return (
     <ProtectedRoute>
       <AppearanceSync />
+      <TimezoneSync />
       <AppHeader />
       <Outlet />
     </ProtectedRoute>
