@@ -572,21 +572,21 @@ interfaz; revisión con `mytasks-security-auditor`.
 
 ### Tests del backend de la Fase 6 (escribirlos primero; deben fallar)
 
-- [ ] T080 [P] [US4] Tests unitarios de las repeticiones en `backend/tests/unit/domain/test_recurrence.py`:
+- [x] T080 [P] [US4] Tests unitarios de las repeticiones en `backend/tests/unit/domain/test_recurrence.py`:
   - `next_occurrence(rule, after)` y `latest_due(rule, upto)` para `once`, `daily`, `weekly` (varios días, cruzando semana) y `monthly`;
   - el día 31 en meses de 30 días y en febrero, incluidos los bisiestos;
   - editar hoy incluye hoy si no se generó nada hoy;
   - reanudar calcula desde hoy;
   - `once` con fecha pasada se rechaza;
   - independiente de los días activos (Clarification Q3).
-- [ ] T081 [P] [US4] Tests unitarios del servicio en `backend/tests/unit/services/test_schedule_service.py`, con un repositorio falso:
+- [x] T081 [P] [US4] Tests unitarios del servicio en `backend/tests/unit/services/test_schedule_service.py`, con un repositorio falso:
   - generación de una sola tarea con `scheduled_for` = la última ocurrencia vencida;
   - no se genera nada si la última tarea sigue activa;
   - se genera si la última está completada, en la papelera o purgada;
   - `once` pasa a `finished`;
   - con 500 tareas activas no se crea nada y se añade un aviso a `notices`;
   - pausada, `next_occurrence = null`.
-- [ ] T082 [US4] Tests de integración del CRUD en `backend/tests/integration/test_schedules.py`:
+- [x] T082 [US4] Tests de integración del CRUD en `backend/tests/integration/test_schedules.py`:
   - 401 y 403 como en el resto de la API;
   - crear con cada tipo de repetición devuelve 201;
   - 422 con campos de texto inválidos (iguales a los de `TaskCreate`), repetición mal formada, días vacíos o repetidos, `month_day` 0 o 32, fecha pasada o campo extra;
@@ -594,7 +594,7 @@ interfaz; revisión con `mytasks-security-auditor`.
   - `PATCH`, `pause` y `resume` (idempotentes) y `DELETE`;
   - 409 `schedule_finished` al editar o reanudar una terminada;
   - 404 si la programación es de otra cuenta o el id tiene una forma inválida.
-- [ ] T083 [US4] Tests de integración de la generación en `backend/tests/integration/test_schedule_generation.py`, con el reloj sobrescrito:
+- [x] T083 [US4] Tests de integración de la generación en `backend/tests/integration/test_schedule_generation.py`, con el reloj sobrescrito:
   - `GET /me/progress` genera la tarea del día con `schedule_id` y `scheduled_for` en `TaskOut`;
   - semanal lunes y miércoles sin completar: sin duplicado el miércoles;
   - 4 días sin entrar con una diaria: una sola tarea;
@@ -603,35 +603,35 @@ interfaz; revisión con `mytasks-security-auditor`.
   - eliminar una programación deja la tarea generada;
   - una cuenta revocada no genera nada y, al reactivarla, se genera solo la ocurrencia más reciente;
   - completar una tarea generada desbloquea `achievement:scheduled_done`.
-- [ ] T084 [P] [US4] Tests de aislamiento de las programaciones en `backend/tests/integration/test_progress_isolation.py`: ninguna cuenta lista, edita, pausa ni borra las de otra; la generación solo crea tareas en la cuenta propietaria
+- [x] T084 [P] [US4] Tests de aislamiento de las programaciones en `backend/tests/integration/test_progress_isolation.py`: ninguna cuenta lista, edita, pausa ni borra las de otra; la generación solo crea tareas en la cuenta propietaria
 
 ### Implementación del backend de la Fase 6
 
-- [ ] T085 [US4] Crear `backend/src/mytasks_api/domain/recurrence.py` (tipos de repetición, `next_occurrence`, `latest_due` y la validación de fecha única ≥ hoy), hasta que pase T080
-- [ ] T086 [US4] Añadir `schedule_id` y `scheduled_for` a `Task` en `backend/src/mytasks_api/domain/task.py`, a `task_repository.py` (incluida la creación de una tarea generada) y a `TaskOut` en `backend/src/mytasks_api/schemas/task.py`, siempre presentes (`null` en las normales) y no editables
-- [ ] T087 [US4] Crear `backend/src/mytasks_api/schemas/schedule.py` (`ScheduleIn`, `ScheduleUpdateIn` y `ScheduleOut`, con `Recurrence` discriminado por `kind`; `extra="forbid"`; el texto con las reglas de `TaskCreate`), conforme a `contracts/progress.yaml`
-- [ ] T088 [US4] Crear `backend/src/mytasks_api/repositories/schedule_repository.py`:
+- [x] T085 [US4] Crear `backend/src/mytasks_api/domain/recurrence.py` (tipos de repetición, `next_occurrence`, `latest_due` y la validación de fecha única ≥ hoy), hasta que pase T080
+- [x] T086 [US4] Añadir `schedule_id` y `scheduled_for` a `Task` en `backend/src/mytasks_api/domain/task.py`, a `task_repository.py` (incluida la creación de una tarea generada) y a `TaskOut` en `backend/src/mytasks_api/schemas/task.py`, siempre presentes (`null` en las normales) y no editables
+- [x] T087 [US4] Crear `backend/src/mytasks_api/schemas/schedule.py` (`ScheduleIn`, `ScheduleUpdateIn` y `ScheduleOut`, con `Recurrence` discriminado por `kind`; `extra="forbid"`; el texto con las reglas de `TaskCreate`), conforme a `contracts/progress.yaml`
+- [x] T088 [US4] Crear `backend/src/mytasks_api/repositories/schedule_repository.py`:
   - CRUD bajo `users/{uid}/schedules`;
   - recuento para el límite de 50;
   - consulta `next_occurrence <= hoy`;
   - transacción de generación por programación (research R7).
-- [ ] T089 [US4] Crear `backend/src/mytasks_api/services/schedule_service.py` (con `get_schedule_service`) y llamar a `generate_due` desde la puesta al día de `progress_service.py`, guardando los avisos en `progress/state.notices` y devolviéndolos en `ProgressOut`, hasta que pasen T081 y T083
-- [ ] T090 [US4] Crear `backend/src/mytasks_api/routers/schedules.py` (`GET`/`POST /api/v1/schedules`, `PATCH`/`DELETE /{id}`, `POST /{id}/pause` y `/{id}/resume`, con `Depends(get_active_user)` y validación del id como en `routers/tasks.py`) y registrarlo en `backend/src/mytasks_api/factory.py` con los errores 409 `schedule_limit` y `schedule_finished`, hasta que pasen T082 y T084
-- [ ] T091 [US4] Añadir los eventos `schedule_created`, `schedule_updated`, `schedule_deleted`, `schedule_generated` y `schedule_skipped_limit` a `backend/src/mytasks_api/logging_config.py` (solo `uid`, `schedule_id` y `day`) y ampliar `backend/tests/unit/test_logging_config.py`
-- [ ] T092 [US4] Ampliar `backend/tests/unit/test_export_openapi.py` con las rutas de `/schedules` y los campos nuevos de `TaskOut`, y repetir `ruff`, `mypy`, la suite de backend y `pytest -m perf` en verde
+- [x] T089 [US4] Crear `backend/src/mytasks_api/services/schedule_service.py` (con `get_schedule_service`) y llamar a `generate_due` desde la puesta al día de `progress_service.py`, guardando los avisos en `progress/state.notices` y devolviéndolos en `ProgressOut`, hasta que pasen T081 y T083
+- [x] T090 [US4] Crear `backend/src/mytasks_api/routers/schedules.py` (`GET`/`POST /api/v1/schedules`, `PATCH`/`DELETE /{id}`, `POST /{id}/pause` y `/{id}/resume`, con `Depends(get_active_user)` y validación del id como en `routers/tasks.py`) y registrarlo en `backend/src/mytasks_api/factory.py` con los errores 409 `schedule_limit` y `schedule_finished`, hasta que pasen T082 y T084
+- [x] T091 [US4] Añadir los eventos `schedule_created`, `schedule_updated`, `schedule_deleted`, `schedule_generated` y `schedule_skipped_limit` a `backend/src/mytasks_api/logging_config.py` (solo `uid`, `schedule_id` y `day`) y ampliar `backend/tests/unit/test_logging_config.py`
+- [x] T092 [US4] Ampliar `backend/tests/unit/test_export_openapi.py` con las rutas de `/schedules` y los campos nuevos de `TaskOut`, y repetir `ruff`, `mypy`, la suite de backend y `pytest -m perf` en verde
 
 ### Tests del frontend de la Fase 6 (escribirlos primero; deben fallar)
 
-- [ ] T093 [P] [US4] Tests unitarios de las etiquetas en `frontend/tests/unit/features/schedules/recurrenceLabel.test.ts`: «Una vez · 5 nov», «Cada día», «Lunes y miércoles», «Día 31 de cada mes (o el último)», y fechas en español
-- [ ] T094 [P] [US4] Tests unitarios en `frontend/tests/unit/features/schedules/ScheduleForm.test.tsx` y `SchedulesPage.test.tsx`:
+- [x] T093 [P] [US4] Tests unitarios de las etiquetas en `frontend/tests/unit/features/schedules/recurrenceLabel.test.ts`: «Una vez · 5 nov», «Cada día», «Lunes y miércoles», «Día 31 de cada mes (o el último)», y fechas en español
+- [x] T094 [P] [US4] Tests unitarios en `frontend/tests/unit/features/schedules/ScheduleForm.test.tsx` y `SchedulesPage.test.tsx`:
   - los campos y errores de S4 reutilizados;
   - el selector de repetición con la vista previa de la próxima aparición;
   - una fecha pasada se rechaza en el cliente y en el servidor;
   - pausar, reanudar y eliminar con confirmación;
   - el estado vacío;
   - el aviso al llegar a 50 y el 409.
-- [ ] T095 [P] [US4] Tests unitarios de las marcas en `frontend/tests/unit/features/board/TaskCard.test.tsx` y del aviso en `DayScoreboard.test.tsx`: la marca «Programada»; «Pendiente desde el lun 3» si `scheduled_for` es anterior a hoy; el aviso de programación que no cupo, con su botón para cerrarlo (confirmación)
-- [ ] T096 [US4] Test e2e `frontend/tests/e2e/schedules.spec.ts`:
+- [x] T095 [P] [US4] Tests unitarios de las marcas en `frontend/tests/unit/features/board/TaskCard.test.tsx` y del aviso en `DayScoreboard.test.tsx`: la marca «Programada»; «Pendiente desde el lun 3» si `scheduled_for` es anterior a hoy; el aviso de programación que no cupo, con su botón para cerrarlo (confirmación)
+- [x] T096 [US4] Test e2e `frontend/tests/e2e/schedules.spec.ts`:
   - crear una semanal (lunes y miércoles) y una de fecha única para mañana;
   - avanzar al lunes 04:01: la tarea está en su cuadrante con la marca, y en S8 entre las programadas de hoy;
   - el miércoles, sin completarla, «pendiente desde el lunes» y sin duplicado;
@@ -639,19 +639,19 @@ interfaz; revisión con `mytasks-security-auditor`.
 
 ### Implementación del frontend de la Fase 6
 
-- [ ] T097 [US4] Añadir los tipos de programación y los campos nuevos de `TaskOut` a `frontend/src/api/types.ts` y crear `frontend/src/api/schedules.ts` (`useSchedules`, `useCreateSchedule`, `useUpdateSchedule`, `usePauseSchedule`, `useResumeSchedule` y `useDeleteSchedule`; cada mutación invalida `schedules` y `progress`)
-- [ ] T098 [US4] Crear `frontend/src/features/schedules/recurrenceLabel.ts`, `ScheduleForm.tsx` (reutilizando los campos de `frontend/src/features/task-form/TaskForm.tsx` y `taskFormSchema.ts`) y `SchedulesPage.tsx` según S10 y S11, hasta que pasen T093 y T094
-- [ ] T099 [US4] Añadir la ruta `/programadas` en `frontend/src/app/App.tsx` y la pestaña «Programadas» en `frontend/src/app/AppHeader.tsx`, que tiene que caber a 320 px con «Accesos»
-- [ ] T100 [US4] Mostrar la marca de programada y «pendiente desde» en `frontend/src/features/board/TaskCard.tsx` (y en `frontend/src/features/shared/TaskBadges.tsx` si aplica), el aviso de `notices` en `DayScoreboard.tsx`, y las programadas de hoy en `StartOfDayDialog.tsx`, hasta que pase T095
-- [ ] T101 [US4] Ampliar `frontend/tests/e2e/a11y.spec.ts` con `/programadas` y el formulario, en claro y oscuro, y el reflujo de la cabecera a 320 px
-- [ ] T102 Ejecutar lint, typecheck, unitarios y e2e del frontend en verde
-- [ ] T103 Revisión de seguridad de la Fase 6 con `mytasks-security-auditor` y registrar el informe en `specs/007-daily-progress-arcade/security-review-fase-6.md`. Corregir en esta misma PR lo que marque como medio o superior. Puntos a revisar:
+- [x] T097 [US4] Añadir los tipos de programación y los campos nuevos de `TaskOut` a `frontend/src/api/types.ts` y crear `frontend/src/api/schedules.ts` (`useSchedules`, `useCreateSchedule`, `useUpdateSchedule`, `usePauseSchedule`, `useResumeSchedule` y `useDeleteSchedule`; cada mutación invalida `schedules` y `progress`)
+- [x] T098 [US4] Crear `frontend/src/features/schedules/recurrenceLabel.ts`, `ScheduleForm.tsx` (reutilizando los campos de `frontend/src/features/task-form/TaskForm.tsx` y `taskFormSchema.ts`) y `SchedulesPage.tsx` según S10 y S11, hasta que pasen T093 y T094
+- [x] T099 [US4] Añadir la ruta `/programadas` en `frontend/src/app/App.tsx` y la pestaña «Programadas» en `frontend/src/app/AppHeader.tsx`, que tiene que caber a 320 px con «Accesos»
+- [x] T100 [US4] Mostrar la marca de programada y «pendiente desde» en `frontend/src/features/board/TaskCard.tsx` (y en `frontend/src/features/shared/TaskBadges.tsx` si aplica), el aviso de `notices` en `DayScoreboard.tsx`, y las programadas de hoy en `StartOfDayDialog.tsx`, hasta que pase T095
+- [x] T101 [US4] Ampliar `frontend/tests/e2e/a11y.spec.ts` con `/programadas` y el formulario, en claro y oscuro, y el reflujo de la cabecera a 320 px
+- [x] T102 Ejecutar lint, typecheck, unitarios y e2e del frontend en verde
+- [x] T103 Revisión de seguridad de la Fase 6 con `mytasks-security-auditor` y registrar el informe en `specs/007-daily-progress-arcade/security-review-fase-6.md`. Corregir en esta misma PR lo que marque como medio o superior. Puntos a revisar:
   - validación cerrada de las repeticiones;
   - límites de 50 y 500;
   - generación solo en la cuenta propietaria y no para cuentas revocadas;
   - ausencia de duplicados con concurrencia;
   - registros sin títulos.
-- [ ] T104 Marcar T080–T103 como hechas en este fichero y anotar el avance de la fase
+- [x] T104 Marcar T080–T103 como hechas en este fichero y anotar el avance de la fase
 
 **Checkpoint**: las cuatro primeras historias funcionan; las programaciones no necesitan
 infraestructura.
