@@ -134,3 +134,11 @@ body {
   background-color: rgb(var(--color-page));
   color: rgb(var(--color-ink));
 }
+
+/* Arcade celebrations (feature 007): with reduced motion they appear and go without moving. The
+ * component already leaves the animation out; this also covers any other `animate-pop`. */
+@media (prefers-reduced-motion: reduce) {
+  .animate-pop {
+    animation: none;
+  }
+}

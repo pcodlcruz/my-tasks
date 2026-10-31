@@ -506,14 +506,14 @@ fusionan una detrás de otra.
 
 ### Tests de la Fase 5 (escribirlos primero; deben fallar)
 
-- [ ] T071 [P] [US3] Tests unitarios en `frontend/tests/unit/features/progress/Celebrations.test.tsx`:
+- [X] T071 [P] [US3] Tests unitarios en `frontend/tests/unit/features/progress/Celebrations.test.tsx`:
   - muestra en cola los anuncios de `progress.announcements`;
   - cada uno se cierra solo en unos 3 s o con el botón, y se confirma con `POST /ack` una sola vez;
   - con `prefers-reduced-motion: reduce`, sin la clase de animación;
   - nunca atrapa el foco;
   - los textos son los de la spec.
-- [ ] T072 [P] [US3] Tests unitarios del marcador arcade en `frontend/tests/unit/features/progress/DayScoreboard.test.tsx`: puntuación, nivel con nombre y puntos para el siguiente; con `arcade: null`, sin puntuación ni nivel, pero con meta, progreso y racha
-- [ ] T073 [US3] Test e2e `frontend/tests/e2e/arcade.spec.ts`:
+- [X] T072 [P] [US3] Tests unitarios del marcador arcade en `frontend/tests/unit/features/progress/DayScoreboard.test.tsx`: puntuación, nivel con nombre y puntos para el siguiente; con `arcade: null`, sin puntuación ni nivel, pero con meta, progreso y racha
+- [X] T073 [US3] Test e2e `frontend/tests/e2e/arcade.spec.ts`:
   - completar la primera tarea: «Logro: Primera moneda» y +100;
   - completar la tercera: «¡FASE SUPERADA!»;
   - con dos contextos de navegador, cada anuncio se ve en uno solo;
@@ -523,14 +523,32 @@ fusionan una detrás de otra.
 
 ### Implementación de la Fase 5
 
-- [ ] T074 [US3] Añadir `useAcknowledge` a `frontend/src/api/progress.ts` (confirma anuncios y avisos)
-- [ ] T075 [US3] Crear `frontend/src/features/progress/Celebrations.tsx` según S3-c (región `aria-live="polite"`, cola, cierre automático y confirmación) y montarlo en `frontend/src/app/App.tsx`, con la regla `@media (prefers-reduced-motion: reduce)` en `frontend/src/index.css`, hasta que pase T071
-- [ ] T076 [US3] Añadir la puntuación, el nivel y la progresión al siguiente nivel a `frontend/src/features/progress/DayScoreboard.tsx`, ocultos con `arcade: null`, hasta que pase T072. Quitar la celebración mínima de la Fase 3, que ahora sustituye `Celebrations`
-- [ ] T077 [US3] Añadir el interruptor «Modo arcade» a `frontend/src/features/profile/ProgressSettings.tsx`
-- [ ] T078 [US3] Ampliar `frontend/tests/e2e/a11y.spec.ts` con una celebración visible y con el modo arcade desactivado, en claro y oscuro
-- [ ] T079 Ejecutar lint, typecheck, unitarios y e2e del frontend en verde, y marcar T071–T079 como hechas en este fichero
+- [X] T074 [US3] Añadir `useAcknowledge` a `frontend/src/api/progress.ts` (confirma anuncios y avisos)
+- [X] T075 [US3] Crear `frontend/src/features/progress/Celebrations.tsx` según S3-c (región `aria-live="polite"`, cola, cierre automático y confirmación) y montarlo en `frontend/src/app/App.tsx`, con la regla `@media (prefers-reduced-motion: reduce)` en `frontend/src/index.css`, hasta que pase T071
+- [X] T076 [US3] Añadir la puntuación, el nivel y la progresión al siguiente nivel a `frontend/src/features/progress/DayScoreboard.tsx`, ocultos con `arcade: null`, hasta que pase T072. Quitar la celebración mínima de la Fase 3, que ahora sustituye `Celebrations`
+- [X] T077 [US3] Añadir el interruptor «Modo arcade» a `frontend/src/features/profile/ProgressSettings.tsx`
+- [X] T078 [US3] Ampliar `frontend/tests/e2e/a11y.spec.ts` con una celebración visible y con el modo arcade desactivado, en claro y oscuro
+- [X] T079 Ejecutar lint, typecheck, unitarios y e2e del frontend en verde, y marcar T071–T079 como hechas en este fichero
 
 **Checkpoint**: US1, US2 y US3 funcionan; la gamificación arcade está completa salvo el historial.
+
+**Avance (2026-10-31)**: Fase 5 completa (T071–T079).
+- **Tests**: 491 unitarios y 89 e2e en verde. Los e2e pasan también en condiciones de CI (UTC, 2
+  workers, emuladores vacíos), y `arcade.spec.ts`, tres veces seguidas. `lint`, `prettier` y
+  `tsc -b` están en verde en un clon limpio.
+  - Los tests se escribieron antes que el código, pero no se ejecutaron para verlos fallar antes de
+    implementar.
+- **Decisiones**:
+  - Cada anuncio se confirma con `POST /ack` en cuanto se muestra, no al cerrarse. Así otro
+    navegador que recargue después ya no lo ve. Lo que se ve en pantalla no se quita de la caché
+    hasta que se cierra.
+  - Los nombres de los niveles y de los logros están copiados en
+    `features/progress/arcadeCatalog.ts` (el servidor envía un número o un id). Hay que mantenerlos
+    al día con `domain/progress.py`; uno desconocido sale con un texto genérico.
+  - El marcador marca la meta cumplida con «✓ Meta cumplida», también sin el modo arcade. La
+    celebración «¡FASE SUPERADA! +500» la hace S3-c.
+  - Las celebraciones salen arriba, centradas y bajo la cabecera, y no capturan los clics fuera de
+    la tarjeta (`pointer-events-none`). Los avisos siguen abajo a la derecha.
 
 ---
 

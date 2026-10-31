@@ -30,9 +30,9 @@ function toggleWeekday(days: readonly Weekday[], day: Weekday): Weekday[] {
   return next.sort((a, b) => a - b)
 }
 
-// «Progreso y juego» in «Perfil» (S7 v2): the daily goal, the active days and the time zone. Each
-// change is saved at once, like the rest of the page. The switches for the morning review and the
-// arcade mode arrive in later phases. «Restablecer» leaves this section alone.
+// «Progreso y juego» in «Perfil» (S7 v2): the daily goal, the active days, the time zone and the
+// switches of the start-of-day review and the arcade mode. Each change is saved at once, like the
+// rest of the page. «Restablecer» leaves this section alone.
 export function ProgressSettings({ profile, onChange }: ProgressSettingsProps): JSX.Element {
   // Read once: the device's zone does not change while the page is open.
   const [detected] = useState(detectTimezone)
@@ -178,6 +178,24 @@ export function ProgressSettings({ profile, onChange }: ProgressSettingsProps): 
             describedBy="morning-review-hint"
             checked={profile.morning_review}
             onChange={(morning_review) => onChange({ morning_review })}
+          />
+        </div>
+
+        <div className="flex items-start justify-between gap-4 border-t border-border pt-4">
+          <div>
+            <p id="arcade-mode-label" className="text-body-strong text-text">
+              Modo arcade
+            </p>
+            <p id="arcade-mode-hint" className="mt-0.5 text-caption text-text-muted">
+              Puntuación, niveles, logros y celebraciones. Si lo desactivas, sigues viendo tu
+              progreso y tu racha.
+            </p>
+          </div>
+          <Switch
+            labelledBy="arcade-mode-label"
+            describedBy="arcade-mode-hint"
+            checked={profile.arcade_mode}
+            onChange={(arcade_mode) => onChange({ arcade_mode })}
           />
         </div>
 

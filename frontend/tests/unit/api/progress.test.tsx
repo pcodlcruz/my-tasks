@@ -218,6 +218,28 @@ describe('progress hooks', () => {
     })
   })
 
+  describe('useAcknowledge', () => {
+    it('hace POST /me/progress/ack con los anuncios y no toca la caché', async () => {
+      const queryClient = newQueryClient()
+      queryClient.setQueryData(['progress'], PROGRESS)
+      const { useAcknowledge } = await import('../../../src/api/progress')
+      vi.mocked(fetch).mockImplementation(() =>
+        Promise.resolve(new Response(null, { status: 204 })),
+      )
+
+      const { result } = renderHook(() => useAcknowledge(), { wrapper: createWrapper(queryClient) })
+      await act(async () => {
+        await result.current.mutateAsync({ announcement_ids: ['a1'] })
+      })
+
+      const [url, init] = vi.mocked(fetch).mock.calls[0] ?? []
+      expect(url).toBe(`${PROGRESS_URL}/ack`)
+      expect(init?.method).toBe('POST')
+      expect(JSON.parse(String(init?.body))).toEqual({ announcement_ids: ['a1'] })
+      expect(queryClient.getQueryData(['progress'])).toEqual(PROGRESS)
+    })
+  })
+
   describe('invalidación tras cambiar una tarea', () => {
     function seeded(): QueryClient {
       const queryClient = newQueryClient()
@@ -277,6 +299,7 @@ describe('progress hooks', () => {
       { active_weekdays: [1, 2, 3] },
       { timezone: 'Atlantic/Canary' },
       { morning_review: false },
+      { arcade_mode: false },
     ]
 
     it.each(PROGRESS_CHANGES)(

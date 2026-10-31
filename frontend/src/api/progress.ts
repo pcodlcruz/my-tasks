@@ -1,6 +1,6 @@
 import { type QueryClient, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { ApiClientError, apiFetch } from '../lib/apiClient'
-import type { Progress } from './types'
+import type { Acknowledgement, Progress } from './types'
 
 export const PROGRESS_QUERY_KEY = ['progress'] as const
 
@@ -56,6 +56,20 @@ export function useMarkReviewSeen() {
 export function useSetMission() {
   const storeProgress = useStoreProgress()
   return useMutation({ mutationFn: setMission, onSuccess: storeProgress })
+}
+
+export function acknowledge(messages: Acknowledgement): Promise<void> {
+  return apiFetch<undefined>('/api/v1/me/progress/ack', {
+    method: 'POST',
+    body: JSON.stringify(messages),
+  })
+}
+
+// Confirms that announcements or notices have been shown, so no other device shows them again.
+// Nothing changes in the cache: what is on screen goes on until it closes, and the next reload of
+// the progress no longer brings them.
+export function useAcknowledge() {
+  return useMutation({ mutationFn: acknowledge })
 }
 
 const MISSION_INVALID_MESSAGE =

@@ -1,4 +1,5 @@
-import type { Progress } from '../../api/types'
+import type { ArcadeScore, Progress } from '../../api/types'
+import { formatScore } from './arcadeCatalog'
 import { EnergyBar } from './EnergyBar'
 
 interface DayScoreboardProps {
@@ -16,8 +17,9 @@ function completedText(completed: number, goal: number): string {
 // The day's scoreboard above the quadrants (S3 v3): "HOY 2/3", the energy bar and the streak.
 // The pixel figure is hidden from assistive technology and repeated in plain words; with the
 // arcade mode off it becomes "Hoy 2 de 3" in the normal font. A failure to load it is a discreet
-// notice, never an alert: the board works without it (FR-034). Score, level, mission and the
-// arcade celebrations arrive in later phases; here the goal being met is announced politely.
+// notice, never an alert: the board works without it (FR-034). With the arcade mode on it also
+// shows the score and the level; meeting the goal is only marked here, the celebrations (S3-c)
+// announce it.
 export function DayScoreboard({
   progress,
   isLoading,
@@ -86,6 +88,12 @@ function Scoreboard({ progress, onOpenReview }: ScoreboardProps): JSX.Element {
 
       <EnergyBar completed={completed} goal={goal} />
 
+      {goalMet && (
+        <p className="text-caption font-semibold text-success">
+          <span aria-hidden="true">✓ </span>Meta cumplida
+        </p>
+      )}
+
       {streak > 0 && (
         <p className="flex items-center gap-2 text-caption font-semibold text-streak">
           <FlameIcon />
@@ -112,6 +120,8 @@ function Scoreboard({ progress, onOpenReview }: ScoreboardProps): JSX.Element {
         <p className="text-caption text-text-muted">Hoy no es día activo: la racha no cambia.</p>
       )}
 
+      {progress.arcade !== null && <ArcadeScoreboard arcade={progress.arcade} />}
+
       <button
         type="button"
         onClick={onOpenReview}
@@ -120,9 +130,32 @@ function Scoreboard({ progress, onOpenReview }: ScoreboardProps): JSX.Element {
         <span className="font-pixel text-xs leading-5">PULSA START</span>
         <span className="sr-only">: abrir el inicio de jornada</span>
       </button>
+    </div>
+  )
+}
 
-      <p aria-live="polite" className="font-pixel text-xs leading-5 text-gold">
-        {goalMet && <span className="inline-block motion-safe:animate-pop">¡FASE SUPERADA!</span>}
+// Score and level (arcade mode): the pixel figure is decorative, its words go next to it.
+function ArcadeScoreboard({ arcade }: { arcade: ArcadeScore }): JSX.Element {
+  const score = formatScore(arcade.score)
+  return (
+    <div className="flex flex-col">
+      <p className="flex items-center gap-1.5 text-caption font-semibold text-gold">
+        <span aria-hidden="true">★</span>
+        NIVEL {arcade.level} · {arcade.level_name}
+      </p>
+      <p className="flex flex-wrap items-baseline gap-x-2">
+        <span aria-hidden="true" className="font-pixel text-sm leading-6 text-gold">
+          {score} PTS
+        </span>
+        <span className="sr-only">{score} puntos</span>
+        <span className="text-caption text-text-muted">
+          +{formatScore(arcade.points_today)} hoy
+        </span>
+      </p>
+      <p className="text-caption text-text-muted">
+        {arcade.next_level_at === null
+          ? 'Nivel máximo'
+          : `Faltan ${formatScore(arcade.next_level_at - arcade.score)} para el nivel ${arcade.level + 1}`}
       </p>
     </div>
   )

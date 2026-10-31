@@ -178,6 +178,21 @@ describe('<ProgressSettings>', () => {
     })
   })
 
+  describe('modo arcade', () => {
+    it('el interruptor refleja el perfil y lo cambia', async () => {
+      const { onChange } = await renderSettings({ arcade_mode: true })
+      const toggle = screen.getByRole('switch', { name: 'Modo arcade' })
+
+      expect(toggle).toHaveAttribute('aria-checked', 'true')
+      expect(toggle).toHaveAccessibleDescription(
+        'Puntuación, niveles, logros y celebraciones. Si lo desactivas, sigues viendo tu progreso y tu racha.',
+      )
+      await userEvent.click(toggle)
+
+      expect(onChange).toHaveBeenCalledWith({ arcade_mode: false })
+    })
+  })
+
   it('aclara que restablecer los valores por defecto no cambia esta sección', async () => {
     await renderSettings()
 

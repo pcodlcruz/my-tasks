@@ -345,7 +345,7 @@ test.describe('Accesibilidad WCAG 2.1 AA', () => {
         .click()
       const scoreboard = page.getByRole('region', { name: 'Marcador del día' })
       await expect(scoreboard).toContainText('2 de 1 tarea completada hoy')
-      await expect(scoreboard).toContainText('¡FASE SUPERADA!')
+      await expect(scoreboard).toContainText('Meta cumplida')
 
       await expectNoViolations(page, `S3 v3 · Marcador por encima de la meta (${colorScheme})`)
     })
@@ -401,6 +401,40 @@ test.describe('Accesibilidad WCAG 2.1 AA', () => {
       await expect(page.getByRole('button', { name: /iniciar sesión con google/i })).toBeVisible()
 
       await expectNoViolations(page, `S1 · Iniciar sesión (${colorScheme})`)
+    })
+  }
+
+  for (const colorScheme of ['light', 'dark'] as const) {
+    test(`una celebración y el modo arcade desactivado no tienen violaciones en tema ${colorScheme === 'light' ? 'claro' : 'oscuro'}`, async ({
+      page,
+      loginAsGoogleUser,
+    }) => {
+      await page.emulateMedia({ colorScheme })
+      await loginAsGoogleUser(`a11y-arcade-${colorScheme}-${crypto.randomUUID()}@example.com`)
+      await createTask(page, ONE_TASK_PER_QUADRANT[0] as NewTask)
+      await createTask(page, ONE_TASK_PER_QUADRANT[1] as NewTask)
+
+      await page
+        .locator('article', { hasText: 'Tarea hacer ahora' })
+        .getByRole('button', { name: 'Completar' })
+        .click()
+      await expect(page.locator('[data-celebrations]')).toContainText('Logro: Primera moneda')
+      await expect(page.getByRole('region', { name: 'Marcador del día' })).toContainText(
+        '100 puntos',
+      )
+      await expectNoViolations(page, `S3-c · Celebración y marcador arcade (${colorScheme})`)
+
+      await page.getByRole('link', { name: 'Perfil' }).click()
+      const toggle = page.getByRole('switch', { name: 'Modo arcade' })
+      await toggle.click()
+      await expect(toggle).toHaveAttribute('aria-checked', 'false')
+      await expect(page.getByRole('status').filter({ hasText: 'Guardado' })).toBeVisible()
+      await expectNoViolations(page, `S7 v2 · Modo arcade desactivado (${colorScheme})`)
+      await goTo(page, 'Tablero')
+      await expect(page.getByRole('region', { name: 'Marcador del día' })).toContainText(
+        'Hoy 1 de 3',
+      )
+      await expectNoViolations(page, `S3 v3 · Tablero sin modo arcade (${colorScheme})`)
     })
   }
 

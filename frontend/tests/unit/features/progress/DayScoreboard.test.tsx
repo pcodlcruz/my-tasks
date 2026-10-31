@@ -80,19 +80,19 @@ describe('<DayScoreboard>', () => {
     expect(scoreboard()).toHaveTextContent(text)
   })
 
-  it('al cumplir la meta anuncia «¡FASE SUPERADA!» en una región que no interrumpe', () => {
+  it('con la meta cumplida lo indica con una marca y texto, sin celebrarlo aquí', () => {
     renderScoreboard({ progress: progress({ completed_count: 3, goal_met: true }) })
 
-    const live = scoreboard().querySelector('[aria-live="polite"]')
-    expect(live).toHaveTextContent('¡FASE SUPERADA!')
+    expect(scoreboard()).toHaveTextContent('✓ Meta cumplida')
+    // The celebrations (S3-c) announce it, once; the scoreboard does not repeat it.
+    expect(scoreboard()).not.toHaveTextContent('¡FASE SUPERADA!')
+    expect(scoreboard().querySelector('[aria-live]')).toBeNull()
   })
 
-  it('sin la meta cumplida la región de anuncios está vacía', () => {
+  it('sin la meta cumplida no muestra la marca', () => {
     renderScoreboard({ progress: progress({ completed_count: 2 }) })
 
-    const live = scoreboard().querySelector('[aria-live="polite"]')
-    expect(live).not.toBeNull()
-    expect(live).toBeEmptyDOMElement()
+    expect(scoreboard()).not.toHaveTextContent('Meta cumplida')
   })
 
   it('por encima de la meta la cifra de más va en el tono extra', () => {
@@ -196,6 +196,48 @@ describe('<DayScoreboard>', () => {
       })
 
       expect(scoreboard()).toHaveTextContent('Misión 2/2 cumplida')
+    })
+  })
+
+  describe('modo arcade', () => {
+    const ARCADE = {
+      score: 3450,
+      level: 3,
+      level_name: 'Jugador',
+      next_level_at: 6000,
+      points_today: 800,
+    }
+
+    it('muestra la puntuación, el nivel con su nombre y lo que falta para el siguiente', () => {
+      renderScoreboard({ progress: progress({ arcade: ARCADE }) })
+
+      expect(scoreboard()).toHaveTextContent('NIVEL 3 · Jugador')
+      expect(screen.getByText('3.450 PTS')).toHaveAttribute('aria-hidden', 'true')
+      expect(scoreboard()).toHaveTextContent('3.450 puntos')
+      expect(scoreboard()).toHaveTextContent('Faltan 2.550 para el nivel 4')
+      expect(scoreboard()).toHaveTextContent('+800 hoy')
+    })
+
+    it('en el último nivel no habla de un siguiente', () => {
+      renderScoreboard({
+        progress: progress({
+          arcade: { ...ARCADE, level: 10, level_name: 'Jefe final', next_level_at: null },
+        }),
+      })
+
+      expect(scoreboard()).toHaveTextContent('NIVEL 10 · Jefe final')
+      expect(scoreboard()).toHaveTextContent('Nivel máximo')
+      expect(scoreboard()).not.toHaveTextContent('Faltan')
+    })
+
+    it('desactivado no muestra puntuación ni nivel, pero sí la meta, el progreso y la racha', () => {
+      renderScoreboard({
+        progress: progress({ arcade: null, completed_count: 2, streak: 3, streak_at_stake: true }),
+      })
+
+      expect(scoreboard()).not.toHaveTextContent(/PTS|puntos|NIVEL/)
+      expect(scoreboard()).toHaveTextContent('2 de 3 tareas completadas hoy')
+      expect(scoreboard()).toHaveTextContent('Racha 3 días')
     })
   })
 })
