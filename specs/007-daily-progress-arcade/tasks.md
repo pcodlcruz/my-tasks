@@ -409,8 +409,9 @@ Fase 5; en esta fase solo se muestra la celebración mínima de meta cumplida (U
     que Playwright añade a cada petición con `page.route`. No ha hecho falta añadir la cabecera al
     CORS en local (LOW-002 de la Fase 2), porque esa cabecera no pasa por la petición previa del
     navegador.
-  - «Restaurar» también invalida el progreso, porque una tarea completada que vuelve de la papelera
-    cuenta otra vez.
+  - «Restaurar» también invalida el progreso. Hoy el servidor no lo cambia al restaurar (solo
+    completar, reabrir y mandar a la papelera), pero así el marcador no depende de qué transiciones
+    cuente el servidor; cuesta una petición más.
   - El texto de «Restablecer» dice ahora «No cambia tu nombre, tu avatar ni «Progreso y juego»», como
     en S7 v2.
 

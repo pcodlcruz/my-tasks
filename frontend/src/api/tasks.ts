@@ -192,8 +192,9 @@ function undoTrash(queryClient: QueryClient, taskId: string): void {
     .catch((error: unknown) => handleMutationError(queryClient, error))
 }
 
-// Every transition can change today's progress (completing, reopening, and a completed task
-// going to or coming back from the trash), so the scoreboard is asked for again with the views.
+// Completing, reopening and moving to the trash can change today's progress, so the scoreboard is
+// asked for again with the views. Restoring does not change it today; it is refreshed too so the
+// scoreboard does not depend on which transitions the server counts.
 function useTransition(
   action: TransitionAction,
   onSuccess: (task: Task, queryClient: QueryClient) => void,
