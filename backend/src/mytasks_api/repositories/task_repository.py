@@ -48,6 +48,8 @@ def _document_to_task(task_id: str, data: dict[str, Any]) -> Task:
         completed_at=_to_utc(data.get("completed_at")),
         trashed_at=_to_utc(data.get("trashed_at")),
         purge_at=_to_utc(data.get("purge_at")),
+        completed_day=data.get("completed_day"),
+        points_awarded_on=data.get("points_awarded_on"),
     )
 
 
@@ -200,6 +202,17 @@ class TaskRepository:
             .where(filter=FieldFilter("in_trash", "==", False))
         )
         # The SDK's type stubs mark `get` as an unbound method: this is only a mypy quirk.
+        result = await query.count().get()  # type: ignore[call-arg]
+        return int(result[0][0].value)
+
+    async def count_active_do_now(self, uid: str) -> int:
+        query = (
+            self._tasks_collection(uid)
+            .where(filter=FieldFilter("status", "==", Status.ACTIVE.value))
+            .where(filter=FieldFilter("in_trash", "==", False))
+            .where(filter=FieldFilter("urgent", "==", True))
+            .where(filter=FieldFilter("important", "==", True))
+        )
         result = await query.count().get()  # type: ignore[call-arg]
         return int(result[0][0].value)
 

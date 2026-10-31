@@ -18,13 +18,17 @@ from mytasks_api.domain.profile import (
     HistoryDays,
     InvalidAvatarError,
     InvalidDisplayNameError,
+    InvalidProgressSettingError,
     Theme,
     UploadWindow,
     choose_avatar,
     default_profile,
+    normalize_active_weekdays,
     normalize_display_name,
     profile_from_document,
     register_upload,
+    validate_daily_goal,
+    validate_timezone,
 )
 
 pytestmark = pytest.mark.unit
@@ -257,3 +261,86 @@ def test_uploads_below_the_limit_just_count() -> None:
     assert register_upload(window, NOW + timedelta(minutes=30)) == UploadWindow(
         window_start=NOW, count=4
     )
+
+
+# --- Progress settings (feature 007) -------------------------------------------------------
+
+
+def test_default_profile_uses_the_default_progress_settings() -> None:
+    profile = default_profile()
+
+    assert profile.daily_goal == 3
+    assert profile.active_weekdays == (1, 2, 3, 4, 5, 6, 7)
+    assert profile.timezone is None
+    assert profile.effective_timezone == "Europe/Madrid"
+    assert profile.morning_review is True
+    assert profile.arcade_mode is True
+
+
+@pytest.mark.parametrize("goal", [1, 20])
+def test_validate_daily_goal_accepts_one_to_twenty(goal: int) -> None:
+    assert validate_daily_goal(goal) == goal
+
+
+@pytest.mark.parametrize("goal", [0, 21, -3])
+def test_validate_daily_goal_rejects_values_out_of_range(goal: int) -> None:
+    with pytest.raises(InvalidProgressSettingError):
+        validate_daily_goal(goal)
+
+
+def test_normalize_active_weekdays_sorts_the_days() -> None:
+    assert normalize_active_weekdays([5, 1, 3]) == (1, 3, 5)
+
+
+@pytest.mark.parametrize("days", [[], [1, 1], [0], [8]])
+def test_normalize_active_weekdays_rejects_empty_repeated_or_unknown_days(days: list[int]) -> None:
+    with pytest.raises(InvalidProgressSettingError):
+        normalize_active_weekdays(days)
+
+
+def test_validate_timezone_only_accepts_iana_zones() -> None:
+    assert validate_timezone("America/New_York") == "America/New_York"
+    with pytest.raises(InvalidProgressSettingError):
+        validate_timezone("Mars/Olympus")
+
+
+def test_profile_from_document_reads_stored_progress_settings() -> None:
+    profile = profile_from_document(
+        {
+            "daily_goal": 5,
+            "active_weekdays": [1, 2, 3, 4, 5],
+            "timezone": "Atlantic/Canary",
+            "morning_review": False,
+            "arcade_mode": False,
+        }
+    )
+
+    assert profile.daily_goal == 5
+    assert profile.active_weekdays == (1, 2, 3, 4, 5)
+    assert profile.effective_timezone == "Atlantic/Canary"
+    assert profile.morning_review is False
+    assert profile.arcade_mode is False
+
+
+def test_profile_from_document_falls_back_on_invalid_progress_settings() -> None:
+    profile = profile_from_document(
+        {
+            "daily_goal": True,
+            "active_weekdays": [],
+            "timezone": "Mars/Olympus",
+            "morning_review": "yes",
+            "arcade_mode": 0,
+        }
+    )
+
+    assert profile.daily_goal == 3
+    assert profile.active_weekdays == (1, 2, 3, 4, 5, 6, 7)
+    assert profile.timezone is None
+    assert profile.morning_review is True
+    assert profile.arcade_mode is True
+
+
+def test_reset_never_touches_the_progress_settings() -> None:
+    progress_fields = {"daily_goal", "active_weekdays", "timezone", "morning_review", "arcade_mode"}
+
+    assert progress_fields.isdisjoint(RESETTABLE_FIELDS)

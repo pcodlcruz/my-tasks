@@ -24,6 +24,11 @@ DEFAULT_PROFILE = {
     "history_days": None,
     "display_name": None,
     "avatar": {"kind": "initials", "preset": None, "version": 0},
+    "daily_goal": 3,
+    "active_weekdays": [1, 2, 3, 4, 5, 6, 7],
+    "timezone": None,
+    "morning_review": True,
+    "arcade_mode": True,
 }
 
 
@@ -465,3 +470,116 @@ async def test_two_simultaneous_avatar_choices_both_succeed_and_count_twice(
     final = (await client.get(PROFILE_URL, headers=headers)).json()
     assert final["avatar"]["version"] == 2
     assert final["avatar"]["preset"] in {"avatar-01", "avatar-02"}
+
+
+# --- Progress settings (feature 007) -------------------------------------------------------
+
+
+async def test_patch_profile_saves_the_progress_settings(
+    client: httpx.AsyncClient, google_user: GoogleUserFactory
+) -> None:
+    user = await google_user("ana@example.com")
+    changes = {
+        "daily_goal": 5,
+        "active_weekdays": [5, 1, 2, 3, 4],
+        "timezone": "Atlantic/Canary",
+        "morning_review": False,
+        "arcade_mode": False,
+    }
+
+    response = await client.patch(PROFILE_URL, json=changes, headers=_auth(user.id_token))
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["daily_goal"] == 5
+    assert body["active_weekdays"] == [1, 2, 3, 4, 5]
+    assert body["timezone"] == "Atlantic/Canary"
+    assert body["morning_review"] is False
+    assert body["arcade_mode"] is False
+
+
+@pytest.mark.parametrize(
+    "changes",
+    [
+        {"daily_goal": 0},
+        {"daily_goal": 21},
+        {"daily_goal": "3"},
+        {"daily_goal": True},
+        {"active_weekdays": []},
+        {"active_weekdays": [1, 1]},
+        {"active_weekdays": [8]},
+        {"timezone": "Mars/Olympus"},
+        {"timezone": None},
+        {"daily_goal": None},
+        {"morning_review": None},
+        {"arcade_mode": "yes"},
+    ],
+)
+async def test_patch_profile_rejects_invalid_progress_settings_and_saves_nothing(
+    changes: dict[str, object],
+    client: httpx.AsyncClient,
+    google_user: GoogleUserFactory,
+    firestore_client: firestore.AsyncClient,
+) -> None:
+    user = await google_user("ana@example.com")
+
+    response = await client.patch(
+        PROFILE_URL, json={"theme": "dark", **changes}, headers=_auth(user.id_token)
+    )
+
+    assert response.status_code == 422
+    snapshot = await _profile_ref(firestore_client, user.uid).get()
+    assert not snapshot.exists
+
+
+async def test_reset_keeps_the_progress_settings(
+    client: httpx.AsyncClient, google_user: GoogleUserFactory
+) -> None:
+    user = await google_user("ana@example.com")
+    await client.patch(
+        PROFILE_URL,
+        json={"daily_goal": 7, "arcade_mode": False, "theme": "dark"},
+        headers=_auth(user.id_token),
+    )
+
+    response = await client.delete(PROFILE_URL, headers=_auth(user.id_token))
+
+    body = response.json()
+    assert body["theme"] == "system"
+    assert body["daily_goal"] == 7
+    assert body["arcade_mode"] is False
+
+
+async def test_changing_the_time_zone_moves_today_but_not_the_closed_days(
+    client: httpx.AsyncClient,
+    google_user: GoogleUserFactory,
+    firestore_client: firestore.AsyncClient,
+) -> None:
+    user = await google_user("ana@example.com")
+    # 05:00 UTC: 06:00 in Madrid (a new day) but 00:00 in New York (still yesterday).
+    now = {"X-Test-Now": "2026-11-04T05:00:00+00:00"}
+    madrid = await client.get("/api/v1/me/progress", headers={**_auth(user.id_token), **now})
+    closed = (
+        await firestore_client.collection("users")
+        .document(user.uid)
+        .collection("progress")
+        .document("state")
+        .get()
+    ).to_dict()
+
+    await client.patch(
+        PROFILE_URL, json={"timezone": "America/New_York"}, headers=_auth(user.id_token)
+    )
+    new_york = await client.get("/api/v1/me/progress", headers={**_auth(user.id_token), **now})
+
+    assert madrid.json()["today"] == "2026-11-04"
+    assert new_york.json()["today"] == "2026-11-03"
+    after = (
+        await firestore_client.collection("users")
+        .document(user.uid)
+        .collection("progress")
+        .document("state")
+        .get()
+    ).to_dict()
+    assert after is not None and closed is not None
+    assert after["last_closed_day"] == closed["last_closed_day"]

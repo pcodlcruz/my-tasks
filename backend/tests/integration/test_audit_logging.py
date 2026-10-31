@@ -319,3 +319,29 @@ async def test_a_rejected_avatar_upload_is_not_logged_as_an_upload_and_leaks_no_
     assert response.status_code == 415
     assert _records(caplog, "avatar_uploaded") == []
     assert "contenido-secreto-del-archivo" not in caplog.text
+
+
+async def test_setting_the_mission_logs_the_day_and_count_but_no_task_data(
+    client: httpx.AsyncClient,
+    google_user: GoogleUserFactory,
+    seed_task: SeedTaskFactory,
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    caplog.set_level(logging.INFO, logger=LOGGER_NAME)
+    user = await google_user("ana@example.com")
+    task_id = await seed_task(user.uid, title="Pagar el alquiler")
+
+    response = await client.put(
+        "/api/v1/me/progress/today/mission",
+        json={"task_ids": [task_id]},
+        headers={"Authorization": f"Bearer {user.id_token}"},
+    )
+
+    assert response.status_code == 200
+    records = _records(caplog, "progress_mission_set")
+    assert len(records) == 1
+    assert records[0].uid == user.uid  # type: ignore[attr-defined]
+    assert records[0].count == "1"  # type: ignore[attr-defined]
+    assert records[0].day  # type: ignore[attr-defined]
+    assert "Pagar el alquiler" not in caplog.text
+    assert task_id not in caplog.text

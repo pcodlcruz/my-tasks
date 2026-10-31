@@ -11,6 +11,7 @@ dependencies = [
     "firebase-admin>=6.5",
     "uvicorn[standard]>=0.30",
     "pillow>=13.0.0",
+    "tzdata>=2025.2",
 ]
 
 [dependency-groups]
