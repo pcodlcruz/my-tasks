@@ -13,6 +13,7 @@ from tests.integration.progress_helpers import (
     complete,
     get_progress,
     headers,
+    reopen,
 )
 
 if TYPE_CHECKING:
@@ -126,6 +127,27 @@ async def test_day_detail_lists_the_tasks_without_the_trashed_or_the_purged(
     assert [task["id"] for task in body["tasks"]] == [kept]
     assert body["date"] == TUESDAY
     assert body["completed_count"] == 3  # the day keeps its count; only the list is filtered
+
+
+async def test_day_detail_leaves_out_a_task_reopened_on_a_later_day(
+    client: httpx.AsyncClient, google_user: GoogleUserFactory, seed_task: SeedTaskFactory
+) -> None:
+    user = await google_user("ana@example.com")
+    reopened = await seed_task(user.uid, urgent=False, title="Reabierta")
+    kept = await seed_task(user.uid, urgent=False, title="Sigue completada")
+    for task_id in (reopened, kept):
+        await complete(client, user.id_token, task_id)
+    await get_progress(client, user.id_token, WEDNESDAY_MORNING)
+    reopen_response = await reopen(client, user.id_token, reopened, WEDNESDAY_MORNING)
+    assert reopen_response.status_code == 200
+
+    response = await client.get(
+        f"{DAYS_URL}/{TUESDAY}", headers=headers(user.id_token, WEDNESDAY_MORNING)
+    )
+
+    body = response.json()
+    assert [task["id"] for task in body["tasks"]] == [kept]
+    assert body["completed_count"] == 2  # the credit of that day is kept
 
 
 @pytest.mark.parametrize("day", ["2026-11-20", "2026-13-45", "ayer", "__x__", "2026-1-1"])

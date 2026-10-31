@@ -18,7 +18,7 @@ from mytasks_api.domain.progress import (
     open_day,
     today_view,
 )
-from mytasks_api.domain.task import Task
+from mytasks_api.domain.task import Status, Task
 from mytasks_api.logging_config import log_event
 from mytasks_api.repositories.profile_repository import ProfileRepository, get_profile_repository
 from mytasks_api.repositories.progress_repository import (
@@ -129,7 +129,10 @@ class ProgressService:
         stored = await self._repository.get_day(uid, day.isoformat())
         if stored is None:
             raise ProgressDayNotFoundError(day.isoformat())
-        tasks = await self._repository.get_live_tasks(uid, stored.completed_task_ids)
+        live = await self._repository.get_live_tasks(uid, stored.completed_task_ids)
+        # A task reopened on a later day keeps its credit on the day it was completed (FR-006)
+        # but is open again: it is no longer one of that day's completed tasks.
+        tasks = [task for task in live if task.status is Status.COMPLETED]
         return DayDetailSnapshot(profile=profile, day=stored, tasks=tasks)
 
     async def get_stats(self, uid: str) -> StatsSnapshot:

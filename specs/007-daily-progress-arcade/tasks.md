@@ -679,36 +679,36 @@ logros; si no, la página funciona sin ellos.
 
 ### Tests de la Fase 7 (escribirlos primero; deben fallar)
 
-- [ ] T105 [P] [US5] Tests de integración en `backend/tests/integration/test_progress_days.py`:
+- [x] T105 [P] [US5] Tests de integración en `backend/tests/integration/test_progress_days.py`:
   - `GET /me/progress/days?from&to` devuelve los días por orden ascendente;
   - 422 con `from > to`, un rango de más de 84 días o una fecha mal formada;
   - `GET /me/progress/days/{day}`: tareas sin las de la papelera ni las purgadas, 404 si no hay documento o la forma no es válida;
   - `GET /me/progress/stats`: el catálogo completo de 12 logros con `unlocked_at`, y `arcade: null` con el modo desactivado;
   - cambiar la meta no altera los días pasados (US5.4);
   - aislamiento entre cuentas.
-- [ ] T106 [P] [US5] Tests unitarios en `frontend/tests/unit/features/progress/ProgressCalendar.test.tsx`, `DayDetail.test.tsx`, `StatsPanel.test.tsx` y `TrophyRoom.test.tsx`:
+- [x] T106 [P] [US5] Tests unitarios en `frontend/tests/unit/features/progress/ProgressCalendar.test.tsx`, `DayDetail.test.tsx`, `StatsPanel.test.tsx` y `TrophyRoom.test.tsx`:
   - 84 celdas con intensidad por recuento y leyenda;
   - estados distinguibles por icono o texto además del color;
   - navegación por teclado entre los días;
   - el detalle del día seleccionado;
   - el estado vacío del primer día;
   - la sala de trofeos oculta con el modo arcade desactivado.
-- [ ] T107 [US5] Test e2e `frontend/tests/e2e/progress-history.spec.ts`: con 3 días de actividad simulada con `X-Test-Now` (uno con la meta cumplida, uno sin ella y uno no activo), `/progreso` los muestra distinguibles; seleccionar uno lista sus tareas; la sala de trofeos muestra «Primera moneda» con su fecha
+- [x] T107 [US5] Test e2e `frontend/tests/e2e/progress-history.spec.ts`: con 3 días de actividad simulada con `X-Test-Now` (uno con la meta cumplida, uno sin ella y uno no activo), `/progreso` los muestra distinguibles; seleccionar uno lista sus tareas; la sala de trofeos muestra «Primera moneda» con su fecha
 
 ### Implementación de la Fase 7
 
-- [ ] T108 [US5] Añadir a `backend/src/mytasks_api/repositories/progress_repository.py` la consulta de días por rango y la lectura por ids de las tareas de un día (`get_all` en bloques). Añadir a `progress_service.py` y `routers/progress.py` las rutas `GET /api/v1/me/progress/days`, `/days/{day}` y `/stats`, con `ProgressDayDetailOut` y `StatsOut` en `schemas/progress.py`. Hasta que pase T105
-- [ ] T109 [US5] Ampliar `backend/tests/unit/test_export_openapi.py` con las tres rutas y repetir `ruff`, `mypy` y la suite de backend en verde
-- [ ] T110 [US5] Añadir `useProgressDays`, `useProgressDay` y `useStats` a `frontend/src/api/progress.ts`, y crear `frontend/src/features/progress/ProgressPage.tsx`, `ProgressCalendar.tsx`, `DayDetail.tsx`, `StatsPanel.tsx` y `TrophyRoom.tsx` según S9, hasta que pase T106
-- [ ] T111 [US5] Añadir la ruta `/progreso` en `frontend/src/app/App.tsx` y la pestaña «Progreso» en `frontend/src/app/AppHeader.tsx` (reflujo a 320 px con «Accesos»)
-- [ ] T112 [US5] Ampliar `frontend/tests/e2e/a11y.spec.ts` con `/progreso` en claro y oscuro
-- [ ] T113 Revisión de seguridad de la Fase 7 con `mytasks-security-auditor` y registrar el informe en `specs/007-daily-progress-arcade/security-review-fase-7.md`. Corregir en esta misma PR lo que marque como medio o superior. Puntos a revisar:
+- [x] T108 [US5] Añadir a `backend/src/mytasks_api/repositories/progress_repository.py` la consulta de días por rango y la lectura por ids de las tareas de un día (`get_all` en bloques). Añadir a `progress_service.py` y `routers/progress.py` las rutas `GET /api/v1/me/progress/days`, `/days/{day}` y `/stats`, con `ProgressDayDetailOut` y `StatsOut` en `schemas/progress.py`. Hasta que pase T105
+- [x] T109 [US5] Ampliar `backend/tests/unit/test_export_openapi.py` con las tres rutas y repetir `ruff`, `mypy` y la suite de backend en verde
+- [x] T110 [US5] Añadir `useProgressDays`, `useProgressDay` y `useStats` a `frontend/src/api/progress.ts`, y crear `frontend/src/features/progress/ProgressPage.tsx`, `ProgressCalendar.tsx`, `DayDetail.tsx`, `StatsPanel.tsx` y `TrophyRoom.tsx` según S9, hasta que pase T106
+- [x] T111 [US5] Añadir la ruta `/progreso` en `frontend/src/app/App.tsx` y la pestaña «Progreso» en `frontend/src/app/AppHeader.tsx` (reflujo a 320 px con «Accesos»)
+- [x] T112 [US5] Ampliar `frontend/tests/e2e/a11y.spec.ts` con `/progreso` en claro y oscuro
+- [x] T113 Revisión de seguridad de la Fase 7 con `mytasks-security-auditor` y registrar el informe en `specs/007-daily-progress-arcade/security-review-fase-7.md`. Corregir en esta misma PR lo que marque como medio o superior. Puntos a revisar:
   - autorización en `/me/progress/days`, `/days/{day}` y `/stats`;
   - el `uid` sale solo del token;
   - el detalle de un día solo lee tareas de la propia cuenta, sin las de la papelera ni las purgadas;
   - el límite de 84 días;
   - un día de otra cuenta, o que no existe, da el mismo 404.
-- [ ] T114 Ejecutar lint, typecheck, unitarios y e2e del frontend en verde, y marcar T105–T114 como hechas en este fichero
+- [x] T114 Ejecutar lint, typecheck, unitarios y e2e del frontend en verde, y marcar T105–T114 como hechas en este fichero
 
 **Checkpoint**: las cinco historias funcionan.
 
