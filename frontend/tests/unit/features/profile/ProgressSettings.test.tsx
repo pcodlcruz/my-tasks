@@ -157,6 +157,27 @@ describe('<ProgressSettings>', () => {
     })
   })
 
+  describe('inicio de jornada', () => {
+    it('el interruptor refleja el perfil y lo cambia', async () => {
+      const { onChange } = await renderSettings({ morning_review: true })
+      const toggle = screen.getByRole('switch', { name: 'Mostrar el inicio de jornada' })
+
+      expect(toggle).toHaveAttribute('aria-checked', 'true')
+      await userEvent.click(toggle)
+
+      expect(onChange).toHaveBeenCalledWith({ morning_review: false })
+    })
+
+    it('desactivado se muestra apagado', async () => {
+      await renderSettings({ morning_review: false })
+
+      expect(screen.getByRole('switch', { name: 'Mostrar el inicio de jornada' })).toHaveAttribute(
+        'aria-checked',
+        'false',
+      )
+    })
+  })
+
   it('aclara que restablecer los valores por defecto no cambia esta sección', async () => {
     await renderSettings()
 

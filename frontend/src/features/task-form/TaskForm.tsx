@@ -43,6 +43,12 @@ export function TaskForm({ onClose, task }: TaskFormProps): JSX.Element {
   const [scope, setScope] = useState<Scope | null>(task?.scope ?? null)
   const [errors, setErrors] = useState<TaskFormErrors>({})
 
+  // Initial focus once, on opening: `onClose` is a new function on every render of the board, and
+  // moving the focus each time would pull it back to the title while the person types.
+  useEffect(() => {
+    dialogRef.current?.querySelector<HTMLElement>('input, textarea')?.focus()
+  }, [])
+
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent): void {
       if (event.key === 'Escape') {
@@ -70,7 +76,6 @@ export function TaskForm({ onClose, task }: TaskFormProps): JSX.Element {
     }
 
     document.addEventListener('keydown', handleKeyDown)
-    dialogRef.current?.querySelector<HTMLElement>('input, textarea')?.focus()
     return () => document.removeEventListener('keydown', handleKeyDown)
   }, [onClose])
 

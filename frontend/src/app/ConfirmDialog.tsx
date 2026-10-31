@@ -20,6 +20,12 @@ export function ConfirmDialog({
   const dialogRef = useRef<HTMLDivElement>(null)
   const cancelRef = useRef<HTMLButtonElement>(null)
 
+  // Initial focus once, on the safe action so the destructive one is never triggered by accident.
+  // Not on every `onCancel` change: callers pass a new one on each render.
+  useEffect(() => {
+    cancelRef.current?.focus()
+  }, [])
+
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent): void {
       if (event.key === 'Escape') {
@@ -42,8 +48,6 @@ export function ConfirmDialog({
     }
 
     document.addEventListener('keydown', handleKeyDown)
-    // Initial focus on the safe action so the destructive one is never triggered by accident.
-    cancelRef.current?.focus()
     return () => document.removeEventListener('keydown', handleKeyDown)
   }, [onCancel])
 

@@ -39,6 +39,9 @@ export interface Task {
   completed_at: string | null
   trashed_at: string | null
   purge_at: string | null
+  // Set on the tasks a schedule generated (feature 007): its id and the progress day it was for.
+  schedule_id: string | null
+  scheduled_for: string | null
 }
 
 export interface TaskCreate {

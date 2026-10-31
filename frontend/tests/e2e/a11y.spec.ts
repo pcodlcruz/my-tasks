@@ -403,4 +403,38 @@ test.describe('Accesibilidad WCAG 2.1 AA', () => {
       await expectNoViolations(page, `S1 · Iniciar sesión (${colorScheme})`)
     })
   }
+
+  test.describe('inicio de jornada (S8)', () => {
+    test.use({ startOfDay: true })
+
+    for (const colorScheme of ['light', 'dark'] as const) {
+      test(`«PULSA START» y la misión no tienen violaciones en tema ${colorScheme === 'light' ? 'claro' : 'oscuro'}`, async ({
+        page,
+        loginAsGoogleUser,
+      }) => {
+        await page.emulateMedia({ colorScheme })
+        await loginAsGoogleUser(`a11y-s8-${colorScheme}-${crypto.randomUUID()}@example.com`)
+        const review = page.getByRole('dialog', { name: 'PULSA START' })
+        await expect(review).toContainText('PARTIDA NUEVA')
+        await expectNoViolations(page, `S8 · Partida nueva sin tareas (${colorScheme})`)
+        await review.getByRole('button', { name: 'Empezar' }).click()
+
+        await createTask(page, ONE_TASK_PER_QUADRANT[0] as NewTask)
+        await createTask(page, { ...(ONE_TASK_PER_QUADRANT[0] as NewTask), title: 'Otra urgente' })
+        await page
+          .getByRole('region', { name: 'Marcador del día' })
+          .getByRole('button', { name: /PULSA START/ })
+          .click()
+        await review.getByRole('button', { name: 'Añadir a la misión: Tarea hacer ahora' }).click()
+        await expect(review).toContainText('Misión del día: 1 de 5 elegidas')
+        await expectNoViolations(page, `S8 · Misión elegida (${colorScheme})`)
+
+        await review.getByRole('button', { name: 'Empezar' }).click()
+        await expect(page.locator('article', { hasText: 'Tarea hacer ahora' })).toContainText(
+          'Misión del día',
+        )
+        await expectNoViolations(page, `S3 v3 · Tarea de la misión (${colorScheme})`)
+      })
+    }
+  })
 })

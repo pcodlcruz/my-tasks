@@ -21,6 +21,18 @@ describe('<TaskForm> (modo crear)', () => {
     mutateAsync.mockResolvedValue({})
   })
 
+  it('un re-render del tablero mientras se escribe no devuelve el foco al título', async () => {
+    const { TaskForm } = await import('../../../../src/features/task-form/TaskForm')
+    // The board passes a new `onClose` on every render (an inline arrow function).
+    const { rerender } = render(<TaskForm onClose={() => undefined} />)
+    const description = screen.getByLabelText(/Descripción/)
+    await userEvent.click(description)
+
+    rerender(<TaskForm onClose={() => undefined} />)
+
+    expect(description).toHaveFocus()
+  })
+
   it('muestra los contadores de título y descripción y se actualizan al escribir', async () => {
     await renderTaskForm()
 

@@ -164,10 +164,59 @@ export function ProgressSettings({ profile, onChange }: ProgressSettingsProps): 
           )}
         </div>
 
+        <div className="flex items-start justify-between gap-4 border-t border-border pt-4">
+          <div>
+            <p id="morning-review-label" className="text-body-strong text-text">
+              Mostrar el inicio de jornada
+            </p>
+            <p id="morning-review-hint" className="mt-0.5 text-caption text-text-muted">
+              La primera vez que abres la app cada día activo
+            </p>
+          </div>
+          <Switch
+            labelledBy="morning-review-label"
+            describedBy="morning-review-hint"
+            checked={profile.morning_review}
+            onChange={(morning_review) => onChange({ morning_review })}
+          />
+        </div>
+
         <p className="border-t border-border pt-4 text-caption text-text-muted">
           «Restablecer valores por defecto» no cambia esta sección.
         </p>
       </div>
     </section>
+  )
+}
+
+interface SwitchProps {
+  labelledBy: string
+  describedBy: string
+  checked: boolean
+  onChange: (checked: boolean) => void
+}
+
+// An on/off switch (S7 v2). The position of the knob is not the only cue: `aria-checked`, and
+// the track turns from neutral to primary.
+function Switch({ labelledBy, describedBy, checked, onChange }: SwitchProps): JSX.Element {
+  return (
+    <button
+      type="button"
+      role="switch"
+      aria-checked={checked}
+      aria-labelledby={labelledBy}
+      aria-describedby={describedBy}
+      onClick={() => onChange(!checked)}
+      className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full border-2 transition-colors ${
+        checked ? 'border-primary bg-primary' : 'border-text-muted bg-surface-alt'
+      }`}
+    >
+      <span
+        aria-hidden="true"
+        className={`inline-block h-4 w-4 rounded-full shadow-sm transition-transform ${
+          checked ? 'translate-x-5 bg-on-primary' : 'translate-x-0.5 bg-text-muted'
+        }`}
+      />
+    </button>
   )
 }

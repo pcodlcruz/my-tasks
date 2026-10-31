@@ -57,7 +57,7 @@ export function useUpdateProfile() {
     },
     onSuccess: (profile, update) => {
       queryClient.setQueryData(PROFILE_QUERY_KEY, profile)
-      // The goal, the active days and the time zone decide today's scoreboard.
+      // The goal, the active days, the time zone and the morning review decide today's scoreboard.
       if (PROGRESS_SETTINGS.some((field) => update[field] !== undefined)) {
         invalidateProgress(queryClient)
       }
@@ -65,7 +65,7 @@ export function useUpdateProfile() {
   })
 }
 
-const PROGRESS_SETTINGS = ['daily_goal', 'active_weekdays', 'timezone'] as const
+const PROGRESS_SETTINGS = ['daily_goal', 'active_weekdays', 'timezone', 'morning_review'] as const
 
 export function useResetProfile() {
   const queryClient = useQueryClient()

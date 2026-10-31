@@ -433,17 +433,17 @@ Agente: `mytasks-frontend-developer`. Necesita la Fase 3 fusionada y S8 aprobada
 
 ### Tests de la Fase 4 (escribirlos primero; deben fallar)
 
-- [ ] T061 [P] [US2] Tests unitarios en `frontend/tests/unit/features/progress/StartOfDayDialog.test.tsx` y `MissionPicker.test.tsx`:
+- [X] T061 [P] [US2] Tests unitarios en `frontend/tests/unit/features/progress/StartOfDayDialog.test.tsx` y `MissionPicker.test.tsx`:
   - el diálogo se abre si `show_review` es `true`, con el foco atrapado; Escape y «Empezar» llaman a `markReviewSeen` y devuelven el foco;
   - estados «PARTIDA NUEVA» y sin tareas activas;
   - el selector impide más de 5 tareas y solo ofrece tareas activas;
   - un 422 del servidor muestra el error y conserva la selección.
-- [ ] T062 [P] [US2] Tests unitarios de la misión en el tablero en `frontend/tests/unit/features/board/TaskCard.test.tsx`:
+- [X] T062 [P] [US2] Tests unitarios de la misión en el tablero en `frontend/tests/unit/features/board/TaskCard.test.tsx`:
   - icono y texto «Misión del día», con un nombre accesible que no dependa del color;
   - el botón «Añadir a la misión» / «Quitar de la misión» llama a `useSetMission` con la lista actual más o menos la tarea;
   - el botón está deshabilitado, con su motivo, cuando la misión ya tiene 5 tareas;
   - un 422 muestra el error y deja la misión como estaba.
-- [ ] T063 [US2] Test e2e `frontend/tests/e2e/start-of-day.spec.ts`:
+- [X] T063 [US2] Test e2e `frontend/tests/e2e/start-of-day.spec.ts`:
   - primera apertura a las 04:01 con S8, y «Empezar» lleva al tablero;
   - al recargar no sale, y en un segundo contexto de navegador con la misma cuenta tampoco;
   - se reabre desde el marcador;
@@ -453,17 +453,38 @@ Agente: `mytasks-frontend-developer`. Necesita la Fase 3 fusionada y S8 aprobada
 
 ### Implementación de la Fase 4
 
-- [ ] T064 [US2] Añadir `useMarkReviewSeen` y `useSetMission` a `frontend/src/api/progress.ts`; ambos actualizan la caché de `progress` con la respuesta
-- [ ] T065 [US2] Crear `frontend/src/features/progress/MissionPicker.tsx` y `frontend/src/features/progress/StartOfDayDialog.tsx` según S8, hasta que pase T061:
+- [X] T064 [US2] Añadir `useMarkReviewSeen` y `useSetMission` a `frontend/src/api/progress.ts`; ambos actualizan la caché de `progress` con la respuesta
+- [X] T065 [US2] Crear `frontend/src/features/progress/MissionPicker.tsx` y `frontend/src/features/progress/StartOfDayDialog.tsx` según S8, hasta que pase T061:
   - diálogo modal accesible con `useRestoreFocus`;
   - contenido: resultado de `last_day`, racha, meta, «Hacer ahora» y programadas de hoy (las programadas se muestran vacías hasta la Fase 6).
-- [ ] T066 [US2] Abrir el diálogo desde `frontend/src/app/App.tsx` (o `BoardPage.tsx`) cuando `show_review` sea `true`, y añadir a `DayScoreboard.tsx` el botón que lo reabre y el recuento de la misión
-- [ ] T067 [US2] Marcar las tareas de la misión y añadir el botón para añadirlas o quitarlas de la misión en `frontend/src/features/board/TaskCard.tsx` (con `useSetMission`), hasta que pase T062
-- [ ] T068 [US2] Añadir el interruptor «Mostrar el inicio de jornada» a `frontend/src/features/profile/ProgressSettings.tsx`
-- [ ] T069 [US2] Ampliar `frontend/tests/e2e/a11y.spec.ts` con el diálogo S8 abierto, en claro y oscuro
-- [ ] T070 Ejecutar lint, typecheck, unitarios y e2e del frontend en verde, y marcar T061–T070 como hechas en este fichero
+- [X] T066 [US2] Abrir el diálogo desde `frontend/src/app/App.tsx` (o `BoardPage.tsx`) cuando `show_review` sea `true`, y añadir a `DayScoreboard.tsx` el botón que lo reabre y el recuento de la misión
+- [X] T067 [US2] Marcar las tareas de la misión y añadir el botón para añadirlas o quitarlas de la misión en `frontend/src/features/board/TaskCard.tsx` (con `useSetMission`), hasta que pase T062
+- [X] T068 [US2] Añadir el interruptor «Mostrar el inicio de jornada» a `frontend/src/features/profile/ProgressSettings.tsx`
+- [X] T069 [US2] Ampliar `frontend/tests/e2e/a11y.spec.ts` con el diálogo S8 abierto, en claro y oscuro
+- [X] T070 Ejecutar lint, typecheck, unitarios y e2e del frontend en verde, y marcar T061–T070 como hechas en este fichero
 
 **Checkpoint**: US1 y US2 funcionan juntas y por separado.
+
+**Avance (2026-10-31)**: Fase 4 completa (T061–T070).
+- **Tests**: 473 unitarios y 83 e2e en verde. Los e2e pasan también en condiciones de CI (UTC, 2
+  workers, emuladores vacíos), y los nuevos, tres veces seguidas. `lint`, `prettier` y `tsc -b`
+  están en verde en un clon limpio.
+- **Decisiones**:
+  - La misión del diálogo se guarda al pulsar «Empezar», no con cada pulsación. Si el servidor la
+    rechaza (422), el diálogo sigue abierto con la selección y un mensaje propio. «Cerrar» o
+    Escape marcan la revisión como vista sin guardar la misión.
+  - Desde la tarjeta se envía la misión entera, la actual más o menos esa tarea. Las ya
+    completadas hoy siguen en ella, como admite el backend.
+  - No se ha hecho el enlace «Ver tablero sin elegir misión» de S8: «Empezar» sin elegir hace lo
+    mismo. Los puntos de la misión del banner de S8 llegan con la Fase 5.
+- **Arreglo fuera de la fase**: `TaskForm` y `ConfirmDialog` movían el foco al primer campo cada
+  vez que el tablero se renderizaba, porque el efecto dependía de `onClose`. Al refrescarse el
+  progreso mientras se escribía, el texto de la descripción acababa en el título. Lo destapó un e2e
+  de esta fase. Ahora el foco inicial solo se pone al abrirlos (con un test).
+- **Tests e2e**: un fixture automático (`startOfDay`, desactivado por defecto) responde
+  `show_review: false` en `GET /me/progress`, para que el resto de los e2e abran el tablero como
+  antes. Los que prueban S8 lo activan con `test.use({ startOfDay: true })`. El reloj del servidor
+  está en `fixtures/clock.ts` y encadena con ese fixture mediante `route.fallback`.
 
 ---
 

@@ -143,6 +143,81 @@ describe('progress hooks', () => {
     })
   })
 
+  describe('useMarkReviewSeen', () => {
+    it('hace POST /me/progress/review y guarda la respuesta en la caché', async () => {
+      const queryClient = newQueryClient()
+      queryClient.setQueryData(['progress'], { ...PROGRESS, show_review: true })
+      const { useMarkReviewSeen } = await import('../../../src/api/progress')
+      vi.mocked(fetch).mockImplementation(() => Promise.resolve(jsonResponse(PROGRESS)))
+
+      const { result } = renderHook(() => useMarkReviewSeen(), {
+        wrapper: createWrapper(queryClient),
+      })
+      await act(async () => {
+        await result.current.mutateAsync()
+      })
+
+      const [url, init] = vi.mocked(fetch).mock.calls[0] ?? []
+      expect(url).toBe(`${PROGRESS_URL}/review`)
+      expect(init?.method).toBe('POST')
+      expect(queryClient.getQueryData(['progress'])).toEqual(PROGRESS)
+    })
+  })
+
+  describe('useSetMission', () => {
+    it('hace PUT /me/progress/today/mission con las tareas y guarda la respuesta', async () => {
+      const queryClient = newQueryClient()
+      queryClient.setQueryData(['progress'], PROGRESS)
+      const saved: Progress = {
+        ...PROGRESS,
+        mission: { task_ids: ['a', 'b'], completed_ids: [], cleared: false },
+      }
+      const { useSetMission } = await import('../../../src/api/progress')
+      vi.mocked(fetch).mockImplementation(() => Promise.resolve(jsonResponse(saved)))
+
+      const { result } = renderHook(() => useSetMission(), { wrapper: createWrapper(queryClient) })
+      await act(async () => {
+        await result.current.mutateAsync(['a', 'b'])
+      })
+
+      const [url, init] = vi.mocked(fetch).mock.calls[0] ?? []
+      expect(url).toBe(`${PROGRESS_URL}/today/mission`)
+      expect(init?.method).toBe('PUT')
+      expect(JSON.parse(String(init?.body))).toEqual({ task_ids: ['a', 'b'] })
+      expect(queryClient.getQueryData(['progress'])).toEqual(saved)
+    })
+
+    it('un 422 deja la misión de la caché como estaba', async () => {
+      const queryClient = newQueryClient()
+      queryClient.setQueryData(['progress'], PROGRESS)
+      const { useSetMission } = await import('../../../src/api/progress')
+      vi.mocked(fetch).mockImplementation(() =>
+        Promise.resolve(jsonResponse({ code: 'mission_invalid_task', message: 'x' }, 422)),
+      )
+
+      const { result } = renderHook(() => useSetMission(), { wrapper: createWrapper(queryClient) })
+      await act(async () => {
+        await result.current.mutateAsync(['a']).catch(() => undefined)
+      })
+
+      expect(queryClient.getQueryData(['progress'])).toEqual(PROGRESS)
+    })
+
+    it('el mensaje de error es propio y nunca el texto del servidor', async () => {
+      const { missionErrorMessage } = await import('../../../src/api/progress')
+      const { ApiClientError } = await import('../../../src/lib/apiClient')
+
+      expect(
+        missionErrorMessage(
+          new ApiClientError({ code: 'mission_invalid_task', message: 'SECRETO' }),
+        ),
+      ).toBe('Alguna de esas tareas ya no está activa. Revisa la misión y vuelve a intentarlo.')
+      expect(missionErrorMessage(new TypeError('Failed to fetch'))).toBe(
+        'No se pudo guardar la misión. Inténtalo de nuevo.',
+      )
+    })
+  })
+
   describe('invalidación tras cambiar una tarea', () => {
     function seeded(): QueryClient {
       const queryClient = newQueryClient()
@@ -201,6 +276,7 @@ describe('progress hooks', () => {
       { daily_goal: 5 },
       { active_weekdays: [1, 2, 3] },
       { timezone: 'Atlantic/Canary' },
+      { morning_review: false },
     ]
 
     it.each(PROGRESS_CHANGES)(
