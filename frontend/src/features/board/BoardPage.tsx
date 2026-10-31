@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useProgress } from '../../api/progress'
+import { useDismissNotice, useProgress } from '../../api/progress'
 import { useBoardTasks } from '../../api/tasks'
 import type { Quadrant as QuadrantKey, Task } from '../../api/types'
 import { APP_NAME } from '../../lib/brand'
@@ -35,6 +35,7 @@ export function BoardPage(): JSX.Element {
   // Asked for before the board: answering it closes the days left behind and generates today's
   // scheduled tasks, so the board waits for it to arrive, or to fail (FR-034: then it loads anyway).
   const progress = useProgress()
+  const dismissNotice = useDismissNotice()
 
   // The profile's default scope sets the filter once; a manual change never writes back to it.
   useEffect(() => {
@@ -81,6 +82,7 @@ export function BoardPage(): JSX.Element {
         isError={progress.isError}
         onRetry={() => void progress.refetch()}
         onOpenReview={() => setReviewReopened(true)}
+        onDismissNotice={(noticeId) => dismissNotice.mutate(noticeId)}
       />
       <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-display font-display text-text">Matriz de prioridades</h1>
@@ -143,6 +145,7 @@ export function BoardPage(): JSX.Element {
                         task={task}
                         onEdit={setEditingTask}
                         missionTaskIds={progress.data?.mission.task_ids}
+                        today={progress.data?.today}
                       />
                     ))}
                   </div>

@@ -14,10 +14,11 @@ interface NavItem {
 }
 
 // The tabs of the approved header (S3 v3): «Tablero · Progreso · Programadas · Historial ·
-// Papelera», plus «Accesos» for the administrator. «Progreso» and «Programadas» are added here
-// when their screens exist (later phases of feature 007).
+// Papelera», plus «Accesos» for the administrator. «Progreso» is added here when its screen exists
+// (a later phase of feature 007).
 const NAV_ITEMS: readonly NavItem[] = [
   { to: '/', label: 'Tablero', icon: BoardIcon },
+  { to: '/programadas', label: 'Programadas', icon: CalendarIcon },
   { to: '/historial', label: 'Historial', icon: HistoryIcon },
   { to: '/papelera', label: 'Papelera', icon: TrashIcon },
 ]
@@ -138,6 +139,17 @@ function BoardIcon(): JSX.Element {
       <rect x="14" y="3" width="7" height="7" rx="1.5" />
       <rect x="3" y="14" width="7" height="7" rx="1.5" />
       <rect x="14" y="14" width="7" height="7" rx="1.5" />
+    </TabIcon>
+  )
+}
+
+function CalendarIcon(): JSX.Element {
+  return (
+    <TabIcon>
+      <rect x="3" y="4" width="18" height="18" rx="2" />
+      <line x1="16" y1="2" x2="16" y2="6" />
+      <line x1="8" y1="2" x2="8" y2="6" />
+      <line x1="3" y1="10" x2="21" y2="10" />
     </TabIcon>
   )
 }

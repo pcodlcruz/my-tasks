@@ -1,4 +1,5 @@
 import { type QueryClient, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useEffect, useRef } from 'react'
 import { ApiClientError, apiFetch } from '../lib/apiClient'
 import type { Acknowledgement, Progress } from './types'
 
@@ -13,14 +14,27 @@ export function getProgress(): Promise<Progress> {
 // every return to the tab, asks again, which is also how a new day (from 04:00) shows up. One
 // retry only, like the profile: with the API down the board must not wait for it (FR-034). On a
 // failed reload TanStack Query keeps the last value, so the scoreboard keeps showing it.
+// When the day changes under an open page, the scheduled tasks of the new day have just been
+// generated: the tasks are asked for again so the board shows them.
 export function useProgress() {
-  return useQuery({
+  const queryClient = useQueryClient()
+  const query = useQuery({
     queryKey: PROGRESS_QUERY_KEY,
     queryFn: getProgress,
     staleTime: 0,
     retry: 1,
     refetchOnWindowFocus: true,
   })
+  const today = query.data?.today
+  const previousDay = useRef<string | undefined>(undefined)
+  useEffect(() => {
+    if (today === undefined) return
+    if (previousDay.current !== undefined && previousDay.current !== today) {
+      void queryClient.invalidateQueries({ queryKey: ['tasks'] })
+    }
+    previousDay.current = today
+  }, [today, queryClient])
+  return query
 }
 
 export function invalidateProgress(queryClient: QueryClient): void {
@@ -70,6 +84,16 @@ export function acknowledge(messages: Acknowledgement): Promise<void> {
 // the progress no longer brings them.
 export function useAcknowledge() {
   return useMutation({ mutationFn: acknowledge })
+}
+
+// Closing a notice of a schedule that did not fit: confirms it, and asks for the progress again
+// so it no longer comes back.
+export function useDismissNotice() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (noticeId: string) => acknowledge({ notice_ids: [noticeId] }),
+    onSuccess: () => invalidateProgress(queryClient),
+  })
 }
 
 const MISSION_INVALID_MESSAGE =

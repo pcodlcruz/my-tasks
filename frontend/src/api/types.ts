@@ -241,3 +241,43 @@ export interface Progress {
   announcements: Announcement[]
   notices: Notice[]
 }
+
+// Scheduled tasks (/api/v1/schedules, feature 007). A schedule makes a task appear by itself on
+// the days its repetition says (research R7); `next_occurrence` is a progress day `YYYY-MM-DD`.
+export type Recurrence =
+  | { kind: 'once'; date: string }
+  | { kind: 'daily' }
+  | { kind: 'weekly'; weekdays: Weekday[] }
+  | { kind: 'monthly'; month_day: number }
+
+export type ScheduleStatus = 'active' | 'paused' | 'finished'
+
+export interface Schedule {
+  id: string
+  title: string
+  description: string
+  urgent: boolean
+  important: boolean
+  scope: Scope
+  quadrant: Quadrant
+  recurrence: Recurrence
+  status: ScheduleStatus
+  // `null` while paused or once finished.
+  next_occurrence: string | null
+  last_generated_for: string | null
+  created_at: string
+}
+
+export interface ScheduleCreate {
+  title: string
+  description: string
+  urgent: boolean
+  important: boolean
+  scope: Scope
+  recurrence: Recurrence
+}
+
+export type ScheduleUpdate = Partial<ScheduleCreate>
+
+// The server refuses a 51st schedule (409), finished ones included.
+export const MAX_SCHEDULES = 50
