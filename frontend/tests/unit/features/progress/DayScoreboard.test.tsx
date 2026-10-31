@@ -30,6 +30,7 @@ interface RenderOptions {
   isError?: boolean
   onRetry?: () => void
   onOpenReview?: () => void
+  onDismissNotice?: (id: string) => void
 }
 
 function renderScoreboard({
@@ -38,6 +39,7 @@ function renderScoreboard({
   isError = false,
   onRetry = vi.fn(),
   onOpenReview = vi.fn(),
+  onDismissNotice = vi.fn(),
 }: RenderOptions = {}): ReturnType<typeof render> {
   return render(
     <DayScoreboard
@@ -46,6 +48,7 @@ function renderScoreboard({
       isError={isError}
       onRetry={onRetry}
       onOpenReview={onOpenReview}
+      onDismissNotice={onDismissNotice}
     />,
   )
 }
@@ -238,6 +241,65 @@ describe('<DayScoreboard>', () => {
       expect(scoreboard()).not.toHaveTextContent(/PTS|puntos|NIVEL/)
       expect(scoreboard()).toHaveTextContent('2 de 3 tareas completadas hoy')
       expect(scoreboard()).toHaveTextContent('Racha 3 días')
+    })
+  })
+
+  describe('avisos de programaciones que no cupieron', () => {
+    const NOTICE = {
+      id: 'n1',
+      kind: 'schedule_skipped_limit' as const,
+      schedule_id: 's1',
+      schedule_title: 'Pagar alquiler',
+      day: '2026-11-03',
+    }
+
+    it('sin avisos no muestra nada', () => {
+      renderScoreboard({ progress: progress() })
+
+      expect(screen.queryByText(/no cupo/)).not.toBeInTheDocument()
+    })
+
+    it('nombra la programación y explica el límite, con un botón para cerrarlo', async () => {
+      const onDismissNotice = vi.fn()
+      renderScoreboard({ progress: progress({ notices: [NOTICE] }), onDismissNotice })
+
+      expect(scoreboard()).toHaveTextContent(
+        'La tarea programada «Pagar alquiler» no cupo: tienes 500 tareas activas.',
+      )
+      await userEvent.click(screen.getByRole('button', { name: 'Entendido' }))
+      expect(onDismissNotice).toHaveBeenCalledWith('n1')
+    })
+
+    it('si la programación ya no existe, lo dice sin nombre', () => {
+      renderScoreboard({
+        progress: progress({ notices: [{ ...NOTICE, schedule_title: null }] }),
+      })
+
+      expect(scoreboard()).toHaveTextContent(
+        'Una tarea programada no cupo: tienes 500 tareas activas.',
+      )
+    })
+
+    it('varios avisos, cada uno con su botón', async () => {
+      const onDismissNotice = vi.fn()
+      renderScoreboard({
+        progress: progress({
+          notices: [NOTICE, { ...NOTICE, id: 'n2', schedule_title: 'Regar' }],
+        }),
+        onDismissNotice,
+      })
+
+      const buttons = screen.getAllByRole('button', { name: 'Entendido' })
+      expect(buttons).toHaveLength(2)
+      await userEvent.click(buttons[1] as HTMLElement)
+      expect(onDismissNotice).toHaveBeenCalledWith('n2')
+    })
+
+    it('es un aviso discreto (no una alerta): el tablero sigue usable', () => {
+      renderScoreboard({ progress: progress({ notices: [NOTICE] }) })
+
+      expect(screen.queryByRole('alert')).not.toBeInTheDocument()
+      expect(screen.getByRole('status', { name: 'Avisos de programaciones' })).toBeInTheDocument()
     })
   })
 })

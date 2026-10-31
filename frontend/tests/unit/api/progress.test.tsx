@@ -218,6 +218,69 @@ describe('progress hooks', () => {
     })
   })
 
+  describe('useDismissNotice', () => {
+    it('confirma el aviso y vuelve a pedir el progreso para que desaparezca', async () => {
+      const queryClient = newQueryClient()
+      queryClient.setQueryData(['progress'], PROGRESS)
+      const { useDismissNotice, useProgress } = await import('../../../src/api/progress')
+      vi.mocked(fetch).mockImplementation((url) =>
+        Promise.resolve(
+          String(url).endsWith('/ack')
+            ? new Response(null, { status: 204 })
+            : jsonResponse(PROGRESS),
+        ),
+      )
+
+      // The scoreboard is always observed, which is what makes invalidating it fetch again.
+      renderHook(() => useProgress(), { wrapper: createWrapper(queryClient) })
+
+      const { result } = renderHook(() => useDismissNotice(), {
+        wrapper: createWrapper(queryClient),
+      })
+      await act(async () => {
+        await result.current.mutateAsync('n1')
+      })
+
+      const ack = vi.mocked(fetch).mock.calls.find(([url]) => String(url).endsWith('/ack'))
+      expect(ack?.[0]).toBe(`${PROGRESS_URL}/ack`)
+      expect(JSON.parse(String(ack?.[1]?.body))).toEqual({ notice_ids: ['n1'] })
+      await waitFor(() => {
+        const reads = vi.mocked(fetch).mock.calls.filter(([url]) => String(url) === PROGRESS_URL)
+        expect(reads.length).toBeGreaterThanOrEqual(2)
+      })
+    })
+  })
+
+  describe('cambio de día', () => {
+    it('cuando el día del progreso cambia, vuelve a pedir las tareas (se generaron las programadas)', async () => {
+      const queryClient = newQueryClient()
+      queryClient.setQueryData(['tasks', 'board', 'all', 'oldest'], {
+        items: [],
+        next_cursor: null,
+      })
+      const { useProgress } = await import('../../../src/api/progress')
+      vi.mocked(fetch).mockImplementation(() => Promise.resolve(jsonResponse(PROGRESS)))
+      const { result } = renderHook(() => useProgress(), { wrapper: createWrapper(queryClient) })
+      await waitFor(() => expect(result.current.data?.today).toBe('2026-10-31'))
+      expect(queryClient.getQueryState(['tasks', 'board', 'all', 'oldest'])?.isInvalidated).toBe(
+        false,
+      )
+
+      vi.mocked(fetch).mockImplementation(() =>
+        Promise.resolve(jsonResponse({ ...PROGRESS, today: '2026-11-01' })),
+      )
+      await act(async () => {
+        await result.current.refetch()
+      })
+
+      await waitFor(() =>
+        expect(queryClient.getQueryState(['tasks', 'board', 'all', 'oldest'])?.isInvalidated).toBe(
+          true,
+        ),
+      )
+    })
+  })
+
   describe('useAcknowledge', () => {
     it('hace POST /me/progress/ack con los anuncios y no toca la caché', async () => {
       const queryClient = newQueryClient()

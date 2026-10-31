@@ -16,8 +16,11 @@ vi.mock('../../../../src/api/profile', () => ({
   useProfile: () => useProfileMock(),
 }))
 
+const dismissNoticeMutate = vi.fn()
+
 vi.mock('../../../../src/api/progress', () => ({
   useProgress: () => useProgressMock(),
+  useDismissNotice: () => ({ mutate: dismissNoticeMutate }),
 }))
 
 // The dialog is tested on its own; here only when the board opens and closes it.
@@ -103,6 +106,33 @@ describe('<BoardPage>', () => {
     useProgressMock.mockReset()
     useProgressMock.mockReturnValue(progressResult())
     useUiStore.getState().reset()
+  })
+
+  describe('tareas programadas', () => {
+    it('cierra un aviso de programación confirmándolo', async () => {
+      dismissNoticeMutate.mockReset()
+      useProgressMock.mockReturnValue(
+        progressResult({
+          data: {
+            ...PROGRESS,
+            notices: [
+              {
+                id: 'n1',
+                kind: 'schedule_skipped_limit',
+                schedule_id: 's1',
+                schedule_title: 'Regar',
+                day: '2026-10-31',
+              },
+            ],
+          },
+        }),
+      )
+      await renderBoardPage()
+
+      await userEvent.click(screen.getByRole('button', { name: 'Entendido' }))
+
+      expect(dismissNoticeMutate).toHaveBeenCalledWith('n1')
+    })
   })
 
   describe('inicio de jornada', () => {

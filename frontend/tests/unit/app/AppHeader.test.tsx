@@ -212,7 +212,7 @@ describe('<AppHeader>', () => {
         within(nav)
           .getAllByRole('link')
           .map((link) => link.textContent),
-      ).toEqual(['Tablero', 'Historial', 'Papelera'])
+      ).toEqual(['Tablero', 'Programadas', 'Historial', 'Papelera'])
     })
 
     it('está activo (aria-current) solo en /perfil', async () => {
@@ -253,6 +253,7 @@ describe('<AppHeader>', () => {
       const links = within(nav).getAllByRole('link')
       expect(links.map((link) => link.textContent)).toEqual([
         'Tablero',
+        'Programadas',
         'Historial',
         'Papelera',
         'Accesos',
