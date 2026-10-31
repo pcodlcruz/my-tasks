@@ -21,7 +21,11 @@ from mytasks_api.domain.account import (
 )
 from mytasks_api.domain.avatar_image import AvatarTooLargeError, AvatarUnsupportedError
 from mytasks_api.domain.profile import AvatarNotFoundError, AvatarRateLimitedError
-from mytasks_api.domain.progress import InvalidMissionError
+from mytasks_api.domain.progress import (
+    InvalidDayRangeError,
+    InvalidMissionError,
+    ProgressDayNotFoundError,
+)
 from mytasks_api.domain.recurrence import InvalidRecurrenceError
 from mytasks_api.domain.schedule import (
     MAX_SCHEDULES,
@@ -278,6 +282,20 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         # reveals whether an id exists in another account.
         error = ErrorOut(code="mission_invalid_task", message=str(exc))
         return _error_response(status.HTTP_422_UNPROCESSABLE_CONTENT, error)
+
+    @app.exception_handler(InvalidDayRangeError)
+    async def invalid_day_range_handler(_: Request, exc: InvalidDayRangeError) -> JSONResponse:
+        error = ErrorOut(code="validation_error", message=str(exc))
+        return _error_response(status.HTTP_422_UNPROCESSABLE_CONTENT, error)
+
+    @app.exception_handler(ProgressDayNotFoundError)
+    async def progress_day_not_found_handler(
+        _: Request, __: ProgressDayNotFoundError
+    ) -> JSONResponse:
+        # The same answer for a day that never existed, one that is not a date and, for another
+        # account, one that exists: it never reveals anything about someone else's progress.
+        error = ErrorOut(code="not_found", message="No hay progreso registrado ese día.")
+        return _error_response(status.HTTP_404_NOT_FOUND, error)
 
     @app.exception_handler(ScheduleNotFoundError)
     async def schedule_not_found_handler(_: Request, __: ScheduleNotFoundError) -> JSONResponse:

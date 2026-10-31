@@ -38,6 +38,8 @@ TASKS_COLLECTION = "tasks"
 PROGRESS_COLLECTION = "progress"
 STATE_DOCUMENT = "state"
 DAYS_COLLECTION = "progress_days"
+# Firestore's `get_all` takes any number of refs, but one request per hundred keeps each small.
+_READ_CHUNK = 100
 
 # How the progress changes with a task transition: the task before and after it, today's day
 # and the player state, to the new day and state (domain/progress.py).
@@ -243,6 +245,35 @@ class ProgressRepository:
 
     async def get_day(self, uid: str, day: str) -> ProgressDay | None:
         return _day_or_none(await self._days(uid).document(day).get())
+
+    async def list_days(self, uid: str, start: str, end: str) -> list[ProgressDay]:
+        """The stored days from `start` to `end`, both included, oldest first. A single-field
+        range on `date` (ISO strings sort like the days they are): no composite index."""
+        query = (
+            self._days(uid)
+            .where(filter=FieldFilter("date", ">=", start))
+            .where(filter=FieldFilter("date", "<=", end))
+            .order_by("date")
+        )
+        days: list[ProgressDay] = []
+        async for snapshot in query.stream():
+            day = _day_or_none(snapshot)
+            if day is not None:
+                days.append(day)
+        return days
+
+    async def get_live_tasks(self, uid: str, task_ids: tuple[str, ...]) -> list[Task]:
+        """The tasks that still exist and are not in the trash, in the order of `task_ids`.
+        Only ids under `users/{uid}/tasks` are read, so another account's task is never seen."""
+        found: dict[str, Task] = {}
+        for start in range(0, len(task_ids), _READ_CHUNK):
+            chunk = task_ids[start : start + _READ_CHUNK]
+            refs = [self._task_ref(uid, task_id) for task_id in chunk]
+            async for snapshot in self._client.get_all(refs):
+                data = snapshot.to_dict() if snapshot.exists else None
+                if data is not None and not data.get("in_trash", False):
+                    found[snapshot.id] = _document_to_task(snapshot.id, data)
+        return [found[task_id] for task_id in task_ids if task_id in found]
 
     async def run_task_transition(
         self,
