@@ -40,6 +40,9 @@ TASK_FIELDS = {
     "completed_at",
     "trashed_at",
     "purge_at",
+    # Added by the scheduled tasks of feature 007: always present, null on a normal task.
+    "schedule_id",
+    "scheduled_for",
 }
 
 
@@ -53,7 +56,7 @@ async def test_completing_three_tasks_meets_the_goal_and_scores(
     progress = await get_progress(client, user.id_token)
 
     assert all(response.status_code == 200 for response in responses)
-    # The task response does not change shape (feature 001 contract).
+    # The task response only grows by the two schedule fields (contracts/progress.yaml).
     assert set(responses[0].json()) == TASK_FIELDS
     assert progress["completed_count"] == 3
     assert progress["goal_met"] is True
