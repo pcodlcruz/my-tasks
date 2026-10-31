@@ -68,7 +68,16 @@ export default {
         on: {
           primary: color('on-primary'),
           accent: color('on-accent'),
+          gold: color('on-gold'),
         },
+        // Arcade look of feature 007: energy bar, gold rewards and the streak.
+        energy: {
+          fill: color('energy-fill'),
+          extra: color('energy-extra'),
+          'empty-border': color('energy-empty-border'),
+        },
+        gold: color('gold'),
+        streak: color('streak'),
         error: {
           DEFAULT: color('error'),
           surface: color('error-surface'),
@@ -81,6 +90,8 @@ export default {
       },
       fontFamily: {
         sans: ['Inter', 'Segoe UI', 'system-ui', 'sans-serif'],
+        // Only for figures and short arcade labels; Inter while it loads (font-display: swap).
+        pixel: ['"Press Start 2P"', 'Inter', 'monospace'],
       },
       fontSize: {
         display: ['28px', { lineHeight: '36px', fontWeight: '700' }],
@@ -100,6 +111,17 @@ export default {
       boxShadow: {
         card: '0 1px 2px rgba(15, 23, 42, 0.08)',
         modal: '0 8px 24px rgba(15, 23, 42, 0.16)',
+      },
+      // Arcade celebrations: at most 600 ms, and only with `motion-safe:` (DESIGN.md).
+      keyframes: {
+        pop: {
+          '0%': { transform: 'scale(0.8)', opacity: '0' },
+          '60%': { transform: 'scale(1.1)', opacity: '1' },
+          '100%': { transform: 'scale(1)', opacity: '1' },
+        },
+      },
+      animation: {
+        pop: 'pop 600ms ease-out',
       },
     },
   },

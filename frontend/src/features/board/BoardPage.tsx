@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react'
+import { useProgress } from '../../api/progress'
 import { useBoardTasks } from '../../api/tasks'
 import type { Quadrant as QuadrantKey, Task } from '../../api/types'
 import { APP_NAME } from '../../lib/brand'
 import { useUiStore } from '../../stores/uiStore'
+import { DayScoreboard } from '../progress/DayScoreboard'
 import { useSettledProfile } from '../profile/useSettledProfile'
 import { TaskForm } from '../task-form/TaskForm'
 import { Quadrant } from './Quadrant'
@@ -29,6 +31,9 @@ export function BoardPage(): JSX.Element {
   const scopeInitialized = useUiStore((state) => state.scopeInitialized)
   const initializeScope = useUiStore((state) => state.initializeScope)
   const { profile, settled } = useSettledProfile()
+  // Asked for before the board: answering it closes the days left behind and generates today's
+  // scheduled tasks, so the board waits for it to arrive, or to fail (FR-034: then it loads anyway).
+  const progress = useProgress()
 
   // The profile's default scope sets the filter once; a manual change never writes back to it.
   useEffect(() => {
@@ -37,7 +42,7 @@ export function BoardPage(): JSX.Element {
 
   // Wait for the profile (and the filter it sets) before asking for tasks, so the board never
   // shows the wrong scope nor makes a request that is thrown away.
-  const ready = settled && scopeInitialized
+  const ready = settled && scopeInitialized && !progress.isPending
   const { data, isLoading, isError, refetch } = useBoardTasks(
     scopeFilter === 'all' ? undefined : scopeFilter,
     profile?.board_order ?? 'oldest',
@@ -51,6 +56,12 @@ export function BoardPage(): JSX.Element {
 
   return (
     <main className="mx-auto w-full max-w-7xl px-4 py-6">
+      <DayScoreboard
+        progress={progress.data}
+        isLoading={progress.isPending}
+        isError={progress.isError}
+        onRetry={() => void progress.refetch()}
+      />
       <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-display font-display text-text">Matriz de prioridades</h1>
         <ScopeFilter />

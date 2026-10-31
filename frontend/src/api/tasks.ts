@@ -7,6 +7,7 @@ import {
 } from '@tanstack/react-query'
 import { apiFetch, isStaleTaskError, isUserFacingError } from '../lib/apiClient'
 import { useToastStore } from '../stores/toastStore'
+import { invalidateProgress } from './progress'
 import type {
   BoardOrder,
   HistoryDays,
@@ -185,11 +186,14 @@ function undoTrash(queryClient: QueryClient, taskId: string): void {
   transitionRequest(taskId, 'restore')
     .then(() => {
       refreshAllViews(queryClient)
+      invalidateProgress(queryClient)
       useToastStore.getState().show('Tarea restaurada')
     })
     .catch((error: unknown) => handleMutationError(queryClient, error))
 }
 
+// Every transition can change today's progress (completing, reopening, and a completed task
+// going to or coming back from the trash), so the scoreboard is asked for again with the views.
 function useTransition(
   action: TransitionAction,
   onSuccess: (task: Task, queryClient: QueryClient) => void,
@@ -199,6 +203,7 @@ function useTransition(
     mutationFn: (taskId: string) => transitionRequest(taskId, action),
     onSuccess: (task) => {
       refreshAllViews(queryClient)
+      invalidateProgress(queryClient)
       onSuccess(task, queryClient)
     },
     onError: (error) => handleMutationError(queryClient, error),
