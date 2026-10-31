@@ -9,7 +9,6 @@ from mytasks_api.clock import Clock, get_clock
 from mytasks_api.domain.progress import day_key
 from mytasks_api.domain.recurrence import check_once_date, starting_occurrence
 from mytasks_api.domain.schedule import (
-    MAX_SCHEDULES,
     NewSchedule,
     Schedule,
     ScheduleChanges,
@@ -59,15 +58,14 @@ class ScheduleService:
     async def create(self, uid: str, data: NewSchedule) -> Schedule:
         today = await self._today(uid)
         check_once_date(data.recurrence, today)
-        # "Soft" cap like the 500 active tasks: count and write are not atomic, so two
-        # simultaneous creations could overshoot by one. Enough to bound the catch-up.
-        if await self._repository.count(uid) >= MAX_SCHEDULES:
-            log_event(logger, logging.WARNING, "schedule_limit_reached", uid=uid)
-            raise ScheduleLimitError(uid)
         start = starting_occurrence(data.recurrence, today, last_generated_for=None)
-        schedule = await self._repository.create(
-            uid, replace(data, next_occurrence=start), self._clock.now()
-        )
+        try:
+            schedule = await self._repository.create(
+                uid, replace(data, next_occurrence=start), self._clock.now()
+            )
+        except ScheduleLimitError:
+            log_event(logger, logging.WARNING, "schedule_limit_reached", uid=uid)
+            raise
         self._log("schedule_created", uid, schedule.id)
         return schedule
 
@@ -118,15 +116,28 @@ class ScheduleService:
     async def generate_due(self, uid: str, today: date, now: datetime) -> None:
         """Part of the lazy catch-up of `GET /me/progress` (research R1, R7): creates today's
         tasks of the schedules that are due. Idempotent, and safe with two requests at once:
-        each schedule is generated in its own transaction."""
-        due = await self._repository.list_due(uid, today)
-        if not due:
+        each schedule is generated in its own transaction.
+
+        It never raises: it runs before the past days are closed, so a failure here (a lost
+        transaction race, a timeout, a missing index) must not take the scoreboard, the streak or
+        the other schedules down with it (FR-034). What was not generated stays due and is tried
+        again on the next read."""
+        try:
+            due = await self._repository.list_due(uid, today)
+            if not due:
+                return
+            active = await self._tasks.count_active(uid)
+        except Exception as error:
+            self._log_failure(uid, error)
             return
-        active = await self._tasks.count_active(uid)
         for schedule in due:
-            plan = await self._repository.generate(
-                uid, schedule.id, today, now, has_room=active < MAX_ACTIVE_TASKS
-            )
+            try:
+                plan = await self._repository.generate(
+                    uid, schedule.id, today, now, has_room=active < MAX_ACTIVE_TASKS
+                )
+            except Exception as error:
+                self._log_failure(uid, error, schedule.id)
+                continue
             if plan is None:
                 continue
             if plan.create_for is not None:
@@ -148,6 +159,14 @@ class ScheduleService:
                     schedule_id=schedule.id,
                     day=plan.due.isoformat(),
                 )
+
+    @staticmethod
+    def _log_failure(uid: str, error: Exception, schedule_id: str | None = None) -> None:
+        # The class of the error, never its text: it could quote a document.
+        fields = {"uid": uid, "reason": type(error).__name__}
+        if schedule_id is not None:
+            fields["schedule_id"] = schedule_id
+        log_event(logger, logging.ERROR, "schedule_generation_failed", **fields)
 
 
 def get_schedule_service(

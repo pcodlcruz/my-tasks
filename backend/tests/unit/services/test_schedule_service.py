@@ -58,10 +58,9 @@ class FakeScheduleRepository:
     async def list_all(self, uid: str) -> list[Schedule]:
         return sorted(self.schedules.values(), key=lambda item: item.created_at)
 
-    async def count(self, uid: str) -> int:
-        return len(self.schedules)
-
     async def create(self, uid: str, data: NewSchedule, now: datetime) -> Schedule:
+        if len(self.schedules) >= MAX_SCHEDULES:
+            raise ScheduleLimitError(uid)
         schedule = Schedule(
             id=f"s{len(self.schedules) + 1}",
             title=data.title,
@@ -371,3 +370,57 @@ class TestLifecycle:
             await service.pause("uid", "nope")
         with pytest.raises(ScheduleNotFoundError):
             await service.delete("uid", "nope")
+
+
+class TestGenerationFailures:
+    """The catch-up runs inside `GET /me/progress` (research R1): a schedule that cannot be
+    generated must not take the scoreboard, the closing of past days or the other schedules down
+    with it (FR-034; security-review-fase-6, MED-001)."""
+
+    async def test_one_schedule_failing_does_not_stop_the_others(self) -> None:
+        service, repository, _ = _service()
+        repository.add(_schedule("s1", next_occurrence=WEDNESDAY))
+        repository.add(_schedule("s2", next_occurrence=WEDNESDAY))
+        generate = repository.generate
+
+        async def flaky(uid: str, schedule_id: str, *args: object, **kwargs: bool) -> object:
+            if schedule_id == "s1":
+                message = "Failed to commit transaction in 5 attempts"
+                raise RuntimeError(message)
+            return await generate(uid, schedule_id, *args, **kwargs)  # type: ignore[arg-type]
+
+        repository.generate = flaky  # type: ignore[method-assign,assignment]
+
+        await service.generate_due("uid", WEDNESDAY, NOW)
+
+        assert [task.schedule_id for task in repository.tasks.values()] == ["s2"]
+
+    async def test_a_failing_query_of_the_due_schedules_is_not_raised(self) -> None:
+        service, repository, _ = _service()
+
+        async def broken(uid: str, today: date) -> list[Schedule]:
+            message = "index missing"
+            raise RuntimeError(message)
+
+        repository.list_due = broken  # type: ignore[method-assign]
+
+        await service.generate_due("uid", WEDNESDAY, NOW)
+
+        assert repository.tasks == {}
+
+    async def test_a_failing_count_of_active_tasks_is_not_raised_and_creates_nothing(self) -> None:
+        service, repository, tasks = _service()
+        repository.add(_schedule("s1", next_occurrence=WEDNESDAY))
+
+        async def broken(uid: str) -> int:
+            message = "timeout"
+            raise RuntimeError(message)
+
+        tasks.count_active = broken  # type: ignore[method-assign]
+
+        await service.generate_due("uid", WEDNESDAY, NOW)
+
+        # Without knowing the room, nothing is created (it could overshoot the 500 limit); the
+        # schedule stays due and the next read tries again.
+        assert repository.tasks == {}
+        assert repository.schedules["s1"].next_occurrence == WEDNESDAY

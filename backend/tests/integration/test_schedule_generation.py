@@ -224,3 +224,29 @@ async def test_completing_a_generated_task_unlocks_the_punctual_achievement(
     assert response.status_code == 200
     state = await state_document(firestore_client, user.uid)
     assert "scheduled_done" in state["achievements"]
+
+
+async def test_a_failing_generation_does_not_break_the_progress_and_is_retried(
+    client: httpx.AsyncClient,
+    google_user: GoogleUserFactory,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from mytasks_api.repositories.schedule_repository import ScheduleRepository
+
+    user = await google_user("ana@example.com")
+    schedule_id = await create_schedule(client, user.id_token, {"kind": "daily"})
+
+    async def broken(*args: object, **kwargs: object) -> None:
+        message = "Failed to commit transaction in 5 attempts"
+        raise RuntimeError(message)
+
+    with monkeypatch.context() as patch:
+        patch.setattr(ScheduleRepository, "generate", broken)
+        progress = await get_progress(client, user.id_token, MONDAY)
+
+    assert progress["goal"] == 3
+    assert generated(await board(client, user.id_token, MONDAY), schedule_id) == []
+
+    await get_progress(client, user.id_token, MONDAY)
+
+    assert len(generated(await board(client, user.id_token, MONDAY), schedule_id)) == 1

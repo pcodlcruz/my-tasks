@@ -10,9 +10,11 @@ from google.cloud.firestore_v1.base_query import FieldFilter
 from mytasks_api.domain.progress import add_notice, state_from_document, state_to_document
 from mytasks_api.domain.recurrence import Recurrence, RecurrenceKind
 from mytasks_api.domain.schedule import (
+    MAX_SCHEDULES,
     GenerationPlan,
     NewSchedule,
     Schedule,
+    ScheduleLimitError,
     ScheduleNotFoundError,
     ScheduleStatus,
     plan_generation,
@@ -123,6 +125,24 @@ def _is_live_and_active(snapshot: firestore.DocumentSnapshot, now: datetime) -> 
 
 
 @_transactional
+async def _create_within_limit(
+    transaction: firestore.AsyncTransaction,
+    schedules: firestore.AsyncCollectionReference,
+    doc_ref: firestore.AsyncDocumentReference,
+    document: dict[str, Any],
+    limit: int,
+) -> bool:
+    # The count is read inside the transaction: two creations racing for the last place conflict
+    # and one of them retries and sees the full count. Counting outside it, as a first version
+    # did, let a burst of parallel requests walk past the limit.
+    result = await schedules.count().get(transaction=transaction)  # type: ignore[no-untyped-call]
+    if int(result[0][0].value) >= limit:
+        return False
+    transaction.create(doc_ref, document)
+    return True
+
+
+@_transactional
 async def _modify(
     transaction: firestore.AsyncTransaction,
     doc_ref: firestore.AsyncDocumentReference,
@@ -224,12 +244,11 @@ class ScheduleRepository:
                 titles[snapshot.id] = str(data["title"])
         return titles
 
-    async def count(self, uid: str) -> int:
-        result = await self._schedules(uid).count().get()  # type: ignore[no-untyped-call]
-        return int(result[0][0].value)
-
     async def create(self, uid: str, data: NewSchedule, now: datetime) -> Schedule:
-        doc_ref = self._schedules(uid).document()
+        """Raises `ScheduleLimitError` if the person already has `MAX_SCHEDULES` (finished ones
+        included): the check and the write are one transaction."""
+        schedules = self._schedules(uid)
+        doc_ref = schedules.document()
         schedule = Schedule(
             id=doc_ref.id,
             title=data.title,
@@ -245,7 +264,14 @@ class ScheduleRepository:
             created_at=now,
             updated_at=now,
         )
-        await doc_ref.set(_schedule_to_document(schedule))
+        document = _schedule_to_document(schedule)
+        created = await _retry_on_abort(
+            lambda: _create_within_limit(
+                self._client.transaction(), schedules, doc_ref, document, MAX_SCHEDULES
+            )
+        )
+        if not created:
+            raise ScheduleLimitError(uid)
         return schedule
 
     async def modify(

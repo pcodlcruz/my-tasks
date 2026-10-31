@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 from typing import TYPE_CHECKING, Any
 
 import httpx
@@ -177,6 +178,20 @@ async def test_the_51st_schedule_is_refused_with_409(
 
     assert response.status_code == 409
     assert response.json()["code"] == "schedule_limit"
+    listed = await client.get(SCHEDULES_URL, headers=headers(user.id_token))
+    assert len(listed.json()["items"]) == 50
+
+
+async def test_parallel_creations_never_walk_past_the_limit(
+    client: httpx.AsyncClient, google_user: GoogleUserFactory
+) -> None:
+    user = await google_user("ana@example.com")
+    for index in range(48):
+        await created_id(client, user.id_token, title=f"Programada {index}")
+
+    responses = await asyncio.gather(*(create(client, user.id_token) for _ in range(6)))
+
+    assert sorted(response.status_code for response in responses).count(201) == 2
     listed = await client.get(SCHEDULES_URL, headers=headers(user.id_token))
     assert len(listed.json()["items"]) == 50
 
