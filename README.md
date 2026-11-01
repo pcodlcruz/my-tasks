@@ -34,6 +34,28 @@ solo la ve su dueña. **No hay variables de entorno nuevas ni cambios de infraes
 feature añade la dependencia de backend `pillow` y amplía la CSP del contenedor web con `blob:`
 solo en `img-src`.
 
+**Progreso diario y tareas programadas** (feature 007). Cada persona fija en **Perfil** una meta de
+tareas por día (de 1 a 20) y los días de la semana que cuentan. El marcador de la cabecera
+muestra las completadas hoy frente a la meta, y la racha cuenta los días activos seguidos con la
+meta cumplida; en un día no activo se puede avanzar, pero la racha no cambia. **El día empieza a
+las 04:00** (no a medianoche) en la zona horaria de la persona, que el navegador comunica a la
+API; las tareas completadas de madrugada cuentan para el día anterior. Al empezar la jornada
+aparece, si se quiere, la pantalla **PULSA START** con el resultado del último día y la
+**misión del día**: hasta cinco tareas elegidas que dan puntos extra y caducan sin penalización.
+El **modo arcade** (opcional) añade puntos, niveles, logros y una sala de trofeos; la puntuación
+es privada, sin tabla de récords. Con el modo desactivado el progreso se sigue calculando, pero
+no se muestra. La pantalla **Progreso** (`/progreso`) enseña un calendario de 12 semanas, el
+detalle de cada día y las estadísticas. Las **tareas programadas** (`/programadas`) crean una
+tarea en el tablero de forma única, diaria, semanal o mensual; la API las genera al cargar la
+aplicación, no hay ninguna tarea en segundo plano. Todo vive en Firestore bajo
+`users/{uid}/` (`progress/state`, `progress_days/{día}` y `schedules/{id}`) y lo escribe solo la
+API, que calcula puntos, rachas, niveles y logros: ningún endpoint los acepta del cliente.
+**No hay variables de entorno nuevas ni cambios de infraestructura**: la feature añade la
+dependencia de backend `tzdata` y la fuente Press Start 2P, autoalojada. Contrato en
+[`specs/001-eisenhower-task-manager/contracts/openapi.yaml`](specs/001-eisenhower-task-manager/contracts/openapi.yaml)
+(v1.4.0); operación en el
+[runbook](infra/RUNBOOK.md#15-progreso-diario-tareas-programadas-y-modo-arcade-feature-007).
+
 Se desarrolla con [Spec Kit](https://github.com/github/spec-kit) y agentes de IA. La fuente de
 verdad de las reglas del proyecto es la constitución
 ([`.specify/memory/constitution.md`](.specify/memory/constitution.md)); la primera feature está

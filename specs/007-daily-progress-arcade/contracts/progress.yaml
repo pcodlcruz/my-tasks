@@ -8,8 +8,11 @@ info:
     perfil (feature 004) y `TaskOut`. Todos los endpoints exigen `Authorization: Bearer <ID token
     de Firebase>` y una **cuenta activa** (feature 003): una cuenta revocada o sin acceso recibe el
     mismo 403 `access_denied` que en el resto de la API. El `uid` sale siempre del token. Ningún
-    endpoint acepta valores de puntuación, racha, nivel ni logros del cliente (FR-032). Se
-    integrará en el contrato de la 001 en la fase de cierre.
+    endpoint acepta valores de puntuación, racha, nivel ni logros del cliente (FR-032).
+
+    **YA INTEGRADO** (T115) en `specs/001-eisenhower-task-manager/contracts/openapi.yaml`
+    v1.4.0, que es ahora el contrato vigente y coincide con `GET /openapi.json`. Este fichero se
+    conserva solo como registro del diseño: los cambios futuros van en el contrato de la 001.
 
 paths:
   /api/v1/me/progress:
