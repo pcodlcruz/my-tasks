@@ -1,8 +1,11 @@
 import { useEffect, useState } from 'react'
+import { useDismissNotice, useProgress } from '../../api/progress'
 import { useBoardTasks } from '../../api/tasks'
 import type { Quadrant as QuadrantKey, Task } from '../../api/types'
 import { APP_NAME } from '../../lib/brand'
 import { useUiStore } from '../../stores/uiStore'
+import { DayScoreboard } from '../progress/DayScoreboard'
+import { StartOfDayDialog } from '../progress/StartOfDayDialog'
 import { useSettledProfile } from '../profile/useSettledProfile'
 import { TaskForm } from '../task-form/TaskForm'
 import { Quadrant } from './Quadrant'
@@ -29,6 +32,10 @@ export function BoardPage(): JSX.Element {
   const scopeInitialized = useUiStore((state) => state.scopeInitialized)
   const initializeScope = useUiStore((state) => state.initializeScope)
   const { profile, settled } = useSettledProfile()
+  // Asked for before the board: answering it closes the days left behind and generates today's
+  // scheduled tasks, so the board waits for it to arrive, or to fail (FR-034: then it loads anyway).
+  const progress = useProgress()
+  const dismissNotice = useDismissNotice()
 
   // The profile's default scope sets the filter once; a manual change never writes back to it.
   useEffect(() => {
@@ -37,7 +44,19 @@ export function BoardPage(): JSX.Element {
 
   // Wait for the profile (and the filter it sets) before asking for tasks, so the board never
   // shows the wrong scope nor makes a request that is thrown away.
-  const ready = settled && scopeInitialized
+  const ready = settled && scopeInitialized && !progress.isPending
+  // The start-of-day review opens by itself when the server says so (first opening of an active
+  // day with it enabled), and by hand from the scoreboard. Once closed here it does not come back
+  // by itself, even before the server's "seen" arrives.
+  const [reviewDismissed, setReviewDismissed] = useState(false)
+  const [reviewReopened, setReviewReopened] = useState(false)
+  const isReviewOpen =
+    ready &&
+    progress.data !== undefined &&
+    (reviewReopened || (progress.data.show_review && !reviewDismissed))
+  // Every active task, whatever the board's filter, for the mission picker.
+  const reviewTasks = useBoardTasks(undefined, profile?.board_order ?? 'oldest', isReviewOpen)
+
   const { data, isLoading, isError, refetch } = useBoardTasks(
     scopeFilter === 'all' ? undefined : scopeFilter,
     profile?.board_order ?? 'oldest',
@@ -45,12 +64,26 @@ export function BoardPage(): JSX.Element {
   )
   const [isCreating, setIsCreating] = useState(false)
   const [editingTask, setEditingTask] = useState<Task | null>(null)
+
+  function closeReview(): void {
+    setReviewDismissed(true)
+    setReviewReopened(false)
+  }
+
   const tasks = data?.items ?? []
   const groups = groupByQuadrant(tasks)
   const hasNoTasks = tasks.length === 0
 
   return (
     <main className="mx-auto w-full max-w-7xl px-4 py-6">
+      <DayScoreboard
+        progress={progress.data}
+        isLoading={progress.isPending}
+        isError={progress.isError}
+        onRetry={() => void progress.refetch()}
+        onOpenReview={() => setReviewReopened(true)}
+        onDismissNotice={(noticeId) => dismissNotice.mutate(noticeId)}
+      />
       <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-display font-display text-text">Matriz de prioridades</h1>
         <ScopeFilter />
@@ -107,7 +140,13 @@ export function BoardPage(): JSX.Element {
                 {groups[quadrant].length > 0 && (
                   <div className="flex flex-1 flex-col gap-[var(--card-gap)]">
                     {groups[quadrant].map((task) => (
-                      <TaskCard key={task.id} task={task} onEdit={setEditingTask} />
+                      <TaskCard
+                        key={task.id}
+                        task={task}
+                        onEdit={setEditingTask}
+                        missionTaskIds={progress.data?.mission.task_ids}
+                        today={progress.data?.today}
+                      />
                     ))}
                   </div>
                 )}
@@ -117,6 +156,17 @@ export function BoardPage(): JSX.Element {
         </>
       )}
 
+      {isReviewOpen && progress.data !== undefined && (
+        <StartOfDayDialog
+          progress={progress.data}
+          tasks={reviewTasks.data?.items}
+          onClose={closeReview}
+          onCreateTask={() => {
+            closeReview()
+            setIsCreating(true)
+          }}
+        />
+      )}
       {isCreating && <TaskForm onClose={() => setIsCreating(false)} />}
       {editingTask && <TaskForm task={editingTask} onClose={() => setEditingTask(null)} />}
     </main>

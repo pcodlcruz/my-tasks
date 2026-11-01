@@ -201,3 +201,62 @@ compacta 0,5 / 0,375 / 0,375 / 0,25 / 0,5 rem) y, en compacta, la tarjeta se maq
   oscuro con borde), por lo que no se mide contra `surface` y no hay variante por tema.
 - **Regla (FR-009)**: el logo se publica tal como lo entregó el propietario. No se recolorea, no se
   redibuja y no se recorta (un recorte del emblema se probó y no es legible por debajo de 48 px).
+
+## Estética arcade (feature 007)
+
+**Fuente**: [specs/007-daily-progress-arcade/contracts/ui-screens.md](../../specs/007-daily-progress-arcade/contracts/ui-screens.md).
+Guiño a la recreativa del logo «InsertTasks» (feature 006), sin convertir la aplicación en un juego:
+la estructura, la tipografía base y la paleta de las features 001 y 004 no cambian.
+
+### Tipografía
+
+- **«Press Start 2P»** (licencia OFL, autoalojada; la CSP ya permite `font-src 'self'`), **solo** en
+  cifras y rótulos cortos: el marcador («HOY 2/3»), la puntuación, el nivel («NIVEL 3») y los
+  rótulos de celebración («¡FASE SUPERADA!», «PULSA START», «RÉCORD»). Tamaño mínimo 12 px; con
+  `font-display: swap`, mientras carga se ve Inter.
+- Todo lo demás (títulos de tarea, explicaciones, formularios, estadísticas) sigue en Inter. Cada
+  cifra pixel lleva al lado, o en su nombre accesible, el texto normal equivalente («2 de 3 tareas
+  completadas hoy»).
+
+### Tokens nuevos
+
+Mismos nombres en claro y oscuro (variables CSS, como los de la feature 004).
+
+| Token | Claro | Oscuro | Uso |
+|---|---|---|---|
+| `energy-fill` | `#0E7490` | `#22D3EE` | Segmento lleno de la barra de energía y cifra del marcador |
+| `energy-extra` | `#A21CAF` | `#F0ABFC` | Segmentos por encima de la meta («4/3») y su cifra |
+| `energy-empty-border` | `#64748B` | `#94A3B8` | Contorno del segmento vacío (relleno `surface`) |
+| `gold` | `#A16207` | `#FACC15` | Logros conseguidos, «RÉCORD», nivel |
+| `on-gold` | `#FFFFFF` | `#0F172A` | Texto sobre una insignia dorada |
+| `streak` | `#C2410C` | `#FB923C` | Racha «en juego» |
+
+**Verificación**: `python3 docs/design/check-contrast.py` incluye 10 pares arcade por tema.
+Resultado del 2026-10-30: **0 pares por debajo de AA** en ambos temas. Mínimos: `gold` sobre
+`surface-alt` 4,71:1 (claro) y `energy-empty-border` sobre `surface` 4,76:1 (claro, componente
+gráfico, mínimo 3:1).
+
+### Barra de energía
+
+- Un segmento por tarea de la meta (de 1 a 20). Lleno = relleno `energy-fill`; vacío = contorno
+  `energy-empty-border` y relleno `surface`. Los segmentos por encima de la meta se añaden en
+  `energy-extra`, como máximo 10 visibles y después «+N».
+- Lleno y vacío se distinguen por el relleno, no solo por el tono; la cifra «2/3» siempre está
+  visible.
+
+### Celebraciones
+
+- Aviso **no modal** (no atrapa el foco ni tapa los cuadrantes en móvil), anunciado en una región
+  `aria-live="polite"`, que se cierra solo en unos 3 s o con su botón «Cerrar».
+- Animación breve (máximo 600 ms: aparición con escala y destello de los segmentos). Con
+  `prefers-reduced-motion: reduce`, sin animación: el aviso aparece y desaparece sin moverse.
+- Sin sonido.
+
+### Reglas
+
+- Ningún estado se comunica solo por color: la misión lleva estrella **y** el texto «Misión del
+  día»; lo programado, icono de calendario **y** «Programada»; en el calendario de progreso, la meta
+  cumplida lleva una marca (✓) además del tono.
+- Con el **modo arcade desactivado** desaparecen puntuación, nivel, logros, récord y celebraciones;
+  el marcador queda como «Hoy 2 de 3» con la barra y la racha, en Inter.
+- El logo no se reutiliza ni se recorta en estas pantallas (FR-009 de la feature 006).

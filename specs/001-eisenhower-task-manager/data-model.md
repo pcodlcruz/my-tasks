@@ -16,6 +16,15 @@
 > `settings/profile` (preferencias, nombre para mostrar y tipo de avatar) y `settings/avatar` (la
 > imagen subida, ya reprocesada). Solo los lee y escribe la API; sin ellos valen los valores por
 > defecto. No cambia ningún campo de `users/{uid}` ni de las tareas.
+>
+> **Ampliado por la feature 007** ([data-model](../007-daily-progress-arcade/data-model.md)): la
+> tarea gana dos campos persistidos, `schedule_id` y `scheduled_for` (los pone la API al generar
+> una tarea programada; son `null` en las creadas a mano), además de `completed_day` y
+> `points_awarded_on` para el progreso. Bajo `users/{uid}` aparecen tres elementos nuevos que solo
+> lee y escribe la API: `progress/state` (el marcador), `progress_days/{día}` (un día de progreso)
+> y `schedules/{id}` (las tareas programadas); y `settings/profile` gana la meta diaria, los días
+> activos, la zona horaria, el inicio de jornada y el modo arcade. Sin esos campos valen los
+> valores por defecto, así que no se migra nada. Las reglas de esta spec no cambian.
 
 No se persistía como documento propio (ver [research.md § R2](./research.md#r2-modelo-de-almacenamiento-en-firestore-y-aislamiento-por-usuario)).
 Su identidad es el `uid` que emite Firebase Authentication al iniciar sesión con Google. El sistema

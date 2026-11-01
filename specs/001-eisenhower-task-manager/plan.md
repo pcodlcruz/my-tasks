@@ -37,6 +37,13 @@ emuladores de Firebase; la infraestructura en la nube y el CI/CD son una feature
 > parámetros opcionales (`order`, `within_days`) en el listado de tareas. Contrato integrado en
 > `contracts/openapi.yaml` (v1.3.0). Única dependencia nueva: `pillow` en el backend.
 
+> **Ampliado por la feature 007** ([plan](../007-daily-progress-arcade/plan.md)): añade el progreso
+> diario, la misión, el modo arcade y las tareas programadas bajo `users/{uid}/` (`progress/state`,
+> `progress_days/{día}` y `schedules/{id}`), los endpoints `/api/v1/me/progress*` y
+> `/api/v1/schedules*`, y los campos `schedule_id` y `scheduled_for` en la tarea. Contrato
+> integrado en `contracts/openapi.yaml` (v1.4.0). Sin infraestructura nueva; dependencias nuevas:
+> `tzdata` en el backend y la fuente Press Start 2P, autoalojada, en el frontend.
+
 ## Technical Context
 
 **Language/Version**: Python 3.12+ (backend); TypeScript 5.x en modo estricto (frontend)

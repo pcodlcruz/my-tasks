@@ -1,6 +1,7 @@
 import { type QueryClient, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useEffect } from 'react'
 import { ApiClientError, apiFetch, apiFetchBlob } from '../lib/apiClient'
+import { invalidateProgress } from './progress'
 import type { Avatar, Profile, ProfileUpdate } from './types'
 
 export const PROFILE_QUERY_KEY = ['profile'] as const
@@ -54,11 +55,23 @@ export function useUpdateProfile() {
         queryClient.setQueryData(PROFILE_QUERY_KEY, context.previous)
       }
     },
-    onSuccess: (profile) => {
+    onSuccess: (profile, update) => {
       queryClient.setQueryData(PROFILE_QUERY_KEY, profile)
+      // These settings decide today's scoreboard (the arcade mode shows or hides its score).
+      if (PROGRESS_SETTINGS.some((field) => update[field] !== undefined)) {
+        invalidateProgress(queryClient)
+      }
     },
   })
 }
+
+const PROGRESS_SETTINGS = [
+  'daily_goal',
+  'active_weekdays',
+  'timezone',
+  'morning_review',
+  'arcade_mode',
+] as const
 
 export function useResetProfile() {
   const queryClient = useQueryClient()

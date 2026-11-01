@@ -11,7 +11,19 @@ request_id_var: ContextVar[str | None] = ContextVar("request_id", default=None)
 
 # Closed list of fields allowed in a log entry: never the token nor task content
 # (Principle III). Anything not listed here is dropped.
-_LOGGED_FIELDS = ("action", "uid", "task_id", "reason", "actor_uid", "target", "fields", "size")
+_LOGGED_FIELDS = (
+    "action",
+    "uid",
+    "task_id",
+    "schedule_id",
+    "reason",
+    "actor_uid",
+    "target",
+    "fields",
+    "size",
+    "day",
+    "count",
+)
 
 
 class JsonFormatter(logging.Formatter):

@@ -2,6 +2,16 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Pixel font of the arcade look (feature 007), self-hosted (OFL, see assets/fonts/OFL.txt):
+ * only for figures and short labels; Inter shows while it loads. */
+@font-face {
+  font-family: 'Press Start 2P';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('./assets/fonts/press-start-2p.woff2') format('woff2');
+}
+
 /*
  * Design tokens as "r g b" channels so Tailwind can still apply opacity (`bg-error/10`).
  * Light values are the original palette and must not change (docs/design/DESIGN.md,
@@ -44,6 +54,14 @@
   --color-eliminate-accent: 71 85 105;
   --color-eliminate-surface: 248 250 252;
   --color-eliminate-border: 226 232 240;
+
+  /* Arcade tokens of feature 007 (docs/design/DESIGN.md § Estética arcade). */
+  --color-energy-fill: 14 116 144;
+  --color-energy-extra: 162 28 175;
+  --color-energy-empty-border: 100 116 139;
+  --color-gold: 161 98 7;
+  --color-on-gold: 255 255 255;
+  --color-streak: 194 65 12;
 
   /* Page canvas and base ink: what the browser used before there were themes. */
   --color-page: 255 255 255;
@@ -93,6 +111,13 @@
   --color-eliminate-surface: 28 37 54;
   --color-eliminate-border: 59 71 92;
 
+  --color-energy-fill: 34 211 238;
+  --color-energy-extra: 240 171 252;
+  --color-energy-empty-border: 148 163 184;
+  --color-gold: 250 204 21;
+  --color-on-gold: 15 23 42;
+  --color-streak: 251 146 60;
+
   --color-page: 15 23 42;
   --color-ink: 241 245 249;
 }
@@ -108,4 +133,12 @@
 body {
   background-color: rgb(var(--color-page));
   color: rgb(var(--color-ink));
+}
+
+/* Arcade celebrations (feature 007): with reduced motion they appear and go without moving. The
+ * component already leaves the animation out; this also covers any other `animate-pop`. */
+@media (prefers-reduced-motion: reduce) {
+  .animate-pop {
+    animation: none;
+  }
 }

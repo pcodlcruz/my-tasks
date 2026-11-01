@@ -65,6 +65,9 @@ async def test_every_endpoint_meets_the_p95_latency_goal_with_500_active_tasks(
     await client.get("/api/v1/tasks", params={"view": "board"}, headers=headers)
 
     await _measure("GET /healthz", [send("GET", "/healthz")] * SAMPLES, 200, results)
+    # The scoreboard is asked for before the board (feature 007): it must not slow down opening
+    # the app, including its catch-up of closed days.
+    await _measure("GET /me/progress", [get("/api/v1/me/progress")] * SAMPLES, 200, results)
     await _measure(
         "GET /tasks?view=board", [get("/api/v1/tasks", view="board")] * SAMPLES, 200, results
     )

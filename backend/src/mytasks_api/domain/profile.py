@@ -1,13 +1,24 @@
 import math
 import unicodedata
+import zoneinfo
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 from enum import StrEnum
+from functools import cache
 from typing import Any
 
 from mytasks_api.domain.task import BoardOrder, HistoryDays
 
 DISPLAY_NAME_MAX_LENGTH = 50
+
+# Progress settings (feature 007). The daily goal is a number of tasks; the active days are ISO
+# weekdays (1 = Monday … 7 = Sunday).
+DAILY_GOAL_MIN = 1
+DAILY_GOAL_MAX = 20
+DEFAULT_DAILY_GOAL = 3
+ALL_WEEKDAYS = (1, 2, 3, 4, 5, 6, 7)
+# Used to compute the day until the client sends the device's zone for the first time.
+DEFAULT_TIMEZONE = "Europe/Madrid"
 
 # At most this many uploaded images per person in a fixed window that opens with the first one
 # (FR-025). Removing the avatar does not count.
@@ -54,6 +65,10 @@ RESETTABLE_FIELDS = ("theme", "density", "default_scope", "board_order", "histor
 
 
 class InvalidDisplayNameError(ValueError):
+    pass
+
+
+class InvalidProgressSettingError(ValueError):
     pass
 
 
@@ -105,6 +120,16 @@ class Profile:
     history_days: HistoryDays | None
     display_name: str | None
     avatar: Avatar
+    daily_goal: int = DEFAULT_DAILY_GOAL
+    active_weekdays: tuple[int, ...] = ALL_WEEKDAYS
+    # `None` until the client sends the device's zone; the day is then computed in the default.
+    timezone: str | None = None
+    morning_review: bool = True
+    arcade_mode: bool = True
+
+    @property
+    def effective_timezone(self) -> str:
+        return self.timezone or DEFAULT_TIMEZONE
 
 
 def default_profile() -> Profile:
@@ -117,6 +142,39 @@ def default_profile() -> Profile:
         display_name=None,
         avatar=Avatar(kind=AvatarKind.INITIALS, preset=None, version=0),
     )
+
+
+@cache
+def _known_timezones() -> frozenset[str]:
+    return frozenset(zoneinfo.available_timezones())
+
+
+def is_known_timezone(value: str) -> bool:
+    return value in _known_timezones()
+
+
+def validate_daily_goal(value: int) -> int:
+    if not DAILY_GOAL_MIN <= value <= DAILY_GOAL_MAX:
+        message = f"La meta diaria debe estar entre {DAILY_GOAL_MIN} y {DAILY_GOAL_MAX} tareas."
+        raise InvalidProgressSettingError(message)
+    return value
+
+
+def normalize_active_weekdays(values: list[int]) -> tuple[int, ...]:
+    if not values:
+        message = "Al menos un día de la semana debe ser activo."
+        raise InvalidProgressSettingError(message)
+    if len(set(values)) != len(values) or any(day not in ALL_WEEKDAYS for day in values):
+        message = "Los días activos van del 1 (lunes) al 7 (domingo), sin repetir."
+        raise InvalidProgressSettingError(message)
+    return tuple(sorted(values))
+
+
+def validate_timezone(value: str) -> str:
+    if not is_known_timezone(value):
+        message = "La zona horaria no es válida."
+        raise InvalidProgressSettingError(message)
+    return value
 
 
 def normalize_display_name(value: str | None) -> str | None:
@@ -190,7 +248,41 @@ def profile_from_document(data: dict[str, Any]) -> Profile:
             preset=data.get("avatar_preset"),
             version=version if isinstance(version, int) and version >= 0 else 0,
         ),
+        daily_goal=_goal_or_default(data.get("daily_goal")),
+        active_weekdays=_weekdays_or_default(data.get("active_weekdays")),
+        timezone=_timezone_or_none(data.get("timezone")),
+        morning_review=_bool_or_default(data.get("morning_review"), defaults.morning_review),
+        arcade_mode=_bool_or_default(data.get("arcade_mode"), defaults.arcade_mode),
     )
+
+
+def _goal_or_default(value: object) -> int:
+    # `bool` is an `int` in Python: a stored `true` is not a goal of 1.
+    if isinstance(value, int) and not isinstance(value, bool):
+        try:
+            return validate_daily_goal(value)
+        except InvalidProgressSettingError:
+            pass
+    return DEFAULT_DAILY_GOAL
+
+
+def _weekdays_or_default(value: object) -> tuple[int, ...]:
+    if isinstance(value, list) and all(
+        isinstance(day, int) and not isinstance(day, bool) for day in value
+    ):
+        try:
+            return normalize_active_weekdays(value)
+        except InvalidProgressSettingError:
+            pass
+    return ALL_WEEKDAYS
+
+
+def _timezone_or_none(value: object) -> str | None:
+    return value if isinstance(value, str) and is_known_timezone(value) else None
+
+
+def _bool_or_default(value: object, default: bool) -> bool:
+    return value if isinstance(value, bool) else default
 
 
 def register_upload(window: UploadWindow | None, now: datetime) -> UploadWindow:

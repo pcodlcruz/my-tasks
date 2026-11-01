@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>S3 v3 · Tablero - InsertTasks (Móvil Oscuro)</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts: Inter & Press Start 2P -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Press+Start+2P&display=swap" rel="stylesheet">
+  <!-- Material Symbols Outlined -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            pixel: ['"Press Start 2P"', 'monospace'],
+          },
+          colors: {
+            // Tokens especificados
+            'energy-fill': '#22D3EE',
+            'energy-empty-border': '#94A3B8',
+            'retro-gold': '#FACC15',
+            'streak-orange': '#FB923C',
+            // Paleta oscura del sistema
+            slate: {
+              850: '#151F32',
+              900: '#0F172A',
+              950: '#0A0F1D',
+            }
+          }
+        }
+      }
+    };
+  </script>
+  <style>
+    .font-pixel {
+      font-family: 'Press Start 2P', monospace;
+    }
+    /* Estilos de scroll oculto para tab bar horizontal */
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+    /* Material symbols helper */
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+    .material-symbols-outlined.fill {
+      font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+  </style>
+</head>
+<body class="bg-[#0b1120] text-slate-100 font-sans antialiased min-h-screen flex justify-center selection:bg-cyan-500 selection:text-slate-900 pb-20">
+
+  <!-- Contenedor móvil optimizado a 390px, adaptativo a 320px -->
+  <div class="w-full max-w-[390px] min-h-screen bg-[#0f172a] border-x border-slate-800/80 shadow-2xl flex flex-col relative">
+
+    <!-- CABECERA EN DOS FILAS (Cabe sin desborde a 320px) -->
+    <header class="sticky top-0 z-40 bg-[#0f172a]/95 backdrop-blur border-b border-slate-800">
+      <!-- Fila 1: Marca + Badge Arcade + Perfil -->
+      <div class="h-14 px-4 flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <!-- Logo IT -->
+          <div class="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center shadow-md shadow-blue-600/30">
+            <span class="font-pixel text-[11px] text-white font-bold tracking-tighter">IT</span>
+          </div>
+          <span class="font-bold text-base tracking-tight text-white flex items-center gap-1.5">
+            InsertTasks
+            <span class="px-1.5 py-0.5 rounded bg-amber-500/20 text-retro-gold border border-amber-500/30 font-pixel text-[9px] uppercase tracking-wider">
+              Arcade
+            </span>
+          </span>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <button class="flex items-center gap-1.5 pl-1 pr-2.5 py-1 rounded-full bg-slate-800 hover:bg-slate-700/80 border border-slate-700 transition" aria-label="Perfil de usuario Ana">
+            <div class="w-6 h-6 rounded-full bg-blue-500 text-white font-bold text-xs flex items-center justify-center">
+              AC
+            </div>
+            <span class="text-xs font-medium text-slate-200">Ana</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Fila 2: Barra de pestañas con desplazamiento horizontal propio (cabe a 320px) -->
+      <nav class="flex items-center gap-2 px-3 pb-2 overflow-x-auto no-scrollbar scroll-smooth" aria-label="Navegación principal">
+        <a href="#tablero" class="flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-600/20 text-blue-400 border border-blue-500/40 text-xs font-semibold">
+          <span class="material-symbols-outlined text-[17px]">grid_view</span>
+          Tablero
+        </a>
+        <a href="#progreso" class="flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800/60 hover:bg-slate-800 text-slate-400 hover:text-slate-200 border border-slate-700/50 text-xs font-medium transition">
+          <span class="material-symbols-outlined text-[17px]">trending_up</span>
+          Progreso
+        </a>
+        <a href="#programadas" class="flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800/60 hover:bg-slate-800 text-slate-400 hover:text-slate-200 border border-slate-700/50 text-xs font-medium transition">
+          <span class="material-symbols-outlined text-[17px]">calendar_today</span>
+          Programadas
+        </a>
+        <a href="#historial" class="flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800/60 hover:bg-slate-800 text-slate-400 hover:text-slate-200 border border-slate-700/50 text-xs font-medium transition">
+          <span class="material-symbols-outlined text-[17px]">history</span>
+          Historial
+        </a>
+      </nav>
+    </header>
+
+    <!-- ÁREA DE CONTENIDO -->
+    <main class="flex-1 p-3.5 space-y-3.5">
+
+      <!-- MARCADOR COMPACTO RETRO EN DOS FILAS (Arcade HUD) -->
+      <section class="rounded-xl bg-[#090d16] border border-cyan-500/30 p-3.5 shadow-lg shadow-cyan-950/20 relative overflow-hidden" aria-label="Marcador y progreso arcade">
+        <!-- Resplandor sutil de fondo -->
+        <div class="absolute -top-12 -right-12 w-32 h-32 bg-cyan-500/10 rounded-full blur-2xl pointer-events-none"></div>
+
+        <!-- Fila 1 del marcador: HOY 2/3 + Barra de 3 segmentos + Botón PULSA START -->
+        <div class="flex items-center justify-between gap-2 pb-2.5 border-b border-slate-800/80">
+          <div class="flex items-center gap-2">
+            <span class="font-pixel text-[11px] text-cyan-400 tracking-wider">HOY</span>
+            <span class="font-pixel text-[13px] text-white">2/3</span>
+            <!-- Barra de 3 segmentos (tokens: energy-fill #22D3EE, energy-empty-border #94A3B8) -->
+            <div class="flex items-center gap-1 ml-1" title="Energía diaria: 2 de 3 completadas">
+              <span class="w-3.5 h-3.5 rounded-sm bg-energy-fill shadow-[0_0_8px_rgba(34,211,238,0.7)]"></span>
+              <span class="w-3.5 h-3.5 rounded-sm bg-energy-fill shadow-[0_0_8px_rgba(34,211,238,0.7)]"></span>
+              <span class="w-3.5 h-3.5 rounded-sm bg-transparent border-2 border-energy-empty-border"></span>
+            </div>
+          </div>
+
+          <!-- Botón PULSA START interactivo (retro arcade) -->
+          <button class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-400 hover:bg-amber-300 text-slate-950 font-pixel text-[9px] font-bold shadow-[0_0_12px_rgba(250,204,21,0.5)] active:scale-95 transition-transform">
+            <span class="material-symbols-outlined text-[14px] fill">play_arrow</span>
+            PULSA START
+          </button>
+        </div>
+
+        <!-- Fila 2 del marcador: Racha + Misión + Nivel con puntos -->
+        <div class="pt-2.5 flex items-center justify-between flex-wrap gap-y-2 text-xs">
+          <!-- Racha 4 · en juego (streak #FB923C) -->
+          <div class="flex items-center gap-1.5 text-streak-orange">
+            <span class="material-symbols-outlined text-[16px] fill text-streak-orange">local_fire_department</span>
+            <span class="font-pixel text-[9px]">RACHA 4</span>
+            <span class="text-[10px] text-slate-400 font-sans">· en juego</span>
+          </div>
+
+          <!-- ★ Misión 1/2 (gold #FACC15) -->
+          <div class="flex items-center gap-1 px-2 py-0.5 rounded bg-amber-500/10 border border-amber-500/30 text-retro-gold font-pixel text-[8px]">
+            <span>★ MISIÓN 1/2</span>
+          </div>
+
+          <!-- NIVEL 3 · 3.450 PTS -->
+          <div class="font-pixel text-[9px] text-slate-300 tracking-wider">
+            NIVEL 3 · <span class="text-retro-gold">3.450 PTS</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- BANNER AVISO CUPO TAREAS -->
+      <aside class="p-2.5 rounded-lg bg-amber-950/40 border border-amber-600/40 flex items-center justify-between gap-2.5 text-xs">
+        <div class="flex items-center gap-2 text-amber-300">
+          <span class="material-symbols-outlined text-amber-400 text-lg flex-shrink-0">warning</span>
+          <p class="leading-tight">
+            <strong class="font-semibold text-amber-200">«Pagar alquiler»</strong> no cupo: límite de 500 activas.
+          </p>
+        </div>
+        <button class="px-2 py-1 rounded bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 text-[11px] font-semibold flex-shrink-0 border border-amber-500/40">
+          Entendido
+        </button>
+      </aside>
+
+      <!-- BARRA DE FILTROS DE ÁMBITO + BOTÓN NUEVA TAREA -->
+      <div class="flex items-center justify-between gap-2 pt-1">
+        <!-- Filtros ámbito -->
+        <div class="flex items-center gap-1.5 p-1 rounded-xl bg-slate-900 border border-slate-800 text-xs">
+          <button class="px-2.5 py-1 rounded-lg bg-blue-600 text-white font-medium text-xs shadow-sm">
+            Todas <span class="font-pixel text-[9px] ml-0.5">7</span>
+          </button>
+          <button class="px-2 py-1 rounded-lg text-slate-400 hover:text-slate-200 flex items-center gap-1 transition">
+            <span class="w-2 h-2 rounded-full bg-violet-400"></span>
+            Laboral
+          </button>
+          <button class="px-2 py-1 rounded-lg text-slate-400 hover:text-slate-200 flex items-center gap-1 transition">
+            <span class="w-2 h-2 rounded-full bg-teal-400"></span>
+            Personal
+          </button>
+        </div>
+
+        <!-- Botón + Nueva tarea -->
+        <button class="h-9 px-3 rounded-xl bg-blue-600 hover:bg-blue-500 active:scale-95 text-white text-xs font-semibold flex items-center gap-1.5 shadow-md shadow-blue-600/30 transition">
+          <span class="material-symbols-outlined text-base">add</span>
+          <span>Nueva tarea</span>
+        </button>
+      </div>
+
+      <!-- CUADRANTES EN UNA SOLA COLUMNA (Eisenhower Matrix Móvil) -->
+      <div class="space-y-4 pt-1">
+
+        <!-- CUADRANTE 1: HACER AHORA (Urgente e Importante) - Rojo -->
+        <section class="rounded-2xl bg-slate-900/90 border border-red-500/30 p-3 shadow-md relative overflow-hidden" aria-labelledby="q1-heading">
+          <div class="absolute left-0 top-0 bottom-0 w-1 bg-red-500"></div>
+
+          <!-- Cabecera del cuadrante -->
+          <div class="flex items-center justify-between pb-2.5 mb-2.5 border-b border-slate-800/80 pl-1">
+            <div class="flex items-center gap-2">
+              <span class="w-2.5 h-2.5 rounded-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.7)]"></span>
+              <h2 id="q1-heading" class="font-semibold text-sm text-slate-100 flex items-center gap-1.5">
+                Hacer ahora
+                <span class="text-[11px] font-normal text-slate-400">(Urgente e Importante)</span>
+              </h2>
+            </div>
+            <span class="w-5 h-5 rounded-full bg-red-500/20 text-red-400 border border-red-500/30 font-pixel text-[9px] flex items-center justify-center font-bold">
+              2
+            </span>
+          </div>
+
+          <!-- Lista de tarjetas Cuadrante 1 -->
+          <div class="space-y-2.5">
+
+            <!-- Tarea 1: Con insignia «★ Misión del día» -->
+            <article class="p-3 rounded-xl bg-slate-850 border border-slate-750 hover:border-slate-600 shadow-sm relative">
+              <!-- Insignia ★ Misión del día -->
+              <div class="flex items-center justify-between mb-2">
+                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-amber-500/15 border border-amber-500/30 text-retro-gold font-pixel text-[8px] font-medium tracking-wide">
+                  ★ Misión del día
+                </span>
+                <span class="inline-flex items-center gap-1 text-[11px] text-violet-300 bg-violet-950/60 border border-violet-700/50 px-2 py-0.5 rounded-md">
+                  <span class="w-1.5 h-1.5 rounded-full bg-violet-400"></span>
+                  Laboral
+                </span>
+              </div>
+
+              <!-- Título y vencimiento -->
+              <h3 class="text-xs font-semibold text-slate-100 mb-1 leading-snug">
+                Resolver caída de servidor de pagos en producción
+              </h3>
+              <div class="flex items-center gap-2 text-[11px] text-slate-400 mb-3">
+                <span class="flex items-center gap-1 text-red-400 font-medium">
+                  <span class="material-symbols-outlined text-[13px]">schedule</span>
+                  Vence hoy 17:00
+                </span>
+                <span>•</span>
+                <span class="text-red-400 font-semibold">Crítico</span>
+              </div>
+
+              <!-- Acciones: Botón Completar + Botón estrella de ≥44px -->
+              <div class="flex items-center gap-2 pt-1 border-t border-slate-800">
+                <button class="flex-1 h-9 px-3 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs font-medium text-slate-200 flex items-center justify-center gap-1.5 transition">
+                  <span class="material-symbols-outlined text-base text-emerald-400">check_circle</span>
+                  <span>Completar</span>
+                </button>
+                <!-- Botón estrella ≥ 44px táctil (44x44px exactos) -->
+                <button class="w-11 h-11 min-w-[44px] min-h-[44px] rounded-lg bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/40 text-retro-gold flex items-center justify-center transition active:scale-95" aria-label="Tarea actualmente en misión">
+                  <span class="material-symbols-outlined text-xl fill text-retro-gold">star</span>
+                </button>
+              </div>
+            </article>
+
+            <!-- Tarea 2: Compra antibiótico -->
+            <article class="p-3 rounded-xl bg-slate-850 border border-slate-750 hover:border-slate-600 shadow-sm relative">
+              <div class="flex items-center justify-between mb-2">
+                <span class="inline-flex items-center gap-1 text-[11px] text-teal-300 bg-teal-950/60 border border-teal-700/50 px-2 py-0.5 rounded-md">
+                  <span class="w-1.5 h-1.5 rounded-full bg-teal-400"></span>
+                  Personal
+                </span>
+                <button class="w-8 h-8 -mr-1 text-slate-400 hover:text-slate-200 flex items-center justify-center rounded-lg" aria-label="Opciones de tarea">
+                  <span class="material-symbols-outlined text-base">more_vert</span>
+                </button>
+              </div>
+
+              <h3 class="text-xs font-semibold text-slate-100 mb-1 leading-snug">
+                Comprar antibiótico recetado en farmacia de turno
+              </h3>
+              <div class="flex items-center gap-2 text-[11px] text-slate-400 mb-3">
+                <span class="flex items-center gap-1 text-slate-300">
+                  <span class="material-symbols-outlined text-[13px]">schedule</span>
+                  Hoy antes de 20:30
+                </span>
+              </div>
+
+              <!-- Acciones: Botón Completar + Botón estrella de ≥44px -->
+              <div class="flex items-center gap-2 pt-1 border-t border-slate-800">
+                <button class="flex-1 h-9 px-3 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs font-medium text-slate-200 flex items-center justify-center gap-1.5 transition">
+                  <span class="material-symbols-outlined text-base text-emerald-400">check_circle</span>
+                  <span>Completar</span>
+                </button>
+                <!-- Botón estrella ≥ 44px táctil -->
+                <button class="w-11 h-11 min-w-[44px] min-h-[44px] rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-400 hover:text-retro-gold flex items-center justify-center transition active:scale-95" aria-label="Añadir a misión del día">
+                  <span class="material-symbols-outlined text-xl">star</span>
+                </button>
+              </div>
+            </article>
+
+          </div>
+        </section>
+
+        <!-- CUADRANTE 2: PLANIFICAR (No urgente, Importante) - Azul -->
+        <section class="rounded-2xl bg-slate-900/90 border border-blue-500/30 p-3 shadow-md relative overflow-hidden" aria-labelledby="q2-heading">
+          <div class="absolute left-0 top-0 bottom-0 w-1 bg-blue-500"></div>
+
+          <!-- Cabecera del cuadrante -->
+          <div class="flex items-center justify-between pb-2.5 mb-2.5 border-b border-slate-800/80 pl-1">
+            <div class="flex items-center gap-2">
+              <span class="w-2.5 h-2.5 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.7)]"></span>
+              <h2 id="q2-heading" class="font-semibold text-sm text-slate-100 flex items-center gap-1.5">
+                Planificar
+                <span class="text-[11px] font-normal text-slate-400">(No urgente, Importante)</span>
+              </h2>
+            </div>
+            <span class="w-5 h-5 rounded-full bg-blue-500/20 text-blue-400 border border-blue-500/30 font-pixel text-[9px] flex items-center justify-center font-bold">
+              2
+            </span>
+          </div>
+
+          <!-- Lista de tarjetas Cuadrante 2 -->
+          <div class="space-y-2.5">
+
+            <!-- Tarea 1: Con insignia «📅 Programada · Pendiente desde el lun 3» -->
+            <article class="p-3 rounded-xl bg-slate-850 border border-slate-750 hover:border-slate-600 shadow-sm relative">
+              <!-- Insignia Programada -->
+              <div class="flex items-center justify-between mb-2">
+                <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-blue-950/60 border border-blue-600/40 text-blue-300 text-[10px] font-medium">
+                  <span class="material-symbols-outlined text-[13px]">calendar_today</span>
+                  📅 Programada · Pendiente desde el lun 3
+                </span>
+                <span class="inline-flex items-center gap-1 text-[11px] text-violet-300 bg-violet-950/60 border border-violet-700/50 px-2 py-0.5 rounded-md">
+                  <span class="w-1.5 h-1.5 rounded-full bg-violet-400"></span>
+                  Laboral
+                </span>
+              </div>
+
+              <h3 class="text-xs font-semibold text-slate-100 mb-1 leading-snug">
+                Diseñar arquitectura de microservicios de inventario v2
+              </h3>
+              <div class="flex items-center gap-2 text-[11px] text-slate-400 mb-3">
+                <span class="flex items-center gap-1 text-slate-300">
+                  <span class="material-symbols-outlined text-[13px]">event</span>
+                  Jueves 16, 10:00
+                </span>
+              </div>
+
+              <!-- Acciones: Botón Completar + Botón estrella de ≥44px -->
+              <div class="flex items-center gap-2 pt-1 border-t border-slate-800">
+                <button class="flex-1 h-9 px-3 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs font-medium text-slate-200 flex items-center justify-center gap-1.5 transition">
+                  <span class="material-symbols-outlined text-base text-emerald-400">check_circle</span>
+                  <span>Completar</span>
+                </button>
+                <!-- Botón estrella ≥ 44px -->
+                <button class="w-11 h-11 min-w-[44px] min-h-[44px] rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-400 hover:text-retro-gold flex items-center justify-center transition active:scale-95" aria-label="Añadir a misión">
+                  <span class="material-symbols-outlined text-xl">star</span>
+                </button>
+              </div>
+            </article>
+
+            <!-- Tarea 2: Sesión de entrenamiento -->
+            <article class="p-3 rounded-xl bg-slate-850 border border-slate-750 hover:border-slate-600 shadow-sm relative">
+              <div class="flex items-center justify-between mb-2">
+                <span class="inline-flex items-center gap-1 text-[11px] text-teal-300 bg-teal-950/60 border border-teal-700/50 px-2 py-0.5 rounded-md">
+                  <span class="w-1.5 h-1.5 rounded-full bg-teal-400"></span>
+                  Personal
+                </span>
+                <button class="w-8 h-8 -mr-1 text-slate-400 hover:text-slate-200 flex items-center justify-center rounded-lg" aria-label="Opciones">
+                  <span class="material-symbols-outlined text-base">more_vert</span>
+                </button>
+              </div>
+
+              <h3 class="text-xs font-semibold text-slate-100 mb-1 leading-snug">
+                Sesión de entrenamiento de fuerza y cardio 45 min
+              </h3>
+              <div class="flex items-center gap-2 text-[11px] text-slate-400 mb-3">
+                <span class="flex items-center gap-1 text-slate-300">
+                  <span class="material-symbols-outlined text-[13px]">alarm</span>
+                  Mañana 07:30
+                </span>
+              </div>
+
+              <!-- Acciones: Botón Completar + Botón estrella de ≥44px -->
+              <div class="flex items-center gap-2 pt-1 border-t border-slate-800">
+                <button class="flex-1 h-9 px-3 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs font-medium text-slate-200 flex items-center justify-center gap-1.5 transition">
+                  <span class="material-symbols-outlined text-base text-emerald-400">check_circle</span>
+                  <span>Completar</span>
+                </button>
+                <!-- Botón estrella ≥ 44px -->
+                <button class="w-11 h-11 min-w-[44px] min-h-[44px] rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-400 hover:text-retro-gold flex items-center justify-center transition active:scale-95" aria-label="Añadir a misión">
+                  <span class="material-symbols-outlined text-xl">star</span>
+                </button>
+              </div>
+            </article>
+
+          </div>
+        </section>
+
+        <!-- CUADRANTE 3: DELEGAR (Urgente, No importante) - Ámbar -->
+        <section class="rounded-2xl bg-slate-900/90 border border-amber-500/30 p-3 shadow-md relative overflow-hidden" aria-labelledby="q3-heading">
+          <div class="absolute left-0 top-0 bottom-0 w-1 bg-amber-500"></div>
+
+          <!-- Cabecera del cuadrante -->
+          <div class="flex items-center justify-between pb-2.5 mb-2.5 border-b border-slate-800/80 pl-1">
+            <div class="flex items-center gap-2">
+              <span class="w-2.5 h-2.5 rounded-full bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.7)]"></span>
+              <h2 id="q3-heading" class="font-semibold text-sm text-slate-100 flex items-center gap-1.5">
+                Delegar
+                <span class="text-[11px] font-normal text-slate-400">(Urgente, No importante)</span>
+              </h2>
+            </div>
+            <span class="w-5 h-5 rounded-full bg-amber-500/20 text-retro-gold border border-amber-500/30 font-pixel text-[9px] flex items-center justify-center font-bold">
+              2
+            </span>
+          </div>
+
+          <!-- Lista de tarjetas Cuadrante 3 -->
+          <div class="space-y-2.5">
+
+            <!-- Tarea delegada 1 -->
+            <article class="p-3 rounded-xl bg-slate-850 border border-slate-750 hover:border-slate-600 shadow-sm relative">
+              <div class="flex items-center justify-between mb-2">
+                <div class="flex items-center gap-1.5">
+                  <span class="inline-flex items-center gap-1 text-[11px] text-violet-300 bg-violet-950/60 border border-violet-700/50 px-2 py-0.5 rounded-md">
+                    <span class="w-1.5 h-1.5 rounded-full bg-violet-400"></span>
+                    Laboral
+                  </span>
+                  <span class="text-[11px] text-slate-400 flex items-center gap-1">
+                    <span class="material-symbols-outlined text-[13px]">person</span>
+                    Sofía R.
+                  </span>
+                </div>
+                <button class="w-8 h-8 -mr-1 text-slate-400 hover:text-slate-200 flex items-center justify-center rounded-lg" aria-label="Opciones">
+                  <span class="material-symbols-outlined text-base">more_vert</span>
+                </button>
+              </div>
+
+              <h3 class="text-xs font-semibold text-slate-100 mb-3 leading-snug">
+                Coordinar logística y catering para evento de innovación
+              </h3>
+
+              <!-- Acciones: Botón Completar + Botón estrella de ≥44px -->
+              <div class="flex items-center gap-2 pt-1 border-t border-slate-800">
+                <button class="flex-1 h-9 px-3 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs font-medium text-slate-200 flex items-center justify-center gap-1.5 transition">
+                  <span class="material-symbols-outlined text-base text-emerald-400">check_circle</span>
+                  <span>Completar</span>
+                </button>
+                <!-- Botón estrella ≥ 44px -->
+                <button class="w-11 h-11 min-w-[44px] min-h-[44px] rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-400 hover:text-retro-gold flex items-center justify-center transition active:scale-95" aria-label="Añadir a misión">
+                  <span class="material-symbols-outlined text-xl">star</span>
+                </button>
+              </div>
+            </article>
+
+            <!-- Tarea delegada 2 -->
+            <article class="p-3 rounded-xl bg-slate-850 border border-slate-750 hover:border-slate-600 shadow-sm relative">
+              <div class="flex items-center justify-between mb-2">
+                <div class="flex items-center gap-1.5">
+                  <span class="inline-flex items-center gap-1 text-[11px] text-teal-300 bg-teal-950/60 border border-teal-700/50 px-2 py-0.5 rounded-md">
+                    <span class="w-1.5 h-1.5 rounded-full bg-teal-400"></span>
+                    Personal
+                  </span>
+                  <span class="text-[11px] text-slate-400 flex items-center gap-1">
+                    <span class="material-symbols-outlined text-[13px]">person</span>
+                    Roberto M.
+                  </span>
+                </div>
+                <button class="w-8 h-8 -mr-1 text-slate-400 hover:text-slate-200 flex items-center justify-center rounded-lg" aria-label="Opciones">
+                  <span class="material-symbols-outlined text-base">more_vert</span>
+                </button>
+              </div>
+
+              <h3 class="text-xs font-semibold text-slate-100 mb-3 leading-snug">
+                Revisar presupuesto de pintura de oficina en casa
+              </h3>
+
+              <!-- Acciones: Botón Completar + Botón estrella de ≥44px -->
+              <div class="flex items-center gap-2 pt-1 border-t border-slate-800">
+                <button class="flex-1 h-9 px-3 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs font-medium text-slate-200 flex items-center justify-center gap-1.5 transition">
+                  <span class="material-symbols-outlined text-base text-emerald-400">check_circle</span>
+                  <span>Completar</span>
+                </button>
+                <!-- Botón estrella ≥ 44px -->
+                <button class="w-11 h-11 min-w-[44px] min-h-[44px] rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-400 hover:text-retro-gold flex items-center justify-center transition active:scale-95" aria-label="Añadir a misión">
+                  <span class="material-symbols-outlined text-xl">star</span>
+                </button>
+              </div>
+            </article>
+
+          </div>
+        </section>
+
+        <!-- CUADRANTE 4: ELIMINAR (Ni urgente, ni importante) - Pizarra -->
+        <section class="rounded-2xl bg-slate-900/90 border border-slate-700/50 p-3 shadow-md relative overflow-hidden" aria-labelledby="q4-heading">
+          <div class="absolute left-0 top-0 bottom-0 w-1 bg-slate-500"></div>
+
+          <!-- Cabecera del cuadrante -->
+          <div class="flex items-center justify-between pb-2.5 mb-2.5 border-b border-slate-800/80 pl-1">
+            <div class="flex items-center gap-2">
+              <span class="w-2.5 h-2.5 rounded-full bg-slate-400 shadow-[0_0_8px_rgba(148,163,184,0.5)]"></span>
+              <h2 id="q4-heading" class="font-semibold text-sm text-slate-100 flex items-center gap-1.5">
+                Eliminar
+                <span class="text-[11px] font-normal text-slate-400">(Ni urgente, ni importante)</span>
+              </h2>
+            </div>
+            <span class="w-5 h-5 rounded-full bg-slate-800 text-slate-300 border border-slate-700 font-pixel text-[9px] flex items-center justify-center font-bold">
+              1
+            </span>
+          </div>
+
+          <!-- Lista de tarjetas Cuadrante 4 -->
+          <div class="space-y-2.5">
+            <article class="p-3 rounded-xl bg-slate-850 border border-slate-750 hover:border-slate-600 shadow-sm relative">
+              <div class="flex items-center justify-between mb-2">
+                <span class="inline-flex items-center gap-1 text-[11px] text-teal-300 bg-teal-950/60 border border-teal-700/50 px-2 py-0.5 rounded-md">
+                  <span class="w-1.5 h-1.5 rounded-full bg-teal-400"></span>
+                  Personal
+                </span>
+                <span class="text-[10px] text-slate-400 bg-slate-800 px-2 py-0.5 rounded border border-slate-700/70">
+                  Descartable
+                </span>
+              </div>
+
+              <h3 class="text-xs font-semibold text-slate-300 mb-3 leading-snug line-through decoration-slate-500">
+                Reorganizar feeds RSS obsoletos y newsletters archivadas
+              </h3>
+
+              <!-- Acciones: Botón Descartar + Botón estrella de ≥44px -->
+              <div class="flex items-center gap-2 pt-1 border-t border-slate-800">
+                <button class="flex-1 h-9 px-3 rounded-lg bg-slate-800 hover:bg-red-950/40 hover:border-red-600/40 hover:text-red-300 border border-slate-700 text-xs font-medium text-slate-300 flex items-center justify-center gap-1.5 transition">
+                  <span class="material-symbols-outlined text-base">delete</span>
+                  <span>Descartar</span>
+                </button>
+                <!-- Botón estrella ≥ 44px -->
+                <button class="w-11 h-11 min-w-[44px] min-h-[44px] rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-400 hover:text-retro-gold flex items-center justify-center transition active:scale-95" aria-label="Añadir a misión">
+                  <span class="material-symbols-outlined text-xl">star</span>
+                </button>
+              </div>
+            </article>
+          </div>
+        </section>
+
+      </div>
+
+    </main>
+
+    <!-- BARRA INFERIOR DE NAVEGACIÓN (Bottom Nav Bar móvil fija) -->
+    <nav class="sticky bottom-0 z-40 bg-[#0f172a]/95 backdrop-blur border-t border-slate-800 px-2 py-1.5 flex items-center justify-around" aria-label="Navegación inferior">
+      <a href="#tablero" class="flex flex-col items-center justify-center gap-0.5 px-3 py-1 text-blue-400 font-semibold">
+        <span class="material-symbols-outlined text-[20px] fill">grid_view</span>
+        <span class="text-[10px]">Tablero</span>
+      </a>
+      <a href="#misiones" class="flex flex-col items-center justify-center gap-0.5 px-3 py-1 text-slate-400 hover:text-slate-200 transition">
+        <span class="material-symbols-outlined text-[20px]">sports_esports</span>
+        <span class="text-[10px]">Misiones</span>
+      </a>
+      <a href="#historial" class="flex flex-col items-center justify-center gap-0.5 px-3 py-1 text-slate-400 hover:text-slate-200 transition">
+        <span class="material-symbols-outlined text-[20px]">history</span>
+        <span class="text-[10px]">Historial</span>
+      </a>
+      <a href="#ajustes" class="flex flex-col items-center justify-center gap-0.5 px-3 py-1 text-slate-400 hover:text-slate-200 transition">
+        <span class="material-symbols-outlined text-[20px]">settings</span>
+        <span class="text-[10px]">Ajustes</span>
+      </a>
+    </nav>
+
+  </div>
+
+</body>
+</html>

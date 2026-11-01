@@ -21,6 +21,18 @@ from mytasks_api.domain.account import (
 )
 from mytasks_api.domain.avatar_image import AvatarTooLargeError, AvatarUnsupportedError
 from mytasks_api.domain.profile import AvatarNotFoundError, AvatarRateLimitedError
+from mytasks_api.domain.progress import (
+    InvalidDayRangeError,
+    InvalidMissionError,
+    ProgressDayNotFoundError,
+)
+from mytasks_api.domain.recurrence import InvalidRecurrenceError
+from mytasks_api.domain.schedule import (
+    MAX_SCHEDULES,
+    ScheduleFinishedError,
+    ScheduleLimitError,
+    ScheduleNotFoundError,
+)
 from mytasks_api.domain.task import (
     MAX_ACTIVE_TASKS,
     ActiveTaskLimitError,
@@ -35,6 +47,8 @@ from mytasks_api.routers.admin import router as admin_router
 from mytasks_api.routers.me import router as me_router
 from mytasks_api.routers.profile import avatar_router
 from mytasks_api.routers.profile import router as profile_router
+from mytasks_api.routers.progress import router as progress_router
+from mytasks_api.routers.schedules import router as schedules_router
 from mytasks_api.routers.tasks import router as tasks_router
 from mytasks_api.schemas.task import ErrorOut, ReadinessOut
 from mytasks_api.services.access_service import MAX_PENDING_INVITATIONS
@@ -108,6 +122,8 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.include_router(me_router)
     app.include_router(profile_router)
     app.include_router(avatar_router)
+    app.include_router(progress_router)
+    app.include_router(schedules_router)
     app.include_router(admin_router)
     app.include_router(tasks_router)
 
@@ -259,5 +275,55 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     async def avatar_not_found_handler(_: Request, __: AvatarNotFoundError) -> JSONResponse:
         error = ErrorOut(code="avatar_not_found", message="No hay una imagen de avatar subida.")
         return _error_response(status.HTTP_404_NOT_FOUND, error)
+
+    @app.exception_handler(InvalidMissionError)
+    async def invalid_mission_handler(_: Request, exc: InvalidMissionError) -> JSONResponse:
+        # A task of someone else is "not active" here, like a missing one: the answer never
+        # reveals whether an id exists in another account.
+        error = ErrorOut(code="mission_invalid_task", message=str(exc))
+        return _error_response(status.HTTP_422_UNPROCESSABLE_CONTENT, error)
+
+    @app.exception_handler(InvalidDayRangeError)
+    async def invalid_day_range_handler(_: Request, exc: InvalidDayRangeError) -> JSONResponse:
+        error = ErrorOut(code="validation_error", message=str(exc))
+        return _error_response(status.HTTP_422_UNPROCESSABLE_CONTENT, error)
+
+    @app.exception_handler(ProgressDayNotFoundError)
+    async def progress_day_not_found_handler(
+        _: Request, __: ProgressDayNotFoundError
+    ) -> JSONResponse:
+        # The same answer for a day that never existed, one that is not a date and, for another
+        # account, one that exists: it never reveals anything about someone else's progress.
+        error = ErrorOut(code="not_found", message="No hay progreso registrado ese día.")
+        return _error_response(status.HTTP_404_NOT_FOUND, error)
+
+    @app.exception_handler(ScheduleNotFoundError)
+    async def schedule_not_found_handler(_: Request, __: ScheduleNotFoundError) -> JSONResponse:
+        error = ErrorOut(code="not_found", message="La programación no existe.")
+        return _error_response(status.HTTP_404_NOT_FOUND, error)
+
+    @app.exception_handler(ScheduleLimitError)
+    async def schedule_limit_handler(_: Request, __: ScheduleLimitError) -> JSONResponse:
+        error = ErrorOut(
+            code="schedule_limit",
+            message=(
+                f"Has alcanzado el límite de {MAX_SCHEDULES} tareas programadas. "
+                "Elimina alguna para poder crear otra."
+            ),
+        )
+        return _error_response(status.HTTP_409_CONFLICT, error)
+
+    @app.exception_handler(ScheduleFinishedError)
+    async def schedule_finished_handler(_: Request, __: ScheduleFinishedError) -> JSONResponse:
+        error = ErrorOut(
+            code="schedule_finished",
+            message="Esta programación ya ha terminado y no se puede cambiar.",
+        )
+        return _error_response(status.HTTP_409_CONFLICT, error)
+
+    @app.exception_handler(InvalidRecurrenceError)
+    async def invalid_recurrence_handler(_: Request, exc: InvalidRecurrenceError) -> JSONResponse:
+        error = ErrorOut(code="validation_error", message=str(exc))
+        return _error_response(status.HTTP_422_UNPROCESSABLE_CONTENT, error)
 
     return app

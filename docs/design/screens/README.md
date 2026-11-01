@@ -407,3 +407,131 @@ como referencia anterior (FR-028); el detalle (ids de Stitch y carpetas) está e
 | Historial, formulario de tarea y papelera (claro y oscuro) | S5, S4 y S6 v2 | Ronda 2 (T112) |
 | Inicio de sesión en oscuro | S1 · Iniciar sesión (oscuro) | Ronda 2 (T112) |
 | Selector de avatar (catálogo y «Subir imagen») y recortador | S7 · Selector y recortador (claro y oscuro) | Selector de avatar (T114) |
+
+## Feature 007 · pantallas nuevas y versiones (T001, 2026-10-30)
+
+**Fuente**: [specs/007-daily-progress-arcade/contracts/ui-screens.md](../../../specs/007-daily-progress-arcade/contracts/ui-screens.md).
+Las pantallas aprobadas de las features 001 y 004 **no se modifican**: cada cambio es una
+pantalla nueva (FR-036).
+
+### Bases vigentes de las que parten las versiones nuevas
+
+| Base | Claro, escritorio | Claro, móvil | Oscuro, escritorio | Oscuro, «móvil» |
+|---|---|---|---|---|
+| S3 · Tablero v2 | `a3f141c47d3946ea9c1466f3916df60d` | `27a7b42bf13c4592a5d665c889b6aebf` | `6229bf994c8446378757eddc823322df` | `76ec68dd342142b5bc86c2c30ea03ddd` (solo color) |
+| S3 · Tablero compacto | `963cfc7d68c9445b86f32918d2babb02` | `1ae725edfe09482e94c92d2082c9b04e` | — | — |
+| S4 · Formulario v2 (base de S11) | `2dcd890bf4f84f87b0f23e4f01315b39` | `b53dd6d79bd44274ab064dbfa48d17f9` | `5c3ddf048d35439c92ef053db11fbf42` | `9036112ceed343cfbc60c7ec2f4bc8dc` (solo color) |
+| S7 · Perfil | `5b4edf53a88f4c5f89c51608ed120c60` | `0b97e3e427874566a38fc843734dc918` | `912d3dc861c84104af22ceb366a9010a` | `2d33b97724904379828180049debbfe6` (solo color) |
+
+### Design systems (T003)
+
+Se usan los dos ya existentes, **sin modificarlos**: `assets/ec957f11ef474eb58336b8af664aaa2e`
+(claro, aprobado en la 001) y `assets/16783421015770598561` (oscuro, feature 004). Los tokens
+arcade de `DESIGN.md` § Estética arcade **no se añaden a ningún sistema**: Stitch admite un solo
+modo de color por sistema, y `update_design_system` recalcula `namedColors` y sube de versión el
+sistema (lección de la 004). En su lugar, cada *prompt* de generación lleva los valores exactos
+de los tokens arcade y la tipografía «Press Start 2P».
+
+### Registro de generaciones (T004–T010)
+
+`generate_screen_from_text` suele responder con *timeout* y la pantalla aparece igualmente en el
+lienzo 45–60 minutos después (feature 004): **no se reintenta**. Se comprueba con `get_screen`
+o `get_project` antes de volver a lanzar nada.
+
+| Pantalla | Variante | Id de Stitch | Estado |
+|---|---|---|---|
+| S3 v3 · Tablero | claro, escritorio | `81117eabaa4646c3abd3f0bb4f5eb94b` | generada; **aprobada (2026-10-31)** |
+| S3 v3 · Tablero | claro, móvil | `c897887510c1449ab912c09dee1e50fc` | lienzo `DESKTOP` (1280 px) ⚠: solo color; la maquetación móvil vigente es la de S3 v2 móvil (`27a7b42b…`), por decisión del propietario; **aprobada (2026-10-31)** |
+| S3 v3 · Tablero | oscuro, escritorio | `14e9ca5694e14e2c8e87af6ec1c2fc73` | generada; **aprobada (2026-10-31)** |
+| S3 v3 · Tablero | oscuro, móvil | `9bc244225a004223bad38caa44671dd7` | lienzo `DESKTOP` ⚠: solo color; **aprobada (2026-10-31)** |
+| S3 v3 · Tablero sin modo arcade | claro, escritorio | `aeba00edd3bb4bbca68d96f83fd7928d` | generada; **aprobada (2026-10-31)** |
+| S3-c · Celebraciones | claro, escritorio | `a849ae882f33445186187d949d16e599` | generada; **aprobada (2026-10-31)** |
+| S3-c · Celebraciones | oscuro, escritorio | `1236b480972045a3b77af91ca42d5cea` | generada; **aprobada (2026-10-31)** |
+| S7 v2 · Perfil | claro, escritorio | `6963be246e3c470a917811748108e6fc` | generada; **aprobada (2026-10-31)** |
+| S7 v2 · Perfil | claro, móvil | `2f2edf7ef1464aaca6f2b9fb6db91a20` | generada (390 px); **aprobada (2026-10-31)** |
+| S7 v2 · Perfil | oscuro, escritorio | `9b76b8f83b8f493f9f6d9c6666bc54ca` | generada; **aprobada (2026-10-31)** |
+| S7 v2 · Perfil | oscuro, móvil | `cbd569609d7748e9bd6a0c7992d179f7` | lienzo `DESKTOP` ⚠: solo color; **aprobada (2026-10-31)** |
+| S8 · Inicio de jornada | claro, escritorio | `a1322c6444844c428bb3a188421d79dc` | generada; **aprobada (2026-10-31)** |
+| S8 · Inicio de jornada | claro, móvil | `a074bb8078344b23b0764adcd8e27684` | generada (390 px); **aprobada (2026-10-31)** |
+| S8 · Inicio de jornada | oscuro, escritorio | `0b1585100994409ebb5074538bbb6242` | generada; **aprobada (2026-10-31)** |
+| S8 · Inicio de jornada | oscuro, móvil | `fa5ff90879914845befe6838e0024e8e` | lienzo `DESKTOP` ⚠: solo color; **aprobada (2026-10-31)** |
+| S9 · Progreso | claro, escritorio | `64ea9d11db404202a2932956249fd826` | generada; **aprobada (2026-10-31)** |
+| S9 · Progreso | claro, móvil | `4c3d0611a3b343a18411cf8802daa389` | generada (390 px); **aprobada (2026-10-31)** |
+| S9 · Progreso | oscuro, escritorio | `13eae85e91884f869ae0d46ed598d598` | generada; **aprobada (2026-10-31)** |
+| S10 · Tareas programadas | claro, escritorio | `e54daa11eee144b0ad4b3ef1e902b305` | generada (incluye el diálogo de eliminar); **aprobada (2026-10-31)** |
+| S10 · Tareas programadas | claro, móvil | `e5cd17d754364db88d5e3ea4fe744aec` | generada (390 px, incluye el estado vacío); **aprobada (2026-10-31)** |
+| S10 · Tareas programadas | oscuro, escritorio | `ffb027706df54057a8939489a0f54b56` | generada; **aprobada (2026-10-31)** |
+| S11 · Formulario de programación | claro, escritorio | `d7fd20eb7f5d4e13838b763446b8b698` | generada (días de la semana, error en línea); **aprobada (2026-10-31)** |
+| S11 · Formulario de programación | claro, móvil | `6e642b45ac624bc791963c50f74b7193` | generada (390 px, día 31); **aprobada (2026-10-31)** |
+| S11 · Formulario de programación | oscuro, escritorio | `e010f309c1934c698114b746ca98163a` | generada; **aprobada (2026-10-31)** |
+
+Las variantes **móviles oscuras** de S9, S10 y S11 no se generan aparte: en la feature 004 Stitch
+devolvía esas variantes como lienzo de escritorio. Valen como **solo color** la oscura de
+escritorio sobre la maquetación de la móvil clara, igual que en la 004. Los estados «PARTIDA
+NUEVA» y «sin tareas activas» de S8 y el estado vacío de S9 se implementan a partir del contrato
+(`ui-screens.md`), salvo que el propietario pida pantalla propia en el punto de control.
+
+**Estado (2026-10-31)**: las 24 pantallas, **aprobadas por el propietario en una sola ronda**
+(T012) y exportadas a `docs/design/screens/` (T011).
+
+**Salvedades**:
+- **S3 v3 claro móvil** salió como lienzo de escritorio (1280 px), igual que las móviles oscuras.
+  Por decisión del propietario no se regenera: la maquetación móvil vigente del tablero es la de
+  S3 v2 móvil (`27a7b42b…`) con el marcador compacto en dos filas que describe `ui-screens.md`, y
+  `s3-board-v3/mobile.*` vale solo como referencia de color y contenido.
+
+### Pantallas vigentes exportadas (T011, T013)
+
+| Carpeta | Pantalla | Ficheros |
+|---|---|---|
+| [`s3-board-v3/`](s3-board-v3/) | S3 v3 · Tablero, claro | `desktop`, `mobile` (solo color) |
+| [`s3-board-v3-dark/`](s3-board-v3-dark/) | S3 v3 · Tablero, oscuro | `desktop`, `mobile` (solo color) |
+| [`s3-board-v3-no-arcade/`](s3-board-v3-no-arcade/) | S3 v3 · Tablero sin modo arcade | `desktop` |
+| [`s3c-celebrations/`](s3c-celebrations/) | S3-c · Celebraciones, claro | `desktop` |
+| [`s3c-celebrations-dark/`](s3c-celebrations-dark/) | S3-c · Celebraciones, oscuro | `desktop` |
+| [`s7-profile-v2/`](s7-profile-v2/) | S7 v2 · Perfil, claro | `desktop`, `mobile` |
+| [`s7-profile-v2-dark/`](s7-profile-v2-dark/) | S7 v2 · Perfil, oscuro | `desktop`, `mobile` (solo color) |
+| [`s8-day-start/`](s8-day-start/) | S8 · Inicio de jornada, claro | `desktop`, `mobile` |
+| [`s8-day-start-dark/`](s8-day-start-dark/) | S8 · Inicio de jornada, oscuro | `desktop`, `mobile` (solo color) |
+| [`s9-progress/`](s9-progress/) | S9 · Progreso, claro | `desktop`, `mobile` |
+| [`s9-progress-dark/`](s9-progress-dark/) | S9 · Progreso, oscuro | `desktop` |
+| [`s10-schedules/`](s10-schedules/) | S10 · Tareas programadas, claro | `desktop`, `mobile` |
+| [`s10-schedules-dark/`](s10-schedules-dark/) | S10 · Tareas programadas, oscuro | `desktop` |
+| [`s11-schedule-form/`](s11-schedule-form/) | S11 · Formulario de programación, claro | `desktop`, `mobile` |
+| [`s11-schedule-form-dark/`](s11-schedule-form-dark/) | S11 · Formulario de programación, oscuro | `desktop` |
+
+Cada variante tiene su `.html` y su `.png`. Las pantallas aprobadas de las features 001 y 004
+siguen intactas.
+
+**Cómo se exportaron**: las URLs de descarga de `get_screen` (`stitch.googleapis.com`) exigen un
+token OAuth (no admiten claves de API) y un proyecto de cuota con la API de Stitch habilitada, y
+devuelven el fichero dentro de un JSON (`dataString`). `download_file` del MCP mete el contenido en
+la conversación, lo que no es viable para 48 ficheros. Por eso el propietario ejecutó
+[`../export-stitch.py`](../export-stitch.py) en su terminal, con su propio token: el agente no usa
+credenciales personales (Principio V). Para exportar más pantallas, se añaden sus ids de fichero
+(los `htmlCode.name` y `screenshot.name` de `get_screen`) a la lista `EXPORTS` del script.
+
+## Resumen de lo vigente de la feature 007 (T117, 2026-11-01)
+
+Qué pantalla manda para cada función de la feature 007. Las versiones nuevas sustituyen a las de
+las features 001 y 004 en lo que cambian, que siguen intactas como referencia anterior (FR-036);
+el detalle (ids de Stitch) está en «Registro de generaciones» y las carpetas, en «Pantallas
+vigentes exportadas».
+
+| Función | Pantalla vigente | Carpeta |
+|---|---|---|
+| Tablero con marcador del día y cabecera con la pestaña «Progreso» | S3 v3 · Tablero (claro y oscuro; móvil: maquetación de S3 v2 móvil con los colores de v3) | `s3-board-v3/`, `s3-board-v3-dark/` |
+| Tablero con el modo arcade desactivado | S3 v3 · Tablero sin modo arcade | `s3-board-v3-no-arcade/` |
+| Celebraciones (fase, misión, nivel, logro y récord) | S3-c · Celebraciones | `s3c-celebrations/`, `s3c-celebrations-dark/` |
+| Perfil con meta diaria, días activos, inicio de jornada y modo arcade | S7 v2 · Perfil (sustituye a S7) | `s7-profile-v2/`, `s7-profile-v2-dark/` |
+| Inicio de jornada y selector de la misión del día | S8 · Inicio de jornada | `s8-day-start/`, `s8-day-start-dark/` |
+| Historial de progreso, estadísticas y sala de trofeos | S9 · Progreso | `s9-progress/`, `s9-progress-dark/` |
+| Lista de tareas programadas y diálogo de eliminar | S10 · Tareas programadas | `s10-schedules/`, `s10-schedules-dark/` |
+| Crear y editar una programación | S11 · Formulario de programación (parte de S4 v2) | `s11-schedule-form/`, `s11-schedule-form-dark/` |
+
+Siguen vigentes sin cambios, de la feature 004: S1 (inicio de sesión), S4 (formulario de tarea),
+S5 (historial), S6 (papelera) y el selector de avatar con su recortador.
+
+Los estados «PARTIDA NUEVA» y «sin tareas activas» de S8, y el estado vacío de S9, no tienen
+pantalla propia: se implementan desde el contrato (`specs/007-daily-progress-arcade/contracts/ui-screens.md`).
+Las variantes móviles oscuras valen como **solo color**.

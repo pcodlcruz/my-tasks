@@ -65,6 +65,9 @@ class TaskOut(BaseModel):
     completed_at: datetime | None
     trashed_at: datetime | None
     purge_at: datetime | None
+    # Always present: null on a task that no schedule generated (feature 007).
+    schedule_id: str | None
+    scheduled_for: str | None
 
     @classmethod
     def from_task(cls, task: Task) -> "TaskOut":
@@ -84,6 +87,8 @@ class TaskOut(BaseModel):
             completed_at=task.completed_at,
             trashed_at=task.trashed_at,
             purge_at=task.purge_at,
+            schedule_id=task.schedule_id,
+            scheduled_for=task.scheduled_for,
         )
 
 

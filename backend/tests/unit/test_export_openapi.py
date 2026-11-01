@@ -124,6 +124,12 @@ def test_export_matches_the_profile_contract_of_feature_004(tmp_path: Path) -> N
         "history_days",
         "display_name",
         "avatar",
+        # Progress settings, feature 007.
+        "daily_goal",
+        "active_weekdays",
+        "timezone",
+        "morning_review",
+        "arcade_mode",
     }
     assert schemas["ProfileUpdateIn"]["additionalProperties"] is False
     assert schemas["AvatarChoiceIn"]["additionalProperties"] is False
@@ -190,3 +196,151 @@ def test_the_cors_policy_allows_put_for_the_avatar_upload() -> None:
     from mytasks_api.factory import ALLOWED_METHODS
 
     assert "PUT" in ALLOWED_METHODS
+
+
+def test_export_matches_the_progress_contract_of_feature_007(tmp_path: Path) -> None:
+    target = tmp_path / "openapi.json"
+
+    export_openapi(target)
+    contract = json.loads(target.read_text(encoding="utf-8"))
+
+    paths = contract["paths"]
+    assert set(paths["/api/v1/me/progress"]) == {"get"}
+    assert set(paths["/api/v1/me/progress/review"]) == {"post"}
+    assert set(paths["/api/v1/me/progress/today/mission"]) == {"put"}
+    assert set(paths["/api/v1/me/progress/ack"]) == {"post"}
+    for path in (
+        "/api/v1/me/progress",
+        "/api/v1/me/progress/review",
+        "/api/v1/me/progress/today/mission",
+        "/api/v1/me/progress/ack",
+    ):
+        for operation in paths[path].values():
+            assert {"401", "403"} <= set(operation["responses"])
+    assert "422" in paths["/api/v1/me/progress/today/mission"]["put"]["responses"]
+    assert "204" in paths["/api/v1/me/progress/ack"]["post"]["responses"]
+    schemas = contract["components"]["schemas"]
+    assert set(schemas["ProgressOut"]["required"]) == {
+        "today",
+        "goal",
+        "completed_count",
+        "goal_met",
+        "is_active_day",
+        "mission",
+        "show_review",
+        "streak",
+        "streak_at_stake",
+        "arcade",
+        "last_day",
+        "announcements",
+        "notices",
+    }
+    assert schemas["MissionIn"]["additionalProperties"] is False
+    assert schemas["AckIn"]["additionalProperties"] is False
+    assert schemas["MissionIn"]["properties"]["task_ids"]["maxItems"] == 5
+    assert set(schemas["AnnouncementKind"]["enum"]) == {
+        "phase_clear",
+        "mission_clear",
+        "level_up",
+        "achievement",
+        "new_record",
+    }
+
+
+def test_export_contains_the_progress_history_endpoints(tmp_path: Path) -> None:
+    target = tmp_path / "openapi.json"
+
+    export_openapi(target)
+    contract = json.loads(target.read_text(encoding="utf-8"))
+
+    paths = contract["paths"]
+    for path in (
+        "/api/v1/me/progress/days",
+        "/api/v1/me/progress/days/{day}",
+        "/api/v1/me/progress/stats",
+    ):
+        assert set(paths[path]) == {"get"}, path
+        assert {"401", "403"} <= set(paths[path]["get"]["responses"]), path
+    assert "422" in paths["/api/v1/me/progress/days"]["get"]["responses"]
+    assert "404" in paths["/api/v1/me/progress/days/{day}"]["get"]["responses"]
+    parameters = {item["name"] for item in paths["/api/v1/me/progress/days"]["get"]["parameters"]}
+    assert parameters == {"from", "to"}
+    schemas = contract["components"]["schemas"]
+    assert {"ProgressDayDetailOut", "ProgressDaysOut", "StatsOut"} <= set(schemas)
+    assert "tasks" in schemas["ProgressDayDetailOut"]["properties"]
+    assert {"best_day_count", "tasks_scored", "arcade"} <= set(schemas["StatsOut"]["properties"])
+
+
+def test_export_contains_the_schedule_endpoints_each_with_401_and_403(tmp_path: Path) -> None:
+    target = tmp_path / "openapi.json"
+
+    export_openapi(target)
+    contract = json.loads(target.read_text(encoding="utf-8"))
+
+    paths = {path: set(methods) for path, methods in contract["paths"].items()}
+    assert paths["/api/v1/schedules"] == {"get", "post"}
+    assert paths["/api/v1/schedules/{schedule_id}"] == {"patch", "delete"}
+    assert paths["/api/v1/schedules/{schedule_id}/pause"] == {"post"}
+    assert paths["/api/v1/schedules/{schedule_id}/resume"] == {"post"}
+    for path, methods in contract["paths"].items():
+        if path.startswith("/api/v1/schedules"):
+            for operation in methods.values():
+                assert {"401", "403"} <= set(operation["responses"]), path
+    create = contract["paths"]["/api/v1/schedules"]["post"]["responses"]
+    assert {"201", "409", "422"} <= set(create)
+    for action in ("pause", "resume"):
+        assert (
+            "409"
+            in contract["paths"][f"/api/v1/schedules/{{schedule_id}}/{action}"]["post"]["responses"]
+        )
+
+
+def test_export_schedule_schemas_are_closed_and_tell_the_repetitions_apart(
+    tmp_path: Path,
+) -> None:
+    target = tmp_path / "openapi.json"
+
+    export_openapi(target)
+    schemas = json.loads(target.read_text(encoding="utf-8"))["components"]["schemas"]
+
+    for name in ("ScheduleIn", "ScheduleUpdateIn", "OnceIn", "DailyIn", "WeeklyIn", "MonthlyIn"):
+        assert schemas[name]["additionalProperties"] is False, name
+    recurrence = schemas["ScheduleIn"]["properties"]["recurrence"]
+    assert recurrence["discriminator"]["propertyName"] == "kind"
+    assert set(recurrence["discriminator"]["mapping"]) == {"once", "daily", "weekly", "monthly"}
+    assert set(schemas["ScheduleOut"]["required"]) == {
+        "id",
+        "title",
+        "description",
+        "urgent",
+        "important",
+        "scope",
+        "quadrant",
+        "recurrence",
+        "status",
+        "next_occurrence",
+        "last_generated_for",
+        "created_at",
+    }
+
+
+def test_export_task_out_always_carries_the_schedule_fields(tmp_path: Path) -> None:
+    target = tmp_path / "openapi.json"
+
+    export_openapi(target)
+    task_out = json.loads(target.read_text(encoding="utf-8"))["components"]["schemas"]["TaskOut"]
+
+    assert {"schedule_id", "scheduled_for"} <= set(task_out["required"])
+    # Read-only: the create and update bodies do not take them.
+    schemas = json.loads(target.read_text(encoding="utf-8"))["components"]["schemas"]
+    assert "schedule_id" not in schemas["TaskCreate"]["properties"]
+    assert "scheduled_for" not in schemas["TaskUpdate"]["properties"]
+
+
+def test_export_notice_carries_the_schedule_title(tmp_path: Path) -> None:
+    target = tmp_path / "openapi.json"
+
+    export_openapi(target)
+    notice = json.loads(target.read_text(encoding="utf-8"))["components"]["schemas"]["NoticeOut"]
+
+    assert "schedule_title" in notice["properties"]

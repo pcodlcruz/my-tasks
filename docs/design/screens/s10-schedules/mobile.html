@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+
+<html class="light" lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+<title>S10 · Tareas programadas - InsertTasks</title>
+<!-- Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Inter Font -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS v3 with Plugins -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Tailwind Configuration verbatim from Design System -->
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "surface-container-lowest": "#ffffff",
+            "on-surface-variant": "#434655",
+            "on-primary-container": "#cad3ff",
+            "surface-container-high": "#e8e7f3",
+            "on-secondary-fixed-variant": "#005049",
+            "on-background": "#1a1b23",
+            "secondary-fixed-dim": "#6bd8cb",
+            "do-now": "#B91C1C",
+            "on-tertiary": "#ffffff",
+            "surface-container-low": "#f3f2fe",
+            "outline": "#747686",
+            "surface-alt": "#F8FAFC",
+            "delegate": "#B45309",
+            "scope-work": "#7C3AED",
+            "on-error": "#ffffff",
+            "success": "#15803D",
+            "secondary-fixed": "#89f5e7",
+            "surface-bright": "#faf8ff",
+            "error-container": "#ffdad6",
+            "primary-fixed": "#dce1ff",
+            "on-error-container": "#93000a",
+            "outline-variant": "#c4c5d7",
+            "surface": "#FFFFFF",
+            "primary": "#0037b0",
+            "on-surface": "#1a1b23",
+            "schedule": "#1D4ED8",
+            "on-primary": "#ffffff",
+            "scope-personal": "#0D9488",
+            "on-tertiary-fixed-variant": "#832700",
+            "error": "#B91C1C",
+            "border": "#CBD5E1",
+            "secondary": "#006a61",
+            "on-tertiary-container": "#ffc9b7",
+            "primary-fixed-dim": "#b7c4ff",
+            "tertiary-fixed-dim": "#ffb59c",
+            "inverse-on-surface": "#f0f0fb",
+            "on-primary-fixed": "#001551",
+            "primary-container": "#1d4ed8",
+            "surface-tint": "#2151da",
+            "secondary-container": "#86f2e4",
+            "inverse-primary": "#b7c4ff",
+            "on-secondary": "#ffffff",
+            "surface-container": "#ededf9",
+            "tertiary-container": "#a73400",
+            "surface-container-highest": "#e2e1ed",
+            "on-tertiary-fixed": "#390c00",
+            "surface-variant": "#e2e1ed",
+            "on-secondary-fixed": "#00201d",
+            "tertiary-fixed": "#ffdbcf",
+            "surface-dim": "#d9d9e5",
+            "text-muted": "#475569",
+            "on-secondary-container": "#006f66",
+            "eliminate": "#475569",
+            "on-primary-fixed-variant": "#0039b5",
+            "inverse-surface": "#2e3039",
+            "background": "#faf8ff",
+            "text": "#0F172A",
+            "tertiary": "#7f2500"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.125rem",
+            "lg": "0.25rem",
+            "xl": "0.5rem",
+            "full": "0.75rem"
+          },
+          "spacing": {
+            "space-xs": "4px",
+            "gutter": "24px",
+            "space-lg": "16px",
+            "space-xl": "32px",
+            "space-sm": "8px",
+            "space-md": "12px",
+            "space-2xl": "48px",
+            "margin": "24px"
+          },
+          "fontFamily": {
+            "heading": ["Inter"],
+            "caption": ["Inter"],
+            "body": ["Inter"],
+            "display": ["Inter"],
+            "body-strong": ["Inter"]
+          },
+          "fontSize": {
+            "heading": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+            "caption": ["13px", { "lineHeight": "18px", "fontWeight": "400" }],
+            "body": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+            "display": ["28px", { "lineHeight": "36px", "fontWeight": "700" }],
+            "body-strong": ["16px", { "lineHeight": "24px", "fontWeight": "600" }]
+          }
+        },
+      },
+    }
+  </script>
+<style>
+    body {
+      font-family: 'Inter', sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface-alt text-text min-h-screen flex justify-center selection:bg-schedule selection:text-white">
+<!-- Mobile Container (Targeting ~390px viewport width) -->
+<div class="w-full max-w-[412px] min-h-screen bg-surface-alt flex flex-col relative pb-28 shadow-xl">
+<!-- TOP APP BAR (From Shared Components JSON & Specifications) -->
+<header class="sticky top-0 z-40 bg-surface border-b border-border shadow-sm">
+<div class="flex justify-between items-center w-full px-space-lg py-space-md">
+<!-- Leading Icon & Brand Group -->
+<div class="flex items-center gap-space-sm">
+<button aria-label="Abrir menú" class="w-9 h-9 rounded-lg flex items-center justify-center text-on-surface hover:bg-surface-container-low transition-colors duration-150" type="button">
+<span class="material-symbols-outlined text-[24px]">menu</span>
+</button>
+<div class="flex items-center gap-1.5">
+<span class="w-7 h-7 rounded-lg bg-schedule text-white flex items-center justify-center font-bold text-caption tracking-tight">IT</span>
+<span class="text-heading font-heading font-bold text-primary tracking-tight">InsertTasks</span>
+</div>
+</div>
+<!-- Trailing Avatar -->
+<div class="flex items-center gap-2">
+<button aria-label="Perfil de usuario" class="w-8 h-8 rounded-full bg-surface-container-high border border-border flex items-center justify-center text-schedule font-semibold text-caption hover:ring-2 hover:ring-schedule transition-all" type="button">
+            AC
+          </button>
+</div>
+</div>
+<!-- Horizontal Navigation Tabs -->
+<nav aria-label="Pestañas principales" class="flex overflow-x-auto no-scrollbar px-space-md gap-space-sm border-t border-slate-100">
+<button class="whitespace-nowrap px-3 py-2.5 text-caption font-caption text-text-muted hover:text-primary transition-colors" type="button">
+          Tablero
+        </button>
+<button class="whitespace-nowrap px-3 py-2.5 text-caption font-caption text-text-muted hover:text-primary transition-colors" type="button">
+          Progreso
+        </button>
+<!-- Active Tab: Programadas -->
+<button aria-current="page" class="whitespace-nowrap px-3 py-2.5 text-caption font-body-strong text-schedule border-b-2 border-schedule transition-colors" type="button">
+          Programadas
+        </button>
+<button class="whitespace-nowrap px-3 py-2.5 text-caption font-caption text-text-muted hover:text-primary transition-colors" type="button">
+          Historial
+        </button>
+<button class="whitespace-nowrap px-3 py-2.5 text-caption font-caption text-text-muted hover:text-primary transition-colors" type="button">
+          Papelera
+        </button>
+</nav>
+</header>
+<!-- MAIN CONTENT -->
+<main class="flex-1 px-space-lg pt-space-lg space-y-space-lg">
+<!-- Cabecera de contenido -->
+<section class="space-y-space-sm">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<h1 class="text-xl font-bold tracking-tight text-slate-900 font-heading">Tareas programadas</h1>
+<span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-blue-50 text-schedule border border-blue-200">
+              12 de 50
+            </span>
+</div>
+</div>
+<p class="text-caption font-caption text-text-muted">
+          Aparecen solas en tu tablero el día que toca.
+        </p>
+<!-- CTA Principal Button -->
+<button class="w-full mt-2 py-3 px-space-md bg-schedule hover:bg-blue-800 text-white rounded-xl font-body-strong flex items-center justify-center gap-2 shadow-sm active:scale-[0.99] transition-all" type="button">
+<span class="material-symbols-outlined text-[20px]">add</span>
+<span>Nueva programación</span>
+</button>
+</section>
+<!-- Search & Filters Section -->
+<section class="space-y-3">
+<!-- Compact Search Field -->
+<div class="relative">
+<span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-outline">
+<span class="material-symbols-outlined text-[20px]">search</span>
+</span>
+<input class="w-full pl-9 pr-3 py-2 bg-surface text-text text-caption font-caption rounded-lg border border-border focus:outline-none focus:ring-2 focus:ring-schedule focus:border-transparent placeholder:text-outline" placeholder="Buscar por título o etiqueta..." type="search"/>
+</div>
+<!-- Filter Segment Pills -->
+<div aria-label="Filtro de estado" class="flex items-center gap-2 overflow-x-auto no-scrollbar py-1" role="tablist">
+<!-- Todas (Activa) -->
+<button class="whitespace-nowrap px-3 py-1.5 rounded-full text-caption font-semibold bg-schedule text-white shadow-sm flex items-center gap-1.5 transition-colors" type="button">
+<span>Todas</span>
+<span class="bg-white/20 text-white text-[11px] px-1.5 py-0.2 rounded-full font-bold">12</span>
+</button>
+<!-- Activas -->
+<button class="whitespace-nowrap px-3 py-1.5 rounded-full text-caption font-medium bg-surface text-text-muted border border-border hover:bg-slate-50 transition-colors" type="button">
+            Activas (9)
+          </button>
+<!-- Pausadas -->
+<button class="whitespace-nowrap px-3 py-1.5 rounded-full text-caption font-medium bg-surface text-text-muted border border-border hover:bg-slate-50 transition-colors" type="button">
+            Pausadas (2)
+          </button>
+<!-- Terminadas -->
+<button class="whitespace-nowrap px-3 py-1.5 rounded-full text-caption font-medium bg-surface text-text-muted border border-border hover:bg-slate-50 transition-colors" type="button">
+            Terminadas (1)
+          </button>
+</div>
+</section>
+<!-- Task Cards List -->
+<section aria-label="Lista de programaciones" class="space-y-3">
+<!-- Card 1: Hacer Ahora (Rojo) -->
+<article class="bg-surface rounded-xl border border-slate-200 border-l-4 border-l-do-now p-space-md shadow-sm space-y-3 transition hover:shadow-md">
+<div class="flex items-start justify-between gap-2">
+<h2 class="text-body font-body-strong text-slate-900 leading-snug">
+              Revisar balance y tesorería semanal
+            </h2>
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[12px] font-medium bg-emerald-50 text-success border border-emerald-200 shrink-0">
+<span class="material-symbols-outlined text-[14px]">check</span>
+              Activa
+            </span>
+</div>
+<!-- Badges Metadata -->
+<div class="flex flex-wrap items-center gap-1.5">
+<!-- Cuadrante: Hacer ahora -->
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-semibold bg-red-50 text-do-now border border-red-100">
+<span class="w-1.5 h-1.5 rounded-full bg-do-now"></span>
+              Hacer ahora
+            </span>
+<!-- Ámbito: Laboral -->
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-semibold bg-purple-50 text-scope-work border border-purple-100">
+<span class="w-1.5 h-1.5 rounded-full bg-scope-work"></span>
+              Laboral
+            </span>
+</div>
+<!-- Schedule Rules & Next Appearance -->
+<div class="flex flex-wrap items-center justify-between text-caption font-caption text-text-muted pt-1 border-t border-slate-100 gap-y-1">
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px] text-slate-500">repeat</span>
+<span>Lunes y miércoles</span>
+</div>
+<div class="flex items-center gap-1 text-slate-700 font-medium">
+<span class="material-symbols-outlined text-[16px] text-schedule">event</span>
+<span>Próxima: lun 3 nov</span>
+</div>
+</div>
+<!-- Action Buttons -->
+<div class="flex items-center justify-end gap-2 pt-2 border-t border-slate-50 text-caption font-medium">
+<button class="px-2.5 py-1 text-text-muted hover:text-slate-900 hover:bg-slate-100 rounded transition-colors flex items-center gap-1" type="button">
+<span class="material-symbols-outlined text-[16px]">edit</span>
+              Editar
+            </button>
+<button class="px-2.5 py-1 text-text-muted hover:text-delegate hover:bg-amber-50 rounded transition-colors flex items-center gap-1" type="button">
+<span class="material-symbols-outlined text-[16px]">pause</span>
+              Pausar
+            </button>
+<button class="px-2.5 py-1 text-do-now hover:bg-red-50 rounded transition-colors flex items-center gap-1" type="button">
+<span class="material-symbols-outlined text-[16px]">delete</span>
+              Eliminar
+            </button>
+</div>
+</article>
+<!-- Card 2: Planificar (Azul) -->
+<article class="bg-surface rounded-xl border border-slate-200 border-l-4 border-l-schedule p-space-md shadow-sm space-y-3 transition hover:shadow-md">
+<div class="flex items-start justify-between gap-2">
+<h2 class="text-body font-body-strong text-slate-900 leading-snug">
+              Planificar comidas y compras saludables
+            </h2>
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[12px] font-medium bg-emerald-50 text-success border border-emerald-200 shrink-0">
+<span class="material-symbols-outlined text-[14px]">check</span>
+              Activa
+            </span>
+</div>
+<!-- Badges Metadata -->
+<div class="flex flex-wrap items-center gap-1.5">
+<!-- Cuadrante: Planificar -->
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-semibold bg-blue-50 text-schedule border border-blue-100">
+<span class="w-1.5 h-1.5 rounded-full bg-schedule"></span>
+              Planificar
+            </span>
+<!-- Ámbito: Personal -->
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-semibold bg-teal-50 text-scope-personal border border-teal-100">
+<span class="w-1.5 h-1.5 rounded-full bg-scope-personal"></span>
+              Personal
+            </span>
+</div>
+<!-- Schedule Rules & Next Appearance -->
+<div class="flex flex-wrap items-center justify-between text-caption font-caption text-text-muted pt-1 border-t border-slate-100 gap-y-1">
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px] text-slate-500">repeat</span>
+<span>Cada día</span>
+</div>
+<div class="flex items-center gap-1 text-slate-700 font-medium">
+<span class="material-symbols-outlined text-[16px] text-schedule">event</span>
+<span>Próxima: lun 3 nov</span>
+</div>
+</div>
+<!-- Action Buttons -->
+<div class="flex items-center justify-end gap-2 pt-2 border-t border-slate-50 text-caption font-medium">
+<button class="px-2.5 py-1 text-text-muted hover:text-slate-900 hover:bg-slate-100 rounded transition-colors flex items-center gap-1" type="button">
+<span class="material-symbols-outlined text-[16px]">edit</span>
+              Editar
+            </button>
+<button class="px-2.5 py-1 text-text-muted hover:text-delegate hover:bg-amber-50 rounded transition-colors flex items-center gap-1" type="button">
+<span class="material-symbols-outlined text-[16px]">pause</span>
+              Pausar
+            </button>
+<button class="px-2.5 py-1 text-do-now hover:bg-red-50 rounded transition-colors flex items-center gap-1" type="button">
+<span class="material-symbols-outlined text-[16px]">delete</span>
+              Eliminar
+            </button>
+</div>
+</article>
+<!-- Card 3: Delegar (Ámbar) - Pausada -->
+<article class="bg-surface rounded-xl border border-slate-200 border-l-4 border-l-delegate p-space-md shadow-sm space-y-3 transition hover:shadow-md opacity-95">
+<div class="flex items-start justify-between gap-2">
+<h2 class="text-body font-body-strong text-slate-900 leading-snug">
+              Revisar correo
+            </h2>
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[12px] font-medium bg-amber-50 text-delegate border border-amber-200 shrink-0">
+<span class="material-symbols-outlined text-[14px]">pause</span>
+              Pausada
+            </span>
+</div>
+<!-- Badges Metadata -->
+<div class="flex flex-wrap items-center gap-1.5">
+<!-- Cuadrante: Delegar -->
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-semibold bg-amber-50 text-delegate border border-amber-100">
+<span class="w-1.5 h-1.5 rounded-full bg-delegate"></span>
+              Delegar
+            </span>
+<!-- Ámbito: Laboral -->
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-semibold bg-purple-50 text-scope-work border border-purple-100">
+<span class="w-1.5 h-1.5 rounded-full bg-scope-work"></span>
+              Laboral
+            </span>
+</div>
+<!-- Schedule Rules & Next Appearance -->
+<div class="flex flex-wrap items-center justify-between text-caption font-caption text-text-muted pt-1 border-t border-slate-100 gap-y-1">
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px] text-slate-500">repeat</span>
+<span>Cada día</span>
+</div>
+<div class="flex items-center gap-1 text-slate-400 font-medium">
+<span class="material-symbols-outlined text-[16px] text-slate-400">event</span>
+<span>Próxima: —</span>
+</div>
+</div>
+<!-- Action Buttons -->
+<div class="flex items-center justify-end gap-2 pt-2 border-t border-slate-50 text-caption font-medium">
+<button class="px-2.5 py-1 text-text-muted hover:text-slate-900 hover:bg-slate-100 rounded transition-colors flex items-center gap-1" type="button">
+<span class="material-symbols-outlined text-[16px]">edit</span>
+              Editar
+            </button>
+<button class="px-2.5 py-1 text-schedule hover:bg-blue-50 rounded transition-colors flex items-center gap-1" type="button">
+<span class="material-symbols-outlined text-[16px]">play_arrow</span>
+              Reanudar
+            </button>
+<button class="px-2.5 py-1 text-do-now hover:bg-red-50 rounded transition-colors flex items-center gap-1" type="button">
+<span class="material-symbols-outlined text-[16px]">delete</span>
+              Eliminar
+            </button>
+</div>
+</article>
+<!-- Card 4: Planificar (Azul) -->
+<article class="bg-surface rounded-xl border border-slate-200 border-l-4 border-l-schedule p-space-md shadow-sm space-y-3 transition hover:shadow-md">
+<div class="flex items-start justify-between gap-2">
+<h2 class="text-body font-body-strong text-slate-900 leading-snug">
+              Limpieza de suscripciones y carpetas de descargas
+            </h2>
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[12px] font-medium bg-emerald-50 text-success border border-emerald-200 shrink-0">
+<span class="material-symbols-outlined text-[14px]">check</span>
+              Activa
+            </span>
+</div>
+<!-- Badges Metadata -->
+<div class="flex flex-wrap items-center gap-1.5">
+<!-- Cuadrante: Planificar -->
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-semibold bg-blue-50 text-schedule border border-blue-100">
+<span class="w-1.5 h-1.5 rounded-full bg-schedule"></span>
+              Planificar
+            </span>
+<!-- Ámbito: Personal -->
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-semibold bg-teal-50 text-scope-personal border border-teal-100">
+<span class="w-1.5 h-1.5 rounded-full bg-scope-personal"></span>
+              Personal
+            </span>
+</div>
+<!-- Schedule Rules & Next Appearance -->
+<div class="flex flex-wrap items-center justify-between text-caption font-caption text-text-muted pt-1 border-t border-slate-100 gap-y-1">
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px] text-slate-500">repeat</span>
+<span>Día 31 de cada mes (o el último)</span>
+</div>
+<div class="flex items-center gap-1 text-slate-700 font-medium">
+<span class="material-symbols-outlined text-[16px] text-schedule">event</span>
+<span>Próxima: dom 30 nov</span>
+</div>
+</div>
+<!-- Action Buttons -->
+<div class="flex items-center justify-end gap-2 pt-2 border-t border-slate-50 text-caption font-medium">
+<button class="px-2.5 py-1 text-text-muted hover:text-slate-900 hover:bg-slate-100 rounded transition-colors flex items-center gap-1" type="button">
+<span class="material-symbols-outlined text-[16px]">edit</span>
+              Editar
+            </button>
+<button class="px-2.5 py-1 text-text-muted hover:text-delegate hover:bg-amber-50 rounded transition-colors flex items-center gap-1" type="button">
+<span class="material-symbols-outlined text-[16px]">pause</span>
+              Pausar
+            </button>
+<button class="px-2.5 py-1 text-do-now hover:bg-red-50 rounded transition-colors flex items-center gap-1" type="button">
+<span class="material-symbols-outlined text-[16px]">delete</span>
+              Eliminar
+            </button>
+</div>
+</article>
+<!-- Card 5: Terminada (Pizarra / Eliminar / Planificar) -->
+<article class="bg-surface rounded-xl border border-slate-200 border-l-4 border-l-eliminate p-space-md shadow-sm space-y-3 transition hover:shadow-md opacity-85">
+<div class="flex items-start justify-between gap-2">
+<h2 class="text-body font-body-strong text-slate-700 leading-snug line-through decoration-slate-300">
+              Auditoría fiscal extraordinaria Q3
+            </h2>
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[12px] font-medium bg-slate-100 text-slate-600 border border-slate-200 shrink-0">
+<span class="material-symbols-outlined text-[14px]">check_circle</span>
+              Terminada
+            </span>
+</div>
+<!-- Badges Metadata -->
+<div class="flex flex-wrap items-center gap-1.5">
+<!-- Cuadrante: Planificar -->
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-medium bg-slate-100 text-slate-600 border border-slate-200">
+<span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span>
+              Planificar
+            </span>
+<!-- Ámbito: Laboral -->
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-medium bg-slate-100 text-slate-600 border border-slate-200">
+<span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span>
+              Laboral
+            </span>
+</div>
+<!-- Schedule Rules & Next Appearance -->
+<div class="flex flex-wrap items-center justify-between text-caption font-caption text-text-muted pt-1 border-t border-slate-100 gap-y-1">
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px] text-slate-400">history</span>
+<span>Una vez · 5 nov</span>
+</div>
+<div class="flex items-center gap-1 text-slate-400 font-medium">
+<span class="material-symbols-outlined text-[16px]">event</span>
+<span>Próxima: —</span>
+</div>
+</div>
+<!-- Action Buttons -->
+<div class="flex items-center justify-end gap-2 pt-2 border-t border-slate-50 text-caption font-medium">
+<button class="px-2.5 py-1 text-text-muted hover:text-slate-900 hover:bg-slate-100 rounded transition-colors flex items-center gap-1" type="button">
+<span class="material-symbols-outlined text-[16px]">edit</span>
+              Editar
+            </button>
+<button class="px-2.5 py-1 text-text-muted hover:bg-slate-100 rounded transition-colors flex items-center gap-1" type="button">
+<span class="material-symbols-outlined text-[16px]">pause</span>
+              Pausar
+            </button>
+<button class="px-2.5 py-1 text-do-now hover:bg-red-50 rounded transition-colors flex items-center gap-1" type="button">
+<span class="material-symbols-outlined text-[16px]">delete</span>
+              Eliminar
+            </button>
+</div>
+</article>
+</section>
+<!-- Estado Vacío (Empty State Card de Referencia Visual) -->
+<section class="mt-6">
+<div class="border-2 border-dashed border-slate-300 rounded-xl bg-slate-50/60 p-6 flex flex-col items-center text-center space-y-2">
+<div class="w-12 h-12 rounded-full bg-blue-50 text-schedule flex items-center justify-center mb-1">
+<span class="material-symbols-outlined text-[28px]">schedule</span>
+</div>
+<h3 class="text-body font-body-strong text-slate-800">
+            Aún no tienes tareas programadas.
+          </h3>
+<p class="text-caption font-caption text-text-muted max-w-xs">
+            Programa las que se repiten y aparecerán solas en tu tablero.
+          </p>
+<button class="mt-2 text-schedule hover:underline font-semibold text-caption inline-flex items-center gap-1" type="button">
+<span>Crear primera programación</span>
+<span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+</button>
+</div>
+</section>
+</main>
+<!-- BOTTOM NAVIGATION BAR (From Shared Components JSON) -->
+<!-- Destination count: 4, labels: ["Matriz", "Programadas", "Completadas", "Ajustes"], icons: ["grid_view", "schedule", "task_alt", "settings"] -->
+<!-- Active Destination: "Programadas" based on Intent & Specification Match -->
+<nav aria-label="Navegación inferior" class="fixed bottom-0 left-0 right-0 max-w-[412px] mx-auto w-full z-50 bg-surface border-t border-border shadow-sm flex justify-around items-center px-space-sm py-space-xs">
+<!-- Destino 1: Matriz -->
+<button class="flex flex-col items-center justify-center text-text-muted hover:text-primary transition-colors duration-150 py-1 px-3" type="button">
+<span class="material-symbols-outlined text-[22px]">grid_view</span>
+<span class="text-caption font-caption mt-0.5">Matriz</span>
+</button>
+<!-- Destino 2: Programadas (ACTIVE ITEM - style_active_navigation executed) -->
+<button aria-current="page" class="flex flex-col items-center justify-center text-primary font-body-strong transition-colors duration-150 py-1 px-3 relative" type="button">
+<div class="relative flex items-center justify-center">
+<span class="material-symbols-outlined text-[22px]" style="font-variation-settings: 'FILL' 1;">schedule</span>
+<span class="absolute -top-0.5 -right-1 w-2 h-2 bg-schedule rounded-full"></span>
+</div>
+<span class="text-caption font-body-strong mt-0.5 text-schedule">Programadas</span>
+</button>
+<!-- Destino 3: Completadas -->
+<button class="flex flex-col items-center justify-center text-text-muted hover:text-primary transition-colors duration-150 py-1 px-3" type="button">
+<span class="material-symbols-outlined text-[22px]">task_alt</span>
+<span class="text-caption font-caption mt-0.5">Completadas</span>
+</button>
+<!-- Destino 4: Ajustes -->
+<button class="flex flex-col items-center justify-center text-text-muted hover:text-primary transition-colors duration-150 py-1 px-3" type="button">
+<span class="material-symbols-outlined text-[22px]">settings</span>
+<span class="text-caption font-caption mt-0.5">Ajustes</span>
+</button>
+</nav>
+</div>
+</body></html>

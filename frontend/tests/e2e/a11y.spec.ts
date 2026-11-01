@@ -41,7 +41,10 @@ const ONE_TASK_PER_QUADRANT: NewTask[] = [
   { title: 'Tarea eliminar', urgent: false, important: false, scope: 'Personal' },
 ]
 
-async function goTo(page: Page, link: 'Tablero' | 'Historial' | 'Papelera'): Promise<void> {
+async function goTo(
+  page: Page,
+  link: 'Tablero' | 'Progreso' | 'Programadas' | 'Historial' | 'Papelera',
+): Promise<void> {
   await page
     .getByRole('navigation', { name: 'Navegación principal' })
     .getByRole('link', { name: link })
@@ -186,11 +189,14 @@ test.describe('Accesibilidad WCAG 2.1 AA', () => {
 
     await expectNoHorizontalOverflow('Tablero')
     await page.getByRole('button', { name: 'Completar' }).click()
+    // Wait for the completion to land before leaving: navigating away mid-request raced it.
+    await expect(page.getByRole('button', { name: 'Completar' })).toHaveCount(0)
     await goTo(page, 'Historial')
     await expect(page.getByRole('heading', { name: 'Historial', level: 1 })).toBeVisible()
     await expect(page.locator('article')).toHaveCount(1)
     await expectNoHorizontalOverflow('Historial')
     await page.getByRole('button', { name: 'Mover a la papelera' }).click()
+    await expect(page.getByRole('button', { name: 'Mover a la papelera' })).toHaveCount(0)
     await goTo(page, 'Papelera')
     await expect(page.getByRole('heading', { name: 'Papelera', level: 1 })).toBeVisible()
     await expect(page.locator('article')).toHaveCount(1)
@@ -200,7 +206,7 @@ test.describe('Accesibilidad WCAG 2.1 AA', () => {
   // 320 CSS px is the width WCAG 1.4.10 uses for reflow, and the administrator has the most
   // tabs. The header must wrap instead of overflowing: its content differs in width between
   // fonts, so a layout that only just fits at 390 px fails on another machine.
-  test('la cabecera no desborda a 320 px ni con las pestañas del administrador', async ({
+  test('la cabecera, el marcador y «Perfil» no desbordan a 320 px con las pestañas del administrador', async ({
     page,
     loginAsAdmin,
   }) => {
@@ -208,10 +214,42 @@ test.describe('Accesibilidad WCAG 2.1 AA', () => {
     await loginAsAdmin()
     await expect(page.getByRole('navigation', { name: 'Navegación principal' })).toBeVisible()
 
+    await expect(page.getByRole('region', { name: 'Marcador del día' })).toContainText(
+      'tareas completadas hoy',
+    )
     const overflow = await page.evaluate(
       () => document.documentElement.scrollWidth - window.innerWidth,
     )
-    expect(overflow, 'Desbordamiento horizontal de la cabecera a 320 px').toBeLessThanOrEqual(0)
+    expect(
+      overflow,
+      'Desbordamiento horizontal de la cabecera y el marcador a 320 px',
+    ).toBeLessThanOrEqual(0)
+    await goTo(page, 'Progreso')
+    await expect(
+      page.getByRole('heading', { name: 'Progreso y estadísticas', level: 1 }),
+    ).toBeVisible()
+    await expect(page.getByRole('region', { name: 'Sala de trofeos' })).toBeVisible()
+    const progressOverflow = await page.evaluate(
+      () => document.documentElement.scrollWidth - window.innerWidth,
+    )
+    expect(progressOverflow, 'Desbordamiento horizontal en Progreso a 320 px').toBeLessThanOrEqual(
+      0,
+    )
+    await goTo(page, 'Programadas')
+    await expect(page.getByRole('heading', { name: 'Tareas programadas', level: 1 })).toBeVisible()
+    const schedulesOverflow = await page.evaluate(
+      () => document.documentElement.scrollWidth - window.innerWidth,
+    )
+    expect(
+      schedulesOverflow,
+      'Desbordamiento horizontal en Programadas a 320 px',
+    ).toBeLessThanOrEqual(0)
+    await page.getByRole('link', { name: 'Perfil' }).click()
+    await expect(page.getByRole('region', { name: 'Progreso y juego' })).toBeVisible()
+    const profileOverflow = await page.evaluate(
+      () => document.documentElement.scrollWidth - window.innerWidth,
+    )
+    expect(profileOverflow, 'Desbordamiento horizontal en Perfil a 320 px').toBeLessThanOrEqual(0)
     await goToAdmin(page)
     const adminOverflow = await page.evaluate(
       () => document.documentElement.scrollWidth - window.innerWidth,
@@ -287,7 +325,10 @@ test.describe('Accesibilidad WCAG 2.1 AA', () => {
       await expect(page.locator('html')).toHaveAttribute('data-theme', colorScheme)
 
       await expect(page.getByRole('heading', { name: 'Hacer ahora' })).toBeVisible()
-      await expectNoViolations(page, `S3 · Tablero (${colorScheme})`)
+      await expect(page.getByRole('region', { name: 'Marcador del día' })).toContainText(
+        'tareas completadas hoy',
+      )
+      await expectNoViolations(page, `S3 v3 · Tablero con el marcador (${colorScheme})`)
 
       await goTo(page, 'Historial')
       await expect(page.getByText('Aún no has completado ninguna tarea')).toBeVisible()
@@ -299,7 +340,40 @@ test.describe('Accesibilidad WCAG 2.1 AA', () => {
 
       await page.getByRole('link', { name: 'Perfil' }).click()
       await expect(page.getByRole('radiogroup', { name: 'Tema' })).toBeVisible()
-      await expectNoViolations(page, `S7 · Perfil (${colorScheme})`)
+      await expect(page.getByRole('region', { name: 'Progreso y juego' })).toBeVisible()
+      await expectNoViolations(page, `S7 v2 · Perfil con «Progreso y juego» (${colorScheme})`)
+    })
+
+    test(`el marcador con la meta cumplida no tiene violaciones en tema ${colorScheme === 'light' ? 'claro' : 'oscuro'}`, async ({
+      page,
+      loginAsGoogleUser,
+    }) => {
+      await page.emulateMedia({ colorScheme })
+      await loginAsGoogleUser(`a11y-marcador-${colorScheme}-${crypto.randomUUID()}@example.com`)
+      await page.getByRole('link', { name: 'Perfil' }).click()
+      const settings = page.getByRole('region', { name: 'Progreso y juego' })
+      await settings.getByRole('button', { name: 'Disminuir meta diaria' }).click()
+      await expect(settings).toContainText('2 tareas')
+      await settings.getByRole('button', { name: 'Disminuir meta diaria' }).click()
+      await expect(settings).toContainText('1 tarea')
+      await expect(page.getByRole('status').filter({ hasText: 'Guardado' })).toBeVisible()
+
+      await goTo(page, 'Tablero')
+      await createTask(page, ONE_TASK_PER_QUADRANT[0] as NewTask)
+      await createTask(page, ONE_TASK_PER_QUADRANT[1] as NewTask)
+      await page
+        .locator('article', { hasText: 'Tarea hacer ahora' })
+        .getByRole('button', { name: 'Completar' })
+        .click()
+      await page
+        .locator('article', { hasText: 'Tarea planificar' })
+        .getByRole('button', { name: 'Completar' })
+        .click()
+      const scoreboard = page.getByRole('region', { name: 'Marcador del día' })
+      await expect(scoreboard).toContainText('2 de 1 tarea completada hoy')
+      await expect(scoreboard).toContainText('Meta cumplida')
+
+      await expectNoViolations(page, `S3 v3 · Marcador por encima de la meta (${colorScheme})`)
     })
 
     test(`el formulario y la confirmación no tienen violaciones en tema ${colorScheme === 'light' ? 'claro' : 'oscuro'}`, async ({
@@ -355,4 +429,147 @@ test.describe('Accesibilidad WCAG 2.1 AA', () => {
       await expectNoViolations(page, `S1 · Iniciar sesión (${colorScheme})`)
     })
   }
+
+  for (const colorScheme of ['light', 'dark'] as const) {
+    test(`una celebración y el modo arcade desactivado no tienen violaciones en tema ${colorScheme === 'light' ? 'claro' : 'oscuro'}`, async ({
+      page,
+      loginAsGoogleUser,
+    }) => {
+      await page.emulateMedia({ colorScheme })
+      await loginAsGoogleUser(`a11y-arcade-${colorScheme}-${crypto.randomUUID()}@example.com`)
+      await createTask(page, ONE_TASK_PER_QUADRANT[0] as NewTask)
+      await createTask(page, ONE_TASK_PER_QUADRANT[1] as NewTask)
+
+      await page
+        .locator('article', { hasText: 'Tarea hacer ahora' })
+        .getByRole('button', { name: 'Completar' })
+        .click()
+      await expect(page.locator('[data-celebrations]')).toContainText('Logro: Primera moneda')
+      await expect(page.getByRole('region', { name: 'Marcador del día' })).toContainText(
+        '100 puntos',
+      )
+      await expectNoViolations(page, `S3-c · Celebración y marcador arcade (${colorScheme})`)
+
+      await page.getByRole('link', { name: 'Perfil' }).click()
+      const toggle = page.getByRole('switch', { name: 'Modo arcade' })
+      await toggle.click()
+      await expect(toggle).toHaveAttribute('aria-checked', 'false')
+      await expect(page.getByRole('status').filter({ hasText: 'Guardado' })).toBeVisible()
+      await expectNoViolations(page, `S7 v2 · Modo arcade desactivado (${colorScheme})`)
+      await goTo(page, 'Tablero')
+      await expect(page.getByRole('region', { name: 'Marcador del día' })).toContainText(
+        'Hoy 1 de 3',
+      )
+      await expectNoViolations(page, `S3 v3 · Tablero sin modo arcade (${colorScheme})`)
+    })
+  }
+
+  for (const colorScheme of ['light', 'dark'] as const) {
+    test(`las tareas programadas y su formulario no tienen violaciones en tema ${colorScheme === 'light' ? 'claro' : 'oscuro'}`, async ({
+      page,
+      loginAsGoogleUser,
+    }) => {
+      await page.emulateMedia({ colorScheme })
+      await loginAsGoogleUser(`a11y-programadas-${colorScheme}-${crypto.randomUUID()}@example.com`)
+      await goTo(page, 'Programadas')
+      await expect(page.getByText('Aún no tienes tareas programadas')).toBeVisible()
+      await expectNoViolations(page, `S10 · Programadas vacía (${colorScheme})`)
+
+      await page.getByRole('button', { name: 'Crear la primera programación' }).click()
+      const form = page.getByRole('dialog', { name: 'Nueva programación' })
+      await expect(form).toBeVisible()
+      await expectNoViolations(page, `S11 · Formulario (${colorScheme})`)
+
+      await form
+        .getByRole('radiogroup', { name: 'Repetición' })
+        .getByRole('radio', { name: 'Días de la semana' })
+        .check()
+      await form.getByRole('button', { name: 'Guardar' }).click()
+      await expect(form.getByText('Elige al menos un día de la semana.')).toBeVisible()
+      await expectNoViolations(page, `S11 · Formulario con errores en línea (${colorScheme})`)
+
+      await form.getByLabel('Título').fill('Informe semanal')
+      await form.getByLabel('Descripción').fill('Enviar el resumen')
+      await form.getByRole('radio', { name: 'Laboral' }).check()
+      await form
+        .getByRole('group', { name: 'Días de la semana' })
+        .getByRole('button', { name: 'Lunes' })
+        .click()
+      await expect(form.getByText(/^Próxima aparición:/)).toBeVisible()
+      await form.getByRole('button', { name: 'Guardar' }).click()
+      await expect(page.getByRole('dialog')).toHaveCount(0)
+      await expect(page.getByRole('heading', { name: 'Informe semanal' })).toBeVisible()
+      await expectNoViolations(page, `S10 · Con una programación (${colorScheme})`)
+
+      await page.getByRole('button', { name: 'Eliminar' }).click()
+      await expect(page.getByRole('alertdialog')).toBeVisible()
+      await expectNoViolations(page, `S10 · Confirmar eliminar (${colorScheme})`)
+    })
+  }
+
+  for (const colorScheme of ['light', 'dark'] as const) {
+    test(`el progreso y estadísticas no tiene violaciones en tema ${colorScheme === 'light' ? 'claro' : 'oscuro'}`, async ({
+      page,
+      loginAsGoogleUser,
+    }) => {
+      await page.emulateMedia({ colorScheme })
+      await loginAsGoogleUser(`a11y-progreso-${colorScheme}-${crypto.randomUUID()}@example.com`)
+      await goTo(page, 'Progreso')
+      await expect(
+        page.getByRole('heading', { name: 'Progreso y estadísticas', level: 1 }),
+      ).toBeVisible()
+      await expect(page.getByRole('region', { name: 'Sala de trofeos' })).toBeVisible()
+      await expectNoViolations(page, `S9 · Progreso vacío (${colorScheme})`)
+
+      await goTo(page, 'Tablero')
+      await createTask(page, {
+        title: 'Tarea de progreso',
+        urgent: false,
+        important: true,
+        scope: 'Laboral',
+      })
+      await page.getByRole('button', { name: 'Completar' }).first().click()
+      await goTo(page, 'Progreso')
+      await page
+        .getByRole('group', { name: 'Actividad de las últimas 12 semanas' })
+        .getByRole('button', { name: /meta sin cumplir, 1 tarea/i })
+        .click()
+      await expect(page.getByText('Tarea de progreso')).toBeVisible()
+      await expectNoViolations(page, `S9 · Progreso con un día elegido (${colorScheme})`)
+    })
+  }
+
+  test.describe('inicio de jornada (S8)', () => {
+    test.use({ startOfDay: true })
+
+    for (const colorScheme of ['light', 'dark'] as const) {
+      test(`«PULSA START» y la misión no tienen violaciones en tema ${colorScheme === 'light' ? 'claro' : 'oscuro'}`, async ({
+        page,
+        loginAsGoogleUser,
+      }) => {
+        await page.emulateMedia({ colorScheme })
+        await loginAsGoogleUser(`a11y-s8-${colorScheme}-${crypto.randomUUID()}@example.com`)
+        const review = page.getByRole('dialog', { name: 'PULSA START' })
+        await expect(review).toContainText('PARTIDA NUEVA')
+        await expectNoViolations(page, `S8 · Partida nueva sin tareas (${colorScheme})`)
+        await review.getByRole('button', { name: 'Empezar' }).click()
+
+        await createTask(page, ONE_TASK_PER_QUADRANT[0] as NewTask)
+        await createTask(page, { ...(ONE_TASK_PER_QUADRANT[0] as NewTask), title: 'Otra urgente' })
+        await page
+          .getByRole('region', { name: 'Marcador del día' })
+          .getByRole('button', { name: /PULSA START/ })
+          .click()
+        await review.getByRole('button', { name: 'Añadir a la misión: Tarea hacer ahora' }).click()
+        await expect(review).toContainText('Misión del día: 1 de 5 elegidas')
+        await expectNoViolations(page, `S8 · Misión elegida (${colorScheme})`)
+
+        await review.getByRole('button', { name: 'Empezar' }).click()
+        await expect(page.locator('article', { hasText: 'Tarea hacer ahora' })).toContainText(
+          'Misión del día',
+        )
+        await expectNoViolations(page, `S3 v3 · Tarea de la misión (${colorScheme})`)
+      })
+    }
+  })
 })

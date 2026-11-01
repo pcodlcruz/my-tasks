@@ -10,6 +10,11 @@ vi.mock('../../../../src/api/tasks', () => ({
   useTrashTask: () => ({ mutate: vi.fn(), isPending: false }),
 }))
 
+vi.mock('../../../../src/api/progress', () => ({
+  useSetMission: () => ({ mutate: vi.fn(), isPending: false }),
+  missionErrorMessage: () => '',
+}))
+
 const CSS = readFileSync(resolve(process.cwd(), 'src/index.css'), 'utf-8')
 
 const SPACING_VARIABLES = ['card-padding', 'card-gap', 'card-inner-gap', 'quadrant-padding']

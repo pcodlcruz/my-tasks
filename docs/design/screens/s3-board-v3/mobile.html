@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="es" class="h-full bg-slate-100">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>S3 v3 · Tablero - InsertTasks</title>
+  <!-- Google Fonts: Inter & Press Start 2P -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Press+Start+2P&display=swap" rel="stylesheet">
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            pixel: ['"Press Start 2P"', 'monospace'],
+          },
+          colors: {
+            arcade: {
+              energy: '#0E7490',
+              extra: '#A21CAF',
+              empty: '#64748B',
+              gold: '#A16207',
+              streak: '#C2410C',
+            },
+            eisenhower: {
+              q1: '#B91C1C',
+              'q1-bg': '#FEF2F2',
+              q2: '#1D4ED8',
+              'q2-bg': '#EFF6FF',
+              q3: '#B45309',
+              'q3-bg': '#FFFBEB',
+              q4: '#475569',
+              'q4-bg': '#F8FAFC',
+            },
+            scope: {
+              work: '#7C3AED',
+              personal: '#0D9488'
+            }
+          }
+        }
+      }
+    };
+  </script>
+  <style>
+    /* Estilos seguros para contención a 320px - 390px */
+    body {
+      font-family: 'Inter', sans-serif;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+    .font-pixel {
+      font-family: '"Press Start 2P"', monospace;
+    }
+    /* Ocultar barra de scroll pero permitir deslizamiento táctil */
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+    .touch-target {
+      min-width: 44px;
+      min-height: 44px;
+    }
+  </style>
+</head>
+<body class="min-h-full bg-slate-100 text-slate-900 pb-20 flex flex-col items-center">
+  <!-- Contenedor móvil restringido a 390px máximo, responsive fluido hasta 320px -->
+  <div class="w-full max-w-[390px] min-w-[320px] bg-white min-h-screen flex flex-col shadow-xl border-x border-slate-200">
+
+    <!-- ================= CABECERA (Header) ================= -->
+    <header class="sticky top-0 z-40 bg-white border-b border-slate-200 shadow-sm">
+      <!-- Primera fila: Marca y Avatar Ana (Cabe holgadamente a 320px) -->
+      <div class="px-3.5 py-2.5 flex items-center justify-between gap-2">
+        <div class="flex items-center gap-2 min-w-0">
+          <div class="w-8 h-8 rounded-lg bg-blue-700 text-white flex items-center justify-center font-pixel text-[11px] shadow-sm flex-shrink-0 tracking-tighter" aria-hidden="true">
+            IT
+          </div>
+          <span class="font-bold text-lg tracking-tight text-slate-900 truncate">InsertTasks</span>
+          <span class="font-pixel text-[9px] px-1.5 py-0.5 rounded bg-amber-100 text-amber-900 border border-amber-300 font-semibold uppercase tracking-wider flex-shrink-0">
+            ARCADE
+          </span>
+        </div>
+
+        <button type="button" class="flex items-center gap-2 pl-2 pr-2.5 py-1 rounded-full bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-800 touch-target focus:outline-none focus:ring-2 focus:ring-blue-600 transition-colors" aria-label="Perfil de Ana">
+          <div class="w-7 h-7 rounded-full bg-blue-700 text-white flex items-center justify-center text-xs font-semibold shadow-xs">
+            AC
+          </div>
+          <span class="text-xs font-medium text-slate-800">Ana</span>
+        </button>
+      </div>
+
+      <!-- Segunda fila: Barra de pestañas con desplazamiento horizontal propio -->
+      <nav class="flex items-center overflow-x-auto no-scrollbar px-3 space-x-1 border-t border-slate-100 text-xs font-medium" aria-label="Navegación principal">
+        <a href="#tablero" class="whitespace-nowrap px-3 py-2.5 text-blue-700 border-b-2 border-blue-700 font-semibold flex items-center gap-1.5" aria-current="page">
+          <i data-lucide="layout-grid" class="w-3.5 h-3.5"></i>
+          Tablero
+        </a>
+        <a href="#progreso" class="whitespace-nowrap px-3 py-2.5 text-slate-600 hover:text-slate-900 border-b-2 border-transparent flex items-center gap-1.5">
+          <i data-lucide="trending-up" class="w-3.5 h-3.5"></i>
+          Progreso
+        </a>
+        <a href="#programadas" class="whitespace-nowrap px-3 py-2.5 text-slate-600 hover:text-slate-900 border-b-2 border-transparent flex items-center gap-1.5">
+          <i data-lucide="calendar-clock" class="w-3.5 h-3.5"></i>
+          Programadas
+        </a>
+        <a href="#historial" class="whitespace-nowrap px-3 py-2.5 text-slate-600 hover:text-slate-900 border-b-2 border-transparent flex items-center gap-1.5">
+          <i data-lucide="history" class="w-3.5 h-3.5"></i>
+          Historial
+        </a>
+        <a href="#papelera" class="whitespace-nowrap px-3 py-2.5 text-slate-600 hover:text-slate-900 border-b-2 border-transparent flex items-center gap-1.5">
+          <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+          Papelera
+        </a>
+        <a href="#accesos" class="whitespace-nowrap px-3 py-2.5 text-slate-600 hover:text-slate-900 border-b-2 border-transparent flex items-center gap-1.5">
+          <i data-lucide="key-round" class="w-3.5 h-3.5"></i>
+          Accesos
+        </a>
+      </nav>
+    </header>
+
+    <!-- ================= CONTENIDO PRINCIPAL ================= -->
+    <main class="flex-1 px-3 py-3 space-y-3.5">
+
+      <!-- ================= MARCADOR DEL DÍA (HUD ARCADE) ================= -->
+      <section class="bg-slate-900 text-white rounded-xl p-3 shadow-md border-2 border-slate-800 relative overflow-hidden" aria-label="Marcador del día">
+        <!-- Textura de fondo sutil arcade -->
+        <div class="absolute inset-0 opacity-10 bg-[radial-gradient(#38bdf8_1px,transparent_1px)] [background-size:8px_8px] pointer-events-none"></div>
+
+        <div class="relative space-y-2.5">
+          <!-- Fila 1: HOY 2/3 en pixel, barra de energía (3 segmentos) y botón PULSA START -->
+          <div class="flex items-center justify-between gap-2 flex-wrap">
+            <div class="flex items-center gap-2">
+              <span class="font-pixel text-[12px] text-cyan-400 tracking-wider">HOY 2/3</span>
+              
+              <!-- Barra de energía: 3 segmentos (2 llenos #0E7490, 1 vacío con contorno #64748B) -->
+              <div class="flex items-center gap-1" role="progressbar" aria-valuenow="2" aria-valuemin="0" aria-valuemax="3" aria-label="Energía de tareas de hoy: 2 de 3 completadas">
+                <span class="w-4 h-3.5 rounded-sm bg-[#0E7490] border border-cyan-400 shadow-[0_0_6px_rgba(14,116,144,0.6)]" title="Segmento 1: Completo"></span>
+                <span class="w-4 h-3.5 rounded-sm bg-[#0E7490] border border-cyan-400 shadow-[0_0_6px_rgba(14,116,144,0.6)]" title="Segmento 2: Completo"></span>
+                <span class="w-4 h-3.5 rounded-sm bg-slate-950 border-2 border-[#64748B]" title="Segmento 3: Pendiente"></span>
+              </div>
+            </div>
+
+            <!-- Botón de icono «PULSA START» con touch target accesible de 44px -->
+            <button type="button" class="touch-target px-2.5 py-1 rounded bg-amber-500 hover:bg-amber-400 active:scale-95 text-slate-950 flex items-center gap-1.5 font-pixel text-[10px] shadow-sm font-bold border border-amber-300 focus:outline-none focus:ring-2 focus:ring-amber-300 transition-transform" aria-label="Pulsa Start: Iniciar sesión de productividad rápida">
+              <i data-lucide="play" class="w-3 h-3 fill-slate-950" aria-hidden="true"></i>
+              <span>START</span>
+            </button>
+          </div>
+
+          <!-- Fila 2: Racha 4 · en juego (#C2410C), ★ Misión 1/2 y NIVEL 3 · 3.450 PTS en dorado (#A16207) -->
+          <div class="pt-2 border-t border-slate-800 flex items-center justify-between text-xs font-medium flex-wrap gap-y-1.5">
+            <!-- Racha con llama -->
+            <div class="flex items-center gap-1 text-[#F97316]">
+              <i data-lucide="flame" class="w-3.5 h-3.5 fill-[#C2410C] text-[#C2410C]" aria-hidden="true"></i>
+              <span class="font-pixel text-[11px] text-[#F97316]">Racha 4</span>
+              <span class="text-[11px] text-slate-300">· en juego</span>
+            </div>
+
+            <!-- Misión diaria -->
+            <div class="flex items-center gap-1 text-amber-300 bg-amber-950/60 px-2 py-0.5 rounded border border-amber-800/80">
+              <span class="text-amber-400 text-xs">★</span>
+              <span class="text-[11px] font-semibold text-amber-200">Misión 1/2</span>
+            </div>
+
+            <!-- Nivel y Puntuación en dorado (#A16207) -->
+            <div class="font-pixel text-[10px] text-amber-400 tracking-tight">
+              NIVEL 3 · 3.450 PTS
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= AVISO DE CAPACIDAD BAJO EL MARCADOR ================= -->
+      <aside class="bg-amber-50 border-l-4 border-amber-500 rounded-r-lg p-2.5 text-xs text-amber-950 flex items-start justify-between gap-2 shadow-xs" role="alert" aria-live="polite">
+        <div class="flex items-start gap-2 min-w-0">
+          <i data-lucide="alert-circle" class="w-4 h-4 text-amber-700 flex-shrink-0 mt-0.5" aria-hidden="true"></i>
+          <p class="leading-snug break-words">
+            <strong class="font-semibold text-amber-900">«Pagar alquiler» no cupo:</strong> tienes 500 tareas activas
+          </p>
+        </div>
+        <button type="button" class="touch-target px-2.5 py-1 text-xs font-semibold text-amber-900 bg-amber-200/80 hover:bg-amber-300 rounded focus:outline-none focus:ring-2 focus:ring-amber-600 transition-colors flex-shrink-0 self-center">
+          Entendido
+        </button>
+      </aside>
+
+      <!-- ================= FILTRO DE ÁMBITO Y BOTÓN NUEVA TAREA ================= -->
+      <div class="flex items-center justify-between gap-2">
+        <!-- Filtros de ámbito -->
+        <div class="inline-flex p-0.5 rounded-lg bg-slate-200/90 text-xs font-medium" role="group" aria-label="Filtrar por ámbito de tarea">
+          <button type="button" class="px-2.5 py-1.5 rounded-md bg-white text-blue-700 font-semibold shadow-xs touch-target flex items-center justify-center" aria-pressed="true">
+            Todas <span class="ml-1 text-[10px] px-1 py-0.2 bg-blue-100 rounded-full text-blue-800">7</span>
+          </button>
+          <button type="button" class="px-2.5 py-1.5 rounded-md text-slate-700 hover:text-slate-900 touch-target flex items-center justify-center" aria-pressed="false">
+            <span class="w-2 h-2 rounded-full bg-[#7C3AED] mr-1.5 inline-block" aria-hidden="true"></span>
+            Laboral
+          </button>
+          <button type="button" class="px-2.5 py-1.5 rounded-md text-slate-700 hover:text-slate-900 touch-target flex items-center justify-center" aria-pressed="false">
+            <span class="w-2 h-2 rounded-full bg-[#0D9488] mr-1.5 inline-block" aria-hidden="true"></span>
+            Personal
+          </button>
+        </div>
+
+        <!-- Botón Nueva Tarea (Primario #1D4ED8) -->
+        <button type="button" class="touch-target px-3 py-2 rounded-lg bg-[#1D4ED8] hover:bg-[#1E40AF] text-white font-medium text-xs flex items-center gap-1.5 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 flex-shrink-0 transition-colors">
+          <i data-lucide="plus" class="w-4 h-4" aria-hidden="true"></i>
+          <span>Nueva tarea</span>
+        </button>
+      </div>
+
+      <!-- ================= MATRIZ DE EISENHOWER EN 1 COLUMNA MÓVIL ================= -->
+      <div class="space-y-4 pt-1">
+
+        <!-- ---------------- CUADRANTE 1: HACER AHORA ---------------- -->
+        <section class="rounded-xl border border-red-200 bg-[#FEF2F2]/60 p-3 space-y-2.5" aria-labelledby="q1-title">
+          <header class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <span class="w-2.5 h-2.5 rounded-full bg-[#B91C1C]" aria-hidden="true"></span>
+              <h2 id="q1-title" class="font-semibold text-sm text-slate-900 flex items-center gap-1.5">
+                Hacer ahora
+                <span class="text-xs font-normal text-slate-500">(Urgente e Importante)</span>
+              </h2>
+            </div>
+            <span class="font-pixel text-[11px] text-red-700 bg-red-100 px-2 py-0.5 rounded border border-red-200 font-bold">
+              2
+            </span>
+          </header>
+
+          <!-- Tarjeta 1.1: Con insignia «★ Misión del día» -->
+          <article class="bg-white rounded-lg p-3 shadow-xs border-l-4 border-l-[#B91C1C] border border-slate-200 space-y-2 relative">
+            <div class="flex items-start justify-between gap-2">
+              <div class="space-y-1 min-w-0 flex-1">
+                <!-- Insignia Misión del día y Ámbito -->
+                <div class="flex items-center gap-1.5 flex-wrap">
+                  <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-pixel bg-amber-100 text-amber-900 border border-amber-300 font-bold">
+                    ★ Misión del día
+                  </span>
+                  <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[11px] font-medium bg-purple-50 text-purple-700 border border-purple-200">
+                    <span class="w-1.5 h-1.5 rounded-full bg-[#7C3AED]"></span> Laboral
+                  </span>
+                </div>
+                <h3 class="text-sm font-semibold text-slate-900 leading-snug">
+                  Resolver caída de servidor de pagos en producción
+                </h3>
+                <p class="text-xs text-red-700 flex items-center gap-1 font-medium">
+                  <i data-lucide="clock" class="w-3.5 h-3.5"></i> Vence hoy 17:00 · Crítico
+                </p>
+              </div>
+
+              <!-- Menú de acciones -->
+              <button type="button" class="touch-target p-1 text-slate-400 hover:text-slate-700 rounded-md focus:outline-none focus:ring-2 focus:ring-slate-400" aria-label="Más acciones para Resolver caída de servidor">
+                <i data-lucide="more-vertical" class="w-4 h-4"></i>
+              </button>
+            </div>
+
+            <!-- Fila inferior: Botón Completar y Botón estrella de misión (mín. 44px) -->
+            <div class="pt-2 border-t border-slate-100 flex items-center justify-between gap-2">
+              <button type="button" class="touch-target px-3 py-1.5 rounded-md bg-emerald-50 hover:bg-emerald-100 text-emerald-800 text-xs font-semibold border border-emerald-300 flex items-center gap-1.5 focus:outline-none focus:ring-2 focus:ring-emerald-600 transition-colors">
+                <i data-lucide="check-circle-2" class="w-3.5 h-3.5 text-emerald-700"></i>
+                Completar
+              </button>
+
+              <!-- Botón estrella: Quitar de la misión (activo) >= 44px touch target -->
+              <button type="button" class="touch-target px-2.5 py-1.5 rounded-md bg-amber-50 hover:bg-amber-100 border border-amber-300 text-amber-900 text-xs font-medium flex items-center gap-1 focus:outline-none focus:ring-2 focus:ring-amber-500" aria-label="Quitar de la misión del día" title="Quitar de la misión">
+                <i data-lucide="star" class="w-4 h-4 fill-amber-500 text-amber-600" aria-hidden="true"></i>
+                <span class="text-[11px] font-medium">En misión</span>
+              </button>
+            </div>
+          </article>
+
+          <!-- Tarjeta 1.2: Normal sin misión -->
+          <article class="bg-white rounded-lg p-3 shadow-xs border-l-4 border-l-[#B91C1C] border border-slate-200 space-y-2">
+            <div class="flex items-start justify-between gap-2">
+              <div class="space-y-1 min-w-0 flex-1">
+                <div class="flex items-center gap-1.5">
+                  <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[11px] font-medium bg-teal-50 text-teal-700 border border-teal-200">
+                    <span class="w-1.5 h-1.5 rounded-full bg-[#0D9488]"></span> Personal
+                  </span>
+                </div>
+                <h3 class="text-sm font-semibold text-slate-900 leading-snug">
+                  Comprar antibiótico recetado en farmacia de turno
+                </h3>
+                <p class="text-xs text-slate-500 flex items-center gap-1">
+                  <i data-lucide="clock" class="w-3.5 h-3.5"></i> Hoy antes de 20:30
+                </p>
+              </div>
+
+              <button type="button" class="touch-target p-1 text-slate-400 hover:text-slate-700 rounded-md focus:outline-none focus:ring-2 focus:ring-slate-400" aria-label="Más acciones para Comprar antibiótico">
+                <i data-lucide="more-vertical" class="w-4 h-4"></i>
+              </button>
+            </div>
+
+            <div class="pt-2 border-t border-slate-100 flex items-center justify-between gap-2">
+              <button type="button" class="touch-target px-3 py-1.5 rounded-md bg-emerald-50 hover:bg-emerald-100 text-emerald-800 text-xs font-semibold border border-emerald-300 flex items-center gap-1.5 focus:outline-none focus:ring-2 focus:ring-emerald-600 transition-colors">
+                <i data-lucide="check-circle-2" class="w-3.5 h-3.5 text-emerald-700"></i>
+                Completar
+              </button>
+
+              <!-- Botón estrella: Añadir a la misión >= 44px -->
+              <button type="button" class="touch-target px-2.5 py-1.5 rounded-md bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700 text-xs flex items-center gap-1 focus:outline-none focus:ring-2 focus:ring-slate-400" aria-label="Añadir a la misión del día" title="Añadir a la misión">
+                <i data-lucide="star" class="w-4 h-4 text-slate-400" aria-hidden="true"></i>
+                <span class="text-[11px]">Añadir a misión</span>
+              </button>
+            </div>
+          </article>
+        </section>
+
+        <!-- ---------------- CUADRANTE 2: PLANIFICAR ---------------- -->
+        <section class="rounded-xl border border-blue-200 bg-[#EFF6FF]/60 p-3 space-y-2.5" aria-labelledby="q2-title">
+          <header class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <span class="w-2.5 h-2.5 rounded-full bg-[#1D4ED8]" aria-hidden="true"></span>
+              <h2 id="q2-title" class="font-semibold text-sm text-slate-900 flex items-center gap-1.5">
+                Planificar
+                <span class="text-xs font-normal text-slate-500">(No urgente, Importante)</span>
+              </h2>
+            </div>
+            <span class="font-pixel text-[11px] text-blue-700 bg-blue-100 px-2 py-0.5 rounded border border-blue-200 font-bold">
+              2
+            </span>
+          </header>
+
+          <!-- Tarjeta 2.1: Con insignia «📅 Programada · Pendiente desde el lun 3» -->
+          <article class="bg-white rounded-lg p-3 shadow-xs border-l-4 border-l-[#1D4ED8] border border-slate-200 space-y-2">
+            <div class="flex items-start justify-between gap-2">
+              <div class="space-y-1 min-w-0 flex-1">
+                <div class="flex items-center gap-1.5 flex-wrap">
+                  <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[11px] font-medium bg-blue-100 text-blue-900 border border-blue-200">
+                    📅 Programada · Pendiente desde el lun 3
+                  </span>
+                  <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[11px] font-medium bg-purple-50 text-purple-700 border border-purple-200">
+                    <span class="w-1.5 h-1.5 rounded-full bg-[#7C3AED]"></span> Laboral
+                  </span>
+                </div>
+                <h3 class="text-sm font-semibold text-slate-900 leading-snug">
+                  Diseñar arquitectura de microservicios de inventario v2
+                </h3>
+                <p class="text-xs text-slate-500 flex items-center gap-1">
+                  <i data-lucide="calendar" class="w-3.5 h-3.5"></i> Jueves 16, 10:00
+                </p>
+              </div>
+
+              <button type="button" class="touch-target p-1 text-slate-400 hover:text-slate-700 rounded-md focus:outline-none focus:ring-2 focus:ring-slate-400" aria-label="Más acciones para Diseñar arquitectura">
+                <i data-lucide="more-vertical" class="w-4 h-4"></i>
+              </button>
+            </div>
+
+            <div class="pt-2 border-t border-slate-100 flex items-center justify-between gap-2">
+              <button type="button" class="touch-target px-3 py-1.5 rounded-md bg-emerald-50 hover:bg-emerald-100 text-emerald-800 text-xs font-semibold border border-emerald-300 flex items-center gap-1.5 focus:outline-none focus:ring-2 focus:ring-emerald-600 transition-colors">
+                <i data-lucide="check-circle-2" class="w-3.5 h-3.5 text-emerald-700"></i>
+                Completar
+              </button>
+
+              <button type="button" class="touch-target px-2.5 py-1.5 rounded-md bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700 text-xs flex items-center gap-1 focus:outline-none focus:ring-2 focus:ring-slate-400" aria-label="Añadir a la misión del día" title="Añadir a la misión">
+                <i data-lucide="star" class="w-4 h-4 text-slate-400" aria-hidden="true"></i>
+                <span class="text-[11px]">Añadir a misión</span>
+              </button>
+            </div>
+          </article>
+
+          <!-- Tarjeta 2.2: Personal -->
+          <article class="bg-white rounded-lg p-3 shadow-xs border-l-4 border-l-[#1D4ED8] border border-slate-200 space-y-2">
+            <div class="flex items-start justify-between gap-2">
+              <div class="space-y-1 min-w-0 flex-1">
+                <div class="flex items-center gap-1.5">
+                  <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[11px] font-medium bg-teal-50 text-teal-700 border border-teal-200">
+                    <span class="w-1.5 h-1.5 rounded-full bg-[#0D9488]"></span> Personal
+                  </span>
+                </div>
+                <h3 class="text-sm font-semibold text-slate-900 leading-snug">
+                  Sesión de entrenamiento de fuerza y cardio 45 min
+                </h3>
+                <p class="text-xs text-slate-500 flex items-center gap-1">
+                  <i data-lucide="calendar" class="w-3.5 h-3.5"></i> Mañana 07:30
+                </p>
+              </div>
+
+              <button type="button" class="touch-target p-1 text-slate-400 hover:text-slate-700 rounded-md focus:outline-none focus:ring-2 focus:ring-slate-400" aria-label="Más acciones para Sesión de entrenamiento">
+                <i data-lucide="more-vertical" class="w-4 h-4"></i>
+              </button>
+            </div>
+
+            <div class="pt-2 border-t border-slate-100 flex items-center justify-between gap-2">
+              <button type="button" class="touch-target px-3 py-1.5 rounded-md bg-emerald-50 hover:bg-emerald-100 text-emerald-800 text-xs font-semibold border border-emerald-300 flex items-center gap-1.5 focus:outline-none focus:ring-2 focus:ring-emerald-600 transition-colors">
+                <i data-lucide="check-circle-2" class="w-3.5 h-3.5 text-emerald-700"></i>
+                Completar
+              </button>
+
+              <button type="button" class="touch-target px-2.5 py-1.5 rounded-md bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700 text-xs flex items-center gap-1 focus:outline-none focus:ring-2 focus:ring-slate-400" aria-label="Añadir a la misión del día" title="Añadir a la misión">
+                <i data-lucide="star" class="w-4 h-4 text-slate-400" aria-hidden="true"></i>
+                <span class="text-[11px]">Añadir a misión</span>
+              </button>
+            </div>
+          </article>
+        </section>
+
+        <!-- ---------------- CUADRANTE 3: DELEGAR ---------------- -->
+        <section class="rounded-xl border border-amber-200 bg-[#FFFBEB]/60 p-3 space-y-2.5" aria-labelledby="q3-title">
+          <header class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <span class="w-2.5 h-2.5 rounded-full bg-[#B45309]" aria-hidden="true"></span>
+              <h2 id="q3-title" class="font-semibold text-sm text-slate-900 flex items-center gap-1.5">
+                Delegar
+                <span class="text-xs font-normal text-slate-500">(Urgente, No importante)</span>
+              </h2>
+            </div>
+            <span class="font-pixel text-[11px] text-amber-800 bg-amber-100 px-2 py-0.5 rounded border border-amber-200 font-bold">
+              2
+            </span>
+          </header>
+
+          <!-- Tarjeta 3.1 -->
+          <article class="bg-white rounded-lg p-3 shadow-xs border-l-4 border-l-[#B45309] border border-slate-200 space-y-2">
+            <div class="flex items-start justify-between gap-2">
+              <div class="space-y-1 min-w-0 flex-1">
+                <div class="flex items-center gap-1.5">
+                  <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[11px] font-medium bg-purple-50 text-purple-700 border border-purple-200">
+                    <span class="w-1.5 h-1.5 rounded-full bg-[#7C3AED]"></span> Laboral
+                  </span>
+                  <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[11px] font-medium bg-slate-100 text-slate-700">
+                    <i data-lucide="user-check" class="w-3 h-3"></i> Sofía R.
+                  </span>
+                </div>
+                <h3 class="text-sm font-semibold text-slate-900 leading-snug">
+                  Coordinar logística y catering para evento de innovación
+                </h3>
+              </div>
+
+              <button type="button" class="touch-target p-1 text-slate-400 hover:text-slate-700 rounded-md focus:outline-none focus:ring-2 focus:ring-slate-400" aria-label="Más acciones para Coordinar logística">
+                <i data-lucide="more-vertical" class="w-4 h-4"></i>
+              </button>
+            </div>
+
+            <div class="pt-2 border-t border-slate-100 flex items-center justify-between gap-2">
+              <button type="button" class="touch-target px-3 py-1.5 rounded-md bg-emerald-50 hover:bg-emerald-100 text-emerald-800 text-xs font-semibold border border-emerald-300 flex items-center gap-1.5 focus:outline-none focus:ring-2 focus:ring-emerald-600 transition-colors">
+                <i data-lucide="check-circle-2" class="w-3.5 h-3.5 text-emerald-700"></i>
+                Completar
+              </button>
+
+              <button type="button" class="touch-target px-2.5 py-1.5 rounded-md bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700 text-xs flex items-center gap-1 focus:outline-none focus:ring-2 focus:ring-slate-400" aria-label="Añadir a la misión del día" title="Añadir a la misión">
+                <i data-lucide="star" class="w-4 h-4 text-slate-400" aria-hidden="true"></i>
+                <span class="text-[11px]">Añadir a misión</span>
+              </button>
+            </div>
+          </article>
+
+          <!-- Tarjeta 3.2 -->
+          <article class="bg-white rounded-lg p-3 shadow-xs border-l-4 border-l-[#B45309] border border-slate-200 space-y-2">
+            <div class="flex items-start justify-between gap-2">
+              <div class="space-y-1 min-w-0 flex-1">
+                <div class="flex items-center gap-1.5">
+                  <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[11px] font-medium bg-teal-50 text-teal-700 border border-teal-200">
+                    <span class="w-1.5 h-1.5 rounded-full bg-[#0D9488]"></span> Personal
+                  </span>
+                  <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[11px] font-medium bg-slate-100 text-slate-700">
+                    <i data-lucide="user-check" class="w-3 h-3"></i> Roberto M.
+                  </span>
+                </div>
+                <h3 class="text-sm font-semibold text-slate-900 leading-snug">
+                  Revisar presupuesto de pintura de oficina en casa
+                </h3>
+              </div>
+
+              <button type="button" class="touch-target p-1 text-slate-400 hover:text-slate-700 rounded-md focus:outline-none focus:ring-2 focus:ring-slate-400" aria-label="Más acciones para Revisar presupuesto">
+                <i data-lucide="more-vertical" class="w-4 h-4"></i>
+              </button>
+            </div>
+
+            <div class="pt-2 border-t border-slate-100 flex items-center justify-between gap-2">
+              <button type="button" class="touch-target px-3 py-1.5 rounded-md bg-emerald-50 hover:bg-emerald-100 text-emerald-800 text-xs font-semibold border border-emerald-300 flex items-center gap-1.5 focus:outline-none focus:ring-2 focus:ring-emerald-600 transition-colors">
+                <i data-lucide="check-circle-2" class="w-3.5 h-3.5 text-emerald-700"></i>
+                Completar
+              </button>
+
+              <button type="button" class="touch-target px-2.5 py-1.5 rounded-md bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700 text-xs flex items-center gap-1 focus:outline-none focus:ring-2 focus:ring-slate-400" aria-label="Añadir a la misión del día" title="Añadir a la misión">
+                <i data-lucide="star" class="w-4 h-4 text-slate-400" aria-hidden="true"></i>
+                <span class="text-[11px]">Añadir a misión</span>
+              </button>
+            </div>
+          </article>
+        </section>
+
+        <!-- ---------------- CUADRANTE 4: ELIMINAR ---------------- -->
+        <section class="rounded-xl border border-slate-300 bg-[#F8FAFC] p-3 space-y-2.5" aria-labelledby="q4-title">
+          <header class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <span class="w-2.5 h-2.5 rounded-full bg-[#475569]" aria-hidden="true"></span>
+              <h2 id="q4-title" class="font-semibold text-sm text-slate-900 flex items-center gap-1.5">
+                Eliminar
+                <span class="text-xs font-normal text-slate-500">(Ni urgente, ni importante)</span>
+              </h2>
+            </div>
+            <span class="font-pixel text-[11px] text-slate-700 bg-slate-200 px-2 py-0.5 rounded border border-slate-300 font-bold">
+              1
+            </span>
+          </header>
+
+          <!-- Tarjeta 4.1 -->
+          <article class="bg-white rounded-lg p-3 shadow-xs border-l-4 border-l-[#475569] border border-slate-200 space-y-2">
+            <div class="flex items-start justify-between gap-2">
+              <div class="space-y-1 min-w-0 flex-1">
+                <div class="flex items-center gap-1.5">
+                  <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[11px] font-medium bg-teal-50 text-teal-700 border border-teal-200">
+                    <span class="w-1.5 h-1.5 rounded-full bg-[#0D9488]"></span> Personal
+                  </span>
+                  <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium bg-slate-100 text-slate-600">
+                    Descartable
+                  </span>
+                </div>
+                <h3 class="text-sm font-semibold text-slate-700 leading-snug line-through decoration-slate-400">
+                  Reorganizar feeds RSS obsoletos y newsletters archivadas
+                </h3>
+              </div>
+
+              <button type="button" class="touch-target p-1 text-slate-400 hover:text-slate-700 rounded-md focus:outline-none focus:ring-2 focus:ring-slate-400" aria-label="Más acciones para Reorganizar feeds">
+                <i data-lucide="more-vertical" class="w-4 h-4"></i>
+              </button>
+            </div>
+
+            <div class="pt-2 border-t border-slate-100 flex items-center justify-between gap-2">
+              <button type="button" class="touch-target px-3 py-1.5 rounded-md bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold border border-slate-300 flex items-center gap-1.5 focus:outline-none focus:ring-2 focus:ring-slate-400 transition-colors">
+                <i data-lucide="trash-2" class="w-3.5 h-3.5 text-slate-500"></i>
+                Descartar
+              </button>
+
+              <button type="button" class="touch-target px-2.5 py-1.5 rounded-md bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700 text-xs flex items-center gap-1 focus:outline-none focus:ring-2 focus:ring-slate-400" aria-label="Añadir a la misión del día" title="Añadir a la misión">
+                <i data-lucide="star" class="w-4 h-4 text-slate-400" aria-hidden="true"></i>
+                <span class="text-[11px]">Añadir a misión</span>
+              </button>
+            </div>
+          </article>
+        </section>
+
+      </div>
+    </main>
+
+    <!-- ================= BARRA INFERIOR FIJA MÓVIL ================= -->
+    <footer class="sticky bottom-0 z-30 bg-white border-t border-slate-200 py-1.5 px-4 flex items-center justify-around shadow-lg">
+      <button type="button" class="flex flex-col items-center justify-center text-blue-700 py-1 touch-target focus:outline-none">
+        <i data-lucide="layout-grid" class="w-5 h-5 mb-0.5"></i>
+        <span class="text-[11px] font-bold">Tablero</span>
+      </button>
+
+      <button type="button" class="flex flex-col items-center justify-center text-slate-500 hover:text-slate-800 py-1 touch-target focus:outline-none">
+        <i data-lucide="target" class="w-5 h-5 mb-0.5"></i>
+        <span class="text-[11px] font-medium">Misiones</span>
+      </button>
+
+      <button type="button" class="flex flex-col items-center justify-center text-slate-500 hover:text-slate-800 py-1 touch-target focus:outline-none">
+        <i data-lucide="history" class="w-5 h-5 mb-0.5"></i>
+        <span class="text-[11px] font-medium">Historial</span>
+      </button>
+
+      <button type="button" class="flex flex-col items-center justify-center text-slate-500 hover:text-slate-800 py-1 touch-target focus:outline-none">
+        <i data-lucide="settings" class="w-5 h-5 mb-0.5"></i>
+        <span class="text-[11px] font-medium">Ajustes</span>
+      </button>
+    </footer>
+
+  </div>
+
+  <script>
+    // Inicializar iconos de Lucide
+    lucide.createIcons();
+  </script>
+</body>
+</html>

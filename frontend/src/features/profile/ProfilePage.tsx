@@ -14,6 +14,7 @@ import { AppearanceSection } from './AppearanceSection'
 import { AvatarPicker } from './AvatarPicker'
 import { BoardPreferences } from './BoardPreferences'
 import { IdentitySection } from './IdentitySection'
+import { ProgressSettings } from './ProgressSettings'
 
 // One fixed message for any failure to save: the server's own text is never shown.
 const SAVE_ERROR_MESSAGE = 'No se pudo guardar el cambio. Inténtalo de nuevo.'
@@ -126,6 +127,7 @@ export function ProfilePage(): JSX.Element {
           />
           <AppearanceSection profile={profile} onChange={save} />
           <BoardPreferences profile={profile} onChange={save} />
+          <ProgressSettings profile={profile} onChange={save} />
 
           <div className="min-h-6">
             <p role="status" className="text-caption text-success">
@@ -162,7 +164,9 @@ export function ProfilePage(): JSX.Element {
             >
               Restablecer valores por defecto
             </button>
-            <p className="mt-2 text-caption text-text-muted">No cambia tu nombre ni tu avatar.</p>
+            <p className="mt-2 text-caption text-text-muted">
+              No cambia tu nombre, tu avatar ni «Progreso y juego».
+            </p>
           </section>
         </div>
       )}
@@ -179,7 +183,7 @@ export function ProfilePage(): JSX.Element {
       {isConfirmingReset && (
         <ConfirmDialog
           title="¿Restablecer los valores por defecto?"
-          message="Volverán el tema, la densidad, el tablero por defecto, el orden y el historial a sus valores iniciales. No cambia tu nombre ni tu avatar."
+          message="Volverán el tema, la densidad, el tablero por defecto, el orden y el historial a sus valores iniciales. No cambia tu nombre, tu avatar ni «Progreso y juego»."
           confirmLabel="Restablecer"
           onConfirm={confirmReset}
           onCancel={() => setIsConfirmingReset(false)}

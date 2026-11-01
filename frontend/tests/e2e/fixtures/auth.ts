@@ -1,4 +1,4 @@
-import { test as base, expect } from '@playwright/test'
+import { type Page, test as base, expect } from '@playwright/test'
 
 // Must match BOOTSTRAP_ADMIN_EMAIL in the backend web server of playwright.config.ts.
 export const ADMIN_E2E_EMAIL = 'admin-e2e@example.com'
@@ -15,6 +15,40 @@ interface LoginOptions {
 interface AuthFixtures {
   loginAsGoogleUser: (email: string, options?: LoginOptions) => Promise<void>
   loginAsAdmin: () => Promise<void>
+}
+
+interface StartOfDayOptions {
+  // Whether the start-of-day review (S8, feature 007) shows as the server decides. Off by
+  // default: every new account would otherwise open the board under that dialog, which only the
+  // tests about it want. Turn it on with `test.use({ startOfDay: true })`.
+  startOfDay: boolean
+}
+
+interface StartOfDayFixtures {
+  hideStartOfDay: undefined
+}
+
+const PROGRESS_URL = /\/api\/v1\/me\/progress$/
+
+// Answers today's progress on this page as if the review had already been seen. `route.fallback`
+// in other handlers (the server clock) reaches this one, so both apply. The `page` fixture gets it
+// on its own; a page of another browser context, only by calling this.
+export async function hideStartOfDay(page: Page): Promise<void> {
+  await page.route(PROGRESS_URL, async (route) => {
+    if (route.request().method() !== 'GET') {
+      await route.fallback()
+      return
+    }
+    try {
+      const response = await route.fetch()
+      const body = (await response.json()) as Record<string, unknown>
+      await route.fulfill({ response, json: { ...body, show_review: false } })
+    } catch {
+      // Usually the page reloaded or navigated while the request was in flight, and nobody
+      // reads it any more; otherwise let it through untouched rather than leave it hanging.
+      await route.continue().catch(() => undefined)
+    }
+  })
 }
 
 // Seeds the invitation straight into the Firestore emulator from the test process, never
@@ -43,7 +77,17 @@ async function seedInvitation(email: string): Promise<void> {
   }
 }
 
-export const test = base.extend<AuthFixtures>({
+export const test = base.extend<AuthFixtures & StartOfDayOptions & StartOfDayFixtures>({
+  startOfDay: [false, { option: true }],
+
+  hideStartOfDay: [
+    async ({ page, startOfDay }, use) => {
+      if (!startOfDay) await hideStartOfDay(page)
+      await use(undefined)
+    },
+    { auto: true },
+  ],
+
   loginAsGoogleUser: async ({ page }, use) => {
     await use(async (email: string, options: LoginOptions = {}) => {
       if (options.invited ?? true) {

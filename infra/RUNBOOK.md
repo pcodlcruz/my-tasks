@@ -771,3 +771,50 @@ Con la versión de Hosting ya en el estado de staging (Phase 3), el plan de solo
 ### Retirada de `staging.inserttask.com` (2026-10-26)
 
 La Phase 4 aplicó en staging el dominio `staging.inserttask.com`, escrito con el dominio de primer nivel equivocado. Nunca llegó a tener DNS. La Phase 5 lo retira quitándolo de la lista y levantando `prevent_destroy` del recurso de dominio en la misma PR (el borrado es deliberado); `prevent_destroy` se restaura en una PR propia (T073) antes de la release. El plan de solo lectura de esa PR debe mostrar la baja de `staging.inserttask.com` y el alta de la zona, los registros y `staging.inserttask.es`.
+
+## 15. Progreso diario, tareas programadas y modo arcade (feature 007)
+
+**No hay cambios de infraestructura**: ni variables de entorno, ni índices, ni IAM, ni cuentas de servicio, ni tareas programadas en Cloud Scheduler. Todo vive en Firestore bajo el documento de cada cuenta y lo escribe solo la API. Diseño y decisiones: `specs/007-daily-progress-arcade/`; contrato en `specs/001-eisenhower-task-manager/contracts/openapi.yaml` (v1.4.0).
+
+### Dónde está cada cosa
+
+| Dato | Dónde |
+|---|---|
+| Meta, días activos, zona horaria, inicio de jornada y modo arcade | `users/{uid}/settings/profile` (los valores por defecto valen si no hay documento) |
+| Marcador: puntuación, racha, récords, logros, anuncios y avisos pendientes | `users/{uid}/progress/state` |
+| Un día de progreso (tareas completadas, misión, bonus, puntos) | `users/{uid}/progress_days/{AAAA-MM-DD}` |
+| Tareas programadas | `users/{uid}/schedules/{id}` (como mucho 50 por persona) |
+
+No hay ningún proceso en segundo plano: los días se cierran y las programaciones vencidas se generan al llamar a `GET /api/v1/me/progress` (al cargar la aplicación). Una persona que no entra no acumula nada hasta su próxima visita, y la puesta al día es idempotente. El día va de 04:00 a 03:59 en la zona horaria de la persona; si el perfil aún no tiene zona, se usa `Europe/Madrid` hasta que el navegador envíe la suya.
+
+### `X-Test-Now` solo existe en local
+
+La cabecera `X-Test-Now` simula la hora para los e2e. Con `APP_ENV` distinto de `local` **se ignora** y la API deja el aviso `test_clock_ignored` (con el entorno) en los registros. Si aparece en staging o producción, alguien la está enviando: no cambia el resultado, pero conviene averiguar quién.
+
+### Corregir a mano una racha
+
+Lo hace el propietario con sus credenciales en la consola de Firestore del entorno (el agente no lo hace). Solo se toca `users/{uid}/progress/state`: `current_streak` es la racha **cerrada hasta ayer** y `best_streak` el récord. La racha mostrada hoy suma 1 si hoy es activo y ya se cumplió la meta, así que no se corrige en el día. Los documentos de `progress_days` ya cerrados (`closed = true`) no se editan: sirven de historial y un día cerrado no admite más escrituras (`data-model.md` §3). Procedimiento **no probado**.
+
+### Desatascar una programación
+
+- **No genera tareas**: mirar en `users/{uid}/schedules/{id}` que `status = "active"` y que `next_occurrence` es una fecha (no `null`). Si es `null` con la programación activa, ponerle la fecha de la próxima aparición; en la siguiente llamada a `GET /me/progress` se genera la tarea vencida.
+- **Se genera una tarea duplicada o fuera de fecha**: comparar `last_generated_for` con `next_occurrence`. La tarea generada lleva `schedule_id` y `scheduled_for`.
+- **Salida más simple**: eliminarla con `DELETE /api/v1/schedules/{id}` desde la aplicación y crearla de nuevo; las tareas ya generadas se conservan.
+- Una generación que falla (`schedule_generation_failed`) no se pierde: la programación sigue vencida y se reintenta en la siguiente lectura de `GET /me/progress`.
+- El aviso `schedule_skipped_limit` indica que, al generar, la persona ya tenía 500 tareas activas y esa aparición no se creó; liberar espacio después no la recupera.
+
+Procedimientos **no probados** en un entorno real.
+
+### Qué mirar en los registros
+
+- `schedule_generated` (INFO) y `schedule_skipped_limit` (WARNING): `uid`, `schedule_id` y el día.
+- `schedule_generation_failed` (ERROR): `uid`, `schedule_id` y `reason`, que es solo la clase del error, nunca su texto.
+- `schedule_limit_reached` (WARNING): una persona intentó crear la programación 51.
+- `progress_mission_set`, `progress_mission_rejected` y `progress_ack`: `uid`, día y recuento.
+- `test_clock_ignored` (arriba).
+
+Ningún evento lleva puntuaciones, títulos ni descripciones de tareas.
+
+### Validación en staging (T122, propietario)
+
+Tras desplegar por el pipeline, repetir en staging los escenarios 1, 3, 5, 6, 8, 11, 12, 18 y 21 de `specs/007-daily-progress-arcade/quickstart.md` con cuentas reales y anotar el resultado. Los cambios de día se validan al día siguiente real: `X-Test-Now` no existe en staging.

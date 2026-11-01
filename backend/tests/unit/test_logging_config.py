@@ -78,3 +78,56 @@ def test_json_formatter_emits_the_size_of_an_uploaded_avatar() -> None:
 
     assert line["uid"] == "user-1"
     assert line["size"] == "18432"
+
+
+def test_json_formatter_emits_the_day_and_count_of_a_progress_event() -> None:
+    line = _log_line(uid="user-1", day="2026-11-03", count="2")
+
+    assert line["day"] == "2026-11-03"
+    assert line["count"] == "2"
+
+
+def test_json_formatter_never_emits_task_titles_of_a_progress_event() -> None:
+    line = _log_line(uid="user-1", day="2026-11-03", title="Pagar alquiler", task_ids=["a"])
+
+    assert "title" not in line
+    assert "task_ids" not in line
+
+
+@pytest.mark.parametrize(
+    "event",
+    [
+        "schedule_created",
+        "schedule_updated",
+        "schedule_deleted",
+        "schedule_generated",
+        "schedule_skipped_limit",
+    ],
+)
+def test_json_formatter_emits_only_ids_and_the_day_of_a_schedule_event(event: str) -> None:
+    stream = io.StringIO()
+    handler = logging.StreamHandler(stream)
+    handler.setFormatter(JsonFormatter())
+    logger = logging.getLogger(f"test.json.schedule.{event}")
+    logger.setLevel(logging.INFO)
+    logger.propagate = False
+    logger.addHandler(handler)
+
+    logger.info(
+        event,
+        extra={
+            "uid": "user-1",
+            "schedule_id": "sched-1",
+            "day": "2026-11-03",
+            "title": "Pagar el alquiler",
+            "description": "Detalle privado",
+            "recurrence": {"kind": "daily"},
+        },
+    )
+
+    line: dict[str, object] = json.loads(stream.getvalue())
+    assert line["message"] == event
+    assert line["uid"] == "user-1"
+    assert line["schedule_id"] == "sched-1"
+    assert line["day"] == "2026-11-03"
+    assert {"title", "description", "recurrence"}.isdisjoint(line)

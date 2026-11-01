@@ -80,6 +80,14 @@ class Task:
     completed_at: datetime | None
     trashed_at: datetime | None
     purge_at: datetime | None
+    # Daily progress (feature 007): the progress day of the current completion, and the day the
+    # task gave its points (a task only scores once in its life). Internal: never in `TaskOut`.
+    completed_day: str | None = None
+    points_awarded_on: str | None = None
+    # Scheduled tasks (feature 007, US4): the schedule that generated it and the occurrence
+    # (progress day) it is for, the "pending since" of FR-023. Set when generated, never edited.
+    schedule_id: str | None = None
+    scheduled_for: str | None = None
 
     @property
     def quadrant(self) -> Quadrant:
