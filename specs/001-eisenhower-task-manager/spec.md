@@ -33,6 +33,8 @@ Como usuario, quiero iniciar sesión con mi cuenta de Google (la primera vez se 
 
 > **Ampliado por la feature 004** ([`specs/004-user-profile-settings/`](../004-user-profile-settings/spec.md)): cada persona gana un **perfil** con sus preferencias (tema, densidad, ámbito por defecto, orden del tablero, periodo del historial), un nombre para mostrar y un avatar (iniciales, predefinido o imagen propia). Se guardan por cuenta bajo `users/{uid}/settings/` y, como las tareas, solo las ve y modifica su dueña. Las historias y requisitos de esta spec no cambian.
 
+> **Ampliado por la feature 007** ([`specs/007-daily-progress-arcade/`](../007-daily-progress-arcade/spec.md)): sobre estas mismas tareas se añaden una meta diaria con su marcador y su racha, una misión del día, un modo arcade opcional (puntos, niveles y logros), tareas programadas que generan tareas en el tablero y un historial de progreso por días. Todo se guarda por cuenta bajo `users/{uid}/` y, como las tareas, solo lo ve y modifica su dueña. Las historias y requisitos de esta spec no cambian.
+
 **Why this priority**: Es el requisito de acceso previo a cualquier otra funcionalidad: sin cuenta ni aislamiento de datos por usuario no hay tareas que crear ni tablero que ver.
 
 **Independent Test**: Se puede probar de forma aislada iniciando sesión con dos cuentas de Google distintas y comprobando que cada una solo ve sus propias tareas (inicialmente ninguna), sin acceso a las de la otra.

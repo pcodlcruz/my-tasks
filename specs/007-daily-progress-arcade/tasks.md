@@ -727,17 +727,17 @@ repasada.
 coincide con `GET /openapi.json`; el `README.md` y `docs/design/screens/README.md` describen lo
 vigente.
 
-- [ ] T115 [P] Integrar `contracts/progress.yaml` en `specs/001-eisenhower-task-manager/contracts/openapi.yaml` (versión 1.4.0: `/me/progress*`, `/schedules*`, los campos nuevos de `TaskOut` y `ProfileOut`, y los errores 409 y 422 nuevos), comprobarlo contra `GET /openapi.json` y dejar en `contracts/progress.yaml` la nota de que ya está integrado
-- [ ] T116 [P] Actualizar `README.md` (qué ofrecen el progreso, la misión, el modo arcade y las programadas; el día que empieza a las 04:00; que no hay variables nuevas) e `infra/RUNBOOK.md` con una sección breve:
+- [x] T115 [P] Integrar `contracts/progress.yaml` en `specs/001-eisenhower-task-manager/contracts/openapi.yaml` (versión 1.4.0: `/me/progress*`, `/schedules*`, los campos nuevos de `TaskOut` y `ProfileOut`, y los errores 409 y 422 nuevos), comprobarlo contra `GET /openapi.json` y dejar en `contracts/progress.yaml` la nota de que ya está integrado
+- [x] T116 [P] Actualizar `README.md` (qué ofrecen el progreso, la misión, el modo arcade y las programadas; el día que empieza a las 04:00; que no hay variables nuevas) e `infra/RUNBOOK.md` con una sección breve:
   - no hay cambios de infraestructura;
   - dónde viven `progress/state`, `progress_days` y `schedules`;
   - cómo corregir a mano una racha o una programación atascada;
   - que `X-Test-Now` solo existe en local.
-- [ ] T117 [P] Anotar en `specs/001-eisenhower-task-manager/data-model.md`, `spec.md` y `plan.md`, y en `specs/004-user-profile-settings/data-model.md`, que la feature 007 amplía la tarea y el perfil y añade el progreso y las programaciones. Comprobar que `docs/design/screens/README.md` indica la pantalla vigente de cada una
-- [ ] T118 Ejecutar los escenarios 1–21 de [quickstart.md](./quickstart.md) en local y corregir `quickstart.md` y los contratos si algo cambió durante la implementación
-- [ ] T119 Revisión de seguridad **final** de la feature con `mytasks-security-auditor` (estado acumulado de los hallazgos de las Fases 2, 6 y 7, la cabecera de reloj y la documentación) y registrar el informe en `specs/007-daily-progress-arcade/security-review-final.md`
-- [ ] T120 Repasar el checklist *Definition of Done* de la constitución para la feature completa y registrarlo en `specs/007-daily-progress-arcade/definition-of-done.md`, marcando como pendientes solo los puntos de la Fase 9
-- [ ] T121 Marcar T115–T120 como hechas en este fichero
+- [x] T117 [P] Anotar en `specs/001-eisenhower-task-manager/data-model.md`, `spec.md` y `plan.md`, y en `specs/004-user-profile-settings/data-model.md`, que la feature 007 amplía la tarea y el perfil y añade el progreso y las programaciones. Comprobar que `docs/design/screens/README.md` indica la pantalla vigente de cada una
+- [x] T118 Ejecutar los escenarios 1–21 de [quickstart.md](./quickstart.md) en local y corregir `quickstart.md` y los contratos si algo cambió durante la implementación
+- [x] T119 Revisión de seguridad **final** de la feature con `mytasks-security-auditor` (estado acumulado de los hallazgos de las Fases 2, 6 y 7, la cabecera de reloj y la documentación) y registrar el informe en `specs/007-daily-progress-arcade/security-review-final.md`
+- [x] T120 Repasar el checklist *Definition of Done* de la constitución para la feature completa y registrarlo en `specs/007-daily-progress-arcade/definition-of-done.md`, marcando como pendientes solo los puntos de la Fase 9
+- [x] T121 Marcar T115–T120 como hechas en este fichero
 
 **Checkpoint**: la feature queda lista para staging.
 

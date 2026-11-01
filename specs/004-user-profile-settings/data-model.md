@@ -2,6 +2,12 @@
 
 **Feature**: `004-user-profile-settings` | **Fecha**: 2026-10-23 | **Plan**: [plan.md](plan.md)
 
+> **Ampliado por la feature 007** ([data-model](../007-daily-progress-arcade/data-model.md)): el
+> documento `settings/profile` gana cinco campos (`daily_goal`, `active_weekdays`, `timezone`,
+> `morning_review` y `arcade_mode`), con sus valores por defecto cuando faltan, y `ProfileOut` y
+> `ProfileUpdateIn` los exponen (contrato 1.4.0). `DELETE /api/v1/me/profile` no los restablece. No
+> cambia ningún campo de los de esta feature ni se migra nada.
+
 Dos documentos nuevos por persona, en una subcolección `settings` de su documento de cuenta
 `users/{uid}` (feature 003). No cambia ningún documento existente ni se migra nada: sin
 documento, el comportamiento es el de los valores por defecto (FR-004, SC-009).

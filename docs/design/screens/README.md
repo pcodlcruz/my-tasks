@@ -510,3 +510,28 @@ la conversación, lo que no es viable para 48 ficheros. Por eso el propietario e
 [`../export-stitch.py`](../export-stitch.py) en su terminal, con su propio token: el agente no usa
 credenciales personales (Principio V). Para exportar más pantallas, se añaden sus ids de fichero
 (los `htmlCode.name` y `screenshot.name` de `get_screen`) a la lista `EXPORTS` del script.
+
+## Resumen de lo vigente de la feature 007 (T117, 2026-11-01)
+
+Qué pantalla manda para cada función de la feature 007. Las versiones nuevas sustituyen a las de
+las features 001 y 004 en lo que cambian, que siguen intactas como referencia anterior (FR-036);
+el detalle (ids de Stitch) está en «Registro de generaciones» y las carpetas, en «Pantallas
+vigentes exportadas».
+
+| Función | Pantalla vigente | Carpeta |
+|---|---|---|
+| Tablero con marcador del día y cabecera con la pestaña «Progreso» | S3 v3 · Tablero (claro y oscuro; móvil: maquetación de S3 v2 móvil con los colores de v3) | `s3-board-v3/`, `s3-board-v3-dark/` |
+| Tablero con el modo arcade desactivado | S3 v3 · Tablero sin modo arcade | `s3-board-v3-no-arcade/` |
+| Celebraciones (fase, misión, nivel, logro y récord) | S3-c · Celebraciones | `s3c-celebrations/`, `s3c-celebrations-dark/` |
+| Perfil con meta diaria, días activos, inicio de jornada y modo arcade | S7 v2 · Perfil (sustituye a S7) | `s7-profile-v2/`, `s7-profile-v2-dark/` |
+| Inicio de jornada y selector de la misión del día | S8 · Inicio de jornada | `s8-day-start/`, `s8-day-start-dark/` |
+| Historial de progreso, estadísticas y sala de trofeos | S9 · Progreso | `s9-progress/`, `s9-progress-dark/` |
+| Lista de tareas programadas y diálogo de eliminar | S10 · Tareas programadas | `s10-schedules/`, `s10-schedules-dark/` |
+| Crear y editar una programación | S11 · Formulario de programación (parte de S4 v2) | `s11-schedule-form/`, `s11-schedule-form-dark/` |
+
+Siguen vigentes sin cambios, de la feature 004: S1 (inicio de sesión), S4 (formulario de tarea),
+S5 (historial), S6 (papelera) y el selector de avatar con su recortador.
+
+Los estados «PARTIDA NUEVA» y «sin tareas activas» de S8, y el estado vacío de S9, no tienen
+pantalla propia: se implementan desde el contrato (`specs/007-daily-progress-arcade/contracts/ui-screens.md`).
+Las variantes móviles oscuras valen como **solo color**.
