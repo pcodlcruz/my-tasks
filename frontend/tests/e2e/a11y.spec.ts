@@ -43,7 +43,7 @@ const ONE_TASK_PER_QUADRANT: NewTask[] = [
 
 async function goTo(
   page: Page,
-  link: 'Tablero' | 'Programadas' | 'Historial' | 'Papelera',
+  link: 'Tablero' | 'Progreso' | 'Programadas' | 'Historial' | 'Papelera',
 ): Promise<void> {
   await page
     .getByRole('navigation', { name: 'Navegación principal' })
@@ -189,11 +189,14 @@ test.describe('Accesibilidad WCAG 2.1 AA', () => {
 
     await expectNoHorizontalOverflow('Tablero')
     await page.getByRole('button', { name: 'Completar' }).click()
+    // Wait for the completion to land before leaving: navigating away mid-request raced it.
+    await expect(page.getByRole('button', { name: 'Completar' })).toHaveCount(0)
     await goTo(page, 'Historial')
     await expect(page.getByRole('heading', { name: 'Historial', level: 1 })).toBeVisible()
     await expect(page.locator('article')).toHaveCount(1)
     await expectNoHorizontalOverflow('Historial')
     await page.getByRole('button', { name: 'Mover a la papelera' }).click()
+    await expect(page.getByRole('button', { name: 'Mover a la papelera' })).toHaveCount(0)
     await goTo(page, 'Papelera')
     await expect(page.getByRole('heading', { name: 'Papelera', level: 1 })).toBeVisible()
     await expect(page.locator('article')).toHaveCount(1)
@@ -221,6 +224,17 @@ test.describe('Accesibilidad WCAG 2.1 AA', () => {
       overflow,
       'Desbordamiento horizontal de la cabecera y el marcador a 320 px',
     ).toBeLessThanOrEqual(0)
+    await goTo(page, 'Progreso')
+    await expect(
+      page.getByRole('heading', { name: 'Progreso y estadísticas', level: 1 }),
+    ).toBeVisible()
+    await expect(page.getByRole('region', { name: 'Sala de trofeos' })).toBeVisible()
+    const progressOverflow = await page.evaluate(
+      () => document.documentElement.scrollWidth - window.innerWidth,
+    )
+    expect(progressOverflow, 'Desbordamiento horizontal en Progreso a 320 px').toBeLessThanOrEqual(
+      0,
+    )
     await goTo(page, 'Programadas')
     await expect(page.getByRole('heading', { name: 'Tareas programadas', level: 1 })).toBeVisible()
     const schedulesOverflow = await page.evaluate(
@@ -490,6 +504,38 @@ test.describe('Accesibilidad WCAG 2.1 AA', () => {
       await page.getByRole('button', { name: 'Eliminar' }).click()
       await expect(page.getByRole('alertdialog')).toBeVisible()
       await expectNoViolations(page, `S10 · Confirmar eliminar (${colorScheme})`)
+    })
+  }
+
+  for (const colorScheme of ['light', 'dark'] as const) {
+    test(`el progreso y estadísticas no tiene violaciones en tema ${colorScheme === 'light' ? 'claro' : 'oscuro'}`, async ({
+      page,
+      loginAsGoogleUser,
+    }) => {
+      await page.emulateMedia({ colorScheme })
+      await loginAsGoogleUser(`a11y-progreso-${colorScheme}-${crypto.randomUUID()}@example.com`)
+      await goTo(page, 'Progreso')
+      await expect(
+        page.getByRole('heading', { name: 'Progreso y estadísticas', level: 1 }),
+      ).toBeVisible()
+      await expect(page.getByRole('region', { name: 'Sala de trofeos' })).toBeVisible()
+      await expectNoViolations(page, `S9 · Progreso vacío (${colorScheme})`)
+
+      await goTo(page, 'Tablero')
+      await createTask(page, {
+        title: 'Tarea de progreso',
+        urgent: false,
+        important: true,
+        scope: 'Laboral',
+      })
+      await page.getByRole('button', { name: 'Completar' }).first().click()
+      await goTo(page, 'Progreso')
+      await page
+        .getByRole('group', { name: 'Actividad de las últimas 12 semanas' })
+        .getByRole('button', { name: /meta sin cumplir, 1 tarea/i })
+        .click()
+      await expect(page.getByText('Tarea de progreso')).toBeVisible()
+      await expectNoViolations(page, `S9 · Progreso con un día elegido (${colorScheme})`)
     })
   }
 

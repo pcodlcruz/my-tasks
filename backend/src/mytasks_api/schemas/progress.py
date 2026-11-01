@@ -1,8 +1,10 @@
+from datetime import datetime
 from typing import Annotated, Self
 
 from pydantic import AfterValidator, BaseModel, ConfigDict, Field, model_validator
 
 from mytasks_api.domain.progress import (
+    ACHIEVEMENTS,
     MAX_ANNOUNCEMENTS,
     MAX_MISSION_TASKS,
     MAX_NOTICES,
@@ -12,7 +14,13 @@ from mytasks_api.domain.progress import (
     level_for,
     next_level_threshold,
 )
-from mytasks_api.services.progress_service import ProgressSnapshot
+from mytasks_api.schemas.task import TaskOut
+from mytasks_api.services.progress_service import (
+    DayDetailSnapshot,
+    DaysSnapshot,
+    ProgressSnapshot,
+    StatsSnapshot,
+)
 
 
 def _not_reserved(value: str) -> str:
@@ -64,6 +72,83 @@ class ProgressDayOut(BaseModel):
             mission_cleared=day.mission_cleared,
             points=day.points if arcade_mode else None,
             closed=day.closed,
+        )
+
+
+class ProgressDayDetailOut(ProgressDayOut):
+    # Only the tasks that still exist outside the trash (FR-029).
+    tasks: list[TaskOut]
+
+    @classmethod
+    def from_snapshot(cls, snapshot: DayDetailSnapshot) -> "ProgressDayDetailOut":
+        base = ProgressDayOut.from_day(snapshot.day, arcade_mode=snapshot.profile.arcade_mode)
+        return cls(**base.model_dump(), tasks=[TaskOut.from_task(task) for task in snapshot.tasks])
+
+
+class ProgressDaysOut(BaseModel):
+    items: list[ProgressDayOut]
+
+    @classmethod
+    def from_snapshot(cls, snapshot: DaysSnapshot) -> "ProgressDaysOut":
+        arcade_mode = snapshot.profile.arcade_mode
+        return cls(
+            items=[ProgressDayOut.from_day(day, arcade_mode=arcade_mode) for day in snapshot.days]
+        )
+
+
+class AchievementOut(BaseModel):
+    id: str
+    name: str
+    condition: str
+    unlocked_at: datetime | None
+
+
+class StatsArcadeOut(BaseModel):
+    score: int
+    level: int
+    level_name: str
+    achievements: list[AchievementOut]
+
+
+class StatsOut(BaseModel):
+    best_day_count: int
+    best_day_date: str | None
+    current_streak: int
+    best_streak: int
+    tasks_scored: int
+    started_at: datetime | None
+    arcade: StatsArcadeOut | None
+
+    @classmethod
+    def from_snapshot(cls, snapshot: StatsSnapshot) -> "StatsOut":
+        state = snapshot.state
+        level = level_for(state.score)
+        return cls(
+            best_day_count=state.best_day_count,
+            best_day_date=state.best_day_date,
+            current_streak=state.current_streak,
+            best_streak=state.best_streak,
+            tasks_scored=state.tasks_scored,
+            started_at=state.started_at,
+            arcade=(
+                StatsArcadeOut(
+                    score=state.score,
+                    level=level.number,
+                    level_name=level.name,
+                    # The whole catalog, with the date of those already won.
+                    achievements=[
+                        AchievementOut(
+                            id=item.id,
+                            name=item.name,
+                            condition=item.condition,
+                            unlocked_at=state.achievements.get(item.id),
+                        )
+                        for item in ACHIEVEMENTS
+                    ],
+                )
+                if snapshot.profile.arcade_mode
+                else None
+            ),
         )
 
 

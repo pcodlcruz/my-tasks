@@ -11,11 +11,14 @@ from mytasks_api.domain.progress import (
     InvalidMissionError,
     PlayerState,
     ProgressDay,
+    ProgressDayNotFoundError,
     TodayView,
+    check_day_range,
     day_key,
     open_day,
     today_view,
 )
+from mytasks_api.domain.task import Status, Task
 from mytasks_api.logging_config import log_event
 from mytasks_api.repositories.profile_repository import ProfileRepository, get_profile_repository
 from mytasks_api.repositories.progress_repository import (
@@ -38,6 +41,25 @@ class ProgressSnapshot:
     last_day: ProgressDay | None
     # Schedule id → title, to word the notices of schedules that still exist.
     notice_titles: Mapping[str, str] = field(default_factory=dict)
+
+
+@dataclass(frozen=True)
+class DaysSnapshot:
+    profile: Profile
+    days: list[ProgressDay]
+
+
+@dataclass(frozen=True)
+class DayDetailSnapshot:
+    profile: Profile
+    day: ProgressDay
+    tasks: list[Task]
+
+
+@dataclass(frozen=True)
+class StatsSnapshot:
+    profile: Profile
+    state: PlayerState
 
 
 class ProgressService:
@@ -92,6 +114,30 @@ class ProgressService:
             last_day=last_day,
             notice_titles=notice_titles,
         )
+
+    async def list_days(self, uid: str, start: date, end: date) -> DaysSnapshot:
+        """The stored days of a range, for the calendar. Read-only: it closes nothing."""
+        check_day_range(start, end)
+        profile = await self._profiles.get(uid)
+        days = await self._repository.list_days(uid, start.isoformat(), end.isoformat())
+        return DaysSnapshot(profile=profile, days=days)
+
+    async def get_day(self, uid: str, day: date) -> DayDetailSnapshot:
+        """One day with its completed tasks that are still outside the trash (FR-029). A day
+        with no document is a 404, the same for every account."""
+        profile = await self._profiles.get(uid)
+        stored = await self._repository.get_day(uid, day.isoformat())
+        if stored is None:
+            raise ProgressDayNotFoundError(day.isoformat())
+        live = await self._repository.get_live_tasks(uid, stored.completed_task_ids)
+        # A task reopened on a later day keeps its credit on the day it was completed (FR-006)
+        # but is open again: it is no longer one of that day's completed tasks.
+        tasks = [task for task in live if task.status is Status.COMPLETED]
+        return DayDetailSnapshot(profile=profile, day=stored, tasks=tasks)
+
+    async def get_stats(self, uid: str) -> StatsSnapshot:
+        profile = await self._profiles.get(uid)
+        return StatsSnapshot(profile=profile, state=await self._repository.get_state(uid))
 
     async def mark_review_seen(self, uid: str) -> ProgressSnapshot:
         profile, today = await self._context(uid)

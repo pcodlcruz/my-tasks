@@ -247,6 +247,30 @@ def test_export_matches_the_progress_contract_of_feature_007(tmp_path: Path) -> 
     }
 
 
+def test_export_contains_the_progress_history_endpoints(tmp_path: Path) -> None:
+    target = tmp_path / "openapi.json"
+
+    export_openapi(target)
+    contract = json.loads(target.read_text(encoding="utf-8"))
+
+    paths = contract["paths"]
+    for path in (
+        "/api/v1/me/progress/days",
+        "/api/v1/me/progress/days/{day}",
+        "/api/v1/me/progress/stats",
+    ):
+        assert set(paths[path]) == {"get"}, path
+        assert {"401", "403"} <= set(paths[path]["get"]["responses"]), path
+    assert "422" in paths["/api/v1/me/progress/days"]["get"]["responses"]
+    assert "404" in paths["/api/v1/me/progress/days/{day}"]["get"]["responses"]
+    parameters = {item["name"] for item in paths["/api/v1/me/progress/days"]["get"]["parameters"]}
+    assert parameters == {"from", "to"}
+    schemas = contract["components"]["schemas"]
+    assert {"ProgressDayDetailOut", "ProgressDaysOut", "StatsOut"} <= set(schemas)
+    assert "tasks" in schemas["ProgressDayDetailOut"]["properties"]
+    assert {"best_day_count", "tasks_scored", "arcade"} <= set(schemas["StatsOut"]["properties"])
+
+
 def test_export_contains_the_schedule_endpoints_each_with_401_and_403(tmp_path: Path) -> None:
     target = tmp_path / "openapi.json"
 

@@ -42,6 +42,27 @@ class InvalidMissionError(ValueError):
     pass
 
 
+# The calendar shows 12 weeks (FR-028); a wider range is refused so a read stays bounded.
+MAX_DAYS_RANGE = 84
+
+
+class InvalidDayRangeError(ValueError):
+    pass
+
+
+class ProgressDayNotFoundError(Exception):
+    """No day with that date for this account, or not a date at all: both look the same."""
+
+
+def check_day_range(start: date, end: date) -> None:
+    if start > end:
+        message = "La fecha inicial no puede ser posterior a la final."
+        raise InvalidDayRangeError(message)
+    if (end - start).days + 1 > MAX_DAYS_RANGE:
+        message = f"El rango no puede superar {MAX_DAYS_RANGE} días."
+        raise InvalidDayRangeError(message)
+
+
 @dataclass(frozen=True)
 class Level:
     number: int
