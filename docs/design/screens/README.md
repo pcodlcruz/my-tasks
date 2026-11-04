@@ -543,6 +543,10 @@ Rediseño **solo de la tarjeta de tarea** del tablero
 «Programada» y «Misión del día» pasan a ser iconos junto al título, «Pendiente desde» baja al
 pie y «Añadir/Quitar de la misión» pasa a ser un botón ☆/★. El resto del tablero no cambia.
 
+> **Vigente**: la tarjeta del tablero es la de **S3 v4 (variante V2)**; el resto del tablero sigue
+> siendo S3 v3. Contrato:
+> [`task-card-ui.md`](../../../specs/008-task-card-indicators/contracts/task-card-ui.md).
+
 ### Bases (T001, 2026-11-03)
 
 Acceso al proyecto comprobado con `get_project`. S3 v4 se obtiene con `edit_screens` sobre:
