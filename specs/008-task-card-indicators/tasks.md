@@ -201,9 +201,9 @@ accesibles, su `disabled` con el motivo y el aviso de error.
 
 **Depends on**: Phase 2 fusionada.
 
-- [ ] T023 [P] Anotar en `specs/007-daily-progress-arcade/contracts/ui-screens.md` (o en el contrato de S3 que esté vigente) y en `docs/design/screens/README.md` que la tarjeta del tablero vigente es la de **S3 v4** (feature 008), y enlazar [contracts/task-card-ui.md](./contracts/task-card-ui.md)
-- [ ] T024 [P] Si `README.md` describe las marcas de la tarjeta («Programada», «Misión del día»), actualizarlo para que hable de iconos y del botón de estrella. Si no las describe, no tocarlo y anotarlo en la PR
-- [ ] T025 Repasar el checklist *Definition of Done* de la constitución para la feature completa y registrarlo en `specs/008-task-card-indicators/definition-of-done.md`. Deben constar: sin revisión de seguridad porque no se tocaron auth, autorización ni datos (Principio III, research R9); Stitch usado por su MCP sin operaciones en Google Cloud (V); y como pendientes, solo los puntos de la Phase 4. Marcar T023–T025 en este fichero
+- [X] T023 [P] Anotar en `specs/007-daily-progress-arcade/contracts/ui-screens.md` (o en el contrato de S3 que esté vigente) y en `docs/design/screens/README.md` que la tarjeta del tablero vigente es la de **S3 v4** (feature 008), y enlazar [contracts/task-card-ui.md](./contracts/task-card-ui.md)
+- [X] T024 [P] Si `README.md` describe las marcas de la tarjeta («Programada», «Misión del día»), actualizarlo para que hable de iconos y del botón de estrella. Si no las describe, no tocarlo y anotarlo en la PR
+- [X] T025 Repasar el checklist *Definition of Done* de la constitución para la feature completa y registrarlo en `specs/008-task-card-indicators/definition-of-done.md`. Deben constar: sin revisión de seguridad porque no se tocaron auth, autorización ni datos (Principio III, research R9); Stitch usado por su MCP sin operaciones en Google Cloud (V); y como pendientes, solo los puntos de la Phase 4. Marcar T023–T025 en este fichero
 
 ---
 
