@@ -106,7 +106,9 @@ anterior. El pie hace `flex-wrap` para que, en 320 px, el aviso salte de línea 
 
 ## R6. Estrella del botón y estrella del indicador a la vez (FR-008)
 
-**Decisión provisional, que se cierra en Stitch**: se presentan dos variantes al propietario:
+**Decisión (2026-11-04): V2**, elegida por el propietario en Stitch (T006). La estrella solo
+aparece como botón en la fila de acciones (junto a Editar y Papelera), nunca junto al título ni
+en la esquina superior izquierda, también en móvil. Variantes que se presentaron:
 - **V1 (por defecto)**: indicador ★ junto al título (estado) y botón de estrella en las acciones
   (acción). El botón lleva un recuadro de botón al pasar el puntero y el indicador no, para que
   no parezcan lo mismo.
