@@ -535,3 +535,54 @@ S5 (historial), S6 (papelera) y el selector de avatar con su recortador.
 Los estados «PARTIDA NUEVA» y «sin tareas activas» de S8, y el estado vacío de S9, no tienen
 pantalla propia: se implementan desde el contrato (`specs/007-daily-progress-arcade/contracts/ui-screens.md`).
 Las variantes móviles oscuras valen como **solo color**.
+
+## Feature 008 · S3 v4 (indicadores)
+
+Rediseño **solo de la tarjeta de tarea** del tablero
+([`specs/008-task-card-indicators/contracts/task-card-ui.md`](../../../specs/008-task-card-indicators/contracts/task-card-ui.md)).
+«Programada» y «Misión del día» pasan a ser iconos junto al título, «Pendiente desde» baja al
+pie y «Añadir/Quitar de la misión» pasa a ser un botón ☆/★. El resto del tablero no cambia.
+
+### Bases (T001, 2026-11-03)
+
+Acceso al proyecto comprobado con `get_project`. S3 v4 se obtiene con `edit_screens` sobre:
+
+| Base | Variante | Id de Stitch |
+|---|---|---|
+| S3 v3 · Tablero | claro, escritorio | `81117eabaa4646c3abd3f0bb4f5eb94b` |
+| S3 v3 · Tablero | oscuro, escritorio | `14e9ca5694e14e2c8e87af6ec1c2fc73` |
+| S3 v2 · Tablero | claro, móvil (maquetación móvil vigente) | `27a7b42bf13c4592a5d665c889b6aebf` |
+| S3 · Tablero compacto | claro, escritorio (densidad compacta) | `963cfc7d68c9445b86f32918d2babb02` |
+
+### Registro de generaciones (T002–T004)
+
+Las 6 generaciones lanzadas el 2026-11-03 dieron *timeout* pero aparecieron después
+(comprobado con `get_project` el 2026-11-04). Aprobadas en T006 (ver abajo).
+
+| Pantalla | Variante | Id de Stitch | Carpeta exportada | Estado |
+|---|---|---|---|---|
+| S3 v4 · Tablero (indicadores) V1 | claro, escritorio | `5a40781e421d439cbcaaeea9f943dea2` | `s3-board-v4/` (desktop) | descartada: se eligió V2 |
+| S3 v4 · Tablero (indicadores) V2 | claro, escritorio | `d3b9a6469ae44361ba5f996603edeaec` | `s3-board-v4-v2/` (desktop) | **aprobada, vigente** |
+| S3 v4 · Tablero (indicadores), densidad compacta | claro, escritorio | `ec90e14cf8724b669123707f58b19027` | `s3-board-v4-compact/` (desktop) | aprobada (color/densidad; estrella según V2) |
+| S3 v4 · Tablero (indicadores) | claro, móvil | `6fa23f341fb144b0a1cb47a41ad813a7` | `s3-board-v4/` (mobile) | aprobada (maquetación; estrella según V2); **ojo**: Stitch la generó a 1280 px de ancho, no a 390 px |
+| S3 v4 · Tablero (indicadores) V1 | oscuro, escritorio | `fb078fe8da40473a845c19cd03ebd75c` | `s3-board-v4-dark/` (desktop) | aprobada (color/densidad; estrella según V2) |
+| S3 v4 · Tablero (indicadores), densidad compacta | oscuro, escritorio | `0189e8ce06da4accb4e7126513ef6ed9` | `s3-board-v4-compact-dark/` (desktop) | aprobada (color/densidad; estrella según V2) |
+
+### Aprobación (T006, 2026-11-04)
+
+El propietario exportó las 6 pantallas (T005) y las **aprobó** el 2026-11-04:
+
+- **Variante elegida: V2** (`d3b9a6469ae44361ba5f996603edeaec`, `s3-board-v4-v2/`): la estrella
+  de la misión solo aparece como **botón** en la fila de acciones (junto a Editar, Papelera…),
+  nunca junto al título.
+- **Móvil** (`6fa23f34…`): aprobada, aunque Stitch la generó a 1280 px. Su estrella en la esquina
+  superior izquierda **no vale**: en móvil la estrella va como en la V2 de escritorio (solo el
+  botón de las acciones).
+- **Oscuro y compacto** (`fb078fe8…`, `ec90e14c…`, `0189e8ce…`): se generaron con V1; valen para
+  **color y densidad**, y la estrella sigue la V2.
+- **SC-003**: el propietario identifica «programada» y «misión» en menos de 5 s. ✅
+
+Pantalla vigente de referencia para la tarjeta: **S3 v4 V2, claro, escritorio**.
+
+La versión **oscura móvil** no se genera aparte: como en la 007, la oscura de escritorio vale como
+**solo color** sobre la maquetación de la móvil clara.

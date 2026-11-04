@@ -4,13 +4,14 @@
 
 Este contrato describe lo que la tarjeta muestra y anuncia, y lo comprueban los tests. El aspecto
 exacto (tamaños, espaciado, colores) lo fija el diseño aprobado en Stitch (S3 v4, research R7).
-Si el propietario elige la variante V2 (R6), este fichero se actualiza antes de implementar.
+**Variante elegida: V2** (research R6, aprobada por el propietario el 2026-11-04): la misión se
+indica solo con el botón de estrella de las acciones; no hay ★ junto al título.
 
 ## Estructura
 
 ```text
 ┌────────────────────────────────────────────────────────────┐
-│ [📌][📅][★] Título de la tarea (salta de línea si no cabe)  │  ← cabecera: título con indicadores
+│ [📌][📅] Título de la tarea (salta de línea si no cabe)     │  ← cabecera: título con indicadores
 │                       Fijar · Editar · [☆/★] · Papelera    │  ← acciones (flex-wrap; bajan si no caben)
 │────────────────────────────────────────────────────────────│
 │ (Trabajo)   Pendiente desde el lun 2          [Completar]  │  ← pie (flex-wrap)
@@ -26,10 +27,13 @@ Lo obligatorio es que nada se solape (FR-002).
 |---|---|---|---|---|
 | Fijada (sin cambios) | `task.pinned` | 📌 | (como hoy) | (como hoy, `title="Fijada"`) |
 | Programada | `task.schedule_id !== null` | SVG de calendario (el actual) | `Programada` | `Programada` |
-| Misión del día | la tarea está en la misión de hoy | `★` en `text-gold` | `Misión del día` | `Misión del día` |
 
-- **Orden**: 📌 → 📅 → ★ → título. El lector de pantalla lee, por ejemplo, «Programada Misión del
-  día Preparar la demo».
+- **Orden**: 📌 → 📅 → título. El lector de pantalla lee, por ejemplo, «Programada Preparar la
+  demo».
+- **Misión del día (V2)**: no tiene indicador junto al título, ni en escritorio ni en móvil ni en
+  compacto. La estrella llena (`text-gold`) del botón de las acciones es el indicador; su nombre
+  accesible y su `title` («Quitar de la misión») cumplen FR-004. Si el progreso no carga, no hay
+  botón y, por tanto, tampoco marca de misión (FR-006, como hoy).
 - **Sin la condición** no se pinta el indicador ni se deja un hueco (US1, escenario 5).
 - **Tooltip**: aparece al pasar el puntero y no se va mientras el puntero esté encima del icono o
   del propio tooltip. Al tocar se abre o se cierra, y se cierra al tocar fuera o con `Escape`.
