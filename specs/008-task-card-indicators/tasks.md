@@ -98,13 +98,13 @@ se ven los dos iconos (quickstart, escenarios 1–4).
 
 #### Tests (escribir primero; deben fallar)
 
-- [ ] T008 [P] [US1] Reescribir el bloque «tareas programadas» de `frontend/tests/unit/features/board/TaskCard.test.tsx` según el contrato:
+- [X] T008 [P] [US1] Reescribir el bloque «tareas programadas» de `frontend/tests/unit/features/board/TaskCard.test.tsx` según el contrato:
   - **Indicador**: dentro del párrafo del título hay un elemento con el texto accesible «Programada» (en `sr-only`) y el SVG con `aria-hidden="true"`. Una tarea normal no lleva ni indicador ni hueco.
   - **«Pendiente desde el lun 2»**: está en el pie (el mismo contenedor que la etiqueta de ámbito y «Completar»), no en la cabecera.
   - **Sin `today`**: no hay «Pendiente desde».
   - **Orden de los indicadores**: el `textContent` del título empieza por «Programada» y sigue con «Misión del día» antes del título.
-- [ ] T009 [US1] Reescribir en el mismo fichero `frontend/tests/unit/features/board/TaskCard.test.tsx` los casos de la **marca** de misión. Si la tarea está en la misión, el párrafo del título contiene «Misión del día» (en `sr-only`) y una `★` con `aria-hidden="true"`; si no, no. Con la variante V2 (si se eligió en T006), el caso cambia según `contracts/task-card-ui.md`. *Mismo fichero que T008: si se hacen a la vez, que sea en bloques `describe` distintos.*
-- [ ] T010 [P] [US1] Añadir a `frontend/tests/e2e/a11y.spec.ts` el test «la tarjeta no solapa nada»:
+- [X] T009 [US1] Reescribir en el mismo fichero `frontend/tests/unit/features/board/TaskCard.test.tsx` los casos de la **marca** de misión. Si la tarea está en la misión, el párrafo del título contiene «Misión del día» (en `sr-only`) y una `★` con `aria-hidden="true"`; si no, no. Con la variante V2 (si se eligió en T006), el caso cambia según `contracts/task-card-ui.md`. *Mismo fichero que T008: si se hacen a la vez, que sea en bloques `describe` distintos.*
+- [X] T010 [P] [US1] Añadir a `frontend/tests/e2e/a11y.spec.ts` el test «la tarjeta no solapa nada»:
   - **Datos**: crear una tarea con un título de unos 90 caracteres, fijarla, añadirla a la misión y hacer que sea una programada pendiente. Se crea la programación con una fecha única y se avanza el reloj simulado de `frontend/tests/e2e/fixtures/clock.ts`, igual que en `schedules.spec.ts`; no se usa `page.clock`.
   - **Combinaciones**: anchos 320, 768, 1024 y 1280 px (desde 768, matriz 2×2; 768 es el peor caso), en densidad normal y compacta (Perfil → Densidad).
   - **Comprobación**: las cajas (`boundingBox`) del título, cada indicador, cada botón, «Pendiente desde», la etiqueta de ámbito y «Completar» no se cortan entre sí, y `scrollWidth <= clientWidth`.
@@ -114,17 +114,17 @@ se ven los dos iconos (quickstart, escenarios 1–4).
 
 #### Implementation
 
-- [ ] T011 [US1] Crear `frontend/src/features/board/CardIndicator.tsx`. Recibe `label: string`, el icono como `children` y una `className` opcional para el color:
+- [X] T011 [US1] Crear `frontend/src/features/board/CardIndicator.tsx`. Recibe `label: string`, el icono como `children` y una `className` opcional para el color:
   - pinta un `<span>` en línea con el icono (`aria-hidden="true"`) y `<span className="sr-only">{label}</span>`;
   - por ahora, sin tooltip: lo añade T016;
   - comentarios en inglés.
-- [ ] T012 [US1] Modificar `frontend/src/features/board/TaskCard.tsx` (depende de T011):
+- [X] T012 [US1] Modificar `frontend/src/features/board/TaskCard.tsx` (depende de T011):
   - **Indicadores**: mover «Programada» y «Misión del día» al párrafo del título como `CardIndicator`. El SVG de calendario actual va con `text-text-muted`; `★` con `text-gold`. Orden: 📌 → calendario → ★ → título.
   - **Quitar** los dos `<p>` de marcas de la cabecera.
   - **Cabecera**: deja de depender de `sm:`. El título es `min-w-0 flex-1 break-words`; las acciones, `flex flex-wrap`; el contenedor hace `flex-wrap`. Revisar las clases `compact:` para que, en compacto, siga en una fila cuando cabe (research R1).
   - **Pie**: «Pendiente desde el …» se mueve allí, entre `ScopeBadge` y «Completar», con `text-caption text-text-muted`, y el pie hace `flex-wrap` (research R5).
   - **Reglas** de `isScheduled`, `pendingFrom` e `inMission`: sin cambios (data-model).
-- [ ] T013 [US1] Pasar en verde T008–T010. Comprobar que siguen en verde, sin tocarlos, `frontend/tests/e2e/schedules.spec.ts` y `frontend/tests/e2e/start-of-day.spec.ts` (sus `toContainText('Programada' | 'Misión del día' | 'Pendiente desde el lun 2')` leen el `textContent`, research R2)
+- [X] T013 [US1] Pasar en verde T008–T010. Comprobar que siguen en verde, sin tocarlos, `frontend/tests/e2e/schedules.spec.ts` y `frontend/tests/e2e/start-of-day.spec.ts` (sus `toContainText('Programada' | 'Misión del día' | 'Pendiente desde el lun 2')` leen el `textContent`, research R2)
 
 **Checkpoint**: US1 funciona por sí sola. El botón de misión sigue siendo de texto y los iconos
 todavía no tienen tooltip.
@@ -138,21 +138,21 @@ pantalla lo lee.
 
 #### Tests (escribir primero; deben fallar)
 
-- [ ] T014 [P] [US2] Crear `frontend/tests/unit/features/board/CardIndicator.test.tsx`:
+- [X] T014 [P] [US2] Crear `frontend/tests/unit/features/board/CardIndicator.test.tsx`:
   - **Base**: el texto accesible es el `label`, el icono es `aria-hidden` y el indicador no es enfocable (no tiene `tabIndex`).
   - **Tooltip**: aparece con `hover` y desaparece al salir. Al hacer clic o tocar se abre y se cierra. `Escape` lo cierra. Un clic fuera lo cierra.
   - **Accesibilidad**: el tooltip lleva `aria-hidden="true"`, así que el texto no se lee dos veces.
-- [ ] T015 [US2] Ampliar el bloque `S3 v3 · Tarea de la misión` de `frontend/tests/e2e/a11y.spec.ts` con una tarea que también sea programada. Así, el axe en claro y oscuro (`expectNoViolations`) cubre los dos iconos y el tooltip abierto (`hover` sobre el indicador de misión antes de la segunda comprobación), y lo nombra «S3 v4 · Indicadores»
+- [X] T015 [US2] Ampliar el bloque `S3 v3 · Tarea de la misión` de `frontend/tests/e2e/a11y.spec.ts` con una tarea que también sea programada. Así, el axe en claro y oscuro (`expectNoViolations`) cubre los dos iconos y el tooltip abierto (`hover` sobre el indicador de misión antes de la segunda comprobación), y lo nombra «S3 v4 · Indicadores»
 
 #### Implementation
 
-- [ ] T016 [US2] Añadir el tooltip a `frontend/src/features/board/CardIndicator.tsx` (research R3):
+- [X] T016 [US2] Añadir el tooltip a `frontend/src/features/board/CardIndicator.tsx` (research R3):
   - **Estado y apertura**: estado local `open`, `onClick` que lo alterna y `onMouseEnter`/`onMouseLeave` (o `group-hover`).
   - **Cierre**: listeners de `keydown` (`Escape`) y `pointerdown` fuera, registrados **solo mientras está abierto**.
   - **Marcado**: el tooltip es un `<span aria-hidden="true">` posicionado sobre el icono, con los tokens de superficie y texto del tema (contraste ≥ 4,5:1, WCAG 1.4.13: no desaparece mientras el puntero está encima).
   - **Sin parada de tabulador**: ni `tabIndex` ni `role` interactivo.
   - **Sin salirse de la tarjeta**: anclado al borde izquierdo del icono, con `max-width` igual al ancho de la tarjeta y `whitespace-nowrap` (research R3), para no crear desplazamiento horizontal a 320 px.
-- [ ] T017 [US2] Pasar en verde T014 y T015 y ampliar T010:
+- [X] T017 [US2] Pasar en verde T014 y T015 y ampliar T010:
   - **Tooltip abierto**: a 320 px, con el tooltip de misión abierto (tocar el icono), sigue cumpliéndose `scrollWidth <= clientWidth`.
   - **Contraste**: la verificación principal es el axe de T015; los iconos deben tener ≥ 3:1 con la superficie de la tarjeta en claro y oscuro (WCAG 1.4.11). Si axe no mide el SVG o la `★`, comprobar a mano los valores de los tokens (`gold`, `text-muted` y `surface`, de `docs/design/DESIGN.md`) con `docs/design/check-contrast.py` y anotar el resultado en la PR. Si `text-gold` no llega en algún tema, usar el token que fije S3 v4.
 
@@ -167,27 +167,27 @@ accesibles, su `disabled` con el motivo y el aviso de error.
 
 #### Tests (escribir primero; deben fallar)
 
-- [ ] T018 [US3] Ampliar el bloque «misión del día» de `frontend/tests/unit/features/board/TaskCard.test.tsx`. Se mantienen los casos actuales por nombre (`getByRole('button', { name: 'Añadir a la misión' | 'Quitar de la misión' })`: envío, 5 tareas con `disabled` y descripción, error con aviso, sin progreso no hay botón). Se añade:
+- [X] T018 [US3] Ampliar el bloque «misión del día» de `frontend/tests/unit/features/board/TaskCard.test.tsx`. Se mantienen los casos actuales por nombre (`getByRole('button', { name: 'Añadir a la misión' | 'Quitar de la misión' })`: envío, 5 tareas con `disabled` y descripción, error con aviso, sin progreso no hay botón). Se añade:
   - el botón no tiene texto visible: el nombre va en `sr-only` y el icono, `aria-hidden`;
   - muestra ☆ fuera de la misión y ★ dentro, y tiene `title` igual a su nombre;
   - **no** tiene `aria-pressed` (research R4).
 
 #### Implementation
 
-- [ ] T019 [US3] En `frontend/src/features/board/TaskCard.tsx`, convertir el botón de misión en botón de icono según el contrato:
+- [X] T019 [US3] En `frontend/src/features/board/TaskCard.tsx`, convertir el botón de misión en botón de icono según el contrato:
   - **Icono**: `☆` con `text-text-muted` fuera de la misión y `★` con `text-gold` dentro, con `aria-hidden="true"`.
   - **Nombre**: `<span className="sr-only">` con «Añadir a la misión» o «Quitar de la misión», y `title` con el mismo texto.
   - **Tamaño**: área de al menos 24 × 24 px (`min-h-6 min-w-6` o el equivalente del diseño).
   - **Se conservan**: `disabled`, `aria-describedby` con el `sr-only` «La misión ya tiene 5 tareas.», `toggleMission` y `onError`.
   - **Variante elegida en T006**: con V1, el botón lleva un estilo de botón al pasar el puntero (fondo `hover:bg-surface-alt`) para no confundirse con el indicador. Con V2, quitar el `CardIndicator` de misión del título.
-- [ ] T020 [US3] Pasar en verde T018. Comprobar que `frontend/tests/e2e/start-of-day.spec.ts` (`card(page, 'Misión C').getByRole('button', { name: 'Añadir a la misión' })`) y el test de T010 siguen en verde
+- [X] T020 [US3] Pasar en verde T018. Comprobar que `frontend/tests/e2e/start-of-day.spec.ts` (`card(page, 'Misión C').getByRole('button', { name: 'Añadir a la misión' })`) y el test de T010 siguen en verde
 
 **Checkpoint**: las tres historias funcionan; la tarjeta coincide con S3 v4.
 
 ### Cierre de la fase
 
-- [ ] T021 Ejecutar en local los escenarios 1–8 de [quickstart.md](./quickstart.md), en claro y oscuro y en escritorio y móvil, y comparar con las capturas de S3 v4. Ajustar las clases si algo no coincide y corregir `quickstart.md` o el contrato si algo cambió durante la implementación
-- [ ] T022 Ejecutar la batería completa:
+- [X] T021 Ejecutar en local los escenarios 1–8 de [quickstart.md](./quickstart.md), en claro y oscuro y en escritorio y móvil, y comparar con las capturas de S3 v4. Ajustar las clases si algo no coincide y corregir `quickstart.md` o el contrato si algo cambió durante la implementación
+- [X] T022 Ejecutar la batería completa:
   - unitarios sin `.env`, `build`, `lint`, `format`;
   - e2e con los emuladores recién reiniciados, con `XDG_CONFIG_HOME="$TMPDIR/xdg-config"` en el sandbox.
   - Si el e2e de reflujo móvil (`a11y › ninguna pantalla desborda en horizontal en móvil`) falla solo bajo carga, repetirlo aislado y decirlo en la PR.
