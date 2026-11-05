@@ -9,6 +9,13 @@ captura se versionan en `docs/design/screens/<id>/`.
 Si Stitch devuelve un lienzo `DESKTOP` para una variante móvil oscura, se acepta como **solo
 color**, con la maquetación de la móvil clara, como en la feature 004.
 
+> **Actualización (feature 008)**: la **tarjeta de tarea** del tablero vigente es la de **S3 v4**
+> (variante V2): «Programada» y «Misión del día» pasan a ser iconos junto al título, «Pendiente
+> desde» baja al pie y «Añadir/Quitar de la misión» es un botón ☆/★. Lo que esta tabla dice de las
+> marcas y del botón en la fila de S3 v3 queda sustituido por
+> [`specs/008-task-card-indicators/contracts/task-card-ui.md`](../../008-task-card-indicators/contracts/task-card-ui.md).
+> El resto de S3 v3 (marcador, cabecera, avisos) no cambia.
+
 ## Estética arcade común
 
 - La marca «InsertTasks» y su logo de recreativa (feature 006) **no** se rediseñan.

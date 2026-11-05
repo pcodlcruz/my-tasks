@@ -40,6 +40,10 @@ function card(page: Page, title: string) {
   return page.locator('article', { hasText: title })
 }
 
+function inMission(page: Page, title: string) {
+  return card(page, title).getByRole('button', { name: 'Quitar de la misión' })
+}
+
 async function signInElsewhere(browser: Browser, email: string, instant: string): Promise<Page> {
   const context = await browser.newContext({ timezoneId: 'Europe/Madrid' })
   const other = await context.newPage()
@@ -108,9 +112,10 @@ test.describe('Inicio de jornada y misión (US2)', () => {
     await startOfDay(page).getByRole('button', { name: 'Empezar' }).click()
     await expect(startOfDay(page)).toHaveCount(0)
 
-    await expect(card(page, 'Misión A')).toContainText('Misión del día')
-    await expect(card(page, 'Misión B')).toContainText('Misión del día')
-    await expect(card(page, 'Misión C')).not.toContainText('Misión del día')
+    // Variant V2 (feature 008): the filled star of the button is the mission mark.
+    await expect(inMission(page, 'Misión A')).toBeVisible()
+    await expect(inMission(page, 'Misión B')).toBeVisible()
+    await expect(inMission(page, 'Misión C')).toHaveCount(0)
     await expect(scoreboard(page)).toContainText('Misión 0/2')
 
     await card(page, 'Misión A').getByRole('button', { name: 'Completar' }).click()
@@ -120,7 +125,7 @@ test.describe('Inicio de jornada y misión (US2)', () => {
 
     // A third one from its card on the board.
     await card(page, 'Misión C').getByRole('button', { name: 'Añadir a la misión' }).click()
-    await expect(card(page, 'Misión C')).toContainText('Misión del día')
+    await expect(inMission(page, 'Misión C')).toBeVisible()
     await expect(scoreboard(page)).toContainText('Misión 2/3')
   })
 

@@ -1,6 +1,7 @@
 import AxeBuilder from '@axe-core/playwright'
 import type { Page } from '@playwright/test'
 import { ADMIN_E2E_EMAIL, expect, test } from './fixtures/auth'
+import { useServerClock } from './fixtures/clock'
 
 const WCAG_TAGS = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']
 
@@ -565,10 +566,217 @@ test.describe('Accesibilidad WCAG 2.1 AA', () => {
         await expectNoViolations(page, `S8 · Misión elegida (${colorScheme})`)
 
         await review.getByRole('button', { name: 'Empezar' }).click()
-        await expect(page.locator('article', { hasText: 'Tarea hacer ahora' })).toContainText(
-          'Misión del día',
+        // Variant V2 (feature 008): the filled star of the button is the mission mark.
+        await expect(
+          page
+            .locator('article', { hasText: 'Tarea hacer ahora' })
+            .getByRole('button', { name: 'Quitar de la misión' }),
+        ).toBeVisible()
+        await expectNoViolations(page, `S3 v4 · Tarea de la misión (${colorScheme})`)
+      })
+    }
+  })
+
+  // Feature 008: a card with every state at once (pinned, scheduled, pending since and in the
+  // mission) and a long title, against the same title without states.
+  test.describe('tarjeta de tarea (S3 v4)', () => {
+    // As in schedules.spec.ts: the review is shown by the server and closed by hand, since a
+    // simulated day change opens it on its own.
+    test.use({ startOfDay: true, timezoneId: 'Europe/Madrid' })
+
+    // 10:00 in Madrid on Sunday 1 November 2026, and 04:01 on the Wednesday after it.
+    const SUNDAY_MORNING = '2026-11-01T09:00:00Z'
+    const WEDNESDAY_0401 = '2026-11-04T03:01:00Z'
+    const LONG_TITLE =
+      'Preparar la presentación trimestral para el comité de dirección con las cifras de octubre'
+
+    interface Box {
+      name: string
+      x: number
+      y: number
+      width: number
+      height: number
+    }
+
+    function overlaps(a: Box, b: Box): boolean {
+      // Half a pixel of slack for sub-pixel rounding between touching boxes.
+      const slack = 0.5
+      return (
+        a.x + a.width - slack > b.x &&
+        b.x + b.width - slack > a.x &&
+        a.y + a.height - slack > b.y &&
+        b.y + b.height - slack > a.y
+      )
+    }
+
+    async function chooseDensity(page: Page, label: 'Cómoda' | 'Compacta'): Promise<void> {
+      await page.getByRole('link', { name: 'Perfil' }).click()
+      await page
+        .getByRole('radiogroup', { name: 'Densidad' })
+        .getByRole('radio', { name: label })
+        .check()
+      await expect(page.getByRole('main').getByRole('status')).toHaveText('Guardado')
+      await goTo(page, 'Tablero')
+    }
+
+    async function closeStartOfDay(page: Page): Promise<void> {
+      const review = page.getByRole('dialog', { name: 'PULSA START' })
+      await review.getByRole('button', { name: 'Empezar' }).click()
+      await expect(review).toHaveCount(0)
+    }
+
+    async function horizontalOverflow(page: Page): Promise<number> {
+      return page.evaluate(
+        () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
+      )
+    }
+
+    async function prepareCards(
+      page: Page,
+      login: (email: string) => Promise<void>,
+      email: string,
+    ) {
+      const setNow = await useServerClock(page, SUNDAY_MORNING)
+      await login(email)
+      await closeStartOfDay(page)
+
+      // A one-off for Monday 2 November, seen on the Wednesday: scheduled and pending since.
+      await goTo(page, 'Programadas')
+      await page.getByRole('button', { name: '+ Nueva programación' }).click()
+      const form = page.getByRole('dialog', { name: 'Nueva programación' })
+      await form.getByLabel('Título').fill(LONG_TITLE)
+      await form.getByLabel('Descripción').fill('Detalle de la tarea')
+      await form.getByRole('checkbox', { name: 'Marcar como importante' }).check()
+      await form.getByRole('radio', { name: 'Laboral' }).check()
+      await form
+        .getByRole('radiogroup', { name: 'Repetición' })
+        .getByRole('radio', { name: 'Una vez' })
+        .check()
+      await form.getByLabel('Fecha').fill('2026-11-02')
+      await form.getByRole('button', { name: 'Guardar' }).click()
+      await expect(page.getByRole('dialog')).toHaveCount(0)
+
+      setNow(WEDNESDAY_0401)
+      await page.goto('/')
+      await closeStartOfDay(page)
+      const full = page
+        .locator('article', { hasText: LONG_TITLE })
+        .filter({ hasText: 'Programada' })
+      await expect(full).toContainText('Pendiente desde el lun 2')
+      await full.getByRole('button', { name: 'Fijar' }).click()
+      await expect(full.getByLabel('Fijada')).toBeVisible()
+      await full.getByRole('button', { name: 'Añadir a la misión' }).click()
+      await expect(full.getByRole('button', { name: 'Quitar de la misión' })).toBeVisible()
+
+      // The same title without states, in the same quadrant (Planificar).
+      await createTask(page, {
+        title: LONG_TITLE,
+        urgent: false,
+        important: true,
+        scope: 'Laboral',
+      })
+      const plain = page
+        .locator('article', { hasText: LONG_TITLE })
+        .filter({ hasNotText: 'Programada' })
+      await expect(plain).toHaveCount(1)
+      return { full, plain }
+    }
+
+    test('la tarjeta no solapa nada en ningún ancho ni densidad', async ({
+      page,
+      loginAsGoogleUser,
+    }) => {
+      test.slow()
+      const { full, plain } = await prepareCards(
+        page,
+        loginAsGoogleUser,
+        `a11y-tarjeta-${crypto.randomUUID()}@example.com`,
+      )
+
+      for (const density of ['Cómoda', 'Compacta'] as const) {
+        // «Cómoda» is the default: only the switch to «Compacta» saves anything.
+        if (density === 'Compacta') await chooseDensity(page, density)
+        for (const width of [320, 768, 1024, 1280]) {
+          await page.setViewportSize({ width, height: 900 })
+          const where = `${width} px, densidad ${density}`
+          await expect(full.getByRole('button', { name: 'Completar' })).toBeVisible()
+
+          const parts = [
+            { name: 'título', locator: full.locator('p').first() },
+            { name: 'Desfijar', locator: full.getByRole('button', { name: 'Desfijar' }) },
+            { name: 'Editar', locator: full.getByRole('button', { name: 'Editar' }) },
+            {
+              name: 'estrella',
+              locator: full.getByRole('button', { name: 'Quitar de la misión' }),
+            },
+            {
+              name: 'Mover a la papelera',
+              locator: full.getByRole('button', { name: 'Mover a la papelera' }),
+            },
+            { name: 'Pendiente desde', locator: full.getByText('Pendiente desde el lun 2') },
+            { name: 'ámbito', locator: full.getByText('Laboral', { exact: true }) },
+            { name: 'Completar', locator: full.getByRole('button', { name: 'Completar' }) },
+          ]
+          const boxes: Box[] = []
+          for (const part of parts) {
+            const box = await part.locator.boundingBox()
+            expect(box, `Sin caja para «${part.name}» a ${where}`).not.toBeNull()
+            if (box !== null) boxes.push({ name: part.name, ...box })
+          }
+          for (const [i, a] of boxes.entries()) {
+            for (const b of boxes.slice(i + 1)) {
+              expect(overlaps(a, b), `«${a.name}» se solapa con «${b.name}» a ${where}`).toBe(false)
+            }
+          }
+          expect(await horizontalOverflow(page), `Desbordamiento horizontal a ${where}`).toBe(0)
+
+          // SC-002: the icons do not make the title line taller. Both titles are a whole number
+          // of lines of the same line height (the one with icons may wrap one line earlier).
+          for (const [name, card] of [
+            ['con estados', full],
+            ['sin estados', plain],
+          ] as const) {
+            const lines = await card
+              .locator('p')
+              .first()
+              .evaluate((element) => {
+                const lineHeight = parseFloat(getComputedStyle(element).lineHeight)
+                return element.getBoundingClientRect().height / lineHeight
+              })
+            expect(
+              Math.abs(lines - Math.round(lines)),
+              `El título ${name} no ocupa líneas enteras a ${where}`,
+            ).toBeLessThan(0.1)
+          }
+        }
+      }
+
+      // With the tooltip open (tapped) at 320 px there is still no horizontal scroll.
+      await page.setViewportSize({ width: 320, height: 900 })
+      await full.getByText('Programada', { exact: true }).locator('..').click()
+      await expect(full.getByRole('tooltip', { includeHidden: true })).toHaveText('Programada')
+      expect(await horizontalOverflow(page), 'Desbordamiento con el tooltip abierto').toBe(0)
+    })
+
+    for (const colorScheme of ['light', 'dark'] as const) {
+      test(`los indicadores y su tooltip no tienen violaciones en tema ${colorScheme === 'light' ? 'claro' : 'oscuro'}`, async ({
+        page,
+        loginAsGoogleUser,
+      }) => {
+        await page.emulateMedia({ colorScheme })
+        const { full } = await prepareCards(
+          page,
+          loginAsGoogleUser,
+          `a11y-indicadores-${colorScheme}-${crypto.randomUUID()}@example.com`,
         )
-        await expectNoViolations(page, `S3 v3 · Tarea de la misión (${colorScheme})`)
+        await expectNoViolations(page, `S3 v4 · Indicadores (${colorScheme})`)
+
+        await full.getByText('Programada', { exact: true }).locator('..').hover()
+        await expect(full.getByRole('tooltip', { includeHidden: true })).toHaveText('Programada')
+        await expectNoViolations(
+          page,
+          `S3 v4 · Indicadores con el tooltip abierto (${colorScheme})`,
+        )
       })
     }
   })

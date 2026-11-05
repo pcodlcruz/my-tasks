@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Export the approved Stitch screens of feature 007 to docs/design/screens/<dir>/.
+"""Export the Stitch screens of feature 008 (S3 v4) to docs/design/screens/<dir>/.
 
 Run it yourself with your own OAuth access token (the agent never sees it); the Stitch
 API rejects API keys:
@@ -27,30 +27,12 @@ SCREENS_DIR = Path(__file__).resolve().parent / "screens"
 
 # (target dir, variant, html file id, screenshot file id)
 EXPORTS = [
-    ("s3-board-v3", "desktop", "53531984f5e64243982006a7170ba285", "bd36003aa0fc42289a758ec0015fbe64"),
-    ("s3-board-v3", "mobile", "4d660b666b164878b2ee626faf9d2b9b", "7249e6d01eb84a55a332f0e3c3cc14b2"),
-    ("s3-board-v3-dark", "desktop", "ae49736f3f4743a58703fff386d09d9f", "e59b91478dac472c938690a96ec3088d"),
-    ("s3-board-v3-dark", "mobile", "a2eb02893b1e4f0b8011c9f96f4f999b", "1bdbf485aa5847e4b0a082575d90eb39"),
-    ("s3-board-v3-no-arcade", "desktop", "8e5ee79a1e6c48b783d938ced2656228", "f49aa2c0b8e542449408e96773cd686d"),
-    ("s3c-celebrations", "desktop", "cf6dacede74248d48adbd604adf63abe", "0a5d77a7ad814482937e5553d4366bf6"),
-    ("s3c-celebrations-dark", "desktop", "f9a391790b284f8c9b03e7ff36dd38ef", "e2d3272bb51f4ec1a39c7420da3daa55"),
-    ("s7-profile-v2", "desktop", "4bdf2a3afdcc4186a998930c4da19e2c", "bac9ef305b714625a031d9aaeea1aed8"),
-    ("s7-profile-v2", "mobile", "b1e650245428424e98e3b270333c0353", "e00fc7e59224450c9262eed611b01137"),
-    ("s7-profile-v2-dark", "desktop", "4c1756fb4e0e4b25a97348fcad9d5256", "2f40fb8dcc744877acd4d3ac1aa6fc8e"),
-    ("s7-profile-v2-dark", "mobile", "b985eed9ce484048a345fb1d3c9d5751", "6c3944f81043468daead293cc9f1345f"),
-    ("s8-day-start", "desktop", "f59b885d90b14d8b965b8cf69b060e41", "85478995a36a48a490319949a58c3628"),
-    ("s8-day-start", "mobile", "4414adf9dd3b4f9a913e90fa11c767bc", "ed811eff05534dd89224b47f126be674"),
-    ("s8-day-start-dark", "desktop", "c5b3c76b11624d01b9a614734ea07916", "a7679795ec4944baa6413f87f43f2a39"),
-    ("s8-day-start-dark", "mobile", "e88247e018204bf9aee86f3da73234c8", "dd12c818e4344ae3830961df446200c5"),
-    ("s9-progress", "desktop", "7d9128d184bc402cac8eac81619a5e6c", "3d23249f1b444df083dfea97d3258229"),
-    ("s9-progress", "mobile", "261e733aca514bdcbf3d261ae803760d", "bfee094787d7437aab7e77458aba23fc"),
-    ("s9-progress-dark", "desktop", "a06fc15ef4b74721818127f5b87e6448", "cc5626b66ce64820900d03cbb0d32fa5"),
-    ("s10-schedules", "desktop", "f719fb836bb14e678a8d968889403f32", "ff0d210357994e4893e2a558cc8a4326"),
-    ("s10-schedules", "mobile", "e11a92c3d2e6469da3595641e863ee75", "1f71bda6ea0a447e803101ab546a06b1"),
-    ("s10-schedules-dark", "desktop", "de2407fb5e664b799c231f6f03576de4", "269d256d27714bc095d188968f219bc6"),
-    ("s11-schedule-form", "desktop", "0bcd6821fc7747718f98304fe1e80b4f", "e7a03ad0d2894e80891b2f3372e4023c"),
-    ("s11-schedule-form", "mobile", "37f9f61b469d4bbb962ebe542678e801", "4f065fb1e4a549b29a6ad6db9d80bc77"),
-    ("s11-schedule-form-dark", "desktop", "44e34962d15a4d4bb1269b707548e9af", "cebd9ff6f30541969d54760cc6c64961"),
+    ("s3-board-v4", "desktop", "8f10499883594e5fa5c94a95fb636139", "d9f407c18d1c43b6b739f2b9973c0499"),
+    ("s3-board-v4", "mobile", "d569c935cf254661a3b446ae8eb77115", "1e252fb63f774f598ddbdf37b1c541ae"),
+    ("s3-board-v4-v2", "desktop", "1a13a3010da6469e9e63c1b095cf4d6b", "fbe1a35aee4e4816812a3ffe281e2d82"),
+    ("s3-board-v4-dark", "desktop", "6f811e6ae58943cda971f8cfe7f44e2c", "b4877ca87695412991d175e71a714a4b"),
+    ("s3-board-v4-compact", "desktop", "6f63bdb429174e24a587b1dcada6e065", "602b5f87d89e41f18263ba9c6f7ab2d5"),
+    ("s3-board-v4-compact-dark", "desktop", "4a92a899733b467bb73c8f00d69540c6", "9074f961f7334f45a96d7e0dcddde238"),
 ]
 
 PNG_SIGNATURE = b"\x89PNG\r\n\x1a\n"
